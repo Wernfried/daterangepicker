@@ -1295,6 +1295,7 @@
             var col = title.substr(3, 1);
             var cal = $(e.target).parents('.drp-calendar');
             var date = cal.hasClass('left') ? this.leftCalendar.calendar[row][col] : this.rightCalendar.calendar[row][col];
+            let dateType = 'end';
 
             //
             // this function needs to do a few things:
@@ -1324,6 +1325,7 @@
                 }
                 this.endDate = null;
                 this.setStartDate(date.clone());
+                dateType = 'start';
             } else if (!this.endDate && date.isBefore(this.startDate)) {
                 //special case: clicking the same date for start/end,
                 //but the time of the end date is before the start date
@@ -1362,6 +1364,8 @@
 
             //This is to cancel the blur event handler if the mouse was in one of the inputs
             e.stopPropagation();
+
+            this.element.trigger('dateChange.daterangepicker', this, e.target, dateType);
 
         },
 
@@ -1500,6 +1504,7 @@
             this.renderTimePicker('left');
             this.renderTimePicker('right');
 
+            this.element.trigger('timeChange.daterangepicker', this, e.target, isLeft ? 'start' : 'end');
         },
 
         elementChanged: function() {
