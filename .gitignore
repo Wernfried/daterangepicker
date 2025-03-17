@@ -3,4 +3,6 @@ node_modules
 npm-debug.log
 *.sublime-workspace
 *.sublime-project
+*.min.js
+*.min.css
 *.sw[onp]
