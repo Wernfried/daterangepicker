@@ -59,9 +59,9 @@ $('#daterange').daterangepicker(options);
 | buttonClasses        | string  | `'btn btn-sm'`  | CSS class names that will be added to both the apply and cancel buttons |
 | applyButtonClasses   | string  | `'btn-primary'` | CSS class names that will be added only to the apply button  |
 | cancelButtonClasses  | string  | `'btn-default'` | CSS class names that will be added only to the cancel button |
-| isInvalidDate        | function | `undefined`    | A function that is passed each date in the two calendars before they are displayed, and may return `true` or `false` to indicate whether that date should be available for selection or not.</br>`isInvalidDate(date)` |
-| isInvalidTime        | function | `undefined`    | A function that is passed each hour/minute/second in the two calendars before they are displayed, and may return `true` or `false` to indicate whether that time should be available for selection or not.</br>`isInvalidTime(time, side, unit)`.</br>`side` is `start` or `end` or `null` for `singleDatePicker = true`</br>`unit` is `hour`, `minute`, `second` or `ampm`  |
-| isCustomDate         | function | `undefined`    | A function that is passed each date in the two calendars before they are displayed, and may return a string or array of CSS class names to apply to that date's calendar cell.</br>`isCustomDate(date)`
+| isInvalidDate        | function | `undefined`    | A function that is passed each date in the two calendars before they are displayed, and may return `true` or `false` to indicate whether that date should be available for selection or not.</br>**Signature**: `isInvalidDate(date)` |
+| isInvalidTime        | function | `undefined`    | A function that is passed each hour/minute/second/am-pm in the two calendars before they are displayed, and may return `true` or `false` to indicate whether that time should be available for selection or not.</br>**Signature**: `isInvalidTime(time, side, unit)`.</br>`side` is `start` or `end` or `null` for `singleDatePicker = true`</br>`unit` is `hour`, `minute`, `second` or `ampm`</br></br>**Note**: Ensure that your function returns `false` for at least one item. Otherwise the calender is not rendered. |
+| isCustomDate         | function | `undefined`    | A function that is passed each date in the two calendars before they are displayed, and may return a string or array of CSS class names to apply to that date's calendar cell.</br>**Signature**: `isCustomDate(date)`
 
 ### Options.locale
 <a name="options-locale"></a>

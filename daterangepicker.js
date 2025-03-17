@@ -608,11 +608,16 @@
                 var hour, minute, second;
                 if (this.endDate) {
                     hour = parseInt(this.container.find('.left .hourselect').val(), 10);
+                    if (isNaN(hour))
+                        hour = parseInt(this.container.find('.left .hourselect option:last').val(), 10);
+
                     minute = parseInt(this.container.find('.left .minuteselect').val(), 10);
-                    if (isNaN(minute)) {
+                    if (isNaN(minute))
                         minute = parseInt(this.container.find('.left .minuteselect option:last').val(), 10);
-                    }
+
                     second = this.timePickerSeconds ? parseInt(this.container.find('.left .secondselect').val(), 10) : 0;
+                    if (isNaN(second))
+                        second = parseInt(this.container.find('.left .secondselect option:last').val(), 10);
                     if (!this.timePicker24Hour) {
                         var ampm = this.container.find('.left .ampmselect').val();
                         if (ampm === 'PM' && hour < 12)
@@ -622,11 +627,17 @@
                     }
                 } else {
                     hour = parseInt(this.container.find('.right .hourselect').val(), 10);
+                    if (isNaN(hour))
+                        hour = parseInt(this.container.find('.right .hourselect option:last').val(), 10);
+
                     minute = parseInt(this.container.find('.right .minuteselect').val(), 10);
-                    if (isNaN(minute)) {
+                    if (isNaN(minute))
                         minute = parseInt(this.container.find('.right .minuteselect option:last').val(), 10);
-                    }
+
                     second = this.timePickerSeconds ? parseInt(this.container.find('.right .secondselect').val(), 10) : 0;
+                    if (isNaN(second))
+                        second = parseInt(this.container.find('.right .secondselect option:last').val(), 10);
+
                     if (!this.timePicker24Hour) {
                         var ampm = this.container.find('.right .ampmselect').val();
                         if (ampm === 'PM' && hour < 12)
@@ -1353,6 +1364,8 @@
             if (this.endDate || date.isBefore(this.startDate, 'day')) { //picking start
                 if (this.timePicker) {
                     var hour = parseInt(this.container.find('.left .hourselect').val(), 10);
+                    if (isNaN(hour))
+                        hour = parseInt(this.container.find('.left .hourselect option:last').val(), 10);
                     if (!this.timePicker24Hour) {
                         var ampm = this.container.find('.left .ampmselect').val();
                         if (ampm === 'PM' && hour < 12)
@@ -1361,10 +1374,12 @@
                             hour = 0;
                     }
                     var minute = parseInt(this.container.find('.left .minuteselect').val(), 10);
-                    if (isNaN(minute)) {
+                    if (isNaN(minute))
                         minute = parseInt(this.container.find('.left .minuteselect option:last').val(), 10);
-                    }
+
                     var second = this.timePickerSeconds ? parseInt(this.container.find('.left .secondselect').val(), 10) : 0;
+                    if (isNaN(second))
+                        second = parseInt(this.container.find('.left .secondselect option:last').val(), 10);
                     date = date.clone().hour(hour).minute(minute).second(second);
                 }
                 this.endDate = null;
@@ -1377,6 +1392,8 @@
             } else { // picking end
                 if (this.timePicker) {
                     var hour = parseInt(this.container.find('.right .hourselect').val(), 10);
+                    if (isNaN(hour))
+                        hour = parseInt(this.container.find('.right .hourselect option:last').val(), 10);
                     if (!this.timePicker24Hour) {
                         var ampm = this.container.find('.right .ampmselect').val();
                         if (ampm === 'PM' && hour < 12)
@@ -1385,10 +1402,12 @@
                             hour = 0;
                     }
                     var minute = parseInt(this.container.find('.right .minuteselect').val(), 10);
-                    if (isNaN(minute)) {
+                    if (isNaN(minute))
                         minute = parseInt(this.container.find('.right .minuteselect option:last').val(), 10);
-                    }
+
                     var second = this.timePickerSeconds ? parseInt(this.container.find('.right .secondselect').val(), 10) : 0;
+                    if (isNaN(second))
+                        second = parseInt(this.container.find('.right .secondselect option:last').val(), 10);
                     date = date.clone().hour(hour).minute(minute).second(second);
                 }
                 this.setEndDate(date.clone());
@@ -1505,11 +1524,16 @@
                 isLeft = cal.hasClass('left');
 
             var hour = parseInt(cal.find('.hourselect').val(), 10);
+            if (isNaN(hour))
+                hour = parseInt(cal.find('.hourselect option:last').val(), 10);
+
             var minute = parseInt(cal.find('.minuteselect').val(), 10);
-            if (isNaN(minute)) {
+            if (isNaN(minute))
                 minute = parseInt(cal.find('.minuteselect option:last').val(), 10);
-            }
+
             var second = this.timePickerSeconds ? parseInt(cal.find('.secondselect').val(), 10) : 0;
+            if (isNaN(second))
+                second = parseInt(cal.find('.secondselect option:last').val(), 10);
 
             if (!this.timePicker24Hour) {
                 var ampm = cal.find('.ampmselect').val();
