@@ -49,7 +49,10 @@
         this.showCustomRangeLabel = true;
         this.timePicker = false;
         this.timePicker24Hour = false;
-        this.timePickerIncrement = 1;
+        this.timePickerIncrement = null;
+        this.timePickerStepHour = 1;
+        this.timePickerStepMinute = 1;
+        this.timePickerStepSecond = 1;
         this.timePickerSeconds = false;
         this.linkedCalendars = true;
         this.autoUpdateInput = true;
@@ -254,8 +257,15 @@
         if (typeof options.timePickerSeconds === 'boolean')
             this.timePickerSeconds = options.timePickerSeconds;
 
+        // Use options.timePickerIncrement only for backward compatibility
         if (typeof options.timePickerIncrement === 'number')
-            this.timePickerIncrement = options.timePickerIncrement;
+            this.timePickerStepMinute = options.timePickerStepMinute;
+        if (typeof options.timePickerStepHour === 'number')
+            this.timePickerStepHour = options.timePickerStepHour;
+        if (typeof options.timePickerStepMinute === 'number')
+            this.timePickerStepMinute = options.timePickerStepMinute;
+        if (typeof options.timePickerStepSecond === 'number')
+            this.timePickerStepSecond = options.timePickerStepSecond;
 
         if (typeof options.timePicker24Hour === 'boolean')
             this.timePicker24Hour = options.timePicker24Hour;
@@ -463,19 +473,31 @@
             if (!this.timePicker)
                 this.startDate = this.startDate.startOf('day');
 
-            if (this.timePicker && this.timePickerIncrement)
-                this.startDate.minute(Math.round(this.startDate.minute() / this.timePickerIncrement) * this.timePickerIncrement);
+            if (this.timePicker && this.timePickerStepHour)
+                this.startDate.hour(Math.round(this.startDate.hour() / this.timePickerStepHour) * this.timePickerStepHour);
+            if (this.timePicker && this.timePickerStepMinute)
+                this.startDate.minute(Math.round(this.startDate.minute() / this.timePickerStepMinute) * this.timePickerStepMinute);
+            if (this.timePicker && this.timePickerStepSecond)
+                this.startDate.second(Math.round(this.startDate.second() / this.timePickerStepSecond) * this.timePickerStepSecond);
 
             if (this.minDate && this.startDate.isBefore(this.minDate)) {
                 this.startDate = this.minDate.clone();
-                if (this.timePicker && this.timePickerIncrement)
-                    this.startDate.minute(Math.round(this.startDate.minute() / this.timePickerIncrement) * this.timePickerIncrement);
+                if (this.timePicker && this.timePickerStepHour)
+                    this.startDate.hour(Math.round(this.startDate.hour() / this.timePickerStepHour) * this.timePickerStepHour);
+                if (this.timePicker && this.timePickerStepHour)
+                    this.startDate.minute(Math.round(this.startDate.minute() / this.timePickerStepMinute) * this.timePickerStepMinute);
+                if (this.timePicker && this.timePickerStepSecond)
+                    this.startDate.second(Math.round(this.startDate.second() / this.timePickerStepSecond) * this.timePickerStepSecond);
             }
 
             if (this.maxDate && this.startDate.isAfter(this.maxDate)) {
                 this.startDate = this.maxDate.clone();
-                if (this.timePicker && this.timePickerIncrement)
-                    this.startDate.minute(Math.floor(this.startDate.minute() / this.timePickerIncrement) * this.timePickerIncrement);
+                if (this.timePicker && this.timePickerStepHour)
+                    this.startDate.hour(Math.floor(this.startDate.hour() / this.timePickerStepHour) * this.timePickerStepHour);
+                if (this.timePicker && this.timePickerStepMinute)
+                    this.startDate.minute(Math.floor(this.startDate.minute() / this.timePickerStepMinute) * this.timePickerStepMinute);
+                if (this.timePicker && this.timePickerStepSecond)
+                    this.startDate.second(Math.floor(this.startDate.second() / this.timePickerStepSecond) * this.timePickerStepSecond);
             }
 
             if (!this.isShowing)
@@ -494,8 +516,12 @@
             if (!this.timePicker)
                 this.endDate = this.endDate.endOf('day');
 
-            if (this.timePicker && this.timePickerIncrement)
-                this.endDate.minute(Math.round(this.endDate.minute() / this.timePickerIncrement) * this.timePickerIncrement);
+            if (this.timePicker && this.timePickerStepHour)
+                this.endDate.hour(Math.round(this.endDate.hour() / this.timePickerStepHour) * this.timePickerStepHour);
+            if (this.timePicker && this.timePickerStepMinute)
+                this.endDate.minute(Math.round(this.endDate.minute() / this.timePickerStepMinute) * this.timePickerStepMinute);
+            if (this.timePicker && this.timePickerStepSecond)
+                this.endDate.second(Math.round(this.endDate.second() / this.timePickerStepSecond) * this.timePickerStepSecond);
 
             if (this.endDate.isBefore(this.startDate))
                 this.endDate = this.startDate.clone();
@@ -910,7 +936,7 @@
             var start = this.timePicker24Hour ? 0 : 1;
             var end = this.timePicker24Hour ? 23 : 12;
 
-            for (var i = start; i <= end; i++) {
+            for (var i = start; i <= end; i += this.timePickerStepHour) {
                 var i_in_24 = i;
                 if (!this.timePicker24Hour)
                     i_in_24 = selected.hour() >= 12 ? (i == 12 ? 12 : i + 12) : (i == 12 ? 0 : i);
@@ -941,7 +967,7 @@
 
             html += ': <select class="minuteselect">';
 
-            for (var i = 0; i < 60; i += this.timePickerIncrement) {
+            for (var i = 0; i < 60; i += this.timePickerStepMinute) {
                 var padded = i < 10 ? '0' + i : i;
                 var time = selected.clone().minute(i);
 
@@ -971,7 +997,7 @@
             if (this.timePickerSeconds) {
                 html += ': <select class="secondselect">';
 
-                for (var i = 0; i < 60; i++) {
+                for (var i = 0; i < 60; i += this.timePickerStepSecond) {
                     var padded = i < 10 ? '0' + i : i;
                     var time = selected.clone().second(i);
 

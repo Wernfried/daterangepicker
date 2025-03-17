@@ -1,6 +1,6 @@
 Package.describe({
   name: 'wernfried:bootstrap-daterangepicker',
-  version: '3.2.0',
+  version: '3.3.0',
   summary: 'Date range picker component',
   git: 'https://github.com/Wernfried/daterangepicker',
   documentation: 'README.md'
