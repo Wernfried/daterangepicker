@@ -130,7 +130,7 @@ isInvalidTime: (time, side, unit) => {
       } else {
          return time.hasSame(validRange[0], 'hour') ? time.minute < validRange[0].minute : false;
       }
-   } else if (side == 'start' && t.hasSame(validRange[1], 'day')) {
+   } else if (side == 'end' && t.hasSame(validRange[1], 'day')) {
       if (unit == 'hour') {
          return time.hour > validRange[1].hour;
       } else {
