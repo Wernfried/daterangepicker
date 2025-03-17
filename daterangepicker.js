@@ -947,7 +947,7 @@
                     disabled = true;
                 if (maxDate && time.minute(0).isAfter(maxDate))
                     disabled = true;
-                if (!disabled && this.isInvalidTime(time, this.singleDatePicker ? null : (side == 'left' ? 'start' : 'stop'), 'hour'))
+                if (!disabled && this.isInvalidTime(time, this.singleDatePicker ? null : (side == 'left' ? 'start' : 'end'), 'hour'))
                     disabled = true;
 
                 if (i_in_24 == selected.hour() && !disabled) {
@@ -976,7 +976,7 @@
                     disabled = true;
                 if (maxDate && time.second(0).isAfter(maxDate))
                     disabled = true;
-                if (!disabled && this.isInvalidTime(time, this.singleDatePicker ? null : (side == 'left' ? 'start' : 'stop'), 'minute'))
+                if (!disabled && this.isInvalidTime(time, this.singleDatePicker ? null : (side == 'left' ? 'start' : 'end'), 'minute'))
                     disabled = true;
 
                 if (selected.minute() == i && !disabled) {
@@ -1006,7 +1006,7 @@
                         disabled = true;
                     if (maxDate && time.isAfter(maxDate))
                         disabled = true;
-                    if (!disabled && this.isInvalidTime(time, this.singleDatePicker ? null : (side == 'left' ? 'start' : 'stop'), 'second'))
+                    if (!disabled && this.isInvalidTime(time, this.singleDatePicker ? null : (side == 'left' ? 'start' : 'end'), 'second'))
                         disabled = true;
 
                     if (selected.second() == i && !disabled) {
@@ -1037,7 +1037,7 @@
                 if (maxDate && selected.clone().hour(0).minute(0).second(0).isAfter(maxDate))
                     pm_html = ' disabled="disabled" class="disabled"';
 
-                if (this.isInvalidTime(time, this.singleDatePicker ? null : (side == 'left' ? 'start' : 'stop'), 'ampm')) {
+                if (this.isInvalidTime(time, this.singleDatePicker ? null : (side == 'left' ? 'start' : 'end'), 'ampm')) {
                     am_html = ' disabled="disabled" class="disabled"';
                     pm_html = ' disabled="disabled" class="disabled"';
                 }
