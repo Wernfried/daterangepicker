@@ -259,7 +259,7 @@
 
         // Use options.timePickerIncrement only for backward compatibility
         if (typeof options.timePickerIncrement === 'number')
-            this.timePickerStepMinute = options.timePickerStepMinute;
+            this.timePickerStepMinute = options.timePickerIncrement;
         if (typeof options.timePickerStepHour === 'number')
             this.timePickerStepHour = options.timePickerStepHour;
         if (typeof options.timePickerStepMinute === 'number')
@@ -798,7 +798,12 @@
                 html += '<th class="week">' + this.locale.weekLabel + '</th>';
 
             $.each(this.locale.daysOfWeek, function (index, dayOfWeek) {
-                html += '<th>' + dayOfWeek + '</th>';
+                if ([5, 6].includes(index)) {
+                    //highlight weekend day
+                    html += '<th class="weekend-day">' + dayOfWeek + '</th>';
+                } else {
+                    html += '<th>' + dayOfWeek + '</th>';
+                }
             });
 
             html += '</tr>';
