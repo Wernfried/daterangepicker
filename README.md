@@ -18,8 +18,8 @@ a single date picker mode, a time picker, and predefined date ranges.
 ```
 <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
-<script type="text/javascript" src="daterangepicker.min.js"></script>
-<link rel="stylesheet" type="text/css" href="daterangepicker.min.css" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/Wernfried/daterangepicker@master/daterangepicker.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/Wernfried/daterangepicker@master/daterangepicker.min.css" />
 
 <input type="text" id="daterange" />
 
@@ -178,6 +178,7 @@ isInvalidDate: function(date) {
 
 The MIT License (MIT)
 
-Copyright (c) 2012-2020 Dan Grossman
+Copyright (c) 2012-2019 Dan Grossman
+Copyright (c) 2025 Wernfried Domscheit
 
 Licensed under the [MIT license](LICENSE).
