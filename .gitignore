@@ -6,3 +6,4 @@ npm-debug.log
 *.min.js
 *.min.css
 *.sw[onp]
+.vscode
