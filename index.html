@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>daterangepicker</title>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/luxon/3.5.0/luxon.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="daterangepicker.css" />
+  <script type="text/javascript" src="daterangepicker.js"></script>
+
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='1em' font-size='80'>📅</text></svg>" />
+
+
+  <style type="text/css">
+    .weekend {
+      color: red
+    }
+
+    .weekend-day {
+      color: red
+    }
+  </style>
+
+  <script type="text/javascript">
+    const DateTime = luxon.DateTime;
+    const Duration = luxon.Duration;
+    const Info = luxon.Info;
+    const Settings = luxon.Settings;
+
+    $(document).ready(function () {
+
+      $('#picker').daterangepicker({
+        timePicker: true,
+        timePickerStepMinute: 5,
+        timePicker24Hour: true,
+        //minDate: DateTime.fromSQL($("#PwTime").attr('option-minDate')).toJSDate(),
+        //maxDate: DateTime.now().plus({ year: 3 }).endOf('month').toJSDate(),
+        //startDate: DateTime.fromSQL($("#PwTime").attr('option-startDate')).toJSDate(),
+        //endDate: DateTime.fromSQL($("#PwTime").attr('option-endDate')).toJSDate(),
+        locale: {
+          format: 'DD.MM.YYYY HH:mm',
+          separator: ' - ',
+          //daysOfWeek: moment.weekdaysShort(),
+          //monthNames: moment.months(),
+          //firstDay: 1
+        }
+      });
+    });
+  </script>
+</head>
+
+<body>
+  <div>
+    <input type="text" id="picker" size="30" />
+  </div>
+
+</body>
+
+</html>
