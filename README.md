@@ -14,14 +14,22 @@ a single date picker mode, a time picker, and predefined date ranges.
 ## [See It In a Live Application](https://awio.iljmp.com/5/drpdemogh)
 
 
-## Constructor Example
+## Basic usage
 ```
+<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script type="text/javascript" src="daterangepicker.min.js"></script>
+<link rel="stylesheet" type="text/css" href="daterangepicker.min.css" />
+
 <input type="text" id="daterange" />
 
-const options = {
-   timePicker: true
-}
-$('#daterange').daterangepicker(options);
+<script>
+$(function() {
+   const options = {
+      timePicker: true
+   }
+   $('#daterange').daterangepicker(options);
+});
 
 ```
 
@@ -61,7 +69,7 @@ $('#daterange').daterangepicker(options);
 | applyButtonClasses   | string  | `'btn-primary'` | CSS class names that will be added only to the apply button  |
 | cancelButtonClasses  | string  | `'btn-default'` | CSS class names that will be added only to the cancel button |
 | isInvalidDate        | function | `undefined`    | A function that is passed each date in the two calendars before they are displayed, and may return `true` or `false` to indicate whether that date should be available for selection or not.</br>**Signature**: `isInvalidDate(date)` |
-| isInvalidTime        | function | `undefined`    | A function that is passed each hour/minute/second/am-pm in the two calendars before they are displayed, and may return `true` or `false` to indicate whether that time should be available for selection or not.</br>**Signature**: `isInvalidTime(time, side, unit)`.</br>`side` is `start` or `end` or `null` for `singleDatePicker = true`</br>`unit` is `hour`, `minute`, `second` or `ampm`</br></br>**Note**: Ensure that your function returns `false` for at least one item. Otherwise the calender is not rendered. |
+| isInvalidTime        | function | `undefined`    | A function that is passed each hour/minute/second/am-pm in the two calendars before they are displayed, and may return `true` or `false` to indicate whether that time should be available for selection or not.</br></br>**Signature**: `isInvalidTime(time, side, unit)`.</br>`side` is `'start'` or `'end'` or `null` for `singleDatePicker = true`</br>`unit` is `'hour'`, `'minute'`, `'second'` or `'ampm'`</br></br>**Note**: Ensure that your function returns `false` for at least one item. Otherwise the calender is not rendered. |
 | isCustomDate         | function | `undefined`    | A function that is passed each date in the two calendars before they are displayed, and may return a string or array of CSS class names to apply to that date's calendar cell.</br>**Signature**: `isCustomDate(date)`
 
 ### Options.locale
@@ -77,7 +85,7 @@ $('#daterange').daterangepicker(options);
 | customRangeLabel | string | `'Custom Range'` | Title for custom ranges| 
 | daysOfWeek       | Array(string) | moment.weekdaysMin() | Array with weekday names.</br>Can be also used to customize name, e.g.</br>`[ '<span style="color:red">Sun</span>', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', '<span style="color:red">Sat</span>' ]` | 
 | monthNames       | Array(string) | moment.monthsShort() | Array with month names | 
-| firstDay         | number | moment.localeData().firstDayOfWeek() | First day of the week (1 = Monday) | 
+| firstDay         | number | moment.localeData().firstDayOfWeek() | First day of the week, 0-6 (Sunday to Saturday) | 
 
 
 ## Methods
@@ -96,8 +104,8 @@ $('#daterange').daterangepicker(options);
 | `hideCalendar.daterangepicker(this)` | Triggered when the calendar(s) are hidden
 | `apply.daterangepicker(this)`        | Triggered when the apply button is clicked, or when a predefined range is clicked
 | `cancel.daterangepicker(this)`       | Triggered when the cancel button is clicked
-| `dateChange.daterangepicker(this, side)` | Triggered when selected day changes.</br>`side` indicates which day changed, `start` or `end` or `null` for `singleDatePicker = true`
-| `timeChange.daterangepicker(this, side)` |Triggered when selected time changes.</br>`side` indicates which time changed, `start` or `end` or `null` for `singleDatePicker = true`
+| `dateChange.daterangepicker(this, side)` | Triggered when selected day changes.</br>`side` indicates which day changed, `'start'` or `'end'` or `null` for `singleDatePicker = true`
+| `timeChange.daterangepicker(this, side)` |Triggered when selected time changes.</br>`side` indicates which time changed, `'start'` or `'end'` or `null` for `singleDatePicker = true`
 
 ## Examples
 ### `ranges`
@@ -172,20 +180,4 @@ The MIT License (MIT)
 
 Copyright (c) 2012-2020 Dan Grossman
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
+Licensed under the [MIT license](LICENSE).
