@@ -35,10 +35,13 @@
         timePicker: true,
         timePickerStepMinute: 5,
         timePicker24Hour: true,
+        maxSpan: moment.duration(14, 'days'),
+        minSpan: moment.duration(4, 'days'),
         //minDate: DateTime.fromSQL($("#PwTime").attr('option-minDate')).toJSDate(),
         //maxDate: DateTime.now().plus({ year: 3 }).endOf('month').toJSDate(),
         //startDate: DateTime.fromSQL($("#PwTime").attr('option-startDate')).toJSDate(),
         //endDate: DateTime.fromSQL($("#PwTime").attr('option-endDate')).toJSDate(),
+        singleDatePicker: true,
         locale: {
           format: 'DD.MM.YYYY HH:mm',
           separator: ' - ',
@@ -47,7 +50,9 @@
           //firstDay: 1
         }
       });
+      $('#picker').trigger('click');
     });
+    
   </script>
 </head>
 

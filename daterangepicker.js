@@ -39,6 +39,7 @@
         this.minDate = false;
         this.maxDate = false;
         this.maxSpan = false;
+        this.minSpan = false;
         this.autoApply = false;
         this.singleDatePicker = false;
         this.showDropdowns = false;
@@ -209,10 +210,19 @@
         if (typeof options.cancelClass === 'string') //backwards compat
             this.cancelButtonClasses = options.cancelClass;
 
-        if (typeof options.maxSpan === 'object')
+        if (typeof options.singleDatePicker === 'boolean') {
+            this.singleDatePicker = options.singleDatePicker;
+            if (this.singleDatePicker)
+                this.endDate = this.startDate.clone();
+        }
+
+        if (typeof options.maxSpan === 'object' && !this.singleDatePicker)
             this.maxSpan = options.maxSpan;
 
-        if (typeof options.dateLimit === 'object') //backwards compat
+        if (typeof options.minSpan === 'object' && !this.singleDatePicker)
+            this.minSpan = options.minSpan;
+
+        if (typeof options.dateLimit === 'object' && !this.singleDatePicker) //backwards compat
             this.maxSpan = options.dateLimit;
 
         if (typeof options.opens === 'string')
@@ -244,12 +254,6 @@
 
         if (typeof options.showCustomRangeLabel === 'boolean')
             this.showCustomRangeLabel = options.showCustomRangeLabel;
-
-        if (typeof options.singleDatePicker === 'boolean') {
-            this.singleDatePicker = options.singleDatePicker;
-            if (this.singleDatePicker)
-                this.endDate = this.startDate.clone();
-        }
 
         if (typeof options.timePicker === 'boolean')
             this.timePicker = options.timePicker;
@@ -324,7 +328,7 @@
             }
         }
 
-        if (typeof options.ranges === 'object') {
+        if (!this.singleDatePicker && typeof options.ranges === 'object') {
             for (range in options.ranges) {
 
                 if (typeof options.ranges[range][0] === 'string')
@@ -348,8 +352,14 @@
                 if (maxDate && end.isAfter(maxDate))
                     end = maxDate.clone();
 
+                // If the end date falls below those allowed by the minSpan
+                // option, expand the range to the allowable period.
+                if (this.minSpan && end.isBefore(start.clone().add(this.minSpan)))
+                    end = start.clone().add(this.minSpan);
+
                 // If the end of the range is before the minimum or the start of the range is
                 // after the maximum, don't display this range option at all.
+                // to do: No idea why it compares only day/minute. Simple earlier or later should be fine
                 if ((this.minDate && end.isBefore(this.minDate, this.timepicker ? 'minute' : 'day'))
                     || (maxDate && start.isAfter(maxDate, this.timepicker ? 'minute' : 'day')))
                     continue;
@@ -526,11 +536,14 @@
             if (this.endDate.isBefore(this.startDate))
                 this.endDate = this.startDate.clone();
 
-            if (this.maxDate && this.endDate.isAfter(this.maxDate))
-                this.endDate = this.maxDate.clone();
-
             if (this.maxSpan && this.startDate.clone().add(this.maxSpan).isBefore(this.endDate))
                 this.endDate = this.startDate.clone().add(this.maxSpan);
+
+            if (!this.singleDatePicker && this.minSpan && this.endDate.isBefore(this.startDate.clone().add(this.minSpan)))
+                this.endDate = this.startDate.clone().add(this.minSpan);
+
+            if (this.maxDate && this.endDate.isAfter(this.maxDate))
+                this.endDate = this.maxDate.clone();
 
             this.previousRightTime = this.endDate.clone();
 
@@ -819,6 +832,11 @@
                 }
             }
 
+            var minLimit;
+            //grey out end dates shorter than minSpan
+            if (this.endDate == null && this.minSpan)
+                minLimit = this.startDate.clone().add(this.minSpan).startOf('day');
+
             for (var row = 0; row < 6; row++) {
                 html += '<tr>';
 
@@ -850,6 +868,10 @@
 
                     //don't allow selection of dates after the maximum date
                     if (maxDate && calendar[row][col].isAfter(maxDate, 'day'))
+                        classes.push('off', 'disabled');
+
+                    //don't allow selection of dates before the minimun span
+                    if (minLimit && calendar[row][col].isAfter(this.startDate, 'day') && calendar[row][col].isBefore(minLimit, 'day'))
                         classes.push('off', 'disabled');
 
                     //don't allow selection of date if a custom function decides it's invalid
@@ -905,10 +927,12 @@
             // because an end date hasn't been clicked yet
             if (side == 'right' && !this.endDate) return;
 
-            var html, selected, minDate, maxDate = this.maxDate;
+            var html, selected, minLimit, minDate, maxDate = this.maxDate;
 
             if (this.maxSpan && (!this.maxDate || this.startDate.clone().add(this.maxSpan).isBefore(this.maxDate)))
                 maxDate = this.startDate.clone().add(this.maxSpan);
+            if (this.minSpan && side == 'right')
+                minLimit = this.startDate.clone().add(this.minSpan);
 
             if (side == 'left') {
                 selected = this.startDate.clone();
@@ -963,6 +987,8 @@
                     disabled = true;
                 if (maxDate && time.minute(0).isAfter(maxDate))
                     disabled = true;
+                if (minLimit && time.minute(59).isBefore(minLimit))
+                    disabled = true;
                 if (!disabled && this.isInvalidTime(time, this.singleDatePicker ? null : (side == 'left' ? 'start' : 'end'), 'hour'))
                     disabled = true;
 
@@ -991,6 +1017,8 @@
                 if (minDate && time.second(59).isBefore(minDate))
                     disabled = true;
                 if (maxDate && time.second(0).isAfter(maxDate))
+                    disabled = true;
+                if (minLimit && time.second(59).isBefore(minLimit))
                     disabled = true;
                 if (!disabled && this.isInvalidTime(time, this.singleDatePicker ? null : (side == 'left' ? 'start' : 'end'), 'minute'))
                     disabled = true;
@@ -1022,6 +1050,8 @@
                         disabled = true;
                     if (maxDate && time.isAfter(maxDate))
                         disabled = true;
+                    if (minLimit && time.isBefore(minLimit))
+                        disabled = true;
                     if (!disabled && this.isInvalidTime(time, this.singleDatePicker ? null : (side == 'left' ? 'start' : 'end'), 'second'))
                         disabled = true;
 
@@ -1051,6 +1081,9 @@
                     am_html = ' disabled="disabled" class="disabled"';
 
                 if (maxDate && selected.clone().hour(0).minute(0).second(0).isAfter(maxDate))
+                    pm_html = ' disabled="disabled" class="disabled"';
+
+                if (minLimit && selected.clone().hour(0).minute(0).second(0).isAfter(minLimit))
                     pm_html = ' disabled="disabled" class="disabled"';
 
                 if (this.isInvalidTime(time, this.singleDatePicker ? null : (side == 'left' ? 'start' : 'end'), 'ampm')) {

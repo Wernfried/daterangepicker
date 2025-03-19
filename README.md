@@ -33,7 +33,8 @@ $('#daterange').daterangepicker(options);
 | endDate              | Date \| string \| [moment](https://momentjs.com/docs/#/parsing/) | End of current day | The end date of the initially selected date range |
 | minDate              | boolean \| Date \| string \| [moment](https://momentjs.com/docs/#/parsing/) | `false` | The earliest date a user may select or `false` for no limit |
 | maxDate              | boolean \| Date \| string \| [moment](https://momentjs.com/docs/#/parsing/)| `false` | The latest date a user may select or `false` for no limit |
-| maxSpan              | object  | `false`    | The maximum span between the selected start and end dates. See moment [Durations](https://momentjs.com/docs/#/durations/) |
+| maxSpan              | object  | `false`    | The maximum span between the selected start and end dates. See moment [Durations](https://momentjs.com/docs/#/durations/) </br>Ignored when `singleDatePicker: true` |
+| minSpan              | object  | `false`    | The minimum span between the selected start and end dates. See moment [Durations](https://momentjs.com/docs/#/durations/) </br>Ignored when `singleDatePicker: true` |
 | autoApply            | boolean | `false`    | Hide the apply and cancel buttons, and automatically apply a new date range as soon as two dates are clicked.<br/>Only useful when `timePicker: false` |
 | singleDatePicker     | boolean | `false`    | Show only a single calendar to choose one date, instead of a range picker with two calendars. The start and end dates provided to your callback will be the same single date chosen.  |
 | showDropdowns        | boolean | `false`    | Show year and month select boxes above calendars to jump to a specific month and year |
@@ -52,7 +53,7 @@ $('#daterange').daterangepicker(options);
 | linkedCalendars      | boolean | `true`     | When enabled, the two calendars displayed will always be for two sequential months (i.e. January and February), and both will be advanced when clicking the left or right arrows above the calendars. When disabled, the two calendars can be individually advanced and display any month/year |
 | autoUpdateInput      | boolean | `true`     | Indicates whether the date range picker should automatically update the value of the `<input>` element it's attached to at initialization and when the selected dates change. |
 | alwaysShowCalendars  | boolean | `false`    | Normally, if you use the `ranges` option to specify pre-defined date ranges, calendars for choosing a custom date range are not shown until the user clicks "Custom Range". When this option is set to true, the calendars for choosing a custom date range are always shown instead.  |
-| ranges               | object  | `{}`       | Object of predefined ranges. `{name: [start, end]}`. See example [ranges](#options-ranges) |
+| ranges               | object  | `{}`       | Object of predefined ranges. `{name: [start, end]}`. See example [ranges](#options-ranges)</br>Ignored when `singleDatePicker: true` |
 | locale               | object  | `{}`       | See [Options.locale](#options-locale) |
 | opens                | string  | `'right'`  | Whether the picker appears aligned to the left, to the right, or centered under the HTML element it's attached to.</br> `'left'` \|  `'right'` \| `'center'` |
 | drops                | string  | `'down'`   | Whether the picker appears below (default) or above the HTML element it's attached to.</br> `'down'` \|  `'up'` \| `'auto'` |
