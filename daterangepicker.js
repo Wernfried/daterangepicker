@@ -539,7 +539,7 @@
             if (this.maxSpan && this.startDate.clone().add(this.maxSpan).isBefore(this.endDate))
                 this.endDate = this.startDate.clone().add(this.maxSpan);
 
-            if (!this.singleDatePicker && this.minSpan && this.endDate.isBefore(this.startDate.clone().add(this.minSpan)))
+            if (this.minSpan && this.endDate.isBefore(this.startDate.clone().add(this.minSpan)))
                 this.endDate = this.startDate.clone().add(this.minSpan);
 
             if (this.maxDate && this.endDate.isAfter(this.maxDate))
@@ -553,6 +553,13 @@
                 this.updateElement();
 
             this.updateMonthsInView();
+        },
+
+        setPeriod: function (range) {
+            this.endDate = null;
+            setStartDate(range[0]);
+            if (!this.singleDatePicker)
+                setEndDate(range[1]);
         },
 
         isInvalidDate: function () {

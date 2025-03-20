@@ -180,7 +180,7 @@
 
         for (let opt of ['startDate', 'endDate', 'minDate', 'maxDate']) {
             if (typeof options[opt] === 'object') {
-                if (options[opt] instanceof DateTime) {
+                if (options[opt] instanceof DateTime && options[opt].isValid) {
                     this[opt] = options[opt];
                 } else if (options[opt] instanceof Date) {
                     this[opt] = DateTime.fromJSDate(options[opt]);
@@ -195,6 +195,8 @@
                 } else {
                     console.error(`Option '${key}' is not a valid string`);
                 }
+            } else if (typeof options[opt] === 'boolean' || options[opt] === null) {
+                this[opt] = options[opt];
             }
         }
 
@@ -234,7 +236,14 @@
                     } else {
                         console.error(`Option '${key}' is not a valid string`);
                     };
+                } else if (typeof options[opt] === 'boolean' || options[opt] === null) {
+                    this[opt] = options[opt];
                 }
+            }
+            if (this.minSpan && this.maxSpan && this.minSpan > this.maxSpan ) {
+                this.minSpan =false;
+                this.maxSpan =false;
+                console.error(`Option 'minSpan' must be smaller than 'maxSpan'`);
             }
         }
 
@@ -575,6 +584,53 @@ setEndDate: function (endDate) {
         this.updateElement();
 
     this.updateMonthsInView();
+},
+
+setPeriod: function (range) {
+    if (!Array.isArray(range)) {
+        console.error(`Parameter for 'setPeriod' must be an array`);
+        return;
+    }
+
+    let start, end;
+    for (let i = 0; i <= 1; i++) {
+        let date;
+        if (typeof range[i] === 'object') {
+            if (range[i] instanceof DateTime && range[i].isValid) {
+                date = range[i];
+            } else if (range[i] instanceof Date) {
+                date = DateTime.fromJSDate(range[i]);
+            } else {
+                console.error(`Parameter for 'setPeriod' must be a array of luxon.DateTime or Date or string`);
+                return;
+            }
+        } else if (typeof range[i] === 'string') {
+            if (DateTime.fromISO(range[i]).isValid) {
+                date = DateTime.fromISO(range[i]);
+            } else if (typeof this.locale.format === 'string' && DateTime.fromFormat(range[i], this.locale.format).isValid) {
+                date = DateTime.fromFormat(range[i], this.locale.format);
+            } else {
+                console.error(`Parameter for 'setPeriod' must be a array of luxon.DateTime or Date or string`);
+                return;
+            }
+        }
+        if (i == 0) {
+            start = date;
+        } else {
+            end = date;
+        }
+    }
+
+    this.endDate = null;
+    if (start <= end) {
+        setStartDate(start);
+        if (!this.singleDatePicker)
+            setEndDate(end);
+    } else {
+        setStartDate(end);
+        if (!this.singleDatePicker)
+            setEndDate(start);
+    }
 },
 
 isInvalidDate: function () {

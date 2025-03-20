@@ -93,6 +93,7 @@ $(function() {
 | -------------------------------------- | ----------- |
 | setStartDate(Date \| string \| [moment](https://momentjs.com/docs/#/parsing/)) | Sets the date range picker's currently selected start date to the provided date |
 | setEndDate(Date \| string \| [moment](https://momentjs.com/docs/#/parsing/))   | Sets the date range picker's currently selected end date to the provided date  |
+| setPeriod([Date \| string \| [moment](https://momentjs.com/docs/#/parsing/))]   | Sets the date range picker's currently selected start and end date to the provided dates. Avoids situation where endDate can be lower than startDate  |
 
 
 ## Events
@@ -173,6 +174,22 @@ isInvalidDate: function(date) {
    return bankDays.some(x => x.hasSame(date, 'day')) ? 'daterangepicker-bank-day' : '';
 }
 ```
+### Features
+Compared to [inital repository](https://github.com/dangrossman/daterangepicker), this fork added following features:
+
+- Added CSS class `weekend-day` for weekend days in csalendar 
+- Deprecated option `timePickerIncrement` im favor of `timePickerStepHour`, `timePickerStepMinute` and `timePickerStepSecond`
+- Added events for `dateChange.daterangepicker` and `timeChange.daterangepicker`
+- Added method `setRange` to combine `setStartDate` and `setEndDate`
+- Added option `minSpan` similar to `maxSpan`
+- Added option `isInvalidTime` similar to `isInvalidDate`
+- Replaced [moment](https://momentjs.com/) by [luxon](https://moment.github.io/luxon/index.html)
+- Better validation of input parameters 
+- ... and maybe some new bugs 😉 
+
+
+
+
 
 ## License
 
