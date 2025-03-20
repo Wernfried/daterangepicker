@@ -557,9 +557,9 @@
 
         setPeriod: function (range) {
             this.endDate = null;
-            setStartDate(range[0]);
+            this.setStartDate(range[0]);
             if (!this.singleDatePicker)
-                setEndDate(range[1]);
+                this.setEndDate(range[1]);
         },
 
         isInvalidDate: function () {

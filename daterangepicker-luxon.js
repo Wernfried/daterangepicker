@@ -623,13 +623,13 @@ setPeriod: function (range) {
 
     this.endDate = null;
     if (start <= end) {
-        setStartDate(start);
+        this.setStartDate(start);
         if (!this.singleDatePicker)
-            setEndDate(end);
+            this.setEndDate(end);
     } else {
-        setStartDate(end);
+        this.setStartDate(end);
         if (!this.singleDatePicker)
-            setEndDate(start);
+            this.setEndDate(start);
     }
 },
 
