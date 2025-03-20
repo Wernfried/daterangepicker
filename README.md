@@ -93,7 +93,7 @@ $(function() {
 | -------------------------------------- | ----------- |
 | setStartDate(Date \| string \| [moment](https://momentjs.com/docs/#/parsing/)) | Sets the date range picker's currently selected start date to the provided date |
 | setEndDate(Date \| string \| [moment](https://momentjs.com/docs/#/parsing/))   | Sets the date range picker's currently selected end date to the provided date  |
-| setPeriod([Date \| string \| [moment](https://momentjs.com/docs/#/parsing/))]   | Sets the date range picker's currently selected start and end date to the provided dates. Avoids situation where endDate can be lower than startDate  |
+| setPeriod(Date \| string \| [moment](https://momentjs.com/docs/#/parsing/)), Date \| string \| [moment](https://momentjs.com/docs/#/parsing/)) | Sets the date range picker's currently selected start and end date to the provided dates. Avoids situation where endDate can be lower than startDate  |
 
 
 ## Events
@@ -101,10 +101,11 @@ $(function() {
 | ------------------------------------ | ----------- | 
 | `show.daterangepicker(this)`         | Triggered when the picker is shown
 | `hide.daterangepicker(this)`         | Triggered when the picker is hidden
-| `showCalendar.daterangepicker(this)` | Triggered when the calendar(s) are shown
+| `showCalendar.daterangepicker(this)` | Triggered when the calendar(s) are shown, i.e. triggers every time when user select new month or "Custom Range" in predefined ranges
 | `hideCalendar.daterangepicker(this)` | Triggered when the calendar(s) are hidden
 | `apply.daterangepicker(this)`        | Triggered when the apply button is clicked, or when a predefined range is clicked
 | `cancel.daterangepicker(this)`       | Triggered when the cancel button is clicked
+| `outsideClick.daterangepicker(this)` | Triggered when user clicked outside the picker
 | `dateChange.daterangepicker(this, side)` | Triggered when selected day changes.</br>`side` indicates which day changed, `'start'` or `'end'` or `null` for `singleDatePicker = true`
 | `timeChange.daterangepicker(this, side)` |Triggered when selected time changes.</br>`side` indicates which time changed, `'start'` or `'end'` or `null` for `singleDatePicker = true`
 

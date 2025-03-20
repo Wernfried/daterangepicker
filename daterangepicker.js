@@ -555,11 +555,11 @@
             this.updateMonthsInView();
         },
 
-        setPeriod: function (range) {
+        setPeriod: function (startDate, endDate) {
             this.endDate = null;
-            this.setStartDate(range[0]);
+            this.setStartDate(startDate);
             if (!this.singleDatePicker)
-                this.setEndDate(range[1]);
+                this.setEndDate(endDate);
         },
 
         isInvalidDate: function () {
