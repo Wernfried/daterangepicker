@@ -37,13 +37,13 @@ $(function() {
 | Name                 | Type    | Default    | Description |
 | -------------------- | ------- | ---------- | ----------- |
 | parentEl             | string  | `'body'`     |  jQuery selector of the parent element that the date range picker will be added to |
-| startDate            | Date \| string \| [moment](https://momentjs.com/docs/#/parsing/) | Start of current day | The beginning date of the initially selected date range. If you provide a string, it must match the date format string set in your locale setting. |
-| endDate              | Date \| string \| [moment](https://momentjs.com/docs/#/parsing/) | End of current day | The end date of the initially selected date range |
-| minDate              | boolean \| Date \| string \| [moment](https://momentjs.com/docs/#/parsing/) | `false` | The earliest date a user may select or `false` for no limit |
-| maxDate              | boolean \| Date \| string \| [moment](https://momentjs.com/docs/#/parsing/)| `false` | The latest date a user may select or `false` for no limit |
-| maxSpan              | object  | `false`    | The maximum span between the selected start and end dates. See moment [Durations](https://momentjs.com/docs/#/durations/) </br>Ignored when `singleDatePicker: true` |
-| minSpan              | object  | `false`    | The minimum span between the selected start and end dates. See moment [Durations](https://momentjs.com/docs/#/durations/) </br>Ignored when `singleDatePicker: true` |
-| autoApply            | boolean | `false`    | Hide the apply and cancel buttons, and automatically apply a new date range as soon as two dates are clicked.<br/>Only useful when `timePicker: false` |
+| startDate            | DateTime \| Date \| string | Start of current day | The beginning date of the initially selected date range.</br>Must be a [luxon.DateTime](](https://moment.github.io/luxon/api-docs/index.html#datetime)) or [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) or string according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) or a string matching `locale.format` when given as `string`. |
+| endDate              | DateTime \| Date \| string | End of current day | The end date of the initially selected date range.</br>Must be a [luxon.DateTime](](https://moment.github.io/luxon/api-docs/index.html#datetime)) or [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) or string according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) or a string matching `locale.format` when given as `string`. |
+| minDate              | DateTime \| Date \| string | `null` | The earliest date a user may select or `null` for no limit.</br>Must be a [luxon.DateTime](](https://moment.github.io/luxon/api-docs/index.html#datetime)) or [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) or string according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) or a string matching `locale.format` when given as `string`. |
+| maxDate              | DateTime \| Date \| string | `null` | The latest date a user may select or `null` for no limit.</br>Must be a [luxon.DateTime](](https://moment.github.io/luxon/api-docs/index.html#datetime)) or [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) or string according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) or a string matching `locale.format` when given as `string`. |
+| maxSpan              | Duration \| string | `null`    | The maximum span between the selected start and end dates.</br>Must be a [luxon.Durations](https://moment.github.io/luxon/api-docs/index.html#duration) of a string according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601#Time_intervals) duration.</br>Ignored when `singleDatePicker: true` |
+| minSpan              | Duration \| string | `null`    | The minimum span between the selected start and end dates..</br>Must be a [luxon.Durations](https://moment.github.io/luxon/api-docs/index.html#duration) of a string according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601#Time_intervals) duration.</br>Ignored when `singleDatePicker: true` |
+| autoApply            | boolean | `null`    | Hide the apply and cancel buttons, and automatically apply a new date range as soon as two dates are clicked.<br/>Only useful when `timePicker: false` |
 | singleDatePicker     | boolean | `false`    | Show only a single calendar to choose one date, instead of a range picker with two calendars. The start and end dates provided to your callback will be the same single date chosen.  |
 | showDropdowns        | boolean | `false`    | Show year and month select boxes above calendars to jump to a specific month and year |
 | minYear              | number  | this year - 100 | The minimum year shown in the dropdowns when `showDropdowns` is set to `true` |
@@ -54,9 +54,9 @@ $(function() {
 | timePicker           | boolean | `false`    | Adds select boxes to choose times in addition to dates |
 | timePicker24Hour     | boolean | `false`    | Use 24-hour instead of 12-hour times, removing the AM/PM selection |
 | timePickerIncrement  | number  | `null`     | **Deprecated**, only supported for backward compatibility</br>Use `timePickerStepMinute` |
-| timePickerStepHour   | number  | `1`          | Increment of the hour selection list for times (i.e. 6 to allow only selection of times ending in 0, 6, 12 or 18) |
-| timePickerStepMinute | number  | `1`          | Increment of the minutes selection list for times (i.e. 30 to allow only selection of times ending in 0 or 30) |
-| timePickerStepSecond | number  | `1`          | Increment of the seconds selection list for times (i.e. 30 to allow only selection of times ending in 0 or 30) |
+| timePickerStepHour   | number  | 1          | Increment of the hour selection list for times (i.e. 6 to allow only selection of times ending in 0, 6, 12 or 18) |
+| timePickerStepMinute | number  | 1          | Increment of the minutes selection list for times (i.e. 30 to allow only selection of times ending in 0 or 30) |
+| timePickerStepSecond | number  | 1          | Increment of the seconds selection list for times (i.e. 30 to allow only selection of times ending in 0 or 30) |
 | timePickerSeconds    | boolean | `false`    | Show seconds in the timePicke |
 | linkedCalendars      | boolean | `true`     | When enabled, the two calendars displayed will always be for two sequential months (i.e. January and February), and both will be advanced when clicking the left or right arrows above the calendars. When disabled, the two calendars can be individually advanced and display any month/year |
 | autoUpdateInput      | boolean | `true`     | Indicates whether the date range picker should automatically update the value of the `<input>` element it's attached to at initialization and when the selected dates change. |
@@ -65,7 +65,7 @@ $(function() {
 | locale               | object  | `{}`       | See [Options.locale](#options-locale) |
 | opens                | string  | `'right'`  | Whether the picker appears aligned to the left, to the right, or centered under the HTML element it's attached to.</br> `'left'` \|  `'right'` \| `'center'` |
 | drops                | string  | `'down'`   | Whether the picker appears below (default) or above the HTML element it's attached to.</br> `'down'` \|  `'up'` \| `'auto'` |
-| buttonClasses        | string  | `'btn btn-sm'`  | CSS class names that will be added to both the apply and cancel buttons |
+| buttonClasses        | string \| Array(string)  | `'btn btn-sm'`  | CSS class names that will be added to both the apply and cancel buttons.  |
 | applyButtonClasses   | string  | `'btn-primary'` | CSS class names that will be added only to the apply button  |
 | cancelButtonClasses  | string  | `'btn-default'` | CSS class names that will be added only to the cancel button |
 | isInvalidDate        | function | `undefined`    | A function that is passed each date in the two calendars before they are displayed, and may return `true` or `false` to indicate whether that date should be available for selection or not.</br>**Signature**: `isInvalidDate(date)` |
@@ -77,23 +77,23 @@ $(function() {
 | Name             | Type    | Default    | Description |
 | -----------------| ------- | ---------- | ----------- |
 | direction        | string  | `'ltr'`      | Direction of reading, `'ltr'` `'rtl'` | 
-| format           | string  | moment.localeData().longDateFormat('L') | Display format of selected values | 
+| format           | string \| object | `DateTime.DATE_SHORT` | Date formats. Either given as string, see [Format Tokens](https://moment.github.io/luxon/#/formatting?id=table-of-tokens) or an object according to [Intl.DateTimeFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat)</br>I recommend to use the luxon [Presets](https://moment.github.io/luxon/#/formatting?id=presets).</br>Note, when using an `object`, then this parameter is **not** used to parse string or `startDate`, `endDate`, `minDate`, `maxDate`  | 
 | separator        | string | `' - '`       | Separator for start and end time | 
 | applyLabel       | string | `'Apply'`     | Label of `Apply` Button | 
 | cancelLabel      | string | `'Cancel'`    | Label of `Cancel` Button  | 
 | weekLabel        | string | `'W'`        | Label for week numbers | 
 | customRangeLabel | string | `'Custom Range'` | Title for custom ranges| 
-| daysOfWeek       | Array(string) | moment.weekdaysMin() | Array with weekday names.</br>Can be also used to customize name, e.g.</br>`[ '<span style="color:red">Sun</span>', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', '<span style="color:red">Sat</span>' ]` | 
-| monthNames       | Array(string) | moment.monthsShort() | Array with month names | 
-| firstDay         | number | moment.localeData().firstDayOfWeek() | First day of the week, 0-6 (Sunday to Saturday) | 
+| daysOfWeek       | Array(string) | `luxon.Info.weekdays('short')` | Array with weekday names | 
+| monthNames       | Array(string) | `luxon.Info.months('long')`| Array with month names | 
+| firstDay         | number | `luxon.Info.getStartOfWeek()`| First day of the week, 1 for Monday through 7 for Sunday | 
 
 
 ## Methods
-| Name                                   | Description |
-| -------------------------------------- | ----------- |
-| setStartDate(Date \| string \| [moment](https://momentjs.com/docs/#/parsing/)) | Sets the date range picker's currently selected start date to the provided date |
-| setEndDate(Date \| string \| [moment](https://momentjs.com/docs/#/parsing/))   | Sets the date range picker's currently selected end date to the provided date  |
-| setPeriod(Date \| string \| [moment](https://momentjs.com/docs/#/parsing/)), Date \| string \| [moment](https://momentjs.com/docs/#/parsing/)) | Sets the date range picker's currently selected start and end date to the provided dates. Avoids situation where endDate can be lower than startDate  |
+| Name                          | Description |
+| ----------------------------- | ----------- |
+| setStartDate(startDate)       | Sets the date range picker's currently selected start date to the provided date.</br>`startDate` must be a [luxon.DateTime](](https://moment.github.io/luxon/api-docs/index.html#datetime)) or [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) or string according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) or a string matching `locale.format` when given as `string`. |
+| setEndDate(endDate)           | Sets the date range picker's currently selected end date to the provided date.</br>`endDate` must be a [luxon.DateTime](](https://moment.github.io/luxon/api-docs/index.html#datetime)) or [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) or string according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) or a string matching `locale.format` when given as `string`.  |
+| setPeriod(startDate,endDate ) | Shortcut for `setStartDate()` and `setEndDate()`.</br>`startDate` and `endDate` be a [luxon.DateTime](](https://moment.github.io/luxon/api-docs/index.html#datetime)) or [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) or string according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) or a string matching `locale.format` when given as `string`.  |
 
 
 ## Events
@@ -114,19 +114,19 @@ $(function() {
 <a name="options-ranges"></a>
 ```
 {
-   'Today': [moment(), moment()],
-   'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+   'Today': [DateTime.now().startOf('day'), DateTime.now().endOf('day')],
+   'Yesterday': [DateTime.now().startOf('day').minus({day: 1}), DateTime.now().endOf('day').minus({day: 1})],
    'Last 7 Days': ['2025-03-01', '2025-03-07'],
    'Last 30 Days': [new Date(new Date - 1000*60*60*24*30), new Date()],
-   'This Month': [moment().startOf('month'), moment().endOf('month')],
-   'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+   'This Month': [DateTime.now().startOf('month'), DateTime.now().endOf('month')],
+   'Last Month': [DateTime.now().minus({month: 1}).startOf('month'), DateTime.now().minus({month: 1}).endOf('month')]
 }
 ```
 
 ### `isInvalidDate`
 ```
 isInvalidDate: function(date) {
-   return [0, 6].includes(date.day); // weekend
+   return date.isWeekend;
 }
 ```
 
@@ -163,14 +163,14 @@ isInvalidTime: (time, side, unit) => {
 }
 
 isInvalidDate: function(date) {
-   if ([0, 6].includes(date.day))
+   if (date.isWeekend)
       return 'daterangepicker-weekend-day';
 
-   const yyyy = moment().year;
+   const yyyy = date.year;
    let bankDays = [
-      moment({ year: yyyy, month: 1, day: 1 }), // New year
-      moment({ year: yyyy, month: 7, day: 4 }), // Independence Day
-      moment({ year: yyyy, month: 12, day: 25 }) // Christmas Day
+      DateTime.fromObject({ year: yyyy, month: 1, day: 1 }), // New year
+      DateTime.fromObject({ year: yyyy, month: 7, day: 4 }), // Independence Day
+      DateTime.fromObject({ year: yyyy, month: 12, day: 25 }) // Christmas Day
    ];
    return bankDays.some(x => x.hasSame(date, 'day')) ? 'daterangepicker-bank-day' : '';
 }
@@ -185,10 +185,21 @@ Compared to [inital repository](https://github.com/dangrossman/daterangepicker),
 - Added option `minSpan` similar to `maxSpan`
 - Added option `isInvalidTime` similar to `isInvalidDate`
 - Replaced [moment](https://momentjs.com/) by [luxon](https://moment.github.io/luxon/index.html)
-- Better validation of input parameters 
+- Better validation of input parameters, error are printed to console
+- Highlight range in calendars when hovering over custom ranges
 - ... and maybe some new bugs 😉 
 
+#### Differences between moment vs. luxon
+This table lists a few important differences between datarangepicker using moment and luxon
 
+| Parameter               | moment                                              | luxon             |
+| ----------------------- | --------------------------------------------------- | ----------------- |
+| locale.daysOfWeek       | [ "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" ] | [ "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" ] | 
+| locale.firstDay         | 0-6 (Sunday to Saturday)                            | 1 for Monday through 7 for Sunday | 
+| to ISO-8601 String      | `toISOString()`                                     | `toISO()`         | 
+| to [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) Object | `toDate()` | `toJSDate()`         | 
+| from ISO-8601 String    | `moment(...)`                                       | `DateIme.fromISO(...)`         | 
+| from [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) Object | `moment(...)` | `DateIme.fromJSDate(...)`         | 
 
 
 

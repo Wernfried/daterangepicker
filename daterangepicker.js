@@ -556,10 +556,23 @@
         },
 
         setPeriod: function (startDate, endDate) {
-            this.endDate = null;
-            this.setStartDate(startDate);
-            if (!this.singleDatePicker)
-                this.setEndDate(endDate);
+            let start, end;
+
+            if (typeof startDate === 'string')
+                start = moment(startDate, this.locale.format);
+            if (typeof startDate === 'object')
+                start = moment(startDate);
+            if (typeof endDate === 'string')
+                end = moment(endDate, this.locale.format);
+            if (typeof endDate === 'object')
+                end = moment(endDate);
+
+            if (this.singleDatePicker) {
+                this.setStartDate(start);
+            } else {
+                this.setStartDate(start);
+                this.setEndDate(end);
+            }
         },
 
         isInvalidDate: function () {
