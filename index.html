@@ -34,31 +34,72 @@
         timePicker: true,
         timePickerStepMinute: 5,
         timePicker24Hour: true,
-        maxSpan: moment.duration(14, 'days'),
-        minSpan: moment.duration(4, 'days'),
+        //maxSpan: moment.duration(14, 'days'),
+        //minSpan: moment.duration(4, 'days'),
         //minDate: DateTime.fromSQL($("#PwTime").attr('option-minDate')).toJSDate(),
         //maxDate: DateTime.now().plus({ year: 3 }).endOf('month').toJSDate(),
         //startDate: DateTime.fromSQL($("#PwTime").attr('option-startDate')).toJSDate(),
         //endDate: DateTime.fromSQL($("#PwTime").attr('option-endDate')).toJSDate(),
-        singleDatePicker: true,
+        singleDatePicker: false,
+        linkedCalendars: false,
         locale: {
           format: 'DD.MM.YYYY HH:mm',
           separator: ' - ',
           //daysOfWeek: moment.weekdaysShort(),
           //monthNames: moment.months(),
-          //firstDay: 1
+          firstDay: 6
         }
       });
+
+
       $('#picker').trigger('click');
+
+      $('#startButton').on('click', () => {        
+        const picker = $('#picker').data('daterangepicker');
+        picker.setStartDate(DateTime.fromSQL($('#start').val()).toJSDate());
+        picker.updateView();
+      });
+
+      $('#endButton').on('click', () => {        
+        const picker = $('#picker').data('daterangepicker');
+        picker.setEndDate(DateTime.fromSQL($('#end').val()).toJSDate());        
+        picker.updateView();
+      });
+
+      
+      $('#start').on('change', () => {        
+        const picker = $('#picker').data('daterangepicker');
+        picker.setStartDate(DateTime.fromSQL($('#start').val()).toJSDate());
+        picker.updateView();
+      });
+
+      $('#end').on('change', () => {        
+        const picker = $('#picker').data('daterangepicker');
+        picker.setEndDate(DateTime.fromSQL($('#end').val()).toJSDate());        
+        picker.updateView();
+      });
+
+
     });
-    
+
   </script>
 </head>
 
 <body>
+
+  <p>
+    <input type="text" id="start" value="2025-03-10 15:50" />
+    <button type="button" id="startButton">set Start</button>
+  </p>
+  <p>
+    <input type="text" id="end" value="2025-03-29 15:50" />
+    <button type="button" id="endButton">set End</button>
+  </p>
+
   <div>
     <input type="text" id="picker" size="30" />
   </div>
+
 
 </body>
 

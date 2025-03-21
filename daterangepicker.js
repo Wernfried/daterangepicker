@@ -474,6 +474,7 @@
         constructor: DateRangePicker,
 
         setStartDate: function (startDate) {
+            console.log('In setStartDate')
             if (typeof startDate === 'string')
                 this.startDate = moment(startDate, this.locale.format);
 
@@ -588,6 +589,7 @@
         },
 
         updateView: function () {
+            console.log('In updateView');
             if (this.timePicker) {
                 this.renderTimePicker('left');
                 this.renderTimePicker('right');
