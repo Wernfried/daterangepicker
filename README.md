@@ -79,11 +79,12 @@ $(function() {
 | separator        | string | `' - '`       | Separator for start and end time | 
 | applyLabel       | string | `'Apply'`     | Label of `Apply` Button | 
 | cancelLabel      | string | `'Cancel'`    | Label of `Cancel` Button  | 
-| weekLabel        | string | `'W'`        | Label for week numbers | 
+| weekLabel        | string | `'W'`         | Label for week numbers | 
 | customRangeLabel | string | `'Custom Range'` | Title for custom ranges| 
 | daysOfWeek       | Array(string) | `luxon.Info.weekdays('short')` | Array with weekday names | 
 | monthNames       | Array(string) | `luxon.Info.months('long')`| Array with month names | 
 | firstDay         | number | `luxon.Info.getStartOfWeek()`| First day of the week, 1 for Monday through 7 for Sunday | 
+| durationLabel    | string \| object | `null` | Format a custom label for selected duration, for example `'5 Days, 12 Hours'`. Define the format either as string, see [Duration.toFormat - Format Tokens](https://moment.github.io/luxon/api-docs/index.html#durationtoformat) or an object according to [Intl.NumberFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#options), see [Duration.toHuamn](https://moment.github.io/luxon/api-docs/index.html#durationtohuman).
 
 
 ## Methods

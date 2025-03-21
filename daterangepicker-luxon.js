@@ -84,9 +84,7 @@
             daysOfWeek: Info.weekdays('short'),
             monthNames: Info.months('long'),
             firstDay: Info.getStartOfWeek(),
-            // durationLabel: null // -> not implemented yet, see https://github.com/dangrossman/daterangepicker/pull/2372/files
-            // will use [Duration.toFormat](https://moment.github.io/luxon/api-docs/index.html#durationtoformat)
-            // or [Duration.toHuman](https://moment.github.io/luxon/api-docs/index.html#durationtohuman)
+            durationLabel: null
         };
 
         this.callback = function () { };
@@ -118,6 +116,7 @@
                 '<div class="calendar-time"></div>' +
                 '</div>' +
                 '<div class="drp-buttons">' +
+                '<span class="drp-duration-label"></span>' +
                 '<span class="drp-selected"></span>' +
                 '<button class="cancelBtn" type="button"></button>' +
                 '<button class="applyBtn" disabled="disabled" type="button"></button> ' +
@@ -175,6 +174,9 @@
                 var rangeHtml = elem.value;
                 this.locale.customRangeLabel = rangeHtml;
             }
+
+            if (['string', 'object'].includes(typeof options.locale.durationLabel) && options.locale.durationLabel != null)
+                this.locale.durationLabel = durationLabel;
         }
         this.container.addClass(this.locale.direction);
 
@@ -761,6 +763,14 @@
 
             this.previousRightTime = this.endDate;
 
+            if (this.locale.durationLabel && !this.singleDatePicker) {
+                const duration = this.endDate.diff(this.startDate).rescale();
+                if (typeof this.locale.durationLabel === 'object') {
+                    this.container.find('.drp-duration-label').html(duration.toHuman(this.locale.durationLabel));
+                } else {
+                    this.container.find('.drp-duration-label').html(duration.toFormat(this.locale.durationLabel));
+                }
+            }
             if (typeof this.locale.format === 'object') {
                 this.container.find('.drp-selected').html(this.startDate.toLocaleString(this.locale.format) + this.locale.separator + this.endDate.toLocaleString(this.locale.format));
             } else {
@@ -805,6 +815,14 @@
                 }
             }
             if (this.endDate) {
+                if (this.locale.durationLabel && !this.singleDatePicker) {
+                    const duration = this.endDate.diff(this.startDate).rescale();
+                    if (typeof this.locale.durationLabel === 'object') {
+                        this.container.find('.drp-duration-label').html(duration.toHuman(this.locale.durationLabel));
+                    } else {
+                        this.container.find('.drp-duration-label').html(duration.toFormat(this.locale.durationLabel));
+                    }
+                }
                 if (typeof this.locale.format === 'object') {
                     this.container.find('.drp-selected').html(this.startDate.toLocaleString(this.locale.format) + this.locale.separator + this.endDate.toLocaleString(this.locale.format));
                 } else {
