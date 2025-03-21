@@ -131,7 +131,7 @@ isInvalidDate: function(date) {
 
 ### `isInvalidTime`
 ```
-const validRange = [moment('2025-03-01 11:30'), moment('2025-04-21 18:30')];
+const validRange = [DateTime.fromSQL('2025-03-01 11:30'), DateTime.fromSQL('2025-04-21 18:30')];
 
 isInvalidTime: (time, side, unit) => {   
    if (side == 'start' && time.hasSame(validRange[0], 'day')) {
@@ -177,37 +177,39 @@ isInvalidDate: function(date) {
 ### Features
 Compared to [inital repository](https://github.com/dangrossman/daterangepicker), this fork added following features:
 
-- Added CSS class `weekend-day` for weekend days in csalendar 
-- Deprecated option `timePickerIncrement` and `timePickerSeconds` in favor to `timePickerStepSize`
+- Added CSS class `weekend-day` for weekend days in calendar 
+- Added option `timePickerStepSize` to succeed options `timePickerIncrement` and `timePickerSeconds`
 - Added events for `dateChange.daterangepicker` and `timeChange.daterangepicker`
 - Added method `setRange` to combine `setStartDate` and `setEndDate`
 - Added option `minSpan` similar to `maxSpan`
 - Added option `isInvalidTime` similar to `isInvalidDate`
 - Replaced [moment](https://momentjs.com/) by [luxon](https://moment.github.io/luxon/index.html)
 - Better validation of input parameters, error are printed to console
-- Highlight range in calendars when hovering over custom ranges
+- Highlight range in calendar when hovering over pre-defined ranges
 - Added option `locale.durationLabel` to show customized label for selected duration, e.g. `'4 Days, 6 Hours, 30 Minutes'` 
 - ... and maybe some new bugs 😉 
 
-#### Differences between moment vs. luxon
-This table lists a few important differences between datarangepicker using moment and luxon
+### Differences between `moment` and `luxon` library
+This table lists a few important differences between datarangepicker using moment and luxon. Check them carefully when you migrate from older daterangepicker.
 
 | Parameter               | moment                                              | luxon             |
 | ----------------------- | --------------------------------------------------- | ----------------- |
-| locale.daysOfWeek       | [ "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" ] | [ "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" ] | 
-| locale.firstDay         | 0-6 (Sunday to Saturday)                            | 1 for Monday through 7 for Sunday | 
+| `locale.daysOfWeek`     | [ "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" ] | [ "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" ] | 
+| `locale.firstDay`       | 0-6 (Sunday to Saturday)                            | 1 for Monday through 7 for Sunday | 
 | to ISO-8601 String      | `toISOString()`                                     | `toISO()`         | 
 | to [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) Object | `toDate()` | `toJSDate()`         | 
 | from ISO-8601 String    | `moment(...)`                                       | `DateIme.fromISO(...)`         | 
 | from [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) Object | `moment(...)` | `DateIme.fromJSDate(...)`         | 
-
+| current day             | `moment()`                                          | `DateTime.now()`  |
+| format to string        | `format(...)``                                      | `toFormat(...)`   |
+| format tokens           | `'YYYY-MM-DD'`                                      | `'yyyy-MM-dd'`    |
 
 
 ## License
 
 The MIT License (MIT)
 
-Copyright (c) 2012-2019 Dan Grossman
+Copyright (c) 2012-2019 Dan Grossman<br/> 
 Copyright (c) 2025 Wernfried Domscheit
 
 Licensed under the [MIT license](LICENSE).

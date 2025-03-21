@@ -9,6 +9,7 @@
   <script type="text/javascript" src="luxon.min.js"></script>
   <link rel="stylesheet" type="text/css" href="daterangepicker.css" />
   <script type="text/javascript" src="daterangepicker.js"></script>
+  <script type="text/javascript" src="daterangepicker-moment.js"></script>
   <link rel="shortcut icon"
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='1em' font-size='80'>📅</text></svg>" />
 
@@ -30,12 +31,44 @@
 
     $(document).ready(function () {
 
+      const durs = [
+        Duration.fromObject({ hours: 6 }),
+        Duration.fromObject({ hours: 1 }),
+        Duration.fromObject({ minutes: 10 }),
+        Duration.fromObject({ minutes: 1 }),
+        Duration.fromObject({ seconds: 30 }),
+        Duration.fromObject({ seconds: 1 })
+      ];
+
       $('#picker').daterangepicker({
         timePicker: true,
         timePickerStepMinute: 5,
         timePicker24Hour: true,
+        maxSpan: Duration.fromObject({ days: 14 }),
+        minSpan: Duration.fromObject({ days: 4 }),
+        timePickerStepSize: Duration.fromObject({ seconds: 30 }),
+        //minDate: DateTime.fromSQL($("#PwTime").attr('option-minDate')).toJSDate(),
+        //maxDate: DateTime.now().plus({ year: 3 }).endOf('month').toJSDate(),
+        //startDate: DateTime.fromSQL($("#PwTime").attr('option-startDate')).toJSDate(),
+        //endDate: DateTime.fromSQL($("#PwTime").attr('option-endDate')).toJSDate(),
+        singleDatePicker: true,
+        locale: {
+          format: 'dd.MM.yyyy HH:mm',
+          separator: ' - ',
+          //daysOfWeek: moment.weekdaysShort(),
+          //monthNames: moment.months(),
+          //firstDay: 1
+        }
+      });
+      $('#picker').trigger('click');
+
+
+      $('#picker-moment').daterangepickerM({
+        timePicker: true,
+        timePickerStepMinute: 5,
+        timePicker24Hour: true,
         maxSpan: moment.duration(14, 'days'),
-        minSpan: moment.duration(4, 'days'),
+        minSpan: moment.duration(4, 'days'),        
         //minDate: DateTime.fromSQL($("#PwTime").attr('option-minDate')).toJSDate(),
         //maxDate: DateTime.now().plus({ year: 3 }).endOf('month').toJSDate(),
         //startDate: DateTime.fromSQL($("#PwTime").attr('option-startDate')).toJSDate(),
@@ -49,15 +82,20 @@
           //firstDay: 1
         }
       });
-      $('#picker').trigger('click');
+      $('#picker-moment').trigger('click');
+
     });
-    
+
   </script>
 </head>
 
 <body>
   <div>
     <input type="text" id="picker" size="30" />
+  </div>
+
+  <div style="margin-top: 350px;">
+    <input type="text" id="picker-moment" size="30" />
   </div>
 
 </body>

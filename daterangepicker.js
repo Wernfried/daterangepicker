@@ -1,5 +1,5 @@
 /**
-* @version: 3.4.1
+* @version: 4.1
 * @author: Wernfried Domscheit
 * @copyright: Copyright (c) 2025 Wernfried Domscheit. All rights reserved.
 * @license: Licensed under the MIT license. See http://www.opensource.org/licenses/mit-license.php
@@ -9,10 +9,10 @@
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
         // AMD. Make globaly available as well
-        define(['moment', 'jquery'], function (moment, jquery) {
+        define(['luxon', 'jquery'], function (luxon, jquery) {
             if (!jquery.fn) jquery.fn = {}; // webpack server rendering
-            if (typeof moment !== 'function' && moment.hasOwnProperty('default')) moment = moment['default']
-            return factory(moment, jquery);
+            if (typeof luxon !== 'function' && luxon.hasOwnProperty('default')) luxon = luxon['default']
+            return factory(luxon, jquery);
         });
     } else if (typeof module === 'object' && module.exports) {
         // Node / Browserify
@@ -22,39 +22,40 @@
             jQuery = require('jquery');
             if (!jQuery.fn) jQuery.fn = {};
         }
-        var moment = (typeof window != 'undefined' && typeof window.moment != 'undefined') ? window.moment : require('moment');
-        module.exports = factory(moment, jQuery);
+        var luxon = (typeof window != 'undefined' && typeof window.luxon != 'undefined') ? window.luxon : require('luxon');
+        module.exports = factory(luxon, jQuery);
     } else {
         // Browser globals
-        root.daterangepicker = factory(root.moment, root.jQuery);
+        root.daterangepicker = factory(root.luxon, root.jQuery);
     }
-}(typeof window !== 'undefined' ? window : this, function (moment, $) {
+}(typeof window !== 'undefined' ? window : this, function (luxon, $) {
+    const DateTime = luxon.DateTime;
+    const Duration = luxon.Duration;
+    const Info = luxon.Info;
+    const Settings = luxon.Settings;
+
     var DateRangePicker = function (element, options, cb) {
 
         //default settings for options
         this.parentEl = 'body';
         this.element = $(element);
-        this.startDate = moment().startOf('day');
-        this.endDate = moment().endOf('day');
-        this.minDate = false;
-        this.maxDate = false;
-        this.maxSpan = false;
-        this.minSpan = false;
+        this.startDate = DateTime.now().startOf('day');
+        this.endDate = DateTime.now().endOf('day');
+        this.minDate = null;
+        this.maxDate = null;
+        this.maxSpan = null;
+        this.minSpan = null;
         this.autoApply = false;
         this.singleDatePicker = false;
         this.showDropdowns = false;
-        this.minYear = moment().subtract(100, 'year').format('YYYY');
-        this.maxYear = moment().add(100, 'year').format('YYYY');
+        this.minYear = DateTime.now().minus({ year: 100 }).year;
+        this.maxYear = DateTime.now().plus({ year: 100 }).year;
         this.showWeekNumbers = false;
         this.showISOWeekNumbers = false;
         this.showCustomRangeLabel = true;
         this.timePicker = false;
         this.timePicker24Hour = false;
-        this.timePickerIncrement = null;
-        this.timePickerStepHour = 1;
-        this.timePickerStepMinute = 1;
-        this.timePickerStepSecond = 1;
-        this.timePickerSeconds = false;
+        this.timePickerStepSize = Duration.fromObject({ minutes: 1 });
         this.linkedCalendars = true;
         this.autoUpdateInput = true;
         this.alwaysShowCalendars = false;
@@ -74,15 +75,16 @@
 
         this.locale = {
             direction: 'ltr',
-            format: moment.localeData().longDateFormat('L'),
+            format: DateTime.DATE_SHORT,
             separator: ' - ',
             applyLabel: 'Apply',
             cancelLabel: 'Cancel',
             weekLabel: 'W',
             customRangeLabel: 'Custom Range',
-            daysOfWeek: moment.weekdaysMin(),
-            monthNames: moment.monthsShort(),
-            firstDay: moment.localeData().firstDayOfWeek()
+            daysOfWeek: Info.weekdays('short'),
+            monthNames: Info.months('long'),
+            firstDay: Info.getStartOfWeek(),
+            durationLabel: null
         };
 
         this.callback = function () { };
@@ -114,6 +116,7 @@
                 '<div class="calendar-time"></div>' +
                 '</div>' +
                 '<div class="drp-buttons">' +
+                '<span class="drp-duration-label"></span>' +
                 '<span class="drp-selected"></span>' +
                 '<button class="cancelBtn" type="button"></button>' +
                 '<button class="applyBtn" disabled="disabled" type="button"></button> ' +
@@ -132,17 +135,25 @@
             if (typeof options.locale.direction === 'string')
                 this.locale.direction = options.locale.direction;
 
-            if (typeof options.locale.format === 'string')
+            if (['string', 'object'].includes(typeof options.locale.format))
                 this.locale.format = options.locale.format;
 
             if (typeof options.locale.separator === 'string')
                 this.locale.separator = options.locale.separator;
 
-            if (typeof options.locale.daysOfWeek === 'object')
-                this.locale.daysOfWeek = options.locale.daysOfWeek.slice();
+            if (Array.isArray(options.locale.daysOfWeek)) {
+                if (options.locale.daysOfWeek.some(x => typeof x !== 'string'))
+                    console.error(`Option 'options.locale.daysOfWeek' must be an array of strings`)
+                else
+                    this.locale.daysOfWeek = options.locale.daysOfWeek.slice();
+            }
 
-            if (typeof options.locale.monthNames === 'object')
-                this.locale.monthNames = options.locale.monthNames.slice();
+            if (Array.isArray(options.locale.monthNames)) {
+                if (options.locale.monthNames.some(x => typeof x !== 'string'))
+                    console.error(`Option 'locale.monthNames' must be an array of strings`)
+                else
+                    this.locale.monthNames = options.locale.monthNames.slice();
+            }
 
             if (typeof options.locale.firstDay === 'number')
                 this.locale.firstDay = options.locale.firstDay;
@@ -163,40 +174,157 @@
                 var rangeHtml = elem.value;
                 this.locale.customRangeLabel = rangeHtml;
             }
+
+            if (['string', 'object'].includes(typeof options.locale.durationLabel) && options.locale.durationLabel != null)
+                this.locale.durationLabel = durationLabel;
         }
         this.container.addClass(this.locale.direction);
 
-        if (typeof options.startDate === 'string')
-            this.startDate = moment(options.startDate, this.locale.format);
+        if (typeof options.singleDatePicker === 'boolean')
+            this.singleDatePicker = options.singleDatePicker;
 
-        if (typeof options.endDate === 'string')
-            this.endDate = moment(options.endDate, this.locale.format);
+        if (typeof options.timePicker === 'boolean')
+            this.timePicker = options.timePicker;
 
-        if (typeof options.minDate === 'string')
-            this.minDate = moment(options.minDate, this.locale.format);
+        if (typeof options.timePicker24Hour === 'boolean')
+            this.timePicker24Hour = options.timePicker24Hour;
 
-        if (typeof options.maxDate === 'string')
-            this.maxDate = moment(options.maxDate, this.locale.format);
+        if (typeof options.timePickerSeconds === 'boolean')  // backward compatibility            
+            this.timePickerStepSize = Duration.fromObject({ [options.timePickerSeconds ? 'seconds' : 'minutes']: 1 });
+        if (typeof options.timePickerIncrement === 'number')  // backward compatibility
+            this.timePickerStepSize = Duration.fromObject({ minutes: options.timePickerIncrement });
 
-        if (typeof options.startDate === 'object')
-            this.startDate = moment(options.startDate);
+        if (['string', 'object'].includes(typeof options.timePickerStepSize)) {
+            let duration = this.timePickerStepSize;
+            if (options.timePickerStepSize instanceof Duration && options.timePickerStepSize.isValid) {
+                duration = options.timePickerStepSize;
+            } else if (Duration.fromISO(options.timePickerStepSize).isValid) {
+                duration = Duration.fromISO(options.timePickerStepSize);
+            } else if (typeof options[opt] === 'number' && Duration.fromObject({ seconds: this.timePickerStepSize }).isValid) {
+                duration = Duration.fromObject({ seconds: this.timePickerStepSize });
+            } else {
+                console.error(`Option 'timePickerStepSize' is not valid`);
+            };
+            var valid = [];
+            for (let unit of ['minutes', 'seconds'])
+                valid.push(...[1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30].map(x => { return Duration.fromObject({ [unit]: x }) }));
+            valid.push(...[1, 2, 3, 4, 6].map(x => { return Duration.fromObject({ hours: x }) }));
+            if (this.timePicker24Hour)
+                valid.push(...[8, 12].map(x => { return Duration.fromObject({ hours: x }) }));
 
-        if (typeof options.endDate === 'object')
-            this.endDate = moment(options.endDate);
+            if (valid.some(x => duration.rescale().equals(x))) {
+                if (this.maxSpan && duration > this.maxSpan) {
+                    console.error(`Option 'timePickerStepSize' ${JSON.stringify(duration.toObject())} must be smaller than 'maxSpan'`);
+                } else if (this.minSpan && duration < this.minSpan) {
+                    console.error(`Option 'timePickerStepSize' ${JSON.stringify(duration.toObject())} must be greater than 'minSpan'`);
+                } else {
+                    this.timePickerStepSize = duration.rescale();
+                }
+            } else {
+                console.error(`Option 'timePickerStepSize' ${JSON.stringify(duration.toObject())} is not valid`);
+            }
+        }
 
-        if (typeof options.minDate === 'object')
-            this.minDate = moment(options.minDate);
+        if (!this.singleDatePicker) {
+            for (let opt of ['minSpan', 'maxSpan']) {
+                if (['string', 'number', 'object'].includes(typeof options[opt])) {
+                    if (options[opt] instanceof Duration && options[opt].isValid) {
+                        this[opt] = options[opt];
+                    } else if (Duration.fromISO(options[opt]).isValid) {
+                        this[opt] = Duration.fromISO(options[opt]);
+                    } else if (typeof options[opt] === 'number' && Duration.fromObject({ seconds: options[opt] }).isValid) {
+                        this[opt] = Duration.fromObject({ seconds: options[opt] });
+                    } else if (options[opt] === null) {
+                        this[opt] = null;
+                    } else {
+                        console.error(`Option '${key}' is not valid`);
+                    };
+                }
+            }
+            if (this.minSpan && this.maxSpan && this.minSpan > this.maxSpan) {
+                this.minSpan = null;
+                this.maxSpan = null;
+                console.error(`Ignore option 'minSpan' and 'maxSpan', because 'minSpan' must be smaller than 'maxSpan'`);
+            }
+        }
 
-        if (typeof options.maxDate === 'object')
-            this.maxDate = moment(options.maxDate);
+        for (let opt of ['startDate', 'endDate', 'minDate', 'maxDate']) {
+            if (opt == 'endDate' && this.singleDatePicker)
+                continue;
+            if (typeof options[opt] === 'object') {
+                if (options[opt] instanceof DateTime && options[opt].isValid) {
+                    this[opt] = options[opt];
+                } else if (options[opt] instanceof Date) {
+                    this[opt] = DateTime.fromJSDate(options[opt]);
+                } else if (options[opt] === null) {
+                    this[opt] = null;
+                } else {
+                    console.error(`Option '${opt}' must be a luxon.DateTime or Date or string`);
+                }
+            } else if (typeof options[opt] === 'string') {
+                if (DateTime.fromISO(options[opt]).isValid) {
+                    this[opt] = DateTime.fromISO(options[opt]);
+                } else if (typeof this.locale.format === 'string' && DateTime.fromFormat(options[opt], this.locale.format).isValid) {
+                    this[opt] = DateTime.fromFormat(options[opt], this.locale.format);
+                } else {
+                    console.error(`Option '${opt}' is not a valid string`);
+                }
+            }
+        }
+        if (!this.timePicker) {
+            if (this.minDate)
+                this.minDate = this.minDate.startOf('day');
+            if (this.maxDate)
+                this.maxDate = this.maxDate.endOf('day');
+        } else {
+            const secs = this.timePickerStepSize.as('seconds');
+            if (this.minDate)
+                this.minDate = DateTime.fromSeconds(secs * Math.round(this[this.minDate].toSeconds() / secs));
+            if (this.maxDate)
+                this.maxDate = DateTime.fromSeconds(secs * Math.round(this[this.maxDate].toSeconds() / secs));
+        }
+        if (this.singleDatePicker)
+            this.endDate = this.startDate;
 
-        // sanity check for bad options
-        if (this.minDate && this.startDate.isBefore(this.minDate))
-            this.startDate = this.minDate.clone();
+        // Do some sanity checks on startDate for minDate, maxDate
+        if (this.minDate && this.startDate < this.minDate) {
+            if (this.timePicker) {
+                while (this.startDate < this.minDate)
+                    this.startDate = this.startDate.plus(this.timePickerStepSize);
+            } else {
+                this.startDate = this.minDate;
+            }
+            console.warn(`Set startDate to ${this.startDate.toISO()} due to 'minDate'`);
+        } else if (this.maxDate && this.startDate > this.maxDate) {
+            if (this.timePicker) {
+                while (this.startDate > this.minDate)
+                    this.startDate = this.startDate.minus(this.timePickerStepSize);
+            } else {
+                this.startDate = this.maxDate;
+            }
+            console.warn(`Set startDate to ${this.startDate.toISO()} due to 'maxDate'`);
+        }
 
-        // sanity check for bad options
-        if (this.maxDate && this.endDate.isAfter(this.maxDate))
-            this.endDate = this.maxDate.clone();
+        // Do some sanity checks on endDate for minDate, maxDate
+        if (!this.singleDatePicker) {
+            if (this.minDate && this.endDate < this.minDate) {
+                if (this.timePicker) {
+                    while (this.endDate < this.minDate)
+                        this.endDate = this.endDate.plus(this.timePickerStepSize);
+                } else {
+                    this.endDate = this.minDate;
+                }
+                console.warn(`Set endDate to ${this.endDate.toISO()} due to 'minDate'`);
+            } else if (this.maxDate && this.endDate > this.maxDate) {
+                if (this.timePicker) {
+                    while (this.endDate > this.minDate)
+                        this.endDate = this.endDate.minus(this.timePickerStepSize);
+                } else {
+                    this.endDate = this.maxDate;
+                }
+                console.warn(`Set endDate to ${this.endDate.toISO()} due to 'maxDate'`);
+            }
+        }
 
         if (typeof options.applyButtonClasses === 'string')
             this.applyButtonClasses = options.applyButtonClasses;
@@ -210,21 +338,6 @@
         if (typeof options.cancelClass === 'string') //backwards compat
             this.cancelButtonClasses = options.cancelClass;
 
-        if (typeof options.singleDatePicker === 'boolean') {
-            this.singleDatePicker = options.singleDatePicker;
-            if (this.singleDatePicker)
-                this.endDate = this.startDate.clone();
-        }
-
-        if (typeof options.maxSpan === 'object' && !this.singleDatePicker)
-            this.maxSpan = options.maxSpan;
-
-        if (typeof options.minSpan === 'object' && !this.singleDatePicker)
-            this.minSpan = options.minSpan;
-
-        if (typeof options.dateLimit === 'object' && !this.singleDatePicker) //backwards compat
-            this.maxSpan = options.dateLimit;
-
         if (typeof options.opens === 'string')
             this.opens = options.opens;
 
@@ -237,11 +350,11 @@
         if (typeof options.showISOWeekNumbers === 'boolean')
             this.showISOWeekNumbers = options.showISOWeekNumbers;
 
-        if (typeof options.buttonClasses === 'string')
+        if (Array.isArray(options.buttonClasses)) {
+            this.buttonClasses = options.buttonClasses.join(' ')
+        } else if (typeof options.buttonClasses === 'string') {
             this.buttonClasses = options.buttonClasses;
-
-        if (typeof options.buttonClasses === 'object')
-            this.buttonClasses = options.buttonClasses.join(' ');
+        }
 
         if (typeof options.showDropdowns === 'boolean')
             this.showDropdowns = options.showDropdowns;
@@ -254,25 +367,6 @@
 
         if (typeof options.showCustomRangeLabel === 'boolean')
             this.showCustomRangeLabel = options.showCustomRangeLabel;
-
-        if (typeof options.timePicker === 'boolean')
-            this.timePicker = options.timePicker;
-
-        if (typeof options.timePickerSeconds === 'boolean')
-            this.timePickerSeconds = options.timePickerSeconds;
-
-        // Use options.timePickerIncrement only for backward compatibility
-        if (typeof options.timePickerIncrement === 'number')
-            this.timePickerStepMinute = options.timePickerIncrement;
-        if (typeof options.timePickerStepHour === 'number')
-            this.timePickerStepHour = options.timePickerStepHour;
-        if (typeof options.timePickerStepMinute === 'number')
-            this.timePickerStepMinute = options.timePickerStepMinute;
-        if (typeof options.timePickerStepSecond === 'number')
-            this.timePickerStepSecond = options.timePickerStepSecond;
-
-        if (typeof options.timePicker24Hour === 'boolean')
-            this.timePicker24Hour = options.timePicker24Hour;
 
         if (typeof options.autoApply === 'boolean')
             this.autoApply = options.autoApply;
@@ -296,73 +390,127 @@
             this.alwaysShowCalendars = options.alwaysShowCalendars;
 
         // update day names order to firstDay
-        if (this.locale.firstDay != 0) {
-            var iterator = this.locale.firstDay;
-            while (iterator > 0) {
+        if (this.locale.firstDay != 1) {
+            let iterator = this.locale.firstDay;
+            while (iterator > 1) {
                 this.locale.daysOfWeek.push(this.locale.daysOfWeek.shift());
                 iterator--;
             }
         }
 
-        var start, end, range;
-
-        //if no start/end dates set, check if an input element contains initial values
+        //if no start/end dates set, check if the input element contains initial values
         if (typeof options.startDate === 'undefined' && typeof options.endDate === 'undefined') {
             if ($(this.element).is(':text')) {
-                var val = $(this.element).val(),
-                    split = val.split(this.locale.separator);
+                let start, end;
+                const val = $(this.element).val();
+                const split = val.split(this.locale.separator);
 
-                start = end = null;
-
+                const format = typeof this.locale.format === 'string' ? this.locale.format : DateTime.parseFormatForOpts(this.locale.format);
                 if (split.length == 2) {
-                    start = moment(split[0], this.locale.format);
-                    end = moment(split[1], this.locale.format);
+                    start = DateTime.fromFormat(split[0], format, { locale: DateTime.now().locale });
+                    end = DateTime.fromFormat(split[1], format, { locale: DateTime.now().locale });
                 } else if (this.singleDatePicker && val !== "") {
-                    start = moment(val, this.locale.format);
-                    end = moment(val, this.locale.format);
+                    start = DateTime.fromFormat(val, format, { locale: DateTime.now().locale });
+                    end = DateTime.fromFormat(val, format, { locale: DateTime.now().locale });
                 }
-                if (start !== null && end !== null) {
-                    this.setStartDate(start);
-                    this.setEndDate(end);
+
+                if (start && end && start.isValid && end.isValid) {
+                    this.setStartDate(start, false);
+                    this.setEndDate(end, false);
                 }
             }
         }
 
         if (!this.singleDatePicker && typeof options.ranges === 'object') {
-            for (range in options.ranges) {
-
-                if (typeof options.ranges[range][0] === 'string')
-                    start = moment(options.ranges[range][0], this.locale.format);
-                else
-                    start = moment(options.ranges[range][0]);
-
-                if (typeof options.ranges[range][1] === 'string')
-                    end = moment(options.ranges[range][1], this.locale.format);
-                else
-                    end = moment(options.ranges[range][1]);
-
-                // If the start or end date exceed those allowed by the minDate or maxSpan
-                // options, shorten the range to the allowable period.
-                if (this.minDate && start.isBefore(this.minDate))
-                    start = this.minDate.clone();
-
-                var maxDate = this.maxDate;
-                if (this.maxSpan && maxDate && start.clone().add(this.maxSpan).isAfter(maxDate))
-                    maxDate = start.clone().add(this.maxSpan);
-                if (maxDate && end.isAfter(maxDate))
-                    end = maxDate.clone();
-
-                // If the end date falls below those allowed by the minSpan
-                // option, expand the range to the allowable period.
-                if (this.minSpan && end.isBefore(start.clone().add(this.minSpan)))
-                    end = start.clone().add(this.minSpan);
-
-                // If the end of the range is before the minimum or the start of the range is
-                // after the maximum, don't display this range option at all.
-                // to do: No idea why it compares only day/minute. Simple earlier or later should be fine
-                if ((this.minDate && end.isBefore(this.minDate, this.timepicker ? 'minute' : 'day'))
-                    || (maxDate && start.isAfter(maxDate, this.timepicker ? 'minute' : 'day')))
+            // Process custom ranges
+            for (let range in options.ranges) {
+                let start, end;
+                if (['string', 'object'].includes(typeof options.ranges[range][0])) {
+                    if (options.ranges[range][0] instanceof DateTime && options.ranges[range][0].isValid) {
+                        start = options.ranges[range][0];
+                    } else if (typeof options.ranges[range][0] === 'string' && DateTime.fromISO(options.ranges[range][0]).isValid) {
+                        start = DateTime.fromISO(options.ranges[range][0]);
+                    } else {
+                        console.error(`Option 'ranges.${range}' is not a valid string or DateTime`);
+                    }
+                }
+                if (['string', 'object'].includes(typeof options.ranges[range][1])) {
+                    if (options.ranges[range][1] instanceof DateTime && options.ranges[range][1].isValid) {
+                        end = options.ranges[range][1];
+                    } else if (typeof options.ranges[range][1] === 'string' && DateTime.fromISO(options.ranges[range][1]).isValid) {
+                        end = DateTime.fromISO(options.ranges[range][1]);
+                    } else {
+                        console.error(`Option 'ranges.${range}' is not a valid string or DateTime`);
+                    }
+                }
+                if (start == null || end == null)
                     continue;
+
+                if (this.timePicker) {
+                    // Round time to step size                    
+                    const secs = this.timePickerStepSize.as('seconds');
+                    start = DateTime.fromSeconds(secs * Math.round(start.toSeconds() / secs));
+                    end = DateTime.fromSeconds(secs * Math.round(end.toSeconds() / secs));
+                }
+
+                // If the start falls below those allowed by the minDate option, shorten the range to the allowable period.
+                if (this.minDate && start < this.minDate) {
+                    if (this.timePicker) {
+                        while (start < this.minDate)
+                            start = start.plus(this.timePickerStepSize);
+                    } else {
+                        start = this.minDate;
+                    }
+                    console.warn(`Set start of range '${range}' to ${start.toISO()} due to 'minDate'`);
+                }
+
+                // If the end exceeds the maxDate option, shorten the range to the allowable period.
+                if (this.maxDate && end > this.maxDate) {
+                    if (this.timePicker) {
+                        while (end > this.minDate)
+                            end = end.minus(this.timePickerStepSize);
+                    } else {
+                        end = this.maxDate;
+                    }
+                    console.warn(`Set end of range '${range}' to ${end.toISO()} due to 'maxDate'`);
+                }
+
+                // As written in README.md minSpan and maxSpan are not evaluated.
+                // However, if someone may request it, then uncomment the block:
+                /*
+                if (this.maxSpan) {
+                    // If the end date exceeds those allowed by the maxSpan option, shorten the range to the allowable period.
+                    const maxDate = start.plus(this.maxSpan);
+                    if (end > maxDate) {
+                        if (this.timePicker) {
+                            while (end > maxDate)
+                                end = end.minus(this.timePickerStepSize);
+                        } else {
+                            end = maxDate;
+                        }
+                        console.warn(`Set end of range '${range}' to ${end.toISO()} due to 'maxSpan'`);
+                    }
+                }
+
+                if (this.minSpan) {
+                    // If the end date falls below those allowed by the minSpan option, expand the range to the allowable period.
+                    const minDate = start.plus(this.minSpan);
+                    if (end < minDate) {
+                        if (this.minDate && end > this.minDate) {
+                            console.warn(`Skip range '${range}' because option 'minDate' contradicts to option 'minSpan'`);
+                            continue;
+                        } else {
+                            if (this.timePicker) {
+                                while (end < minDate)
+                                    end = end.plus(this.timePickerStepSize);
+                            } else {
+                                end = minDate;
+                            }
+                            console.warn(`Set end of range '${range}' to ${end.toISO()} due to 'minSpan'`);
+                        }
+                    }
+                }
+                */
 
                 //Support unicode chars in the range names.
                 var elem = document.createElement('textarea');
@@ -381,6 +529,7 @@
             }
             list += '</ul>';
             this.container.find('.ranges').prepend(list);
+            this.container.addClass('show-ranges');
         }
 
         if (typeof cb === 'function') {
@@ -400,9 +549,6 @@
         if (this.autoApply) {
             this.container.addClass('auto-apply');
         }
-
-        if (typeof options.ranges === 'object')
-            this.container.addClass('show-ranges');
 
         if (this.singleDatePicker) {
             this.container.addClass('single');
@@ -443,7 +589,8 @@
             .on('change.daterangepicker', 'select.hourselect,select.minuteselect,select.secondselect,select.ampmselect', $.proxy(this.timeChanged, this));
 
         this.container.find('.ranges')
-            .on('click.daterangepicker', 'li', $.proxy(this.clickRange, this));
+            .on('click.daterangepicker', 'li', $.proxy(this.clickRange, this))
+            .on('mouseenter.daterangepicker', 'li', $.proxy(this.hoverRange, this));
 
         this.container.find('.drp-buttons')
             .on('click.daterangepicker', 'button.applyBtn', $.proxy(this.clickApply, this))
@@ -473,42 +620,58 @@
 
         constructor: DateRangePicker,
 
-        setStartDate: function (startDate) {
-            console.log('In setStartDate')
-            if (typeof startDate === 'string')
-                this.startDate = moment(startDate, this.locale.format);
-
-            if (typeof startDate === 'object')
-                this.startDate = moment(startDate);
-
-            if (!this.timePicker)
-                this.startDate = this.startDate.startOf('day');
-
-            if (this.timePicker && this.timePickerStepHour)
-                this.startDate.hour(Math.round(this.startDate.hour() / this.timePickerStepHour) * this.timePickerStepHour);
-            if (this.timePicker && this.timePickerStepMinute)
-                this.startDate.minute(Math.round(this.startDate.minute() / this.timePickerStepMinute) * this.timePickerStepMinute);
-            if (this.timePicker && this.timePickerStepSecond)
-                this.startDate.second(Math.round(this.startDate.second() / this.timePickerStepSecond) * this.timePickerStepSecond);
-
-            if (this.minDate && this.startDate.isBefore(this.minDate)) {
-                this.startDate = this.minDate.clone();
-                if (this.timePicker && this.timePickerStepHour)
-                    this.startDate.hour(Math.round(this.startDate.hour() / this.timePickerStepHour) * this.timePickerStepHour);
-                if (this.timePicker && this.timePickerStepHour)
-                    this.startDate.minute(Math.round(this.startDate.minute() / this.timePickerStepMinute) * this.timePickerStepMinute);
-                if (this.timePicker && this.timePickerStepSecond)
-                    this.startDate.second(Math.round(this.startDate.second() / this.timePickerStepSecond) * this.timePickerStepSecond);
+        setStartDate: function (startDate, isValid) {
+            // If isValid == true, then value is selected from calendar and stepSize, minDate, maxDate are already considered
+            if (isValid === undefined || !isValid) {
+                if (typeof startDate === 'object') {
+                    if (startDate instanceof DateTime && startDate.isValid) {
+                        this.startDate = startDate;
+                    } else if (startDate instanceof Date) {
+                        this.startDate = DateTime.fromJSDate(startDate);
+                    } else {
+                        throw RangeError(`Option '${key}' must be a luxon.DateTime or Date or string`);
+                    }
+                } else if (typeof startDate === 'string') {
+                    const format = typeof this.locale.format === 'string' ? this.locale.format : DateTime.parseFormatForOpts(this.locale.format);
+                    if (DateTime.fromISO(startDate).isValid) {
+                        this.startDate = DateTime.fromISO(startDate);
+                    } else if (DateTime.fromFormat(startDate, format, { locale: DateTime.now().locale }).isValid) {
+                        this.startDate = DateTime.fromFormat(startDate, format, { locale: DateTime.now().locale });
+                    } else {
+                        throw RangeError(`Option '${key}' is not a valid string`);
+                    }
+                }
+            } else {
+                this.startDate = startDate;
             }
 
-            if (this.maxDate && this.startDate.isAfter(this.maxDate)) {
-                this.startDate = this.maxDate.clone();
-                if (this.timePicker && this.timePickerStepHour)
-                    this.startDate.hour(Math.floor(this.startDate.hour() / this.timePickerStepHour) * this.timePickerStepHour);
-                if (this.timePicker && this.timePickerStepMinute)
-                    this.startDate.minute(Math.floor(this.startDate.minute() / this.timePickerStepMinute) * this.timePickerStepMinute);
-                if (this.timePicker && this.timePickerStepSecond)
-                    this.startDate.second(Math.floor(this.startDate.second() / this.timePickerStepSecond) * this.timePickerStepSecond);
+            if (isValid === undefined || !isValid) {
+                if (this.timePicker) {
+                    // Round time to step size
+                    const secs = this.timePickerStepSize.as('seconds');
+                    this.startDate = DateTime.fromSeconds(secs * Math.round(this.startDate.toSeconds() / secs));
+                } else {
+                    this.startDate = this.startDate.startOf('day');
+                }
+
+                // Do some sanity checks on minDate, maxDate
+                if (this.minDate && this.startDate < this.minDate) {
+                    if (this.timePicker) {
+                        while (this.startDate < this.minDate)
+                            this.startDate = this.startDate.plus(this.timePickerStepSize);
+                    } else {
+                        this.startDate = this.minDate;
+                    }
+                    console.warn(`Set startDate to ${this.startDate.toISO()} due to 'minDate'`);
+                } else if (this.maxDate && this.startDate > this.maxDate) {
+                    if (this.timePicker) {
+                        while (this.startDate > this.minDate)
+                            this.startDate = this.startDate.minus(this.timePickerStepSize);
+                    } else {
+                        this.startDate = this.maxDate.startOf('day');
+                    }
+                    console.warn(`Set startDate to ${this.startDate.toISO()} due to 'maxDate'`);
+                }
             }
 
             if (!this.isShowing)
@@ -517,38 +680,108 @@
             this.updateMonthsInView();
         },
 
-        setEndDate: function (endDate) {
-            if (typeof endDate === 'string')
-                this.endDate = moment(endDate, this.locale.format);
+        setEndDate: function (endDate, isValid) {
+            // If isValid == true, then value is selected from calendar and stepSize, minDate, maxDate are already considered
+            if (isValid === undefined || !isValid) {
+                if (typeof endDate === 'object') {
+                    if (endDate instanceof DateTime && endDate.isValid) {
+                        this.endDate = endDate;
+                    } else if (endDate instanceof Date) {
+                        this.endDate = DateTime.fromJSDate(endDate);
+                    } else {
+                        throw RangeError(`Option '${key}' must be a luxon.DateTime or Date or string`);
+                    }
+                } else if (typeof endDate === 'string') {
+                    const format = typeof this.locale.format === 'string' ? this.locale.format : DateTime.parseFormatForOpts(this.locale.format);
+                    if (DateTime.fromISO(endDate).isValid) {
+                        this.endDate = DateTime.fromISO(endDate);
+                    } else if (DateTime.fromFormat(endDate, format, { locale: DateTime.now().locale }).isValid) {
+                        this.endDate = DateTime.fromFormat(endDate, format, { locale: DateTime.now().locale });
+                    } else {
+                        throw RangeError(`Option '${key}' is not a valid string`);
+                    }
+                }
+            } else {
+                this.endDate = endDate;
+            }
 
-            if (typeof endDate === 'object')
-                this.endDate = moment(endDate);
+            if (isValid === undefined || !isValid) {
+                if (this.timePicker) {
+                    // Round time to step size
+                    const secs = this.timePickerStepSize.as('seconds');
+                    this.endDate = DateTime.fromSeconds(secs * Math.round(this.endDate.toSeconds() / secs));
+                } else {
+                    this.endDate = this.endDate.endOf('day');
+                }
 
-            if (!this.timePicker)
-                this.endDate = this.endDate.endOf('day');
+                // Do some sanity checks on minDate, maxDate
+                if (this.minDate && this.endDate < this.minDate) {
+                    if (this.timePicker) {
+                        while (this.endDate < this.minDate)
+                            this.endDate = this.endDate.plus(this.timePickerStepSize);
+                    } else {
+                        this.endDate = this.minDate;
+                    }
+                    console.warn(`Set endDate to ${this.endDate.toISO()} due to 'minDate'`);
+                } else if (this.maxDate && this.endDate > this.maxDate) {
+                    if (this.timePicker) {
+                        while (this.endDate > this.minDate)
+                            this.endDate = this.endDate.minus(this.timePickerStepSize);
+                    } else {
+                        this.endDate = this.maxDate.endOf('day');
+                    }
+                    console.warn(`Set endDate to ${this.endDate.toISO()} due to 'maxDate'`);
+                }
 
-            if (this.timePicker && this.timePickerStepHour)
-                this.endDate.hour(Math.round(this.endDate.hour() / this.timePickerStepHour) * this.timePickerStepHour);
-            if (this.timePicker && this.timePickerStepMinute)
-                this.endDate.minute(Math.round(this.endDate.minute() / this.timePickerStepMinute) * this.timePickerStepMinute);
-            if (this.timePicker && this.timePickerStepSecond)
-                this.endDate.second(Math.round(this.endDate.second() / this.timePickerStepSecond) * this.timePickerStepSecond);
+                if (this.maxSpan) {
+                    // If the end date exceeds those allowed by the maxSpan option, shorten the range to the allowable period.
+                    const maxDate = this.startDate.plus(this.maxSpan);
+                    if (this.endDate > maxDate) {
+                        if (this.timePicker) {
+                            while (this.endDate > maxDate)
+                                this.endDate = this.endDate.minus(this.timePickerStepSize);
+                        } else {
+                            this.endDate = maxDate.endOf('day');
+                        }
+                        console.warn(`Set endDate to ${this.endDate.toISO()} due to 'maxSpan'`);
+                    }
+                }
 
-            if (this.endDate.isBefore(this.startDate))
-                this.endDate = this.startDate.clone();
+                if (this.minSpan) {
+                    // If the end date falls below those allowed by the minSpan option, expand the range to the allowable period.
+                    const minDate = this.startDate.plus(this.minSpan);
+                    if (this.endDate < minDate) {
+                        if (this.minDate && this.endDate > this.minDate) {
+                            throw RangeError(`Option 'minDate' contradicts to option 'minSpan'`);
+                        } else {
+                            if (this.timePicker) {
+                                while (this.endDate < minDate)
+                                    this.endDate = this.endDate.plus(this.timePickerStepSize);
+                            } else {
+                                this.endDate = minDate.endOf('day');
+                            }
+                            console.warn(`Set endDate to ${this.endDate.toISO()} due to 'minSpan'`);
+                        }
+                    }
+                }
 
-            if (this.maxSpan && this.startDate.clone().add(this.maxSpan).isBefore(this.endDate))
-                this.endDate = this.startDate.clone().add(this.maxSpan);
+            }
 
-            if (this.minSpan && this.endDate.isBefore(this.startDate.clone().add(this.minSpan)))
-                this.endDate = this.startDate.clone().add(this.minSpan);
+            this.previousRightTime = this.endDate;
 
-            if (this.maxDate && this.endDate.isAfter(this.maxDate))
-                this.endDate = this.maxDate.clone();
-
-            this.previousRightTime = this.endDate.clone();
-
-            this.container.find('.drp-selected').html(this.startDate.format(this.locale.format) + this.locale.separator + this.endDate.format(this.locale.format));
+            if (this.locale.durationLabel && !this.singleDatePicker) {
+                const duration = this.endDate.diff(this.startDate).rescale();
+                if (typeof this.locale.durationLabel === 'object') {
+                    this.container.find('.drp-duration-label').html(duration.toHuman(this.locale.durationLabel));
+                } else {
+                    this.container.find('.drp-duration-label').html(duration.toFormat(this.locale.durationLabel));
+                }
+            }
+            if (typeof this.locale.format === 'object') {
+                this.container.find('.drp-selected').html(this.startDate.toLocaleString(this.locale.format) + this.locale.separator + this.endDate.toLocaleString(this.locale.format));
+            } else {
+                this.container.find('.drp-selected').html(this.startDate.toFormat(this.locale.format) + this.locale.separator + this.endDate.toFormat(this.locale.format));
+            }
 
             if (!this.isShowing)
                 this.updateElement();
@@ -557,22 +790,11 @@
         },
 
         setPeriod: function (startDate, endDate) {
-            let start, end;
-
-            if (typeof startDate === 'string')
-                start = moment(startDate, this.locale.format);
-            if (typeof startDate === 'object')
-                start = moment(startDate);
-            if (typeof endDate === 'string')
-                end = moment(endDate, this.locale.format);
-            if (typeof endDate === 'object')
-                end = moment(endDate);
-
             if (this.singleDatePicker) {
-                this.setStartDate(start);
+                this.setStartDate(startDate, false);
             } else {
-                this.setStartDate(start);
-                this.setEndDate(end);
+                this.setStartDate(startDate, false);
+                this.setEndDate(endDate, false);
             }
         },
 
@@ -589,7 +811,6 @@
         },
 
         updateView: function () {
-            console.log('In updateView');
             if (this.timePicker) {
                 this.renderTimePicker('left');
                 this.renderTimePicker('right');
@@ -599,8 +820,21 @@
                     this.container.find('.right .calendar-time select').prop('disabled', false).removeClass('disabled');
                 }
             }
-            if (this.endDate)
-                this.container.find('.drp-selected').html(this.startDate.format(this.locale.format) + this.locale.separator + this.endDate.format(this.locale.format));
+            if (this.endDate) {
+                if (this.locale.durationLabel && !this.singleDatePicker) {
+                    const duration = this.endDate.diff(this.startDate).rescale();
+                    if (typeof this.locale.durationLabel === 'object') {
+                        this.container.find('.drp-duration-label').html(duration.toHuman(this.locale.durationLabel));
+                    } else {
+                        this.container.find('.drp-duration-label').html(duration.toFormat(this.locale.durationLabel));
+                    }
+                }
+                if (typeof this.locale.format === 'object') {
+                    this.container.find('.drp-selected').html(this.startDate.toLocaleString(this.locale.format) + this.locale.separator + this.endDate.toLocaleString(this.locale.format));
+                } else {
+                    this.container.find('.drp-selected').html(this.startDate.toFormat(this.locale.format) + this.locale.separator + this.endDate.toFormat(this.locale.format));
+                }
+            }
             this.updateMonthsInView();
             this.updateCalendars();
             this.updateFormInputs();
@@ -608,32 +842,29 @@
 
         updateMonthsInView: function () {
             if (this.endDate) {
-
                 //if both dates are visible already, do nothing
-                if (!this.singleDatePicker && this.leftCalendar.month && this.rightCalendar.month &&
-                    (this.startDate.format('YYYY-MM') == this.leftCalendar.month.format('YYYY-MM') || this.startDate.format('YYYY-MM') == this.rightCalendar.month.format('YYYY-MM'))
-                    &&
-                    (this.endDate.format('YYYY-MM') == this.leftCalendar.month.format('YYYY-MM') || this.endDate.format('YYYY-MM') == this.rightCalendar.month.format('YYYY-MM'))
-                ) {
+                if (!this.singleDatePicker
+                    && this.leftCalendar.month && this.rightCalendar.month
+                    && (this.startDate.hasSame(this.leftCalendar.month, 'month') || this.startDate.hasSame(this.rightCalendar.month, 'month'))
+                    && (this.endDate.hasSame(this.leftCalendar.month, 'month') || this.endDate.hasSame(this.rightCalendar.month, 'month'))
+                )
                     return;
-                }
 
-                this.leftCalendar.month = this.startDate.clone().date(2);
-                if (!this.linkedCalendars && (this.endDate.month() != this.startDate.month() || this.endDate.year() != this.startDate.year())) {
-                    this.rightCalendar.month = this.endDate.clone().date(2);
+                this.leftCalendar.month = this.startDate.startOf('month');
+                if (!this.linkedCalendars && !this.endDate.hasSame(this.startDate, 'month')) {
+                    this.rightCalendar.month = this.endDate.startOf('month');
                 } else {
-                    this.rightCalendar.month = this.startDate.clone().date(2).add(1, 'month');
+                    this.rightCalendar.month = this.startDate.startOf('month').plus({ month: 1 });
                 }
-
             } else {
-                if (this.leftCalendar.month.format('YYYY-MM') != this.startDate.format('YYYY-MM') && this.rightCalendar.month.format('YYYY-MM') != this.startDate.format('YYYY-MM')) {
-                    this.leftCalendar.month = this.startDate.clone().date(2);
-                    this.rightCalendar.month = this.startDate.clone().date(2).add(1, 'month');
+                if (!this.leftCalendar.month.hasSame(this.startDate, 'month') && !this.rightCalendar.month.hasSame(this.startDate, 'month')) {
+                    this.leftCalendar.month = this.startDate.startOf('month');
+                    this.rightCalendar.month = this.startDate.startOf('month').plus({ month: 1 });
                 }
             }
             if (this.maxDate && this.linkedCalendars && !this.singleDatePicker && this.rightCalendar.month > this.maxDate) {
-                this.rightCalendar.month = this.maxDate.clone().date(2);
-                this.leftCalendar.month = this.maxDate.clone().date(2).subtract(1, 'month');
+                this.rightCalendar.month = this.maxDate.startOf('month');
+                this.leftCalendar.month = this.maxDate.startOf('month').minus({ month: 1 });
             }
         },
 
@@ -641,18 +872,27 @@
 
             if (this.timePicker) {
                 var hour, minute, second;
+
+                const showMinutes = this.timePickerStepSize < Duration.fromObject({ hours: 1 });
+                const showSeconds = this.timePickerStepSize < Duration.fromObject({ minutes: 1 });
                 if (this.endDate) {
                     hour = parseInt(this.container.find('.left .hourselect').val(), 10);
                     if (isNaN(hour))
                         hour = parseInt(this.container.find('.left .hourselect option:last').val(), 10);
 
-                    minute = parseInt(this.container.find('.left .minuteselect').val(), 10);
-                    if (isNaN(minute))
-                        minute = parseInt(this.container.find('.left .minuteselect option:last').val(), 10);
+                    minute = 0;
+                    if (showMinutes) {
+                        minute = parseInt(this.container.find('.left .minuteselect').val(), 10);
+                        if (isNaN(minute))
+                            minute = parseInt(this.container.find('.left .minuteselect option:last').val(), 10);
+                    }
 
-                    second = this.timePickerSeconds ? parseInt(this.container.find('.left .secondselect').val(), 10) : 0;
-                    if (isNaN(second))
-                        second = parseInt(this.container.find('.left .secondselect option:last').val(), 10);
+                    second = 0;
+                    if (showSeconds) {
+                        second = parseInt(this.container.find('.left .secondselect').val(), 10);
+                        if (isNaN(second))
+                            second = parseInt(this.container.find('.left .secondselect option:last').val(), 10);
+                    }
                     if (!this.timePicker24Hour) {
                         var ampm = this.container.find('.left .ampmselect').val();
                         if (ampm === 'PM' && hour < 12)
@@ -665,13 +905,19 @@
                     if (isNaN(hour))
                         hour = parseInt(this.container.find('.right .hourselect option:last').val(), 10);
 
-                    minute = parseInt(this.container.find('.right .minuteselect').val(), 10);
-                    if (isNaN(minute))
-                        minute = parseInt(this.container.find('.right .minuteselect option:last').val(), 10);
+                    minute = 0;
+                    if (showMinutes) {
+                        minute = parseInt(this.container.find('.right .minuteselect').val(), 10);
+                        if (isNaN(minute))
+                            minute = parseInt(this.container.find('.right .minuteselect option:last').val(), 10);
+                    }
 
-                    second = this.timePickerSeconds ? parseInt(this.container.find('.right .secondselect').val(), 10) : 0;
-                    if (isNaN(second))
-                        second = parseInt(this.container.find('.right .secondselect option:last').val(), 10);
+                    second = 0;
+                    if (showSeconds) {
+                        second = parseInt(this.container.find('.right .secondselect').val(), 10);
+                        if (isNaN(second))
+                            second = parseInt(this.container.find('.right .secondselect option:last').val(), 10);
+                    }
 
                     if (!this.timePicker24Hour) {
                         var ampm = this.container.find('.right .ampmselect').val();
@@ -681,8 +927,8 @@
                             hour = 0;
                     }
                 }
-                this.leftCalendar.month.hour(hour).minute(minute).second(second);
-                this.rightCalendar.month.hour(hour).minute(minute).second(second);
+                this.leftCalendar.month = this.leftCalendar.month.set({ hour: hour, minute: minute, second: second });
+                this.rightCalendar.month = this.rightCalendar.month.set({ hour: hour, minute: minute, second: second });
             }
 
             this.renderCalendar('left');
@@ -702,55 +948,35 @@
             //
 
             var calendar = side == 'left' ? this.leftCalendar : this.rightCalendar;
-            var month = calendar.month.month();
-            var year = calendar.month.year();
-            var hour = calendar.month.hour();
-            var minute = calendar.month.minute();
-            var second = calendar.month.second();
-            var daysInMonth = moment([year, month]).daysInMonth();
-            var firstDay = moment([year, month, 1]);
-            var lastDay = moment([year, month, daysInMonth]);
-            var lastMonth = moment(firstDay).subtract(1, 'month').month();
-            var lastYear = moment(firstDay).subtract(1, 'month').year();
-            var daysInLastMonth = moment([lastYear, lastMonth]).daysInMonth();
-            var dayOfWeek = firstDay.day();
+            const firstDay = calendar.month.startOf('month');
+            const lastDay = calendar.month.endOf('month').startOf('day');
+            var theDate = calendar.month.startOf('month').minus({ day: 1 });
 
             //initialize a 6 rows x 7 columns array for the calendar
             var calendar = [];
             calendar.firstDay = firstDay;
             calendar.lastDay = lastDay;
 
-            for (var i = 0; i < 6; i++) {
+            for (var i = 0; i < 6; i++)
                 calendar[i] = [];
-            }
 
-            //populate the calendar with date objects
-            var startDay = daysInLastMonth - dayOfWeek + this.locale.firstDay + 1;
-            if (startDay > daysInLastMonth)
-                startDay -= 7;
+            // compute the startDay in month            
+            while (theDate.weekday != this.locale.firstDay)
+                theDate = theDate.minus({ day: 1 });
 
-            if (dayOfWeek == this.locale.firstDay)
-                startDay = daysInLastMonth - 6;
-
-            var curDate = moment([lastYear, lastMonth, startDay, 12, minute, second]);
-
-            var col, row;
-            for (var i = 0, col = 0, row = 0; i < 42; i++, col++, curDate = moment(curDate).add(24, 'hour')) {
+            var row, col;
+            for (let i = 0, col = 0, row = 0; i < 42; i++, col++, theDate = theDate.plus({ day: 1 })) {
                 if (i > 0 && col % 7 === 0) {
                     col = 0;
                     row++;
                 }
-                calendar[row][col] = curDate.clone().hour(hour).minute(minute).second(second);
-                curDate.hour(12);
+                calendar[row][col] = theDate;
 
-                if (this.minDate && calendar[row][col].format('YYYY-MM-DD') == this.minDate.format('YYYY-MM-DD') && calendar[row][col].isBefore(this.minDate) && side == 'left') {
-                    calendar[row][col] = this.minDate.clone();
-                }
+                if (this.minDate && calendar[row][col].hasSame(this.minDate, 'month') && calendar[row][col] < this.minDate && side == 'left')
+                    calendar[row][col] = this.minDate;
 
-                if (this.maxDate && calendar[row][col].format('YYYY-MM-DD') == this.maxDate.format('YYYY-MM-DD') && calendar[row][col].isAfter(this.maxDate) && side == 'right') {
-                    calendar[row][col] = this.maxDate.clone();
-                }
-
+                if (this.maxDate && calendar[row][col].hasSame(this.maxDate, 'month') && calendar[row][col] > this.maxDate && side == 'right')
+                    calendar[row][col] = this.maxDate;
             }
 
             //make the calendar object available to hoverDate/clickDate
@@ -777,25 +1003,25 @@
             if (this.showWeekNumbers || this.showISOWeekNumbers)
                 html += '<th></th>';
 
-            if ((!minDate || minDate.isBefore(calendar.firstDay)) && (!this.linkedCalendars || side == 'left')) {
+            if ((!minDate || minDate < calendar.firstDay) && (!this.linkedCalendars || side == 'left')) {
                 html += '<th class="prev available"><span></span></th>';
             } else {
                 html += '<th></th>';
             }
 
-            var dateHtml = this.locale.monthNames[calendar[1][1].month()] + calendar[1][1].format(" YYYY");
+            var dateHtml = this.locale.monthNames[calendar[1][1].month] + calendar[1][1].toFormat(" yyyy");
 
             if (this.showDropdowns) {
-                var currentMonth = calendar[1][1].month();
-                var currentYear = calendar[1][1].year();
-                var maxYear = (maxDate && maxDate.year()) || (this.maxYear);
-                var minYear = (minDate && minDate.year()) || (this.minYear);
+                var currentMonth = calendar[1][1].month;
+                var currentYear = calendar[1][1].year;
+                var maxYear = (maxDate && maxDate.year) || (this.maxYear);
+                var minYear = (minDate && minDate.year) || (this.minYear);
                 var inMinYear = currentYear == minYear;
                 var inMaxYear = currentYear == maxYear;
 
                 var monthHtml = '<select class="monthselect">';
                 for (var m = 0; m < 12; m++) {
-                    if ((!inMinYear || (minDate && m >= minDate.month())) && (!inMaxYear || (maxDate && m <= maxDate.month()))) {
+                    if ((!inMinYear || (minDate && m >= minDate.month)) && (!inMaxYear || (maxDate && m <= maxDate.month))) {
                         monthHtml += "<option value='" + m + "'" +
                             (m === currentMonth ? " selected='selected'" : "") +
                             ">" + this.locale.monthNames[m] + "</option>";
@@ -819,7 +1045,7 @@
             }
 
             html += '<th colspan="5" class="month">' + dateHtml + '</th>';
-            if ((!maxDate || maxDate.isAfter(calendar.lastDay)) && (!this.linkedCalendars || side == 'right' || this.singleDatePicker)) {
+            if ((!maxDate || maxDate > calendar.lastDay.endOf('day')) && (!this.linkedCalendars || side == 'right' || this.singleDatePicker)) {
                 html += '<th class="next available"><span></span></th>';
             } else {
                 html += '<th></th>';
@@ -833,7 +1059,7 @@
                 html += '<th class="week">' + this.locale.weekLabel + '</th>';
 
             $.each(this.locale.daysOfWeek, function (index, dayOfWeek) {
-                if ([5, 6].includes(index)) {
+                if (Info.getWeekendWeekdays().includes(index + 1)) {
                     //highlight weekend day
                     html += '<th class="weekend-day">' + dayOfWeek + '</th>';
                 } else {
@@ -848,8 +1074,8 @@
             //adjust maxDate to reflect the maxSpan setting in order to
             //grey out end dates beyond the maxSpan
             if (this.endDate == null && this.maxSpan) {
-                var maxLimit = this.startDate.clone().add(this.maxSpan).endOf('day');
-                if (!maxDate || maxLimit.isBefore(maxDate)) {
+                var maxLimit = this.startDate.plus(this.maxSpan).endOf('day');
+                if (!maxDate || maxLimit < maxDate) {
                     maxDate = maxLimit;
                 }
             }
@@ -857,43 +1083,43 @@
             var minLimit;
             //grey out end dates shorter than minSpan
             if (this.endDate == null && this.minSpan)
-                minLimit = this.startDate.clone().add(this.minSpan).startOf('day');
+                minLimit = this.startDate.plus(this.minSpan).startOf('day');
 
             for (var row = 0; row < 6; row++) {
                 html += '<tr>';
 
                 // add week number
                 if (this.showWeekNumbers)
-                    html += '<td class="week">' + calendar[row][0].week() + '</td>';
+                    html += '<td class="week">' + calendar[row][0].localWeekNumber + '</td>';
                 else if (this.showISOWeekNumbers)
-                    html += '<td class="week">' + calendar[row][0].isoWeek() + '</td>';
+                    html += '<td class="week">' + calendar[row][0].weekNumber + '</td>';
 
                 for (var col = 0; col < 7; col++) {
 
                     var classes = [];
 
                     //highlight today's date
-                    if (calendar[row][col].isSame(new Date(), "day"))
+                    if (calendar[row][col].hasSame(DateTime.now(), 'day'))
                         classes.push('today');
 
                     //highlight weekends
-                    if (calendar[row][col].isoWeekday() > 5)
+                    if (Info.getWeekendWeekdays().includes(calendar[row][col].weekday))
                         classes.push('weekend');
 
                     //grey out the dates in other months displayed at beginning and end of this calendar
-                    if (calendar[row][col].month() != calendar[1][1].month())
+                    if (calendar[row][col].month != calendar[1][1].month)
                         classes.push('off', 'ends');
 
                     //don't allow selection of dates before the minimum date
-                    if (this.minDate && calendar[row][col].isBefore(this.minDate, 'day'))
+                    if (this.minDate && calendar[row][col].startOf('day') < this.minDate.startOf('day'))
                         classes.push('off', 'disabled');
 
                     //don't allow selection of dates after the maximum date
-                    if (maxDate && calendar[row][col].isAfter(maxDate, 'day'))
+                    if (maxDate && calendar[row][col].startOf('day') > maxDate.startOf('day'))
                         classes.push('off', 'disabled');
 
                     //don't allow selection of dates before the minimun span
-                    if (minLimit && calendar[row][col].isAfter(this.startDate, 'day') && calendar[row][col].isBefore(minLimit, 'day'))
+                    if (minLimit && calendar[row][col].startOf('day') > this.startDate.startOf('day') && calendar[row][col].startOf('day') < minLimit.startOf('day'))
                         classes.push('off', 'disabled');
 
                     //don't allow selection of date if a custom function decides it's invalid
@@ -901,11 +1127,11 @@
                         classes.push('off', 'disabled');
 
                     //highlight the currently selected start date
-                    if (calendar[row][col].format('YYYY-MM-DD') == this.startDate.format('YYYY-MM-DD'))
+                    if (calendar[row][col].hasSame(this.startDate, 'day'))
                         classes.push('active', 'start-date');
 
                     //highlight the currently selected end date
-                    if (this.endDate != null && calendar[row][col].format('YYYY-MM-DD') == this.endDate.format('YYYY-MM-DD'))
+                    if (this.endDate != null && calendar[row][col].hasSame(this.endDate, 'day'))
                         classes.push('active', 'end-date');
 
                     //highlight dates in-between the selected dates
@@ -930,7 +1156,7 @@
                     if (!disabled)
                         cname += 'available';
 
-                    html += '<td class="' + cname.replace(/^\s+|\s+$/g, '') + '" data-title="' + 'r' + row + 'c' + col + '">' + calendar[row][col].date() + '</td>';
+                    html += '<td class="' + cname.replace(/^\s+|\s+$/g, '') + '" data-title="' + 'r' + row + 'c' + col + '">' + calendar[row][col].day + '</td>';
 
                 }
                 html += '</tr>';
@@ -951,43 +1177,50 @@
 
             var html, selected, minLimit, minDate, maxDate = this.maxDate;
 
-            if (this.maxSpan && (!this.maxDate || this.startDate.clone().add(this.maxSpan).isBefore(this.maxDate)))
-                maxDate = this.startDate.clone().add(this.maxSpan);
+            if (this.maxSpan && (!this.maxDate || this.startDate.plus(this.maxSpan) < this.maxDate))
+                maxDate = this.startDate.plus(this.maxSpan);
+
             if (this.minSpan && side == 'right')
-                minLimit = this.startDate.clone().add(this.minSpan);
+                minLimit = this.startDate.plus(this.minSpan);
 
             if (side == 'left') {
-                selected = this.startDate.clone();
+                selected = this.startDate;
                 minDate = this.minDate;
             } else if (side == 'right') {
-                selected = this.endDate.clone();
+                selected = this.endDate;
                 minDate = this.startDate;
 
                 //Preserve the time already selected
                 var timeSelector = this.container.find('.drp-calendar.right .calendar-time');
                 if (timeSelector.html() != '') {
-
-                    selected.hour(!isNaN(selected.hour()) ? selected.hour() : timeSelector.find('.hourselect option:selected').val());
-                    selected.minute(!isNaN(selected.minute()) ? selected.minute() : timeSelector.find('.minuteselect option:selected').val());
-                    selected.second(!isNaN(selected.second()) ? selected.second() : timeSelector.find('.secondselect option:selected').val());
+                    selected.set({ hour: !isNaN(selected.hour) ? selected.hour : timeSelector.find('.hourselect option:selected').val() });
+                    selected.set({ minute: !isNaN(selected.minute) ? selected.minute : timeSelector.find('.minuteselect option:selected').val() });
+                    selected.set({ second: !isNaN(selected.second) ? selected.second : timeSelector.find('.secondselect option:selected').val() });
 
                     if (!this.timePicker24Hour) {
                         var ampm = timeSelector.find('.ampmselect option:selected').val();
-                        if (ampm === 'PM' && selected.hour() < 12)
-                            selected.hour(selected.hour() + 12);
-                        if (ampm === 'AM' && selected.hour() === 12)
-                            selected.hour(0);
+                        if (ampm === 'PM' && selected.hour < 12)
+                            selected.set({ hour: selected.hour + 12 });
+                        if (ampm === 'AM' && selected.hour === 12)
+                            selected.set({ hour: 0 });
                     }
 
                 }
 
-                if (selected.isBefore(this.startDate))
-                    selected = this.startDate.clone();
+                if (selected < this.startDate)
+                    selected = this.startDate;
 
-                if (maxDate && selected.isAfter(maxDate))
-                    selected = maxDate.clone();
-
+                if (maxDate && selected > maxDate)
+                    selected = maxDate;
             }
+
+            const opts = {
+                showMinutes: this.timePickerStepSize < Duration.fromObject({ hours: 1 }),
+                showSeconds: this.timePickerStepSize < Duration.fromObject({ minutes: 1 }),
+                hourStep: this.timePickerStepSize >= Duration.fromObject({ hours: 1 }) ? this.timePickerStepSize.hours : 1,
+                minuteStep: this.timePickerStepSize >= Duration.fromObject({ minutes: 1 }) ? this.timePickerStepSize.minutes : 1,
+                secondStep: this.timePickerStepSize.seconds
+            };
 
             //
             // hours
@@ -998,23 +1231,23 @@
             var start = this.timePicker24Hour ? 0 : 1;
             var end = this.timePicker24Hour ? 23 : 12;
 
-            for (var i = start; i <= end; i += this.timePickerStepHour) {
+            for (var i = start; i <= end; i += opts.hourStep) {
                 var i_in_24 = i;
                 if (!this.timePicker24Hour)
-                    i_in_24 = selected.hour() >= 12 ? (i == 12 ? 12 : i + 12) : (i == 12 ? 0 : i);
+                    i_in_24 = selected.hour >= 12 ? (i == 12 ? 12 : i + 12) : (i == 12 ? 0 : i);
 
-                var time = selected.clone().hour(i_in_24);
+                var time = selected.set({ hour: i_in_24 });
                 var disabled = false;
-                if (minDate && time.minute(59).isBefore(minDate))
+                if (minDate && time.set({ minute: 59 }) < minDate)
                     disabled = true;
-                if (maxDate && time.minute(0).isAfter(maxDate))
+                if (maxDate && time.set({ minute: 0 }) > maxDate)
                     disabled = true;
-                if (minLimit && time.minute(59).isBefore(minLimit))
+                if (minLimit && time.endOf('hour') < minLimit)
                     disabled = true;
                 if (!disabled && this.isInvalidTime(time, this.singleDatePicker ? null : (side == 'left' ? 'start' : 'end'), 'hour'))
                     disabled = true;
 
-                if (i_in_24 == selected.hour() && !disabled) {
+                if (i_in_24 == selected.hour && !disabled) {
                     html += '<option value="' + i + '" selected="selected">' + i + '</option>';
                 } else if (disabled) {
                     html += '<option value="' + i + '" disabled="disabled" class="disabled">' + i + '</option>';
@@ -1029,55 +1262,57 @@
             // minutes
             //
 
-            html += ': <select class="minuteselect">';
+            if (opts.showMinutes) {
+                html += ': <select class="minuteselect">';
 
-            for (var i = 0; i < 60; i += this.timePickerStepMinute) {
-                var padded = i < 10 ? '0' + i : i;
-                var time = selected.clone().minute(i);
+                for (var i = 0; i < 60; i += opts.minuteStep) {
+                    var padded = i < 10 ? '0' + i : i;
+                    var time = selected.set({ minute: i });
 
-                var disabled = false;
-                if (minDate && time.second(59).isBefore(minDate))
-                    disabled = true;
-                if (maxDate && time.second(0).isAfter(maxDate))
-                    disabled = true;
-                if (minLimit && time.second(59).isBefore(minLimit))
-                    disabled = true;
-                if (!disabled && this.isInvalidTime(time, this.singleDatePicker ? null : (side == 'left' ? 'start' : 'end'), 'minute'))
-                    disabled = true;
+                    var disabled = false;
+                    if (minDate && time.set({ second: 59 }) < minDate)
+                        disabled = true;
+                    if (maxDate && time.set({ second: 0 }) > maxDate)
+                        disabled = true;
+                    if (minLimit && time.endOf('minute') < minLimit)
+                        disabled = true;
+                    if (!disabled && this.isInvalidTime(time, this.singleDatePicker ? null : (side == 'left' ? 'start' : 'end'), 'minute'))
+                        disabled = true;
 
-                if (selected.minute() == i && !disabled) {
-                    html += '<option value="' + i + '" selected="selected">' + padded + '</option>';
-                } else if (disabled) {
-                    html += '<option value="' + i + '" disabled="disabled" class="disabled">' + padded + '</option>';
-                } else {
-                    html += '<option value="' + i + '">' + padded + '</option>';
+                    if (selected.minute == i && !disabled) {
+                        html += '<option value="' + i + '" selected="selected">' + padded + '</option>';
+                    } else if (disabled) {
+                        html += '<option value="' + i + '" disabled="disabled" class="disabled">' + padded + '</option>';
+                    } else {
+                        html += '<option value="' + i + '">' + padded + '</option>';
+                    }
                 }
-            }
 
-            html += '</select> ';
+                html += '</select> ';
+            }
 
             //
             // seconds
             //
 
-            if (this.timePickerSeconds) {
+            if (opts.showSeconds) {
                 html += ': <select class="secondselect">';
 
-                for (var i = 0; i < 60; i += this.timePickerStepSecond) {
+                for (var i = 0; i < 60; i += opts.secondStep) {
                     var padded = i < 10 ? '0' + i : i;
-                    var time = selected.clone().second(i);
+                    var time = selected.set({ second: i });
 
                     var disabled = false;
-                    if (minDate && time.isBefore(minDate))
+                    if (minDate && time < minDate)
                         disabled = true;
-                    if (maxDate && time.isAfter(maxDate))
+                    if (maxDate && time > maxDate)
                         disabled = true;
-                    if (minLimit && time.isBefore(minLimit))
+                    if (minLimit && time < minLimit)
                         disabled = true;
                     if (!disabled && this.isInvalidTime(time, this.singleDatePicker ? null : (side == 'left' ? 'start' : 'end'), 'second'))
                         disabled = true;
 
-                    if (selected.second() == i && !disabled) {
+                    if (selected.second == i && !disabled) {
                         html += '<option value="' + i + '" selected="selected">' + padded + '</option>';
                     } else if (disabled) {
                         html += '<option value="' + i + '" disabled="disabled" class="disabled">' + padded + '</option>';
@@ -1099,13 +1334,13 @@
                 var am_html = '';
                 var pm_html = '';
 
-                if (minDate && selected.clone().hour(12).minute(0).second(0).isBefore(minDate))
+                if (minDate && selected.startOf('day').plus({ hour: 12 }) < minDate)
                     am_html = ' disabled="disabled" class="disabled"';
 
-                if (maxDate && selected.clone().hour(0).minute(0).second(0).isAfter(maxDate))
+                if (maxDate && selected.startOf('day') > maxDate)
                     pm_html = ' disabled="disabled" class="disabled"';
 
-                if (minLimit && selected.clone().hour(0).minute(0).second(0).isAfter(minLimit))
+                if (minLimit && selected.startOf('day') > minLimit)
                     pm_html = ' disabled="disabled" class="disabled"';
 
                 if (this.isInvalidTime(time, this.singleDatePicker ? null : (side == 'left' ? 'start' : 'end'), 'ampm')) {
@@ -1113,7 +1348,7 @@
                     pm_html = ' disabled="disabled" class="disabled"';
                 }
 
-                if (selected.hour() >= 12) {
+                if (selected.hour >= 12) {
                     html += '<option value="AM"' + am_html + '>AM</option><option value="PM" selected="selected"' + pm_html + '>PM</option>';
                 } else {
                     html += '<option value="AM" selected="selected"' + am_html + '>AM</option><option value="PM"' + pm_html + '>PM</option>';
@@ -1127,8 +1362,7 @@
         },
 
         updateFormInputs: function () {
-
-            if (this.singleDatePicker || (this.endDate && (this.startDate.isBefore(this.endDate) || this.startDate.isSame(this.endDate)))) {
+            if (this.singleDatePicker || (this.endDate && this.startDate <= this.endDate)) {
                 this.container.find('button.applyBtn').prop('disabled', false);
             } else {
                 this.container.find('button.applyBtn').prop('disabled', true);
@@ -1192,8 +1426,7 @@
                     });
                 }
             } else if (this.opens == 'center') {
-                var containerLeft = this.element.offset().left - parentOffset.left + this.element.outerWidth() / 2
-                    - containerWidth / 2;
+                var containerLeft = this.element.offset().left - parentOffset.left + this.element.outerWidth() / 2 - containerWidth / 2;
                 if (containerLeft < 0) {
                     this.container.css({
                         top: containerTop,
@@ -1250,9 +1483,9 @@
             // Reposition the picker if the window is resized while it's open
             $(window).on('resize.daterangepicker', $.proxy(function (e) { this.move(e); }, this));
 
-            this.oldStartDate = this.startDate.clone();
-            this.oldEndDate = this.endDate.clone();
-            this.previousRightTime = this.endDate.clone();
+            this.oldStartDate = this.startDate;
+            this.oldEndDate = this.endDate;
+            this.previousRightTime = this.endDate;
 
             this.updateView();
             this.container.show();
@@ -1262,17 +1495,18 @@
         },
 
         hide: function (e) {
+            return;
             if (!this.isShowing) return;
 
             //incomplete date selection, revert to last values
             if (!this.endDate) {
-                this.startDate = this.oldStartDate.clone();
-                this.endDate = this.oldEndDate.clone();
+                this.startDate = this.oldStartDate;
+                this.endDate = this.oldEndDate;
             }
 
             //if a new date range was selected, invoke the user callback function
-            if (!this.startDate.isSame(this.oldStartDate) || !this.endDate.isSame(this.oldEndDate))
-                this.callback(this.startDate.clone(), this.endDate.clone(), this.chosenLabel);
+            if (!this.startDate == this.oldStartDate || !this.endDate == this.oldEndDate)
+                this.callback(this.startDate, this.endDate, this.chosenLabel);
 
             //if picker is attached to a text input, update it
             this.updateElement();
@@ -1342,11 +1576,11 @@
         clickPrev: function (e) {
             var cal = $(e.target).parents('.drp-calendar');
             if (cal.hasClass('left')) {
-                this.leftCalendar.month.subtract(1, 'month');
+                this.leftCalendar.month.minus({ month: 1 });
                 if (this.linkedCalendars)
-                    this.rightCalendar.month.subtract(1, 'month');
+                    this.rightCalendar.month.minus({ month: 1 });
             } else {
-                this.rightCalendar.month.subtract(1, 'month');
+                this.rightCalendar.month.minus({ month: 1 });
             }
             this.updateCalendars();
         },
@@ -1354,11 +1588,11 @@
         clickNext: function (e) {
             var cal = $(e.target).parents('.drp-calendar');
             if (cal.hasClass('left')) {
-                this.leftCalendar.month.add(1, 'month');
+                this.leftCalendar.month.plus({ month: 1 });
             } else {
-                this.rightCalendar.month.add(1, 'month');
+                this.rightCalendar.month.plus({ month: 1 });
                 if (this.linkedCalendars)
-                    this.leftCalendar.month.add(1, 'month');
+                    this.leftCalendar.month.plus({ month: 1 });
             }
             this.updateCalendars();
         },
@@ -1369,8 +1603,8 @@
             if (!$(e.target).hasClass('available')) return;
 
             var title = $(e.target).attr('data-title');
-            var row = title.substr(1, 1);
-            var col = title.substr(3, 1);
+            var row = title.substring(1, 2);
+            var col = title.substring(3, 4);
             var cal = $(e.target).parents('.drp-calendar');
             var date = cal.hasClass('left') ? this.leftCalendar.calendar[row][col] : this.rightCalendar.calendar[row][col];
 
@@ -1385,12 +1619,12 @@
                     if ($(el).hasClass('week')) return;
 
                     var title = $(el).attr('data-title');
-                    var row = title.substr(1, 1);
-                    var col = title.substr(3, 1);
+                    var row = title.substring(1, 2);
+                    var col = title.substring(3, 4);
                     var cal = $(el).parents('.drp-calendar');
                     var dt = cal.hasClass('left') ? leftCalendar.calendar[row][col] : rightCalendar.calendar[row][col];
 
-                    if ((dt.isAfter(startDate) && dt.isBefore(date)) || dt.isSame(date, 'day')) {
+                    if ((dt > startDate) && dt < date || dt.hasSame(date, 'day')) {
                         $(el).addClass('in-range');
                     } else {
                         $(el).removeClass('in-range');
@@ -1399,6 +1633,43 @@
                 });
             }
 
+        },
+
+        hoverRange: function (e) {
+            // Not tested yet
+            const label = e.target.getAttribute('data-range-key');
+            const dates = this.ranges[label];
+            const leftCalendar = this.leftCalendar;
+            const rightCalendar = this.rightCalendar;
+
+            this.container.find('.drp-calendar tbody td').each(function (index, el) {
+                //skip week numbers, only look at dates
+                if ($(el).hasClass('week')) return;
+
+                const title = $(el).attr('data-title');
+                const row = title.substring(1, 2);
+                const col = title.substring(3, 4);
+                const cal = $(el).parents('.drp-calendar');
+                const dt = cal.hasClass('left') ? leftCalendar.calendar[row][col] : rightCalendar.calendar[row][col];
+
+                if (dates == null) {
+                    // Hover over custom range
+                    $(el).removeClass('in-range');
+                    $(el).removeClass('start-date');
+                    $(el).removeClass('end-date');
+                } else {
+                    if (dt.hasSame(dates[0], 'day')) {
+                        $(el).addClass('start-date');
+                    } else if (dt.hasSame(dates[1], 'day')) {
+                        $(el).addClass('end-date');
+                    } else if (dt.startOf('day') > dates[0].startOf('day') && dt.startOf('day') < dates[1].startOf('day')) {
+                        $(el).addClass('in-range');
+                    } else {
+                        $(el).removeClass('in-range');
+                    }
+                }
+
+            });
         },
 
         clickDate: function (e) {
@@ -1421,9 +1692,12 @@
             // * if one of the inputs above the calendars was focused, cancel that manual input
             //
 
-            if (this.endDate || date.isBefore(this.startDate, 'day')) { //picking start
+            const showMinutes = this.timePickerStepSize < Duration.fromObject({ hours: 1 });
+            const showSeconds = this.timePickerStepSize < Duration.fromObject({ minutes: 1 });
+
+            if (this.endDate || date < this.startDate, 'day') { //picking start
                 if (this.timePicker) {
-                    var hour = parseInt(this.container.find('.left .hourselect').val(), 10);
+                    let hour = parseInt(this.container.find('.left .hourselect').val(), 10);
                     if (isNaN(hour))
                         hour = parseInt(this.container.find('.left .hourselect option:last').val(), 10);
                     if (!this.timePicker24Hour) {
@@ -1433,25 +1707,32 @@
                         if (ampm === 'AM' && hour === 12)
                             hour = 0;
                     }
-                    var minute = parseInt(this.container.find('.left .minuteselect').val(), 10);
-                    if (isNaN(minute))
-                        minute = parseInt(this.container.find('.left .minuteselect option:last').val(), 10);
+                    let minute = 0;
+                    if (showMinutes) {
+                        minute = parseInt(this.container.find('.left .minuteselect').val(), 10);
+                        if (isNaN(minute))
+                            minute = parseInt(this.container.find('.left .minuteselect option:last').val(), 10);
+                    }
 
-                    var second = this.timePickerSeconds ? parseInt(this.container.find('.left .secondselect').val(), 10) : 0;
-                    if (isNaN(second))
-                        second = parseInt(this.container.find('.left .secondselect option:last').val(), 10);
-                    date = date.clone().hour(hour).minute(minute).second(second);
+                    let second = 0;
+                    if (showSeconds) {
+                        second = parseInt(this.container.find('.left .secondselect').val(), 10);
+                        if (isNaN(second))
+                            second = parseInt(this.container.find('.left .secondselect option:last').val(), 10);
+                    }
+
+                    date = date.set({ hour: hour, minute: minute, second: second });
                 }
                 this.endDate = null;
-                this.setStartDate(date.clone());
+                this.setStartDate(date, true);
                 side = 'start';
-            } else if (!this.endDate && date.isBefore(this.startDate)) {
+            } else if (!this.endDate && date < this.startDate) {
                 //special case: clicking the same date for start/end,
                 //but the time of the end date is before the start date
-                this.setEndDate(this.startDate.clone());
+                this.setEndDate(this.startDate, true);
             } else { // picking end
                 if (this.timePicker) {
-                    var hour = parseInt(this.container.find('.right .hourselect').val(), 10);
+                    let hour = parseInt(this.container.find('.right .hourselect').val(), 10);
                     if (isNaN(hour))
                         hour = parseInt(this.container.find('.right .hourselect option:last').val(), 10);
                     if (!this.timePicker24Hour) {
@@ -1461,16 +1742,24 @@
                         if (ampm === 'AM' && hour === 12)
                             hour = 0;
                     }
-                    var minute = parseInt(this.container.find('.right .minuteselect').val(), 10);
-                    if (isNaN(minute))
-                        minute = parseInt(this.container.find('.right .minuteselect option:last').val(), 10);
 
-                    var second = this.timePickerSeconds ? parseInt(this.container.find('.right .secondselect').val(), 10) : 0;
-                    if (isNaN(second))
-                        second = parseInt(this.container.find('.right .secondselect option:last').val(), 10);
-                    date = date.clone().hour(hour).minute(minute).second(second);
+                    let minute = 0;
+                    if (showMinutes) {
+                        minute = parseInt(this.container.find('.right .minuteselect').val(), 10);
+                        if (isNaN(minute))
+                            minute = parseInt(this.container.find('.right .minuteselect option:last').val(), 10);
+                    }
+
+                    let second = 0;
+                    if (showSeconds) {
+                        second = parseInt(this.container.find('.right .secondselect').val(), 10);
+                        if (isNaN(second))
+                            second = parseInt(this.container.find('.right .secondselect option:last').val(), 10);
+                    }
+
+                    date = date.set({ hour: hour, minute: minute, second: second });
                 }
-                this.setEndDate(date.clone());
+                this.setEndDate(date, true);
                 if (this.autoApply) {
                     this.calculateChosenLabel();
                     this.clickApply();
@@ -1478,7 +1767,7 @@
             }
 
             if (this.singleDatePicker) {
-                this.setEndDate(this.startDate);
+                this.setEndDate(this.startDate, true);
                 if (!this.timePicker && this.autoApply)
                     this.clickApply();
             }
@@ -1493,24 +1782,24 @@
         },
 
         calculateChosenLabel: function () {
+
+            const showMinutes = this.timePickerStepSize < Duration.fromObject({ hours: 1 });
+            const showSeconds = this.timePickerStepSize < Duration.fromObject({ minutes: 1 });
+
+            // If selected range from calendar matches any custom range, then highlight it
             var customRange = true;
             var i = 0;
             for (var range in this.ranges) {
-                if (this.timePicker) {
-                    var format = this.timePickerSeconds ? "YYYY-MM-DD HH:mm:ss" : "YYYY-MM-DD HH:mm";
-                    //ignore times when comparing dates if time picker seconds is not enabled
-                    if (this.startDate.format(format) == this.ranges[range][0].format(format) && this.endDate.format(format) == this.ranges[range][1].format(format)) {
-                        customRange = false;
-                        this.chosenLabel = this.container.find('.ranges li:eq(' + i + ')').addClass('active').attr('data-range-key');
-                        break;
-                    }
-                } else {
-                    //ignore times when comparing dates if time picker is not enabled
-                    if (this.startDate.format('YYYY-MM-DD') == this.ranges[range][0].format('YYYY-MM-DD') && this.endDate.format('YYYY-MM-DD') == this.ranges[range][1].format('YYYY-MM-DD')) {
-                        customRange = false;
-                        this.chosenLabel = this.container.find('.ranges li:eq(' + i + ')').addClass('active').attr('data-range-key');
-                        break;
-                    }
+                var unit = this.timePicker ? 'hour' : 'day';
+                if (showMinutes) {
+                    unit = 'minute';
+                } else if (showSeconds) {
+                    unit = 'second';
+                }
+                if (this.startDate.startOf(unit) == this.ranges[range][0].startOf(unit) == this.endDate.startOf(unit) == this.ranges[range][1].startOf(unit)) {
+                    customRange = false;
+                    this.chosenLabel = this.container.find('.ranges li:eq(' + i + ')').addClass('active').attr('data-range-key');
+                    break;
                 }
                 i++;
             }
@@ -1541,44 +1830,46 @@
                 leftOrRight = isLeft ? 'left' : 'right',
                 cal = this.container.find('.drp-calendar.' + leftOrRight);
 
-            // Month must be Number for new moment versions
+            // Month must be Number for new DateTime versions
             var month = parseInt(cal.find('.monthselect').val(), 10);
             var year = cal.find('.yearselect').val();
 
             if (!isLeft) {
-                if (year < this.startDate.year() || (year == this.startDate.year() && month < this.startDate.month())) {
-                    month = this.startDate.month();
-                    year = this.startDate.year();
+                if (year < this.startDate.year || (year == this.startDate.year && month < this.startDate.month)) {
+                    month = this.startDate.month;
+                    year = this.startDate.year;
                 }
             }
 
             if (this.minDate) {
-                if (year < this.minDate.year() || (year == this.minDate.year() && month < this.minDate.month())) {
-                    month = this.minDate.month();
-                    year = this.minDate.year();
+                if (year < this.minDate.year || (year == this.minDate.year && month < this.minDate.month)) {
+                    month = this.minDate.month;
+                    year = this.minDate.year;
                 }
             }
 
             if (this.maxDate) {
-                if (year > this.maxDate.year() || (year == this.maxDate.year() && month > this.maxDate.month())) {
-                    month = this.maxDate.month();
-                    year = this.maxDate.year();
+                if (year > this.maxDate.year || (year == this.maxDate.year && month > this.maxDate.month)) {
+                    month = this.maxDate.month;
+                    year = this.maxDate.year;
                 }
             }
 
             if (isLeft) {
-                this.leftCalendar.month.month(month).year(year);
+                this.leftCalendar.month.set({ year: year, month: month });
                 if (this.linkedCalendars)
-                    this.rightCalendar.month = this.leftCalendar.month.clone().add(1, 'month');
+                    this.rightCalendar.month = this.leftCalendar.month.plus({ month: 1 });
             } else {
-                this.rightCalendar.month.month(month).year(year);
+                this.rightCalendar.month.set({ year: year, month: month });
                 if (this.linkedCalendars)
-                    this.leftCalendar.month = this.rightCalendar.month.clone().subtract(1, 'month');
+                    this.leftCalendar.month = this.rightCalendar.month.minus({ month: 1 });
             }
             this.updateCalendars();
         },
 
         timeChanged: function (e) {
+            const showMinutes = this.timePickerStepSize < Duration.fromObject({ hours: 1 });
+            const showSeconds = this.timePickerStepSize < Duration.fromObject({ minutes: 1 });
 
             var cal = $(e.target).closest('.drp-calendar'),
                 isLeft = cal.hasClass('left');
@@ -1587,13 +1878,19 @@
             if (isNaN(hour))
                 hour = parseInt(cal.find('.hourselect option:last').val(), 10);
 
-            var minute = parseInt(cal.find('.minuteselect').val(), 10);
-            if (isNaN(minute))
-                minute = parseInt(cal.find('.minuteselect option:last').val(), 10);
+            var minute = 0;
+            if (showMinutes) {
+                minute = parseInt(cal.find('.minuteselect').val(), 10);
+                if (isNaN(minute))
+                    minute = parseInt(cal.find('.minuteselect option:last').val(), 10);
+            }
 
-            var second = this.timePickerSeconds ? parseInt(cal.find('.secondselect').val(), 10) : 0;
-            if (isNaN(second))
-                second = parseInt(cal.find('.secondselect option:last').val(), 10);
+            var second = 0;
+            if (showSeconds) {
+                second = parseInt(cal.find('.secondselect').val(), 10);
+                if (isNaN(second))
+                    second = parseInt(cal.find('.secondselect option:last').val(), 10);
+            }
 
             if (!this.timePicker24Hour) {
                 var ampm = cal.find('.ampmselect').val();
@@ -1604,22 +1901,22 @@
             }
 
             if (isLeft) {
-                var start = this.startDate.clone();
-                start.hour(hour);
-                start.minute(minute);
-                start.second(second);
-                this.setStartDate(start);
+                var start = this.startDate;
+                start.set({ hour: hour });
+                start.set({ minute: minute });
+                start.set({ second: second });
+                this.setStartDate(start, true);
                 if (this.singleDatePicker) {
-                    this.endDate = this.startDate.clone();
-                } else if (this.endDate && this.endDate.format('YYYY-MM-DD') == start.format('YYYY-MM-DD') && this.endDate.isBefore(start)) {
-                    this.setEndDate(start.clone());
+                    this.endDate = this.startDate;
+                } else if (this.endDate && this.endDate.hasSame(start, 'day') && this.endDate < start) {
+                    this.setEndDate(start, true);
                 }
             } else if (this.endDate) {
-                var end = this.endDate.clone();
-                end.hour(hour);
-                end.minute(minute);
-                end.second(second);
-                this.setEndDate(end);
+                var end = this.endDate;
+                end.hour.set({ hour });
+                end.minuteset({ minute });
+                end.secondset({ second });
+                this.setEndDate(end, true);
             }
 
             //update the calendars so all clickable dates reflect the new time component
@@ -1639,24 +1936,24 @@
             if (!this.element.is('input')) return;
             if (!this.element.val().length) return;
 
-            var dateString = this.element.val().split(this.locale.separator),
-                start = null,
-                end = null;
+            const dateString = this.element.val().split(this.locale.separator);
+            var start = null, end = null;
+            const format = typeof this.locale.format === 'string' ? this.locale.format : DateTime.parseFormatForOpts(this.locale.format);
 
             if (dateString.length === 2) {
-                start = moment(dateString[0], this.locale.format);
-                end = moment(dateString[1], this.locale.format);
+                start = DateTime.fromFormat(dateString[0], format, { locale: DateTime.now().locale });
+                end = DateTime.fromFormat(dateString[1], format, { locale: DateTime.now().locale });
             }
 
             if (this.singleDatePicker || start === null || end === null) {
-                start = moment(this.element.val(), this.locale.format);
+                start = DateTime.fromFormat(this.element.val(), format, { locale: DateTime.now().locale });
                 end = start;
             }
 
             if (!start.isValid() || !end.isValid()) return;
 
-            this.setStartDate(start);
-            this.setEndDate(end);
+            this.setStartDate(start, false);
+            this.setEndDate(end, false);
             this.updateView();
         },
 
@@ -1677,10 +1974,12 @@
 
         updateElement: function () {
             if (this.element.is('input') && this.autoUpdateInput) {
-                var newValue = this.startDate.format(this.locale.format);
+                let newValue = typeof this.locale.format === 'object' ? this.startDate.toLocaleString(this.locale.format) : this.startDate.toFormat(this.locale.format);
                 if (!this.singleDatePicker) {
-                    newValue += this.locale.separator + this.endDate.format(this.locale.format);
+                    newValue += this.locale.separator
+                    newValue += typeof this.locale.format === 'object' ? this.endDate.toLocaleString(this.locale.format) : this.endDate.toFormat(this.locale.format);
                 }
+
                 if (newValue !== this.element.val()) {
                     this.element.val(newValue).trigger('change');
                 }
