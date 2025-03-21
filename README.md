@@ -186,6 +186,7 @@ Compared to [inital repository](https://github.com/dangrossman/daterangepicker),
 - Replaced [moment](https://momentjs.com/) by [luxon](https://moment.github.io/luxon/index.html)
 - Better validation of input parameters, error are printed to console
 - Highlight range in calendars when hovering over custom ranges
+- Added option `locale.durationLabel` to show customized label for selected duration, e.g. `'4 Days, 6 Hours, 30 Minutes'` 
 - ... and maybe some new bugs 😉 
 
 #### Differences between moment vs. luxon
