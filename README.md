@@ -21,6 +21,8 @@ Above samples are based on the [original repository](https://github.com/dangross
 <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/Wernfried/daterangepicker@master/daterangepicker.min.js"></script>
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/Wernfried/daterangepicker@master/daterangepicker.min.css" />
 
+<! --https://cdn.jsdelivr.net/npm/daterangepickerg@4.0.1/daterangepicker.min.js -->
+
 <input type="text" id="daterange" />
 
 <script>
