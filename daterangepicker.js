@@ -474,6 +474,7 @@
         constructor: DateRangePicker,
 
         setStartDate: function (startDate) {
+            console.log('In setStartDate')
             if (typeof startDate === 'string')
                 this.startDate = moment(startDate, this.locale.format);
 
@@ -539,7 +540,7 @@
             if (this.maxSpan && this.startDate.clone().add(this.maxSpan).isBefore(this.endDate))
                 this.endDate = this.startDate.clone().add(this.maxSpan);
 
-            if (!this.singleDatePicker && this.minSpan && this.endDate.isBefore(this.startDate.clone().add(this.minSpan)))
+            if (this.minSpan && this.endDate.isBefore(this.startDate.clone().add(this.minSpan)))
                 this.endDate = this.startDate.clone().add(this.minSpan);
 
             if (this.maxDate && this.endDate.isAfter(this.maxDate))
@@ -555,6 +556,26 @@
             this.updateMonthsInView();
         },
 
+        setPeriod: function (startDate, endDate) {
+            let start, end;
+
+            if (typeof startDate === 'string')
+                start = moment(startDate, this.locale.format);
+            if (typeof startDate === 'object')
+                start = moment(startDate);
+            if (typeof endDate === 'string')
+                end = moment(endDate, this.locale.format);
+            if (typeof endDate === 'object')
+                end = moment(endDate);
+
+            if (this.singleDatePicker) {
+                this.setStartDate(start);
+            } else {
+                this.setStartDate(start);
+                this.setEndDate(end);
+            }
+        },
+
         isInvalidDate: function () {
             return false;
         },
@@ -568,6 +589,7 @@
         },
 
         updateView: function () {
+            console.log('In updateView');
             if (this.timePicker) {
                 this.renderTimePicker('left');
                 this.renderTimePicker('right');
