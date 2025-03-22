@@ -1,16 +1,35 @@
 {
   "name": "daterangepicker",
-  "version": "5.0.0-0",
+  "version": "4.0.0-0",
   "description": "Date range picker with time component",
   "main": "daterangepicker.js",
   "style": "daterangepicker.css",
+  "jsdelivr": [
+    "daterangepicker.js",
+    "daterangepicker.css"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "add-version":  "replace -s \"@VERSION@\" %npm_package_version% daterangepicker.js"
+
   },
+  "keywords": [
+    "date",
+    "time",
+    "calendar",
+    "picker",
+    "range",
+    "html",
+    "jquery"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/wernfried/daterangepicker.git"
   },
+  "files": [
+    "daterangepicker.*",
+    "*.html"
+  ],
   "author": {
     "name": "wernfried Domscheit",
     "url": "https://www.domscheit.ch"
