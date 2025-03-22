@@ -1,5 +1,5 @@
 /**
-* @version: @VERSION@
+* @version: 3.3.5
 * @author: Wernfried Domscheit
 * @copyright: Copyright (c) 2025 Wernfried Domscheit. All rights reserved.
 * @license: Licensed under the MIT license. See http://www.opensource.org/licenses/mit-license.php
