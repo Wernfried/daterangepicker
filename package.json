@@ -1,5 +1,5 @@
 {
-  "name": "daterangepicker",
+  "name": "daterangepicker-4.x",
   "version": "4.0.0-0",
   "description": "Date range picker with time component",
   "main": "daterangepicker.js",
@@ -9,8 +9,10 @@
     "daterangepicker.css"
   ],
   "scripts": {
-    "postversion": "sed -i -e \"s/@version: .*/@version: %npm_package_version%/\" daterangepicker.js",
-    "postpack": "unix2dos daterangepicker.js"
+    "preversion": "jsdoc2md --private daterangepicker.js > daterangepicker.md",
+    "postversion": "sed -i -e \"s/@version: .*/@version: %npm_package_version%/\" daterangepicker.js", 
+    "prepack": "unix2dos daterangepicker.js doc/daterangepicker.md",
+    "prepare": "git commit -a -m \"Updated doc and version\""
   },
   "keywords": [
     "date",
@@ -19,7 +21,8 @@
     "picker",
     "range",
     "html",
-    "jquery"
+    "jquery",
+    "daterangepicker"
   ],
   "repository": {
     "type": "git",
