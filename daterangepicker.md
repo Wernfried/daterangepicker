@@ -26,9 +26,10 @@
 
 ## DateRangePicker
 **Kind**: global class  
+**Requires**: <code>module:jQuery</code>, <code>module:luxon</code>  
 
 * [DateRangePicker](#DateRangePicker)
-    * [new DateRangePicker([element], options, cb)](#new_DateRangePicker_new)
+    * [new DateRangePicker(element, options, cb)](#new_DateRangePicker_new)
     * _instance_
         * [.setStartDate(startDate)](#DateRangePicker+setStartDate)
         * [.setEndDate(handler, [options])](#DateRangePicker+setEndDate)
@@ -38,13 +39,13 @@
 
 <a name="new_DateRangePicker_new"></a>
 
-### new DateRangePicker([element], options, cb)
+### new DateRangePicker(element, options, cb)
 
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [element] | <code>Selector</code> | <code>body</code> | jQuery selector of the parent element that the date range picker will be added to |
-| options | [<code>Options</code>](#Options) |  | - |
-| cb | <code>function</code> |  | Callback function executed when |
+| Param | Type | Description |
+| --- | --- | --- |
+| element | <code>Selector</code> | jQuery selector of the parent element that the date range picker will be added to |
+| options | [<code>Options</code>](#Options) | Object to configure the DateRangePicker |
+| cb | <code>function</code> | Callback function executed when |
 
 <a name="DateRangePicker+setStartDate"></a>
 
@@ -70,6 +71,10 @@ Create a new Twig parser
 | handler | <code>TwigHandler</code> \| <code>Array.&lt;TwigHandler&gt;</code> | Object or array of element specification and function to handle elements |
 | [options] | <code>ParserOptions</code> | Object of optional options |
 
+**Example**  
+```js
+var picker = $('#daterange').data('daterangepicker'); picker.setEndDate(DateTime.now().startOf('day'));
+```
 <a name="DateRangePicker+hideCalendars"></a>
 
 ### dateRangePicker.hideCalendars()

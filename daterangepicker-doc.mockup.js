@@ -84,11 +84,13 @@
     }
 }(typeof window !== 'undefined' ? window : this, function (moment, $) {
     /**
-     * @constructs DateRangePicker
-     * @param {Selector} [element=body] - jQuery selector of the parent element that the date range picker will be added to
-     * @param {Options} options - 
-     * @param {function} cb - Callback function executed when 
-     */
+    * @constructs DateRangePicker
+    * @param {Selector} element - jQuery selector of the parent element that the date range picker will be added to
+    * @param {Options} options - Object to configure the DateRangePicker
+    * @param {function} cb - Callback function executed when 
+    * @requires jQuery
+    * @requires luxon
+    */
     var DateRangePicker = function (element, options, cb) {
 
         this.parentEl = 'body';
@@ -130,6 +132,8 @@
         * @param {TwigHandler|TwigHandler[]} handler - Object or array of element specification and function to handle elements
         * @param {ParserOptions} [options] - Object of optional options 
         * @public
+        * @example var picker = $('#daterange').data('daterangepicker'); 
+        * picker.setEndDate(DateTime.now().startOf('day'));
         */
         setEndDate: function (startDate) {
             console.log('In setStartDate')
