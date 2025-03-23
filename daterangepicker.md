@@ -5,20 +5,12 @@
 <dd></dd>
 </dl>
 
-## Members
-
-<dl>
-<dt><a href="#daterangepicker">daterangepicker</a> ⇒</dt>
-<dd><p>constructs DateRangePicker</p>
-</dd>
-</dl>
-
 ## Events
 
 <dl>
 <dt><a href="#event_show.daterangepicker">"show.daterangepicker" (this)</a></dt>
 <dd></dd>
-<dt><a href="#event_hideCalendar.daterangepicker">"hideCalendar.daterangepicker" (this)</a></dt>
+<dt><a href="#event_hideCalendar">"hideCalendar" (this)</a></dt>
 <dd></dd>
 </dl>
 
@@ -36,10 +28,23 @@
 **Kind**: global class  
 
 * [DateRangePicker](#DateRangePicker)
-    * [.setStartDate(startDate)](#DateRangePicker+setStartDate)
-    * [.setEndDate(handler, [options])](#DateRangePicker+setEndDate)
-    * [.show(handler, [options])](#DateRangePicker+show) ℗
-    * [.hideCalendars(handler, [options])](#DateRangePicker+hideCalendars)
+    * [new DateRangePicker([element], options, cb)](#new_DateRangePicker_new)
+    * _instance_
+        * [.setStartDate(startDate)](#DateRangePicker+setStartDate)
+        * [.setEndDate(handler, [options])](#DateRangePicker+setEndDate)
+        * [.hideCalendars()](#DateRangePicker+hideCalendars)
+    * _static_
+        * [.daterangepicker(options, callback)](#DateRangePicker.daterangepicker) ⇒
+
+<a name="new_DateRangePicker_new"></a>
+
+### new DateRangePicker([element], options, cb)
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [element] | <code>Selector</code> | <code>body</code> | jQuery selector of the parent element that the date range picker will be added to |
+| options | [<code>Options</code>](#Options) |  | - |
+| cb | <code>function</code> |  | Callback function executed when |
 
 <a name="DateRangePicker+setStartDate"></a>
 
@@ -65,47 +70,19 @@ Create a new Twig parser
 | handler | <code>TwigHandler</code> \| <code>Array.&lt;TwigHandler&gt;</code> | Object or array of element specification and function to handle elements |
 | [options] | <code>ParserOptions</code> | Object of optional options |
 
-<a name="DateRangePicker+show"></a>
-
-### dateRangePicker.show(handler, [options]) ℗
-Create a new Twig parser
-
-**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
-**Throws**:
-
-- <code>UnsupportedParser</code> - For an unsupported parser. Currently `expat` and `sax` (default) are supported.
-
-**Access**: private  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| handler | <code>TwigHandler</code> \| <code>Array.&lt;TwigHandler&gt;</code> | Object or array of element specification and function to handle elements |
-| [options] | <code>ParserOptions</code> | Object of optional options |
-
 <a name="DateRangePicker+hideCalendars"></a>
 
-### dateRangePicker.hideCalendars(handler, [options])
+### dateRangePicker.hideCalendars()
 Create a new Twig parser
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
-**Throws**:
+**Emits**: [<code>hideCalendar</code>](#event_hideCalendar)  
+<a name="DateRangePicker.daterangepicker"></a>
 
-- <code>UnsupportedParser</code> - For an unsupported parser. Currently `expat` and `sax` (default) are supported.
+### DateRangePicker.daterangepicker(options, callback) ⇒
+Initiate a new DateRangePicker
 
-**Emits**: <code>DateRangePicker#h&quot;ideCalendar\.event:daterangepicker</code>  
-**Access**: protected  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| handler | <code>TwigHandler</code> \| <code>Array.&lt;TwigHandler&gt;</code> | Object or array of element specification and function to handle elements |
-| [options] | <code>ParserOptions</code> | Object of optional options |
-
-<a name="daterangepicker"></a>
-
-## daterangepicker ⇒
-constructs DateRangePicker
-
-**Kind**: global variable  
+**Kind**: static method of [<code>DateRangePicker</code>](#DateRangePicker)  
 **Returns**: DateRangePicker  
 
 | Param | Type | Description |
@@ -122,9 +99,9 @@ constructs DateRangePicker
 | --- | --- | --- |
 | this | [<code>DateRangePicker</code>](#DateRangePicker) | Object of optional options |
 
-<a name="event_hideCalendar.daterangepicker"></a>
+<a name="event_hideCalendar"></a>
 
-## "hideCalendar.daterangepicker" (this)
+## "hideCalendar" (this)
 **Kind**: event emitted  
 
 | Param | Type | Description |

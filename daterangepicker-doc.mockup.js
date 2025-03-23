@@ -85,7 +85,6 @@
 }(typeof window !== 'undefined' ? window : this, function (moment, $) {
     /**
      * @constructs DateRangePicker
-     * @hideconstructor
      * @param {Selector} [element=body] - jQuery selector of the parent element that the date range picker will be added to
      * @param {Options} options - 
      * @param {function} cb - Callback function executed when 
@@ -112,7 +111,6 @@
         this.callback = function () { };
 
     };
-
 
     DateRangePicker.prototype = {
 
@@ -141,6 +139,7 @@
         /**
         * Shows the daterangepicker
         * @param {external:jQuery} e - The calendar jQuery Object
+        * @fires "show.daterangepicker"
         * @private
         */
         show: function (e) {
@@ -156,27 +155,14 @@
         },
 
         /**
-         * @memberof DateRangePicker
-         * @event hideCalendar.daterangepicker
-         */
-
-        /**
-         * @memberof DateRangePicker
-         * @event show.daterangepicker
-         */
-
-        /**
         * Create a new Twig parser
-        * @param {TwigHandler|TwigHandler[]} handler - Object or array of element specification and function to handle elements
-        * @param {ParserOptions} [options] - Object of optional options 
-        * @throws {UnsupportedParser} - For an unsupported parser. Currently `expat` and `sax` (default) are supported.
-        * @fires DateRangePicker#h"ideCalendar\.daterangepicker
+        * @fires hideCalendar
         */
         hideCalendars: function () {
             this.container.removeClass('show-calendar');
             /**
             * @event
-            * @name "hideCalendar.daterangepicker"
+            * @name hideCalendar
             * @param {DateRangePicker} this - Object of optional options 
             */
             this.element.trigger('hideCalendar.daterangepicker', this);
@@ -185,8 +171,9 @@
     };
 
     /**
-    * constructs DateRangePicker
-    * @name daterangepicker
+    * Initiate a new DateRangePicker
+    * @name DateRangePicker.daterangepicker
+    * @function
     * @param {Options} options - 
     * @param {function} callback - Callback function executed when 
     * @returns DateRangePicker
