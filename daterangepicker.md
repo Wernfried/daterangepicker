@@ -60,7 +60,40 @@ Only useful when <a href="#Options.Ranges">custom ranges</a> are used.</p>
 
 * [DateRangePicker](#DateRangePicker)
     * [new DateRangePicker(element, options, cb)](#new_DateRangePicker_new)
-    * [.daterangepicker(options, callback)](#DateRangePicker.daterangepicker) ⇒
+    * _instance_
+        * [.setStartDate(startDate)](#DateRangePicker+setStartDate)
+        * [.setEndDate(endDate)](#DateRangePicker+setEndDate)
+        * [.setPeriod(startDate, endDate)](#DateRangePicker+setPeriod)
+        * [.updateView()](#DateRangePicker+updateView)
+        * [.updateMonthsInView()](#DateRangePicker+updateMonthsInView) ℗
+        * [.updateCalendars()](#DateRangePicker+updateCalendars) ℗
+        * [.renderCalendar()](#DateRangePicker+renderCalendar) ℗
+        * [.renderTimePicker()](#DateRangePicker+renderTimePicker) ℗
+        * [.updateFormInputs()](#DateRangePicker+updateFormInputs) ℗
+        * [.move()](#DateRangePicker+move) ℗
+        * [.show(e)](#DateRangePicker+show) ℗
+        * [.hide(e)](#DateRangePicker+hide) ℗
+        * [.toggle(e)](#DateRangePicker+toggle) ℗
+        * [.outsideClick(e)](#DateRangePicker+outsideClick) ℗
+        * [.showCalendars()](#DateRangePicker+showCalendars) ℗
+        * [.hideCalendars()](#DateRangePicker+hideCalendars) ℗
+        * [.clickRange(e)](#DateRangePicker+clickRange) ℗
+        * [.clickPrev(e)](#DateRangePicker+clickPrev) ℗
+        * [.clickNext(e)](#DateRangePicker+clickNext) ℗
+        * [.hoverDate(e)](#DateRangePicker+hoverDate) ℗
+        * [.hoverRange(e)](#DateRangePicker+hoverRange) ℗
+        * [.clickDate(e)](#DateRangePicker+clickDate) ℗
+        * [.calculateChosenLabel(e)](#DateRangePicker+calculateChosenLabel) ℗
+        * [.clickApply(e)](#DateRangePicker+clickApply) ℗
+        * [.clickCancel(e)](#DateRangePicker+clickCancel) ℗
+        * [.monthOrYearChanged(e)](#DateRangePicker+monthOrYearChanged) ℗
+        * [.timeChanged(e)](#DateRangePicker+timeChanged) ℗
+        * [.elementChanged()](#DateRangePicker+elementChanged) ℗
+        * [.keydown(e)](#DateRangePicker+keydown) ℗
+        * [.updateElement()](#DateRangePicker+updateElement) ℗
+        * [.remove()](#DateRangePicker+remove) ℗
+    * _static_
+        * [.daterangepicker(options, callback)](#DateRangePicker.daterangepicker) ⇒
 
 <a name="new_DateRangePicker_new"></a>
 
@@ -72,6 +105,336 @@ Only useful when <a href="#Options.Ranges">custom ranges</a> are used.</p>
 | options | [<code>Options</code>](#Options) | Object to configure the DateRangePicker |
 | cb | <code>function</code> | Callback function executed when |
 
+<a name="DateRangePicker+setStartDate"></a>
+
+### dateRangePicker.setStartDate(startDate)
+Sets the date range picker's currently selected start date to the provided date.<br/>`startDate` be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) or a string matching [locale.format](#Locale.format).Functions `isInvalidDate()` and `isInvalidTime()` are not evaluated, you may set date/time which is not selectable in calendar.<br/>If the `startDate` does not fall into `minDate` and `maxDate` then `startDate` is shifted and a warning is written to console.
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Throws**:
+
+- `RangeError` for invalid date values.
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| startDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> | startDate to be set |
+
+<a name="DateRangePicker+setEndDate"></a>
+
+### dateRangePicker.setEndDate(endDate)
+Sets the date range picker's currently selected end date to the provided date.<br/>`endDate` be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) or a string matching [locale.format](#Locale.format).Functions `isInvalidDate()` and `isInvalidTime()` are not evaluated, you may set date/time which is not selectable in calendar.<br/>If the `endDate` does not fall into `minDate` and `maxDate` then `endDate` or `minSpan` and `maxSpan` is shifted and a warning is written to console.
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Throws**:
+
+- `RangeError` for invalid date values.
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| endDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> | endDate to be set |
+
+<a name="DateRangePicker+setPeriod"></a>
+
+### dateRangePicker.setPeriod(startDate, endDate)
+Shortcut for [setStartDate](#setStartDate) and  [setEndDate](#setEndDate)
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Throws**:
+
+- `RangeError` for invalid date values.
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| startDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> | startDate to be set |
+| endDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> | endDate to be set |
+
+<a name="DateRangePicker+updateView"></a>
+
+### dateRangePicker.updateView()
+Updates the picker when calendar is initiated or any date has been selected. Could be useful after running `setStartDate()` or `setEndDate()`
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+<a name="DateRangePicker+updateMonthsInView"></a>
+
+### dateRangePicker.updateMonthsInView() ℗
+Displays the months
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Access**: private  
+<a name="DateRangePicker+updateCalendars"></a>
+
+### dateRangePicker.updateCalendars() ℗
+Updates the custome ranges
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Access**: private  
+<a name="DateRangePicker+renderCalendar"></a>
+
+### dateRangePicker.renderCalendar() ℗
+Renders the calendar month
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Access**: private  
+<a name="DateRangePicker+renderTimePicker"></a>
+
+### dateRangePicker.renderTimePicker() ℗
+Renders the time pickers
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Access**: private  
+<a name="DateRangePicker+updateFormInputs"></a>
+
+### dateRangePicker.updateFormInputs() ℗
+Update the linke `<input>` element with selected date
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Access**: private  
+<a name="DateRangePicker+move"></a>
+
+### dateRangePicker.move() ℗
+Positions the calendar
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Access**: private  
+<a name="DateRangePicker+show"></a>
+
+### dateRangePicker.show(e) ℗
+Shows the picker
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Emits**: [<code>show</code>](#event_show)  
+**Access**: private  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| e | [<code>jQuery</code>](https://learn.jquery.com/using-jquery-core/jquery-object/) | The Event target |
+
+<a name="DateRangePicker+hide"></a>
+
+### dateRangePicker.hide(e) ℗
+Hides the picker
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Emits**: [<code>beforeHide</code>](#event_beforeHide), [<code>hide</code>](#event_hide)  
+**Access**: private  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| e | [<code>jQuery</code>](https://learn.jquery.com/using-jquery-core/jquery-object/) | The Event target |
+
+<a name="DateRangePicker+toggle"></a>
+
+### dateRangePicker.toggle(e) ℗
+Toggles visibility of the picker
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Access**: private  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| e | [<code>jQuery</code>](https://learn.jquery.com/using-jquery-core/jquery-object/) | The Event target |
+
+<a name="DateRangePicker+outsideClick"></a>
+
+### dateRangePicker.outsideClick(e) ℗
+Closes the picker when user clicks outside
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Emits**: [<code>outsideClick</code>](#event_outsideClick)  
+**Access**: private  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| e | [<code>jQuery</code>](https://learn.jquery.com/using-jquery-core/jquery-object/) | The Event target |
+
+<a name="DateRangePicker+showCalendars"></a>
+
+### dateRangePicker.showCalendars() ℗
+Shows calendar when user selects "Custom Ranges"
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Emits**: [<code>showCalendar</code>](#event_showCalendar)  
+**Access**: private  
+<a name="DateRangePicker+hideCalendars"></a>
+
+### dateRangePicker.hideCalendars() ℗
+Hides calendar when user selects a predefined range
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Emits**: <code>event:hideCalendar</code>  
+**Access**: private  
+<a name="DateRangePicker+clickRange"></a>
+
+### dateRangePicker.clickRange(e) ℗
+Set date values after user selected a date
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Access**: private  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| e | [<code>jQuery</code>](https://learn.jquery.com/using-jquery-core/jquery-object/) | The Event target |
+
+<a name="DateRangePicker+clickPrev"></a>
+
+### dateRangePicker.clickPrev(e) ℗
+Move calendar to previous month
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Access**: private  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| e | [<code>jQuery</code>](https://learn.jquery.com/using-jquery-core/jquery-object/) | The Event target |
+
+<a name="DateRangePicker+clickNext"></a>
+
+### dateRangePicker.clickNext(e) ℗
+Move calendar to next month
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Access**: private  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| e | [<code>jQuery</code>](https://learn.jquery.com/using-jquery-core/jquery-object/) | The Event target |
+
+<a name="DateRangePicker+hoverDate"></a>
+
+### dateRangePicker.hoverDate(e) ℗
+User hovers over date values
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Access**: private  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| e | [<code>jQuery</code>](https://learn.jquery.com/using-jquery-core/jquery-object/) | The Event target |
+
+<a name="DateRangePicker+hoverRange"></a>
+
+### dateRangePicker.hoverRange(e) ℗
+User hovers over ranges
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Access**: private  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| e | [<code>jQuery</code>](https://learn.jquery.com/using-jquery-core/jquery-object/) | The Event target |
+
+<a name="DateRangePicker+clickDate"></a>
+
+### dateRangePicker.clickDate(e) ℗
+User clicked a date
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Emits**: [<code>dateChange</code>](#event_dateChange)  
+**Access**: private  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| e | [<code>jQuery</code>](https://learn.jquery.com/using-jquery-core/jquery-object/) | The Event target |
+
+<a name="DateRangePicker+calculateChosenLabel"></a>
+
+### dateRangePicker.calculateChosenLabel(e) ℗
+Hightlight selected predefined range in calendar
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Access**: private  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| e | [<code>jQuery</code>](https://learn.jquery.com/using-jquery-core/jquery-object/) | The Event target |
+
+<a name="DateRangePicker+clickApply"></a>
+
+### dateRangePicker.clickApply(e) ℗
+User clicked `Apply` button
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Emits**: [<code>apply</code>](#event_apply)  
+**Access**: private  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| e | [<code>jQuery</code>](https://learn.jquery.com/using-jquery-core/jquery-object/) | The Event target |
+
+<a name="DateRangePicker+clickCancel"></a>
+
+### dateRangePicker.clickCancel(e) ℗
+User clicked `Cancel` button
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Emits**: [<code>cancel</code>](#event_cancel)  
+**Access**: private  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| e | [<code>jQuery</code>](https://learn.jquery.com/using-jquery-core/jquery-object/) | The Event target |
+
+<a name="DateRangePicker+monthOrYearChanged"></a>
+
+### dateRangePicker.monthOrYearChanged(e) ℗
+Calender month moved
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Access**: private  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| e | [<code>jQuery</code>](https://learn.jquery.com/using-jquery-core/jquery-object/) | The Event target |
+
+<a name="DateRangePicker+timeChanged"></a>
+
+### dateRangePicker.timeChanged(e) ℗
+User clicked a time
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Emits**: [<code>timeChange</code>](#event_timeChange)  
+**Access**: private  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| e | [<code>jQuery</code>](https://learn.jquery.com/using-jquery-core/jquery-object/) | The Event target |
+
+<a name="DateRangePicker+elementChanged"></a>
+
+### dateRangePicker.elementChanged() ℗
+User inserted value into `<input>`
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Access**: private  
+<a name="DateRangePicker+keydown"></a>
+
+### dateRangePicker.keydown(e) ℗
+Handles key press
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Access**: private  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| e | [<code>jQuery</code>](https://learn.jquery.com/using-jquery-core/jquery-object/) | The Event target |
+
+<a name="DateRangePicker+updateElement"></a>
+
+### dateRangePicker.updateElement() ℗
+Update linked `<input>` element with selected value
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Access**: private  
+<a name="DateRangePicker+remove"></a>
+
+### dateRangePicker.remove() ℗
+Remove the picker from document
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Access**: private  
 <a name="DateRangePicker.daterangepicker"></a>
 
 ### DateRangePicker.daterangepicker(options, callback) ⇒
@@ -231,7 +594,7 @@ Options for DateRangePicker
 | linkedCalendars | <code>boolean</code> | <code>true</code> | When enabled, the two calendars displayed will always be for two sequential months (i.e. January and February), and both will be advanced when clicking the left or right arrows above the calendars.<br/> When disabled, the two calendars can be individually advanced and display any month/year |
 | isInvalidDate | <code>function</code> | <code>false</code> | A function that is passed each date in the two calendars before they are displayed,<br/>  and may return `true` or `false` to indicate whether that date should be available for selection or not.<br/> Signature: `isInvalidDate(date)` Function has no effect on date values set by `startDate`, `endDate`, `ranges`, `setStartDate()`, `setEndDate()`. |
 | isInvalidTime | <code>function</code> | <code>false</code> | A function that is passed each hour/minute/second/am-pm in the two calendars before they are displayed,<br/>  and may return `true` or `false` to indicate whether that date should be available for selection or not.<br/> Signature: `isInvalidDate(time, side, unit)`<br/> `side` is 'start' or 'end' or `null` for `singleDatePicker = true`<br/> `unit` is `'hour'`, `'minute'`, `'second'` or `'ampm'`<br/> Function has no effect on time values set by `startDate`, `endDate`, `ranges`, `setStartDate()`, `setEndDate()`.<br/> Ensure that your function returns `false` for at least one item. Otherwise the calender is not rendered.<br/> |
-| isCustomDate | <code>function</code> | <code>&quot;&quot;</code> | A function that is passed each date in the two calendars before they are displayed, and may return a string or array of CSS class names to apply to that date's calendar cell.<br/> Signature: `isCustomDate(date)` |
+| isCustomDate | <code>function</code> | <code>false</code> | A function that is passed each date in the two calendars before they are displayed, and may return a string or array of CSS class names to apply to that date's calendar cell.<br/> Signature: `isCustomDate(date)` |
 | applyButtonClasses | <code>string</code> | <code>&quot;btn-primary&quot;</code> | CSS class names that will be added only to the apply button |
 | cancelButtonClasses | <code>string</code> | <code>&quot;btn-default&quot;</code> | CSS class names that will be added only to the cancel button |
 | buttonClasses | <code>string</code> | <code>&quot;btn&quot;</code> | btn-sm - CSS class names that will be added to both the apply and cancel buttons. |
