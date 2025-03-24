@@ -1260,7 +1260,6 @@
         },
 
         hide: function (e) {
-            return;
             if (!this.isShowing) return;
 
             //incomplete date selection, revert to last values
@@ -1276,6 +1275,9 @@
             //if picker is attached to a text input, update it
             this.updateElement();
 
+            const cancel = this.element.triggerHandler('beforeHide', this);
+            if (cancel)
+                return;
             $(document).off('.daterangepickerM');
             $(window).off('.daterangepickerM');
             this.container.hide();

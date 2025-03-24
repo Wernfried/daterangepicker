@@ -5,7 +5,10 @@
   "main": "daterangepicker.js",
   "style": "daterangepicker.css",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "preversion": "jsdoc2md --private daterangepicker.js > daterangepicker.md",
+    "postversion": "sed -i -e \"s/@version: .*/@version: %npm_package_version%/\" daterangepicker.js",
+    "prepack": "unix2dos daterangepicker.js doc/daterangepicker.md",
+    "prepare": "git commit -a -m \"Updated doc and version\""
   },
   "repository": {
     "type": "git",

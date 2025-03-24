@@ -1193,16 +1193,18 @@
                 //Preserve the time already selected
                 var timeSelector = this.container.find('.drp-calendar.right .calendar-time');
                 if (timeSelector.html() != '') {
-                    selected.set({ hour: !isNaN(selected.hour) ? selected.hour : timeSelector.find('.hourselect option:selected').val() });
-                    selected.set({ minute: !isNaN(selected.minute) ? selected.minute : timeSelector.find('.minuteselect option:selected').val() });
-                    selected.set({ second: !isNaN(selected.second) ? selected.second : timeSelector.find('.secondselect option:selected').val() });
+                    selected = selected.set({
+                        hour: !isNaN(selected.hour) ? selected.hour : timeSelector.find('.hourselect option:selected').val(),
+                        minute: !isNaN(selected.minute) ? selected.minute : timeSelector.find('.minuteselect option:selected').val(),
+                        second: !isNaN(selected.second) ? selected.second : timeSelector.find('.secondselect option:selected').val()
+                    });
 
                     if (!this.timePicker24Hour) {
                         var ampm = timeSelector.find('.ampmselect option:selected').val();
                         if (ampm === 'PM' && selected.hour < 12)
-                            selected.set({ hour: selected.hour + 12 });
+                            selected = selected.set({ hour: selected.hour + 12 });
                         if (ampm === 'AM' && selected.hour === 12)
-                            selected.set({ hour: 0 });
+                            selected = selected.set({ hour: 0 });
                     }
 
                 }
@@ -1236,8 +1238,8 @@
                 if (!this.timePicker24Hour)
                     i_in_24 = selected.hour >= 12 ? (i == 12 ? 12 : i + 12) : (i == 12 ? 0 : i);
 
-                var time = selected.set({ hour: i_in_24 });
-                var disabled = false;
+                let time = selected.set({ hour: i_in_24 });
+                let disabled = false;
                 if (minDate && time.set({ minute: 59 }) < minDate)
                     disabled = true;
                 if (maxDate && time.set({ minute: 0 }) > maxDate)
@@ -1267,9 +1269,9 @@
 
                 for (var i = 0; i < 60; i += opts.minuteStep) {
                     var padded = i < 10 ? '0' + i : i;
-                    var time = selected.set({ minute: i });
+                    let time = selected.set({ minute: i });
 
-                    var disabled = false;
+                    let disabled = false;
                     if (minDate && time.set({ second: 59 }) < minDate)
                         disabled = true;
                     if (maxDate && time.set({ second: 0 }) > maxDate)
@@ -1300,9 +1302,9 @@
 
                 for (var i = 0; i < 60; i += opts.secondStep) {
                     var padded = i < 10 ? '0' + i : i;
-                    var time = selected.set({ second: i });
+                    let time = selected.set({ second: i });
 
-                    var disabled = false;
+                    let disabled = false;
                     if (minDate && time < minDate)
                         disabled = true;
                     if (maxDate && time > maxDate)
@@ -1495,7 +1497,6 @@
         },
 
         hide: function (e) {
-            return;
             if (!this.isShowing) return;
 
             //incomplete date selection, revert to last values
@@ -1856,11 +1857,11 @@
             }
 
             if (isLeft) {
-                this.leftCalendar.month.set({ year: year, month: month });
+                this.leftCalendar.month = this.leftCalendar.month.set({ year: year, month: month });
                 if (this.linkedCalendars)
                     this.rightCalendar.month = this.leftCalendar.month.plus({ month: 1 });
             } else {
-                this.rightCalendar.month.set({ year: year, month: month });
+                this.leftCalendar.month = this.rightCalendar.month.set({ year: year, month: month });
                 if (this.linkedCalendars)
                     this.leftCalendar.month = this.rightCalendar.month.minus({ month: 1 });
             }
@@ -1901,10 +1902,7 @@
             }
 
             if (isLeft) {
-                var start = this.startDate;
-                start.set({ hour: hour });
-                start.set({ minute: minute });
-                start.set({ second: second });
+                let start = this.startDate.set({ hour: hour, minute: minute, second: second });
                 this.setStartDate(start, true);
                 if (this.singleDatePicker) {
                     this.endDate = this.startDate;
@@ -1912,10 +1910,7 @@
                     this.setEndDate(start, true);
                 }
             } else if (this.endDate) {
-                var end = this.endDate;
-                end.hour.set({ hour });
-                end.minuteset({ minute });
-                end.secondset({ second });
+                let end = this.endDate.set({ hour: hour, minute: minute, second: second });
                 this.setEndDate(end, true);
             }
 

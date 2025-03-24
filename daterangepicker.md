@@ -33,6 +33,7 @@
     * _instance_
         * [.setStartDate(startDate)](#DateRangePicker+setStartDate)
         * [.setEndDate(handler, [options])](#DateRangePicker+setEndDate)
+        * [.show(e)](#DateRangePicker+show) ℗
         * [.hideCalendars()](#DateRangePicker+hideCalendars)
     * _static_
         * [.daterangepicker(options, callback)](#DateRangePicker.daterangepicker) ⇒
@@ -75,6 +76,19 @@ Create a new Twig parser
 ```js
 var picker = $('#daterange').data('daterangepicker'); picker.setEndDate(DateTime.now().startOf('day'));
 ```
+<a name="DateRangePicker+show"></a>
+
+### dateRangePicker.show(e) ℗
+Shows the daterangepicker
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Emits**: <code>event:&quot;show.daterangepicker&quot;</code>  
+**Access**: private  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| e | <code>Event</code> | The event fired from calendar |
+
 <a name="DateRangePicker+hideCalendars"></a>
 
 ### dateRangePicker.hideCalendars()

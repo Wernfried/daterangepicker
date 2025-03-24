@@ -142,15 +142,15 @@
 
         /**
         * Shows the daterangepicker
-        * @param {external:jQuery} e - The calendar jQuery Object
-        * @fires "show.daterangepicker"
+        * @param {Event} e - The event emitted from calendar 
+        * @emits show
         * @private
         */
         show: function (e) {
             if (this.isShowing) return;
             /**
             * @event
-            * @name "show.daterangepicker"
+            * @name show
             * @param {DateRangePicker} this - Object of optional options 
             */
 
