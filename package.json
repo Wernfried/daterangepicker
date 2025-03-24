@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/wernfried/daterangepicker.git"
+    "url": "git+https://github.com/wernfried/daterangepicker.git"
   },
   "author": {
     "name": "wernfried Domscheit",
