@@ -93,13 +93,13 @@
         * @property {function} isInvalidDate=false - A function that is passed each date in the two calendars before they are displayed,<br/> 
         * and may return `true` or `false` to indicate whether that date should be available for selection or not.<br/>
         * Signature: `isInvalidDate(date)`
-        * Function has no effect on date values set by `startDate`, `endDate`, `ranges`, {@link #DateRangePicker+setStartDatesetStartDate}, {@link #DateRangePicker+setEndDatesetEndDate}.
+        * Function has no effect on date values set by `startDate`, `endDate`, `ranges`, {@link #DateRangePicker+setStartDate|setStartDate}, {@link #DateRangePicker+setEndDate|setEndDate}.
         * @property {function} isInvalidTime=false - A function that is passed each hour/minute/second/am-pm in the two calendars before they are displayed,<br/> 
         * and may return `true` or `false` to indicate whether that date should be available for selection or not.<br/>
         * Signature: `isInvalidDate(time, side, unit)`<br/>
         * `side` is 'start' or 'end' or `null` for `singleDatePicker = true`<br/>
         * `unit` is `'hour'`, `'minute'`, `'second'` or `'ampm'`<br/>
-        * Function has no effect on time values set by `startDate`, `endDate`, `ranges`, {@link #DateRangePicker+setStartDatesetStartDate}, {@link #DateRangePicker+setEndDatesetEndDate}.<br/>
+        * Function has no effect on time values set by `startDate`, `endDate`, `ranges`, {@link #DateRangePicker+setStartDate|setStartDate}, {@link #DateRangePicker+setEndDate|setEndDate}.<br/>
         * Ensure that your function returns `false` for at least one item. Otherwise the calender is not rendered.<br/>
         * @property {function} isCustomDate=false - A function that is passed each date in the two calendars before they are displayed, 
         * and may return a string or array of CSS class names to apply to that date's calendar cell.<br/>
@@ -789,7 +789,7 @@
         },
 
         /**
-        * Shortcut for {@link #DateRangePicker+setStartDatesetStartDate} and {@link #DateRangePicker+setEndDatesetEndDate}
+        * Shortcut for {@link #DateRangePicker+setStartDate|setStartDate} and {@link #DateRangePicker+setEndDate|setEndDate}
         * @param {external:DateTime|external:Date|string} startDate - startDate to be set
         * @param {external:DateTime|external:Date|string} endDate - endDate to be set
         * @throws `RangeError` for invalid date values.
@@ -983,7 +983,7 @@
 
         /**
         * Updates the picker when calendar is initiated or any date has been selected. 
-        * Could be useful after running {@link #DateRangePicker+setStartDatesetStartDate} or {@link #DateRangePicker+setEndDatesetEndDate}
+        * Could be useful after running {@link #DateRangePicker+setStartDate|setStartDate} or {@link #DateRangePicker+setEndDate|setEndDate}
         */
         updateView: function () {
             if (this.timePicker) {
