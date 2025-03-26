@@ -108,10 +108,11 @@ Compared to [inital repository](https://github.com/dangrossman/daterangepicker),
 - Added method `setRange` to combine `setStartDate` and `setEndDate`
 - Added option `minSpan` similar to `maxSpan`
 - Added option `isInvalidTime` similar to `isInvalidDate`
+- Added option `onOutsideClick` where you can define whether picker shall apply or revert selected value
 - Replaced [moment](https://momentjs.com/) by [luxon](https://moment.github.io/luxon/index.html)
-- Better validation of input parameters, error are printed to console
+- Better validation of input parameters, error are logged to console
 - Highlight range in calendar when hovering over pre-defined ranges
-- Added option `locale.durationLabel` to show customized label for selected duration, e.g. `'4 Days, 6 Hours, 30 Minutes'` 
+- Added option `locale.durationFormat` to show customized label for selected duration, e.g. `'4 Days, 6 Hours, 30 Minutes'` 
 - ... and maybe some new bugs 😉 
 
 ### Differences between `moment` and `luxon` library

@@ -296,6 +296,12 @@
   padding-right: 8px;
 }
 
+.daterangepicker .drp-duration-label {
+  float: left;
+  position: relative;
+  transform: translateY(8px);
+}
+
 .daterangepicker .drp-buttons .btn {
   margin-left: 8px;
   font-size: 12px;

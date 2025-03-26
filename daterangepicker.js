@@ -41,14 +41,15 @@
         
         * @property {external:DateTime|external:Date|string} startDate=DateTime.now().startOf('day') - The beginning date of the initially selected date range.<br/>
         * Must be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) or a string matching [locale.format](#Locale.format).<br/>
-        * Functions `isInvalidDate()` and `isInvalidTime()` are not evaluated, you may set date/time which is not selectable in calendar.<br/>
-        * If the date does not fall into `minDate` and `maxDate` then date is shifted and a warning is written to console.
+        * Date value is rounded to match option {@link timePickerStepSize}<br/>
+        * Option {@link isInvalidDate} and {@link isInvalidTime} are not evaluated, you may set date/time which is not selectable in calendar.<br/>
+        * If the date does not fall into {@link minDate` and {@link maxDate} then date is shifted and a warning is written to console.
         * @property {external:DateTime|external:Date|string} endDate=DateTime.now().endOf('day') - The end date of the initially selected date range.<br/>
         * Must be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) or a string matching [locale.format](#Locale.format).<br/>
-        * Functions `isInvalidDate()` and `isInvalidTime()` are not evaluated, you may set date/time which is not selectable in calendar.<br/>
-        * If the date does not fall into `minDate` and `maxDate` then date is shifted and a warning is written to console.<br/>
-        * Option `minSpan` and `maxSpan` are not evaluated.<br/>
-        
+        * Date value is rounded to match option {@link timePickerStepSize}<br/>
+        * Option {@link isInvalidDate}, {@link isInvalidTime} and {@link minSpan}, {@link maxSpan} are not evaluated, you may set date/time which is not selectable in calendar.<br/>
+        * If the date does not fall into {@link minDate} and {@link maxDate} then date is shifted and a warning is written to console.<br/>
+
         * @property {external:DateTime|external:Date|string|null} minDate - The earliest date a user may select or `null` for no limit.<br/>
         * Must be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) or a string matching [locale.format](#Locale.format).
         * @property {external:DateTime|external:Date|string|null} maxDate - The latest date a user may select or `null` for no limit.<br/>
@@ -76,27 +77,32 @@
         * Must be a `luxon.Duration` or number of seconds or a string according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601#Time_intervals) duration.<br/>
         * Valid values are 1,2,3,4,5,6,10,12,15,20,30 for `Duration.fromObject({seconds: ...})` and `Duration.fromObject({minutes: ...})` 
         * and 1,2,3,4,6,(8,12) for `Duration.fromObject({hours: ...})`.<br/>
-        * Duration must be greater than `minSpan` and smaller than `maxSpan`.<br/>
+        * Duration must be greater than {@link minSpan} and smaller than {@link maxSpan}.<br/>
         * For example `timePickerStepSize: 600` will disable time picker seconds and time picker minutes are set to step size of 10 Minutes.<br/>
         * Overwrites #timePickerIncrement and #timePickerSeconds
-        * @property {boolean} timePickerSeconds=boolean - **Deprecated**, use `timePickerStepSize`<br/>Show seconds in the timePicker, use `timePickerStepSize`
-        * @property {boolean} timePickerIncrement=1 - **Deprecated**, use `timePickerStepSize`<br/>Increment of the minutes selection list for times
+        * @property {boolean} timePickerSeconds=boolean - **Deprecated**, use {@link timePickerStepSize}<br/>Show seconds in the timePicker
+        * @property {boolean} timePickerIncrement=1 - **Deprecated**, use {@link timePickerStepSize}<br/>Increment of the minutes selection list for times
         
-        * @property {boolean} autoUpdateInput=true - Indicates whether the date range picker should automatically update the value of the `<input>` element it's attached to at initialization and when the selected dates change. 
-        * @property {boolean} linkedCalendars=true - When enabled, the two calendars displayed will always be for two sequential months (i.e. January and February), and both will be advanced when clicking the left or right arrows above the calendars.<br/>
+        * @property {boolean} autoUpdateInput=true - Indicates whether the date range picker should automatically update the value of the `<input>` 
+        * element it's attached to at initialization and when the selected dates change.<br/>Value is reverted when use clicks on `Cancel`.
+        * @property {string} onOutsideClick=none - Defines what picker shall do when user clicks outside the calendar. 
+        * `'apply'` or `'cancel'`. Event {@link 'onOutsideClick.daterangepicker'} is always emitted.
+        * @property {boolean} linkedCalendars=true - When enabled, the two calendars displayed will always be for two sequential months (i.e. January and February), 
+        * and both will be advanced when clicking the left or right arrows above the calendars.<br/>
         * When disabled, the two calendars can be individually advanced and display any month/year
         * @property {function} isInvalidDate=false - A function that is passed each date in the two calendars before they are displayed,<br/> 
         * and may return `true` or `false` to indicate whether that date should be available for selection or not.<br/>
         * Signature: `isInvalidDate(date)`
-        * Function has no effect on date values set by `startDate`, `endDate`, `ranges`, `setStartDate()`, `setEndDate()`.
+        * Function has no effect on date values set by {@link startDate}, {@link endDate}, {@link ranges}, {@link setStartDate}, {@link setEndDate}.
         * @property {function} isInvalidTime=false - A function that is passed each hour/minute/second/am-pm in the two calendars before they are displayed,<br/> 
         * and may return `true` or `false` to indicate whether that date should be available for selection or not.<br/>
         * Signature: `isInvalidDate(time, side, unit)`<br/>
         * `side` is 'start' or 'end' or `null` for `singleDatePicker = true`<br/>
         * `unit` is `'hour'`, `'minute'`, `'second'` or `'ampm'`<br/>
-        * Function has no effect on time values set by `startDate`, `endDate`, `ranges`, `setStartDate()`, `setEndDate()`.<br/>
+        * Function has no effect on time values set by {@link startDate}, {@link endDate}, {@link ranges}, {@link setStartDate}, {@link setEndDate}.<br/>
         * Ensure that your function returns `false` for at least one item. Otherwise the calender is not rendered.<br/>
-        * @property {function} isCustomDate=false - A function that is passed each date in the two calendars before they are displayed, and may return a string or array of CSS class names to apply to that date's calendar cell.<br/>
+        * @property {function} isCustomDate=false - A function that is passed each date in the two calendars before they are displayed, 
+        * and may return a string or array of CSS class names to apply to that date's calendar cell.<br/>
         * Signature: `isCustomDate(date)`
         
         * @property {string} applyButtonClasses=btn-primary - CSS class names that will be added only to the apply button
@@ -107,16 +113,21 @@
         * @property {string} drops=down - Whether the picker appears below or above the HTML element it's attached to.<br/>
         * `'down' \| 'up' \| 'auto'`
         
-        * @property {Options.Ranges} ranges={} - Set predefined date ranges the user can select from. Each key is the label for the range, and its value an array with two dates representing the bounds of the range.
-        * @property {boolean} showCustomRangeLabel=true - Displays "Custom Range" at the end of the list of predefined [ranges](Options.Ranges), when the ranges option is used.<br>
+        * @property {Options.Ranges} ranges={} - Set predefined date ranges the user can select from. Each key is the label for the range, 
+        * and its value an array with two dates representing the bounds of the range.
+        * @property {boolean} showCustomRangeLabel=true - Displays "Custom Range" at the end of the list of predefined {@link Ranges}, 
+        * when the ranges option is used.<br>
         * This option will be highlighted whenever the current date range selection does not match one of the predefined ranges.<br/>
         * Clicking it will display the calendars to select a new range.
-        * @property {boolean} alwaysShowCalendars=false - Normally, if you use the ranges option to specify pre-defined date ranges, calendars for choosing a custom date range are not shown until the user clicks "Custom Range".<br/>
+        * @property {boolean} alwaysShowCalendars=false - Normally, if you use the ranges option to specify pre-defined date ranges, 
+        * calendars for choosing a custom date range are not shown until the user clicks "Custom Range".<br/>
         * When this option is set to true, the calendars for choosing a custom date range are always shown instead.
-        * @property {object} locale={} - Allows you to provide localized strings for buttons and labels, customize the date format, and change the first day of week for the calendars.
+        * @property {object} locale={} - Allows you to provide localized strings for buttons and labels, customize the date format, 
+        * and change the first day of week for the calendars.
         * @property {string} locale.direction=ltr - Direction of reading, `'ltr'` or `'rtl'`
         * @property {object|string} locale.format=DateTime.DATE_SHORT - Date formats. Either given as string, 
-        * see [Format Tokens](https://moment.github.io/luxon/#/formatting?id=table-of-tokens) or an object according to [Intl.DateTimeFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat)<br/>
+        * see [Format Tokens](https://moment.github.io/luxon/#/formatting?id=table-of-tokens) or an object according 
+        * to [Intl.DateTimeFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat)<br/>
         * I recommend to use the luxon [Presets](https://moment.github.io/luxon/#/formatting?id=presets).
         * @property {string} locale.separator= - Defaut: `' - '` - Separator for start and end time
         * @property {string} locale.weekLabel=W - Label for week numbers
@@ -126,9 +137,35 @@
         * @property {string} locale.applyLabel=Apply - Label of `Apply` Button
         * @property {string} locale.cancelLabel=Cancel - Label of `Cancel` Button
         * @property {string} locale.customRangeLabel=Custom Range - Title for custom ranges
-        * @property {object|string} locale.durationLabel={} - Format a custom label for selected duration, for example `'5 Days, 12 Hours'`.<br/>
+        * @property {object|string} locale.durationFormat={} - Format a custom label for selected duration, for example `'5 Days, 12 Hours'`.<br/>
         * Define the format either as string, see [Duration.toFormat - Format Tokens](https://moment.github.io/luxon/api-docs/index.html#durationtoformat) or 
-        * an object according to [Intl.NumberFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#options), see [Duration.toHuamn](https://moment.github.io/luxon/api-docs/index.html#durationtohuman).
+        * an object according to [Intl.NumberFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#options), 
+        * see [Duration.toHuamn](https://moment.github.io/luxon/api-docs/index.html#durationtohuman).
+        */
+
+        /**
+        * A set of predefined ranges
+        * @typedef Ranges
+        * @type {Object}
+        * @property {string} name - The name of the range
+        * @property {external:DateTime|external:Date|string} range - Array of 2 elements with startDate and endDate
+        * @example {
+        *  'Today': [DateTime.now().startOf('day'), DateTime.now().endOf('day')],
+        *  'Yesterday': [DateTime.now().startOf('day').minus({days: 1}), DateTime.now().minus({days: 1}).endOf('day')],
+        *  'Last 7 Days': [DateTime.now().startOf('day').minus({days: 6}), DateTime.now()],
+        *  'Last 30 Days': [DateTime.now().startOf('day').minus({days: 29}), DateTime.now()],
+        *  'This Month': [DateTime.now().startOf('day').startOf('month'), DateTime.now().endOf('month')],
+        *  'Last Month': [DateTime.now().startOf('day').minus({months: 1}).startOf('month'), DateTime.now().minus({months: 1}).endOf('month')]
+        * }
+        */
+
+        /**
+        * A single predefined range
+        * @typedef Range
+        * @type {Object}
+        * @property {string} name - The name of the range
+        * @property {external:DateTime|external:Date|string} range - Array of 2 elements with startDate and endDate
+        * @example { Today: [DateTime.now().startOf('day'), DateTime.now().endOf('day')] }        
         */
 
         //default settings for options
@@ -154,9 +191,10 @@
         this.linkedCalendars = true;
         this.autoUpdateInput = true;
         this.alwaysShowCalendars = false;
-        this.isInvalidDate = function () { return false };
-        this.isInvalidTime = function () { return false };
-        this.isCustomDate = function () { return false };
+        this.isInvalidDate = null;
+        this.isInvalidTime = null;
+        this.isCustomDate = null;
+        this.onOutsideClick = 'apply';
         this.ranges = {};
 
         this.opens = 'right';
@@ -182,7 +220,7 @@
             daysOfWeek: Info.weekdays('short'),
             monthNames: Info.months('long'),
             firstDay: Info.getStartOfWeek(),
-            durationLabel: null
+            durationFormat: null
         };
 
         this.callback = function () { };
@@ -230,8 +268,12 @@
 
         if (typeof options.locale === 'object') {
 
-            if (typeof options.locale.direction === 'string')
-                this.locale.direction = options.locale.direction;
+            if (typeof options.locale.direction === 'string') {
+                if (['rtl', 'ltr'].includes(options.locale.direction))
+                    this.locale.direction = options.locale.direction
+                else
+                    console.error(`Option 'options.locale.direction' must be 'rtl' or 'ltr'`);
+            }
 
             if (['string', 'object'].includes(typeof options.locale.format))
                 this.locale.format = options.locale.format;
@@ -273,8 +315,8 @@
                 this.locale.customRangeLabel = rangeHtml;
             }
 
-            if (['string', 'object'].includes(typeof options.locale.durationLabel) && options.locale.durationLabel != null)
-                this.locale.durationLabel = durationLabel;
+            if (['string', 'object'].includes(typeof options.locale.durationFormat) && options.locale.durationFormat != null)
+                this.locale.durationFormat = options.locale.durationFormat;
         }
         this.container.addClass(this.locale.direction);
 
@@ -322,6 +364,14 @@
                 console.error(`Option 'timePickerStepSize' ${JSON.stringify(duration.toObject())} is not valid`);
             }
         }
+
+        this.timePickerOpts = {
+            showMinutes: this.timePickerStepSize < Duration.fromObject({ hours: 1 }),
+            showSeconds: this.timePickerStepSize < Duration.fromObject({ minutes: 1 }),
+            hourStep: this.timePickerStepSize >= Duration.fromObject({ hours: 1 }) ? this.timePickerStepSize.hours : 1,
+            minuteStep: this.timePickerStepSize >= Duration.fromObject({ minutes: 1 }) ? this.timePickerStepSize.minutes : 1,
+            secondStep: this.timePickerStepSize.seconds
+        };
 
         if (!this.singleDatePicker) {
             for (let opt of ['minSpan', 'maxSpan']) {
@@ -374,55 +424,12 @@
                 this.minDate = this.minDate.startOf('day');
             if (this.maxDate)
                 this.maxDate = this.maxDate.endOf('day');
-        } else {
-            const secs = this.timePickerStepSize.as('seconds');
-            if (this.minDate)
-                this.minDate = DateTime.fromSeconds(secs * Math.round(this[this.minDate].toSeconds() / secs));
-            if (this.maxDate)
-                this.maxDate = DateTime.fromSeconds(secs * Math.round(this[this.maxDate].toSeconds() / secs));
         }
         if (this.singleDatePicker)
             this.endDate = this.startDate;
 
         // Do some sanity checks on startDate for minDate, maxDate
-        if (this.minDate && this.startDate < this.minDate) {
-            if (this.timePicker) {
-                while (this.startDate < this.minDate)
-                    this.startDate = this.startDate.plus(this.timePickerStepSize);
-            } else {
-                this.startDate = this.minDate;
-            }
-            console.warn(`Set startDate to ${this.startDate.toISO()} due to 'minDate'`);
-        } else if (this.maxDate && this.startDate > this.maxDate) {
-            if (this.timePicker) {
-                while (this.startDate > this.minDate)
-                    this.startDate = this.startDate.minus(this.timePickerStepSize);
-            } else {
-                this.startDate = this.maxDate;
-            }
-            console.warn(`Set startDate to ${this.startDate.toISO()} due to 'maxDate'`);
-        }
-
-        // Do some sanity checks on endDate for minDate, maxDate
-        if (!this.singleDatePicker) {
-            if (this.minDate && this.endDate < this.minDate) {
-                if (this.timePicker) {
-                    while (this.endDate < this.minDate)
-                        this.endDate = this.endDate.plus(this.timePickerStepSize);
-                } else {
-                    this.endDate = this.minDate;
-                }
-                console.warn(`Set endDate to ${this.endDate.toISO()} due to 'minDate'`);
-            } else if (this.maxDate && this.endDate > this.maxDate) {
-                if (this.timePicker) {
-                    while (this.endDate > this.minDate)
-                        this.endDate = this.endDate.minus(this.timePickerStepSize);
-                } else {
-                    this.endDate = this.maxDate;
-                }
-                console.warn(`Set endDate to ${this.endDate.toISO()} due to 'maxDate'`);
-            }
-        }
+        this.constrainDate();
 
         if (typeof options.applyButtonClasses === 'string')
             this.applyButtonClasses = options.applyButtonClasses;
@@ -430,11 +437,19 @@
         if (typeof options.cancelButtonClasses === 'string')
             this.cancelButtonClasses = options.cancelButtonClasses;
 
-        if (typeof options.opens === 'string')
-            this.opens = options.opens;
+        if (typeof options.opens === 'string') {
+            if (['left', 'right', 'center'].includes(options.opens))
+                this.opens = options.opens
+            else
+                console.error(`Option 'options.opens' must be 'left', 'right' or 'center'`);
+        }
 
-        if (typeof options.drops === 'string')
-            this.drops = options.drops;
+        if (typeof options.drops === 'string') {
+            if (['drop', 'down', 'auto'].includes(options.drops))
+                this.drops = options.drops
+            else
+                console.error(`Option 'options.drops' must be 'drop', 'down' or 'auto'`);
+        }
 
         if (typeof options.showWeekNumbers === 'boolean')
             this.showWeekNumbers = options.showWeekNumbers;
@@ -470,16 +485,29 @@
             this.linkedCalendars = options.linkedCalendars;
 
         if (typeof options.isInvalidDate === 'function')
-            this.isInvalidDate = options.isInvalidDate;
+            this.isInvalidDate = options.isInvalidDate
+        else
+            this.isInvalidDate = function () { return false };
 
         if (typeof options.isInvalidTime === 'function')
-            this.isInvalidTime = options.isInvalidTime;
+            this.isInvalidTime = options.isInvalidTime
+        else
+            this.isInvalidTime = function () { return false };
 
         if (typeof options.isCustomDate === 'function')
-            this.isCustomDate = options.isCustomDate;
+            this.isCustomDate = options.isCustomDate
+        else
+            this.isCustomDate = function () { return false };
 
         if (typeof options.alwaysShowCalendars === 'boolean')
             this.alwaysShowCalendars = options.alwaysShowCalendars;
+
+        if (typeof options.onOutsideClick === 'string') {
+            if (['cancel', 'apply'].includes(options.onOutsideClick))
+                this.onOutsideClick = options.onOutsideClick
+            else
+                console.error(`Option 'options.onOutsideClick' must be 'cancel' or 'apply'`);
+        }
 
         // update day names order to firstDay
         if (this.locale.firstDay != 1) {
@@ -506,7 +534,7 @@
                     end = DateTime.fromFormat(val, format, { locale: DateTime.now().locale });
                 }
 
-                if (start && end && start.isValid && end.isValid) {
+                if (start.isValid && end.isValid) {
                     this.setStartDate(start, false);
                     this.setEndDate(end, false);
                 }
@@ -538,78 +566,15 @@
                 if (start == null || end == null)
                     continue;
 
-                if (this.timePicker) {
-                    // Round time to step size                    
-                    const secs = this.timePickerStepSize.as('seconds');
-                    start = DateTime.fromSeconds(secs * Math.round(start.toSeconds() / secs));
-                    end = DateTime.fromSeconds(secs * Math.round(end.toSeconds() / secs));
-                }
-
-                // If the start falls below those allowed by the minDate option, shorten the range to the allowable period.
-                if (this.minDate && start < this.minDate) {
-                    if (this.timePicker) {
-                        while (start < this.minDate)
-                            start = start.plus(this.timePickerStepSize);
-                    } else {
-                        start = this.minDate;
-                    }
-                    console.warn(`Set start of range '${range}' to ${start.toISO()} due to 'minDate'`);
-                }
-
-                // If the end exceeds the maxDate option, shorten the range to the allowable period.
-                if (this.maxDate && end > this.maxDate) {
-                    if (this.timePicker) {
-                        while (end > this.minDate)
-                            end = end.minus(this.timePickerStepSize);
-                    } else {
-                        end = this.maxDate;
-                    }
-                    console.warn(`Set end of range '${range}' to ${end.toISO()} due to 'maxDate'`);
-                }
-
-                // As written in README.md minSpan and maxSpan are not evaluated.
-                // However, if someone may request it, then uncomment the block:
-                /*
-                if (this.maxSpan) {
-                    // If the end date exceeds those allowed by the maxSpan option, shorten the range to the allowable period.
-                    const maxDate = start.plus(this.maxSpan);
-                    if (end > maxDate) {
-                        if (this.timePicker) {
-                            while (end > maxDate)
-                                end = end.minus(this.timePickerStepSize);
-                        } else {
-                            end = maxDate;
-                        }
-                        console.warn(`Set end of range '${range}' to ${end.toISO()} due to 'maxSpan'`);
-                    }
-                }
-
-                if (this.minSpan) {
-                    // If the end date falls below those allowed by the minSpan option, expand the range to the allowable period.
-                    const minDate = start.plus(this.minSpan);
-                    if (end < minDate) {
-                        if (this.minDate && end > this.minDate) {
-                            console.warn(`Skip range '${range}' because option 'minDate' contradicts to option 'minSpan'`);
-                            continue;
-                        } else {
-                            if (this.timePicker) {
-                                while (end < minDate)
-                                    end = end.plus(this.timePickerStepSize);
-                            } else {
-                                end = minDate;
-                            }
-                            console.warn(`Set end of range '${range}' to ${end.toISO()} due to 'minSpan'`);
-                        }
-                    }
-                }
-                */
+                const validRange = this.constrainDate({ span: false }, [range, start, end]);
+                options.ranges[range] = validRange;
 
                 //Support unicode chars in the range names.
                 var elem = document.createElement('textarea');
                 elem.innerHTML = range;
                 var rangeHtml = elem.value;
 
-                this.ranges[rangeHtml] = [start, end];
+                this.ranges[rangeHtml] = validRange;
             }
 
             var list = '<ul>';
@@ -711,14 +676,19 @@
     DateRangePicker.prototype = {
 
         constructor: DateRangePicker,
-
         /**
         * Sets the date range picker's currently selected start date to the provided date.<br/>
-        * `startDate` be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) or a string matching [locale.format](#Locale.format).
-        * Functions `isInvalidDate()` and `isInvalidTime()` are not evaluated, you may set date/time which is not selectable in calendar.<br/>
-        * If the `startDate` does not fall into `minDate` and `maxDate` then `startDate` is shifted and a warning is written to console. 
+        * `startDate` must be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) or 
+        * a string matching {@link locale.format}.
+        * The value of the attached `<input>` element is also updated.
+        * Date value is rounded to match option {@link timePickerStepSize}<br/>
+        * Functions {@link isInvalidDate} and {@link isInvalidTime} are not evaluated, you may set date/time which is not selectable in calendar.<br/>
+        * If the `startDate` does not fall into {@link minDate} and {@link maxDate} then {@link startDate} is shifted and a warning is written to console. 
         * @param {external:DateTime|external:Date|string} startDate - startDate to be set
         * @throws `RangeError` for invalid date values.
+        * @example const DateTime = luxon.DateTime;
+        * const drp = $('#picker').data('daterangepicker');
+        * drp.setStartDate(DateTime.now().startOf('hour'));
         */
         setStartDate: function (startDate, isValid) {
             // If isValid == true, then value is selected from calendar and stepSize, minDate, maxDate are already considered
@@ -745,34 +715,8 @@
                 this.startDate = startDate;
             }
 
-            if (isValid === undefined || !isValid) {
-                if (this.timePicker) {
-                    // Round time to step size
-                    const secs = this.timePickerStepSize.as('seconds');
-                    this.startDate = DateTime.fromSeconds(secs * Math.round(this.startDate.toSeconds() / secs));
-                } else {
-                    this.startDate = this.startDate.startOf('day');
-                }
-
-                // Do some sanity checks on minDate, maxDate
-                if (this.minDate && this.startDate < this.minDate) {
-                    if (this.timePicker) {
-                        while (this.startDate < this.minDate)
-                            this.startDate = this.startDate.plus(this.timePickerStepSize);
-                    } else {
-                        this.startDate = this.minDate;
-                    }
-                    console.warn(`Set startDate to ${this.startDate.toISO()} due to 'minDate'`);
-                } else if (this.maxDate && this.startDate > this.maxDate) {
-                    if (this.timePicker) {
-                        while (this.startDate > this.minDate)
-                            this.startDate = this.startDate.minus(this.timePickerStepSize);
-                    } else {
-                        this.startDate = this.maxDate.startOf('day');
-                    }
-                    console.warn(`Set startDate to ${this.startDate.toISO()} due to 'maxDate'`);
-                }
-            }
+            if (isValid === undefined || !isValid)
+                this.constrainDate();
 
             if (!this.isShowing)
                 this.updateElement();
@@ -782,11 +726,17 @@
 
         /**
         * Sets the date range picker's currently selected end date to the provided date.<br/>
-        * `endDate` be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) or a string matching [locale.format](#Locale.format).
-        * Functions `isInvalidDate()` and `isInvalidTime()` are not evaluated, you may set date/time which is not selectable in calendar.<br/>
-        * If the `endDate` does not fall into `minDate` and `maxDate` then `endDate` or `minSpan` and `maxSpan` is shifted and a warning is written to console. 
+        * `endDate` be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) or 
+        * a string matching {@link locale.format}.
+        * The value of the attached `<input>` element is also updated.
+        * Date value is rounded to match option {@link timePickerStepSize}<br/>
+        * Functions {@link isInvalidDate} and {@link isInvalidTime} are not evaluated, you may set date/time which is not selectable in calendar.<br/>
+        * If the {@link endDate} does not fall into {@link minDate} and {@link maxDate} or into {@link minSpan} and {@link maxSpan} 
+        * then {@link endDate} is shifted and a warning is written to console. 
         * @param {external:DateTime|external:Date|string} endDate - endDate to be set
         * @throws `RangeError` for invalid date values.
+        * @example const drp = $('#picker').data('daterangepicker');
+        * drp.setEndDate('2025-03-28T18:30:00');
         */
         setEndDate: function (endDate, isValid) {
             // If isValid == true, then value is selected from calendar and stepSize, minDate, maxDate are already considered
@@ -813,76 +763,17 @@
                 this.endDate = endDate;
             }
 
-            if (isValid === undefined || !isValid) {
-                if (this.timePicker) {
-                    // Round time to step size
-                    const secs = this.timePickerStepSize.as('seconds');
-                    this.endDate = DateTime.fromSeconds(secs * Math.round(this.endDate.toSeconds() / secs));
-                } else {
-                    this.endDate = this.endDate.endOf('day');
-                }
-
-                // Do some sanity checks on minDate, maxDate
-                if (this.minDate && this.endDate < this.minDate) {
-                    if (this.timePicker) {
-                        while (this.endDate < this.minDate)
-                            this.endDate = this.endDate.plus(this.timePickerStepSize);
-                    } else {
-                        this.endDate = this.minDate;
-                    }
-                    console.warn(`Set endDate to ${this.endDate.toISO()} due to 'minDate'`);
-                } else if (this.maxDate && this.endDate > this.maxDate) {
-                    if (this.timePicker) {
-                        while (this.endDate > this.minDate)
-                            this.endDate = this.endDate.minus(this.timePickerStepSize);
-                    } else {
-                        this.endDate = this.maxDate.endOf('day');
-                    }
-                    console.warn(`Set endDate to ${this.endDate.toISO()} due to 'maxDate'`);
-                }
-
-                if (this.maxSpan) {
-                    // If the end date exceeds those allowed by the maxSpan option, shorten the range to the allowable period.
-                    const maxDate = this.startDate.plus(this.maxSpan);
-                    if (this.endDate > maxDate) {
-                        if (this.timePicker) {
-                            while (this.endDate > maxDate)
-                                this.endDate = this.endDate.minus(this.timePickerStepSize);
-                        } else {
-                            this.endDate = maxDate.endOf('day');
-                        }
-                        console.warn(`Set endDate to ${this.endDate.toISO()} due to 'maxSpan'`);
-                    }
-                }
-
-                if (this.minSpan) {
-                    // If the end date falls below those allowed by the minSpan option, expand the range to the allowable period.
-                    const minDate = this.startDate.plus(this.minSpan);
-                    if (this.endDate < minDate) {
-                        if (this.minDate && this.endDate > this.minDate) {
-                            throw RangeError(`Option 'minDate' contradicts to option 'minSpan'`);
-                        } else {
-                            if (this.timePicker) {
-                                while (this.endDate < minDate)
-                                    this.endDate = this.endDate.plus(this.timePickerStepSize);
-                            } else {
-                                this.endDate = minDate.endOf('day');
-                            }
-                            console.warn(`Set endDate to ${this.endDate.toISO()} due to 'minSpan'`);
-                        }
-                    }
-                }
-
-            }
+            if (isValid === undefined || !isValid)
+                this.constrainDate();
 
             this.previousRightTime = this.endDate;
 
-            if (this.locale.durationLabel && !this.singleDatePicker) {
+            if (this.locale.durationFormat && !this.singleDatePicker) {
                 const duration = this.endDate.diff(this.startDate).rescale();
-                if (typeof this.locale.durationLabel === 'object') {
-                    this.container.find('.drp-duration-label').html(duration.toHuman(this.locale.durationLabel));
+                if (typeof this.locale.durationFormat === 'object') {
+                    this.container.find('.drp-duration-label').html(duration.toHuman(this.locale.durationFormat));
                 } else {
-                    this.container.find('.drp-duration-label').html(duration.toFormat(this.locale.durationLabel));
+                    this.container.find('.drp-duration-label').html(duration.toFormat(this.locale.durationFormat));
                 }
             }
             if (typeof this.locale.format === 'object') {
@@ -898,10 +789,13 @@
         },
 
         /**
-        * Shortcut for [setStartDate](#setStartDate) and  [setEndDate](#setEndDate)
+        * Shortcut for {@link setStartDate} and {@link setEndDate}
         * @param {external:DateTime|external:Date|string} startDate - startDate to be set
         * @param {external:DateTime|external:Date|string} endDate - endDate to be set
         * @throws `RangeError` for invalid date values.
+        * @example const DateTime = luxon.DateTime;
+        * const drp = $('#picker').data('daterangepicker');
+        * drp.setPeriod(DateTime.now().startOf('week'), DateTime.now().startOf('week').plus({days: 10}));
         */
         setPeriod: function (startDate, endDate) {
             if (this.singleDatePicker) {
@@ -912,8 +806,183 @@
             }
         },
 
+
         /**
-        * Updates the picker when calendar is initiated or any date has been selected. Could be useful after running `setStartDate()` or `setEndDate()`
+        * @typedef constraintOptions
+        * @type {Object}
+        * @property {boolean} stepSize=true If `true`, then `startDate` and `endDate` are rounded to match {@link timePickerStepSize} (no warning)
+        * @property {boolean} minMax=true If `true` then and if the `startDate` and `endDate` do not fall into {@link minDate} and {@link maxDate} 
+        * then dates are shifted and a warning is written to console. 
+        * @property {boolean} span=true If `true` then and if the `startDate` and `endDate` do not fall into {@link minSpan} and {@link maxSpan} 
+        * then `endDate` is shifted and a warning is written to console. 
+        * @property {boolean} invalidDate=false If `true` then and if {@link invalidDate} return `true`, then an error is logged to console
+        * @property {boolean} invalidTime=false If `true` then and if {@link invalidTime} return `true`, then an error is logged to console
+        * @private
+        */
+
+        /**
+        * Modifies and checks `startDate` and `endDate` against {@link timePickerStepSize}, {@link minDate}, {@link maxDate}, 
+        * {@link minSpan}, {@link maxSpan}, {@link invalidDate} and {@link invalidTime} 
+        * @param {constraintOptions} options - Defines which constraint shall apply
+        * @param {Array} [range] - Used to check prefefined range instead of `startDate` and `endDate` => `[name, startDate, endDate]`
+        * @throws `RangeError` for invalid date values
+        * @returns {Array} - Corrected array of `[startDate, endDate]` or `null`
+        * @private
+        */
+        constrainDate: function ({ minMax = true, span = true, stepSize = true, invalidDate = false, invalidTime = false } = {}, range) {
+            const name = range === undefined ? null : range[0];
+            const nLog = range === undefined ? '' : ` of range '${name}'`;
+            let startDate = range === undefined ? this.startDate : range[1];
+            let endDate = range === undefined ? this.endDate : range[2];
+
+            if (!startDate)
+                return;
+
+            if (stepSize && this.timePicker) {
+                // Round time to step size
+                const secs = this.timePickerStepSize.as('seconds');
+                startDate = DateTime.fromSeconds(secs * Math.round(startDate.toSeconds() / secs));
+            } else {
+                startDate = startDate.startOf('day');
+            }
+
+            if (minMax) {
+                if (this.minDate && startDate < this.minDate) {
+                    if (this.timePicker) {
+                        while (startDate < this.minDate)
+                            startDate = startDate.plus(this.timePickerStepSize);
+                    } else {
+                        startDate = this.minDate;
+                    }
+                    console.warn(`Set startDate${nLog} to ${this.timePicker ? startDate.toISO({ suppressMilliseconds: true }) : startDate.toISODate()} due to 'minDate'`);
+                } else if (this.maxDate && startDate > this.maxDate) {
+                    if (this.timePicker) {
+                        while (startDate > this.minDate)
+                            startDate = startDate.minus(this.timePickerStepSize);
+                    } else {
+                        startDate = this.maxDate.startOf('day');
+                    }
+                    console.warn(`Set startDate${nLog} to ${this.timePicker ? startDate.toISO({ suppressMilliseconds: true }) : startDate.toISODate()} due to 'maxDate'`);
+                }
+            }
+
+            let units = ['hour'];
+            if (invalidTime && this.timePicker) {
+                if (this.timePickerOpts.showMinutes)
+                    units.push('minute');
+                if (this.timePickerOpts.showSeconds)
+                    units.push('second');
+                if (!this.timePicker24Hour)
+                    units.push('ampm');
+            }
+
+            if (invalidDate && this.timePicker && this.isInvalidDate(startDate))
+                console.error(`The startDate${nLog} ${startDate.toISODate()} is invalid by 'isInvalidDate'`);
+
+            if (invalidTime && this.timePicker) {
+                for (let unit of units) {
+                    if (this.isInvalidTime(startDate, unit, 'start'))
+                        console.error(`The startDate${nLog} ${startDate.toISO({ suppressMilliseconds: true })} ${unit} is invalid by 'invalidTime'`);
+                }
+            }
+
+
+            if (this.singleDatePicker) {
+                endDate = startDate;
+                if (range === undefined) {
+                    this.startDate = startDate;
+                    this.endDate = endDate;
+                    return null;
+                } else {
+                    return [startDate, endDate];
+                }
+            }
+
+            if (stepSize && this.timePicker) {
+                // Round time to step size
+                const secs = this.timePickerStepSize.as('seconds');
+                endDate = DateTime.fromSeconds(secs * Math.round(endDate.toSeconds() / secs));
+            } else {
+                endDate = endDate.endOf('day');
+            }
+
+            if (minMax) {
+                if (this.minDate && endDate < this.minDate) {
+                    if (this.timePicker) {
+                        while (endDate < this.minDate)
+                            endDate = endDate.plus(this.timePickerStepSize);
+                    } else {
+                        endDate = this.minDate;
+                    }
+                    console.warn(`Set endDate${nLog} to ${this.timePicker ? endDate.toISO({ suppressMilliseconds: true }) : endDate.toISODate()} due to 'minDate'`);
+                } else if (this.maxDate && endDate > this.maxDate) {
+                    if (this.timePicker) {
+                        while (endDate > this.minDate)
+                            endDate = endDate.minus(this.timePickerStepSize);
+                    } else {
+                        endDate = this.maxDate.endOf('day');
+                    }
+                    console.warn(`Set endDate${nLog} to ${this.timePicker ? endDate.toISO({ suppressMilliseconds: true }) : endDate.toISODate()} due to 'maxDate'`);
+                }
+            }
+
+            if (span) {
+                if (this.maxSpan) {
+                    // If the end date exceeds those allowed by the maxSpan option, shorten the range to the allowable period.
+                    const maxDate = startDate.plus(this.maxSpan);
+                    if (endDate > maxDate) {
+                        if (this.timePicker) {
+                            while (endDate > maxDate)
+                                endDate = endDate.minus(this.timePickerStepSize);
+                        } else {
+                            endDate = maxDate.endOf('day');
+                        }
+                        console.warn(`Set endDate${nLog} to ${this.timePicker ? endDate.toISO({ suppressMilliseconds: true }) : endDate.toISODate()} due to 'maxSpan'`);
+                    }
+                }
+
+                if (this.minSpan) {
+                    // If the end date falls below those allowed by the minSpan option, expand the range to the allowable period.
+                    const minDate = startDate.plus(this.minSpan);
+                    if (endDate < minDate) {
+                        if (this.minDate && endDate > this.minDate) {
+                            throw RangeError(`Option${nLog} 'minDate' contradicts to option 'minSpan'`);
+                        } else {
+                            if (this.timePicker) {
+                                while (endDate < minDate)
+                                    endDate = endDate.plus(this.timePickerStepSize);
+                            } else {
+                                endDate = minDate.endOf('day');
+                            }
+                            console.warn(`Set endDate${nLog} to ${this.timePicker ? endDate.toISO({ suppressMilliseconds: true }) : endDate.toISODate()} due to 'minSpan'`);
+                        }
+                    }
+                }
+            }
+
+            if (invalidDate && this.timePicker && this.isInvalidDate(endDate))
+                console.error(`The endDate${nLog} ${endDate.toISODate()} is invalid by 'isInvalidDate'`);
+
+            if (invalidTime && this.timePicker) {
+                for (let unit of units) {
+                    if (this.isInvalidTime(endDate, unit, 'end'))
+                        console.error(`The endDate${nLog} ${endDate.toISO({ suppressMilliseconds: true })} ${unit} is invalid by 'invalidTime'`);
+                }
+            }
+
+            if (range === undefined) {
+                this.startDate = startDate;
+                this.endDate = endDate;
+                return null;
+            } else {
+                return [startDate, endDate];
+            }
+
+        },
+
+
+        /**
+        * Updates the picker when calendar is initiated or any date has been selected. Could be useful after running {@link setStartDate} or {@link setEndDate}
         */
         updateView: function () {
             if (this.timePicker) {
@@ -926,12 +995,12 @@
                 }
             }
             if (this.endDate) {
-                if (this.locale.durationLabel && !this.singleDatePicker) {
+                if (this.locale.durationFormat && !this.singleDatePicker) {
                     const duration = this.endDate.diff(this.startDate).rescale();
-                    if (typeof this.locale.durationLabel === 'object') {
-                        this.container.find('.drp-duration-label').html(duration.toHuman(this.locale.durationLabel));
+                    if (typeof this.locale.durationFormat === 'object') {
+                        this.container.find('.drp-duration-label').html(duration.toHuman(this.locale.durationFormat));
                     } else {
-                        this.container.find('.drp-duration-label').html(duration.toFormat(this.locale.durationLabel));
+                        this.container.find('.drp-duration-label').html(duration.toFormat(this.locale.durationFormat));
                     }
                 }
                 if (typeof this.locale.format === 'object') {
@@ -986,22 +1055,20 @@
             if (this.timePicker) {
                 var hour, minute, second;
 
-                const showMinutes = this.timePickerStepSize < Duration.fromObject({ hours: 1 });
-                const showSeconds = this.timePickerStepSize < Duration.fromObject({ minutes: 1 });
                 if (this.endDate) {
                     hour = parseInt(this.container.find('.left .hourselect').val(), 10);
                     if (isNaN(hour))
                         hour = parseInt(this.container.find('.left .hourselect option:last').val(), 10);
 
                     minute = 0;
-                    if (showMinutes) {
+                    if (this.timePickerOpts.showMinutes) {
                         minute = parseInt(this.container.find('.left .minuteselect').val(), 10);
                         if (isNaN(minute))
                             minute = parseInt(this.container.find('.left .minuteselect option:last').val(), 10);
                     }
 
                     second = 0;
-                    if (showSeconds) {
+                    if (this.timePickerOpts.showSeconds) {
                         second = parseInt(this.container.find('.left .secondselect').val(), 10);
                         if (isNaN(second))
                             second = parseInt(this.container.find('.left .secondselect option:last').val(), 10);
@@ -1019,14 +1086,14 @@
                         hour = parseInt(this.container.find('.right .hourselect option:last').val(), 10);
 
                     minute = 0;
-                    if (showMinutes) {
+                    if (this.timePickerOpts.showMinutes) {
                         minute = parseInt(this.container.find('.right .minuteselect').val(), 10);
                         if (isNaN(minute))
                             minute = parseInt(this.container.find('.right .minuteselect option:last').val(), 10);
                     }
 
                     second = 0;
-                    if (showSeconds) {
+                    if (this.timePickerOpts.showSeconds) {
                         second = parseInt(this.container.find('.right .secondselect').val(), 10);
                         if (isNaN(second))
                             second = parseInt(this.container.find('.right .secondselect option:last').val(), 10);
@@ -1068,6 +1135,7 @@
             const firstDay = calendar.month.startOf('month');
             const lastDay = calendar.month.endOf('month').startOf('day');
             var theDate = calendar.month.startOf('month').minus({ day: 1 });
+            const time = { hour: calendar.month.hour, minute: calendar.month.minute, second: calendar.month.second };
 
             //initialize a 6 rows x 7 columns array for the calendar
             var calendar = [];
@@ -1087,7 +1155,7 @@
                     col = 0;
                     row++;
                 }
-                calendar[row][col] = theDate;
+                calendar[row][col] = theDate.set(time);
 
                 if (this.minDate && calendar[row][col].hasSame(this.minDate, 'month') && calendar[row][col] < this.minDate && side == 'left')
                     calendar[row][col] = this.minDate;
@@ -1126,36 +1194,24 @@
                 html += '<th></th>';
             }
 
-            var dateHtml = this.locale.monthNames[calendar[1][1].month] + calendar[1][1].toFormat(" yyyy");
+            var dateHtml = `${this.locale.monthNames[calendar.firstDay.month - 1]} ${calendar.firstDay.year}`;
 
             if (this.showDropdowns) {
-                var currentMonth = calendar[1][1].month;
-                var currentYear = calendar[1][1].year;
-                var maxYear = (maxDate && maxDate.year) || (this.maxYear);
-                var minYear = (minDate && minDate.year) || (this.minYear);
-                var inMinYear = currentYear == minYear;
-                var inMaxYear = currentYear == maxYear;
+                const maxYear = (maxDate && maxDate.year) ?? this.maxYear;
+                const minYear = (minDate && minDate.year) ?? this.minYear;
 
                 var monthHtml = '<select class="monthselect">';
-                for (var m = 0; m < 12; m++) {
-                    if ((!inMinYear || (minDate && m >= minDate.month)) && (!inMaxYear || (maxDate && m <= maxDate.month))) {
-                        monthHtml += "<option value='" + m + "'" +
-                            (m === currentMonth ? " selected='selected'" : "") +
-                            ">" + this.locale.monthNames[m] + "</option>";
-                    } else {
-                        monthHtml += "<option value='" + m + "'" +
-                            (m === currentMonth ? " selected='selected'" : "") +
-                            " disabled='disabled'>" + this.locale.monthNames[m] + "</option>";
-                    }
+                for (var m = 1; m <= 12; m++) {
+                    monthHtml += `<option value="${m}"${m === calendar.firstDay.month ? ' selected="selected"' : ''}`;
+                    if ((minDate && calendar.firstDay.set({ month: m }) < minDate.startOf('month')) || (maxDate && calendar.firstDay.set({ month: m }) > maxDate.endOf('month')))
+                        monthHtml += ` disabled="disabled"`;
+                    monthHtml += `>${this.locale.monthNames[m - 1]}</option>`;
                 }
                 monthHtml += "</select>";
 
                 var yearHtml = '<select class="yearselect">';
-                for (var y = minYear; y <= maxYear; y++) {
-                    yearHtml += '<option value="' + y + '"' +
-                        (y === currentYear ? ' selected="selected"' : '') +
-                        '>' + y + '</option>';
-                }
+                for (var y = minYear; y <= maxYear; y++)
+                    yearHtml += `<option value="${y}"${y === calendar.firstDay.year ? ' selected="selected"' : ''}>${y}</option>`;
                 yearHtml += '</select>';
 
                 dateHtml = monthHtml + yearHtml;
@@ -1264,16 +1320,10 @@
                             Array.prototype.push.apply(classes, isCustom);
                     }
 
-                    var cname = '', disabled = false;
-                    for (var i = 0; i < classes.length; i++) {
-                        cname += classes[i] + ' ';
-                        if (classes[i] == 'disabled')
-                            disabled = true;
-                    }
-                    if (!disabled)
-                        cname += 'available';
+                    if (!classes.includes('disabled'))
+                        classes.push('available');
 
-                    html += '<td class="' + cname.replace(/^\s+|\s+$/g, '') + '" data-title="' + 'r' + row + 'c' + col + '">' + calendar[row][col].day + '</td>';
+                    html += `<td class="${classes.join(' ')}" data-title="r${row}c${col}" data-date="${calendar[row][col].toISODate()}">${calendar[row][col].day}</td>`;
 
                 }
                 html += '</tr>';
@@ -1337,14 +1387,6 @@
                     selected = maxDate;
             }
 
-            const opts = {
-                showMinutes: this.timePickerStepSize < Duration.fromObject({ hours: 1 }),
-                showSeconds: this.timePickerStepSize < Duration.fromObject({ minutes: 1 }),
-                hourStep: this.timePickerStepSize >= Duration.fromObject({ hours: 1 }) ? this.timePickerStepSize.hours : 1,
-                minuteStep: this.timePickerStepSize >= Duration.fromObject({ minutes: 1 }) ? this.timePickerStepSize.minutes : 1,
-                secondStep: this.timePickerStepSize.seconds
-            };
-
             //
             // hours
             //
@@ -1354,7 +1396,7 @@
             var start = this.timePicker24Hour ? 0 : 1;
             var end = this.timePicker24Hour ? 23 : 12;
 
-            for (var i = start; i <= end; i += opts.hourStep) {
+            for (var i = start; i <= end; i += this.timePickerOpts.hourStep) {
                 var i_in_24 = i;
                 if (!this.timePicker24Hour)
                     i_in_24 = selected.hour >= 12 ? (i == 12 ? 12 : i + 12) : (i == 12 ? 0 : i);
@@ -1371,11 +1413,11 @@
                     disabled = true;
 
                 if (i_in_24 == selected.hour && !disabled) {
-                    html += '<option value="' + i + '" selected="selected">' + i + '</option>';
+                    html += `<option value="${i}" selected="selected">${i}</option>`;
                 } else if (disabled) {
-                    html += '<option value="' + i + '" disabled="disabled" class="disabled">' + i + '</option>';
+                    html += `<option value="${i}" disabled="disabled" class="disabled">${i}</option>`;
                 } else {
-                    html += '<option value="' + i + '">' + i + '</option>';
+                    html += `<option value="${i}">${i}</option>`;
                 }
             }
 
@@ -1385,10 +1427,10 @@
             // minutes
             //
 
-            if (opts.showMinutes) {
+            if (this.timePickerOpts.showMinutes) {
                 html += ': <select class="minuteselect">';
 
-                for (var i = 0; i < 60; i += opts.minuteStep) {
+                for (var i = 0; i < 60; i += this.timePickerOpts.minuteStep) {
                     var padded = i < 10 ? '0' + i : i;
                     let time = selected.set({ minute: i });
 
@@ -1403,11 +1445,11 @@
                         disabled = true;
 
                     if (selected.minute == i && !disabled) {
-                        html += '<option value="' + i + '" selected="selected">' + padded + '</option>';
+                        html += `<option value="${i}" selected="selected">${padded}</option>`;
                     } else if (disabled) {
-                        html += '<option value="' + i + '" disabled="disabled" class="disabled">' + padded + '</option>';
+                        html += `<option value="${i}" disabled="disabled" class="disabled">${padded}</option>`;
                     } else {
-                        html += '<option value="' + i + '">' + padded + '</option>';
+                        html += `<option value="${i}">${padded}</option>`;
                     }
                 }
 
@@ -1418,10 +1460,10 @@
             // seconds
             //
 
-            if (opts.showSeconds) {
+            if (this.timePickerOpts.showSeconds) {
                 html += ': <select class="secondselect">';
 
-                for (var i = 0; i < 60; i += opts.secondStep) {
+                for (var i = 0; i < 60; i += this.timePickerOpts.secondStep) {
                     var padded = i < 10 ? '0' + i : i;
                     let time = selected.set({ second: i });
 
@@ -1436,11 +1478,11 @@
                         disabled = true;
 
                     if (selected.second == i && !disabled) {
-                        html += '<option value="' + i + '" selected="selected">' + padded + '</option>';
+                        html += `<option value="${i}" selected="selected">${padded}</option>`;
                     } else if (disabled) {
-                        html += '<option value="' + i + '" disabled="disabled" class="disabled">' + padded + '</option>';
+                        html += `<option value="${i}" disabled="disabled" class="disabled">${padded}</option>`;
                     } else {
-                        html += '<option value="' + i + '">' + padded + '</option>';
+                        html += `<option value="${i}">${padded}</option>`;
                     }
                 }
 
@@ -1471,11 +1513,13 @@
                     pm_html = ' disabled="disabled" class="disabled"';
                 }
 
-                if (selected.hour >= 12) {
-                    html += '<option value="AM"' + am_html + '>AM</option><option value="PM" selected="selected"' + pm_html + '>PM</option>';
-                } else {
-                    html += '<option value="AM" selected="selected"' + am_html + '>AM</option><option value="PM"' + pm_html + '>PM</option>';
-                }
+                html += `<option value="AM"${am_html}`;
+                if (selected.hour < 12)
+                    html += ' selected="selected"';
+                html += `>${Info.meridiems()[0]}</option><option value="PM"${pm_html}`;
+                if (selected.hour >= 12)
+                    html += ' selected="selected"';
+                html += `>${Info.meridiems()[1]}</option>`;
 
                 html += '</select>';
             }
@@ -1598,7 +1642,7 @@
         /**
         * Shows the picker
         * @param {external:jQuery} e - The Event target
-        * @emits show
+        * @emits "show.daterangepicker"
         * @private
         */
         show: function (e) {
@@ -1630,18 +1674,18 @@
             /**
             * Emitted when the picker is shown 
             * @event
-            * @name show
+            * @name "show.daterangepicker"
             * @param {DateRangePicker} this - The daterangepicker object
             */
-            this.element.triggerHandler('show', this);
+            this.element.trigger('show.daterangepicker', this);
             this.isShowing = true;
         },
 
         /**
         * Hides the picker
         * @param {external:jQuery} e - The Event target
-        * @emits beforeHide
-        * @emits hide
+        * @emits "beforeHide.daterangepicker"
+        * @emits "hide.daterangepicker"
         * @private
         */
         hide: function (e) {
@@ -1654,7 +1698,7 @@
             }
 
             //if a new date range was selected, invoke the user callback function
-            if (!this.startDate == this.oldStartDate || !this.endDate == this.oldEndDate)
+            if (this.startDate != this.oldStartDate || this.endDate != this.oldEndDate)
                 this.callback(this.startDate, this.endDate, this.chosenLabel);
 
             //if picker is attached to a text input, update it
@@ -1663,11 +1707,11 @@
             /**
             * Emitted before the picker will hide. When EventHandler returns `true`, then picker remains visible
             * @event
-            * @name beforeHide
+            * @name "beforeHide.daterangepicker"
             * @param {DateRangePicker} this - The daterangepicker object
             * @return {boolean} cancel - If `true`, then the picker remains visible
             */
-            const cancel = this.element.triggerHandler('beforeHide', this);
+            const cancel = this.element.triggerHandler('beforeHide.daterangepicker', this);
             if (cancel)
                 return;
             $(document).off('.daterangepicker');
@@ -1676,10 +1720,10 @@
             /**
             * Emitted when the picker is hidden
             * @event
-            * @name hide
+            * @name "hide.daterangepicker"
             * @param {DateRangePicker} this - The daterangepicker object
             */
-            this.element.triggerHandler('hide', this);
+            this.element.trigger('hide.daterangepicker', this);
             this.isShowing = false;
         },
 
@@ -1699,7 +1743,7 @@
         /**
         * Closes the picker when user clicks outside
         * @param {external:jQuery} e - The Event target
-        * @emits outsideClick
+        * @emits "outsideClick.daterangepicker"
         * @private
         */
         outsideClick: function (e) {
@@ -1713,20 +1757,26 @@
                 target.closest(this.container).length ||
                 target.closest('.calendar-table').length
             ) return;
+
+            if (this.onOutsideClick == 'cancel') {
+                this.startDate = this.oldStartDate;
+                this.endDate = this.oldEndDate;
+            }
             this.hide();
+
             /**
             * Emitted when user clicks outside the picker. 
             * Picker values is not updated, you may trigger [apply](#event_apply) or [cancel](#event_cancel) in your EventHandler.
             * @event
-            * @name outsideClick
+            * @name "outsideClick.daterangepicker"
             * @param {DateRangePicker} this - The daterangepicker object
             */
-            this.element.triggerHandler('outsideClick', this);
+            this.element.trigger('outsideClick.daterangepicker', this);
         },
 
         /**
         * Shows calendar when user selects "Custom Ranges"
-        * @emits showCalendar
+        * @emits "showCalendar.daterangepicker"
         * @private
         */
         showCalendars: function () {
@@ -1736,15 +1786,15 @@
             * Emitted when the calendar(s) are shown.
             * Only useful when [custom ranges](#Options.Ranges) are used.
             * @event
-            * @name showCalendar
+            * @name "showCalendar.daterangepicker"
             * @param {DateRangePicker} this - The daterangepicker object
             */
-            this.element.triggerHandler('showCalendar', this);
+            this.element.trigger('showCalendar.daterangepicker', this);
         },
 
         /**
         * Hides calendar when user selects a predefined range
-        * @emits hideCalendar
+        * @emits "hideCalendar.daterangepicker"
         * @private
         */
         hideCalendars: function () {
@@ -1753,10 +1803,10 @@
             * Emitted when the calendar(s) are hidden.
             * Only useful when [custom ranges](#Options.Ranges) are used.
             * @event
-            * @name showCalendar
+            * @name "hideCalendar.daterangepicker"
             * @param {DateRangePicker} this - The daterangepicker object
             */
-            this.element.triggerHandler('hideCalendar', this);
+            this.element.trigger('hideCalendar.daterangepicker', this);
         },
 
         /**
@@ -1793,11 +1843,11 @@
         clickPrev: function (e) {
             var cal = $(e.target).parents('.drp-calendar');
             if (cal.hasClass('left')) {
-                this.leftCalendar.month.minus({ month: 1 });
+                this.leftCalendar.month = this.leftCalendar.month.minus({ month: 1 });
                 if (this.linkedCalendars)
-                    this.rightCalendar.month.minus({ month: 1 });
+                    this.rightCalendar.month = this.rightCalendar.month.minus({ month: 1 });
             } else {
-                this.rightCalendar.month.minus({ month: 1 });
+                this.rightCalendar.month = this.rightCalendar.month.minus({ month: 1 });
             }
             this.updateCalendars();
         },
@@ -1810,11 +1860,11 @@
         clickNext: function (e) {
             var cal = $(e.target).parents('.drp-calendar');
             if (cal.hasClass('left')) {
-                this.leftCalendar.month.plus({ month: 1 });
+                this.leftCalendar.month = this.leftCalendar.month.plus({ month: 1 });
             } else {
-                this.rightCalendar.month.plus({ month: 1 });
+                this.rightCalendar.month = this.rightCalendar.month.plus({ month: 1 });
                 if (this.linkedCalendars)
-                    this.leftCalendar.month.plus({ month: 1 });
+                    this.leftCalendar.month = this.leftCalendar.month.plus({ month: 1 });
             }
             this.updateCalendars();
         },
@@ -1907,7 +1957,7 @@
         /**
         * User clicked a date
         * @param {external:jQuery} e - The Event target
-        * @emits dateChange
+        * @emits "dateChange.daterangepicker"
         * @private
         */
         clickDate: function (e) {
@@ -1915,11 +1965,11 @@
             if (!$(e.target).hasClass('available')) return;
 
             var title = $(e.target).attr('data-title');
-            var row = title.substr(1, 1);
-            var col = title.substr(3, 1);
+            var row = title.substring(1, 2);
+            var col = title.substring(3, 4);
             var cal = $(e.target).parents('.drp-calendar');
             var date = cal.hasClass('left') ? this.leftCalendar.calendar[row][col] : this.rightCalendar.calendar[row][col];
-            let side = 'end';
+            let side;
 
             //
             // this function needs to do a few things:
@@ -1930,10 +1980,7 @@
             // * if one of the inputs above the calendars was focused, cancel that manual input
             //
 
-            const showMinutes = this.timePickerStepSize < Duration.fromObject({ hours: 1 });
-            const showSeconds = this.timePickerStepSize < Duration.fromObject({ minutes: 1 });
-
-            if (this.endDate || date < this.startDate, 'day') { //picking start
+            if (this.endDate || date < this.startDate.startOf('day')) { //picking start
                 if (this.timePicker) {
                     let hour = parseInt(this.container.find('.left .hourselect').val(), 10);
                     if (isNaN(hour))
@@ -1946,14 +1993,14 @@
                             hour = 0;
                     }
                     let minute = 0;
-                    if (showMinutes) {
+                    if (this.timePickerOpts.showMinutes) {
                         minute = parseInt(this.container.find('.left .minuteselect').val(), 10);
                         if (isNaN(minute))
                             minute = parseInt(this.container.find('.left .minuteselect option:last').val(), 10);
                     }
 
                     let second = 0;
-                    if (showSeconds) {
+                    if (this.timePickerOpts.showSeconds) {
                         second = parseInt(this.container.find('.left .secondselect').val(), 10);
                         if (isNaN(second))
                             second = parseInt(this.container.find('.left .secondselect option:last').val(), 10);
@@ -1968,6 +2015,7 @@
                 //special case: clicking the same date for start/end,
                 //but the time of the end date is before the start date
                 this.setEndDate(this.startDate, true);
+                side = 'end';
             } else { // picking end
                 if (this.timePicker) {
                     let hour = parseInt(this.container.find('.right .hourselect').val(), 10);
@@ -1982,14 +2030,14 @@
                     }
 
                     let minute = 0;
-                    if (showMinutes) {
+                    if (this.timePickerOpts.showMinutes) {
                         minute = parseInt(this.container.find('.right .minuteselect').val(), 10);
                         if (isNaN(minute))
                             minute = parseInt(this.container.find('.right .minuteselect option:last').val(), 10);
                     }
 
                     let second = 0;
-                    if (showSeconds) {
+                    if (this.timePickerOpts.showSeconds) {
                         second = parseInt(this.container.find('.right .secondselect').val(), 10);
                         if (isNaN(second))
                             second = parseInt(this.container.find('.right .secondselect option:last').val(), 10);
@@ -2002,12 +2050,14 @@
                     this.calculateChosenLabel();
                     this.clickApply();
                 }
+                side = 'end';
             }
 
             if (this.singleDatePicker) {
                 this.setEndDate(this.startDate, true);
                 if (!this.timePicker && this.autoApply)
                     this.clickApply();
+                side = null;
             }
 
             this.updateView();
@@ -2015,14 +2065,17 @@
             //This is to cancel the blur event handler if the mouse was in one of the inputs
             e.stopPropagation();
 
+            if (this.autoUpdateInput)
+                this.updateElement();
+
             /**
             * Emitted when the date changed. Does not trigger when time is changed, use [timeChange](event_timeChange) to handle it
             * @event
-            * @name dateChange
+            * @name "dateChange.daterangepicker"
             * @param {DateRangePicker} this - The daterangepicker object
             * @param {string} side - Either `'start'` or `'end'` indicating whether startDate or endDate was changed. `null` when `singleDatePicker: true`
             */
-            this.element.triggerHandler('dateChange', [this, this.singleDatePicker ? null : side]);
+            this.element.trigger('dateChange.daterangepicker', [this, side]);
 
         },
 
@@ -2033,17 +2086,14 @@
         */
         calculateChosenLabel: function () {
 
-            const showMinutes = this.timePickerStepSize < Duration.fromObject({ hours: 1 });
-            const showSeconds = this.timePickerStepSize < Duration.fromObject({ minutes: 1 });
-
             // If selected range from calendar matches any custom range, then highlight it
             var customRange = true;
             var i = 0;
             for (var range in this.ranges) {
                 var unit = this.timePicker ? 'hour' : 'day';
-                if (showMinutes) {
+                if (this.timePickerOpts.showMinutes) {
                     unit = 'minute';
-                } else if (showSeconds) {
+                } else if (this.timePickerOpts.showSeconds) {
                     unit = 'second';
                 }
                 if (this.startDate.startOf(unit) == this.ranges[range][0].startOf(unit) == this.endDate.startOf(unit) == this.ranges[range][1].startOf(unit)) {
@@ -2066,7 +2116,7 @@
         /**
         * User clicked `Apply` button
         * @param {external:jQuery} e - The Event target
-        * @emits apply
+        * @emits "apply.daterangepicker"
         * @private
         */
         clickApply: function (e) {
@@ -2074,16 +2124,16 @@
             /**
             * Emitted when the `Apply` button is clicked, or when a predefined [range](#Options.Ranges) is clicked 
             * @event
-            * @name apply
+            * @name "apply.daterangepicker"
             * @param {DateRangePicker} this - The daterangepicker object
             */
-            this.element.triggerHandler('apply', this);
+            this.element.trigger('apply.daterangepicker', this);
         },
 
         /**
         * User clicked `Cancel` button
         * @param {external:jQuery} e - The Event target
-        * @emits cancel
+        * @emits "cancel.daterangepicker"
         * @private
         */
         clickCancel: function (e) {
@@ -2093,10 +2143,10 @@
             /**
             * Emitted when the `Cancel` button is clicked
             * @event
-            * @name cancel
+            * @name "cancel.daterangepicker"
             * @param {DateRangePicker} this - The daterangepicker object
             */
-            this.element.triggerHandler('cancel', this);
+            this.element.trigger('cancel.daterangepicker', this);
         },
 
         /**
@@ -2149,13 +2199,10 @@
         /**
         * User clicked a time
         * @param {external:jQuery} e - The Event target
-        * @emits timeChange
+        * @emits "timeChange.daterangepicker"
         * @private
         */
         timeChanged: function (e) {
-            const showMinutes = this.timePickerStepSize < Duration.fromObject({ hours: 1 });
-            const showSeconds = this.timePickerStepSize < Duration.fromObject({ minutes: 1 });
-
             var cal = $(e.target).closest('.drp-calendar'),
                 isLeft = cal.hasClass('left');
 
@@ -2164,14 +2211,14 @@
                 hour = parseInt(cal.find('.hourselect option:last').val(), 10);
 
             var minute = 0;
-            if (showMinutes) {
+            if (this.timePickerOpts.showMinutes) {
                 minute = parseInt(cal.find('.minuteselect').val(), 10);
                 if (isNaN(minute))
                     minute = parseInt(cal.find('.minuteselect option:last').val(), 10);
             }
 
             var second = 0;
-            if (showSeconds) {
+            if (this.timePickerOpts.showSeconds) {
                 second = parseInt(cal.find('.secondselect').val(), 10);
                 if (isNaN(second))
                     second = parseInt(cal.find('.secondselect option:last').val(), 10);
@@ -2208,14 +2255,17 @@
             this.renderTimePicker('left');
             this.renderTimePicker('right');
 
+            if (this.autoUpdateInput)
+                this.updateElement();
+
             /**
             * Emitted when the time changed. Does not trigger when date is changed
             * @event
-            * @name timeChange
+            * @name "timeChange.daterangepicker"
             * @param {DateRangePicker} this - The daterangepicker object
             * @param {string} side - Either `'start'` or `'end'` indicating whether startDate or endDate was changed
             */
-            this.element.triggerHandler('timeChange', [this, this.singleDatePicker ? null : (isLeft ? 'start' : 'stop')]);
+            this.element.trigger('timeChange.daterangepicker', [this, this.singleDatePicker ? null : (isLeft ? 'start' : 'stop')]);
         },
 
         /**
@@ -2240,7 +2290,7 @@
                 end = start;
             }
 
-            if (!start.isValid() || !end.isValid()) return;
+            if (!start.isValid || !end.isValid) return;
 
             this.setStartDate(start, false);
             this.setEndDate(end, false);
@@ -2272,16 +2322,16 @@
         * @private
         */
         updateElement: function () {
-            if (this.element.is('input') && this.autoUpdateInput) {
+            if (this.element.is('input')) {
                 let newValue = typeof this.locale.format === 'object' ? this.startDate.toLocaleString(this.locale.format) : this.startDate.toFormat(this.locale.format);
                 if (!this.singleDatePicker) {
                     newValue += this.locale.separator
-                    newValue += typeof this.locale.format === 'object' ? this.endDate.toLocaleString(this.locale.format) : this.endDate.toFormat(this.locale.format);
+                    if (this.endDate)
+                        newValue += typeof this.locale.format === 'object' ? this.endDate.toLocaleString(this.locale.format) : this.endDate.toFormat(this.locale.format);
                 }
 
-                if (newValue !== this.element.val()) {
+                if (newValue !== this.element.val())
                     this.element.val(newValue).trigger('change');
-                }
             }
         },
 
