@@ -113,7 +113,7 @@
         * @property {string} drops=down - Whether the picker appears below or above the HTML element it's attached to.<br/>
         * `'down' \| 'up' \| 'auto'`
         
-        * @property {Options.Ranges} ranges={} - Set predefined date ranges the user can select from. Each key is the label for the range, 
+        * @property {object} ranges={} - Set predefined date {@link #Ranges|Ranges} the user can select from. Each key is the label for the range, 
         * and its value an array with two dates representing the bounds of the range.
         * @property {boolean} showCustomRangeLabel=true - Displays "Custom Range" at the end of the list of predefined {@link #Ranges|Ranges}, 
         * when the ranges option is used.<br>
@@ -131,8 +131,8 @@
         * I recommend to use the luxon [Presets](https://moment.github.io/luxon/#/formatting?id=presets).
         * @property {string} locale.separator= - Defaut: `' - '` - Separator for start and end time
         * @property {string} locale.weekLabel=W - Label for week numbers
-        * @property {Array(string)} locale.daysOfWeek - Default: `Info.weekdays('short')`<br/>Array with weekday names, from Monday to Sunday
-        * @property {Array(string)} locale.monthNames - Default: `Info.months('long')`<br/>Array with month names
+        * @property {Array} locale.daysOfWeek - Default: `Info.weekdays('short')`<br/>Array with weekday names, from Monday to Sunday
+        * @property {Array} locale.monthNames - Default: `Info.months('long')`<br/>Array with month names
         * @property {number} locale.firstDay - Default: `Info.getStartOfWeek()`<br/>First day of the week, 1 for Monday through 7 for Sunday
         * @property {string} locale.applyLabel=Apply - Label of `Apply` Button
         * @property {string} locale.cancelLabel=Cancel - Label of `Cancel` Button
