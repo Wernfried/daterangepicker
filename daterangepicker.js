@@ -39,21 +39,21 @@
         * @typedef Options 
         * @property {string} parentEl=body - {@link jQuery} selector of the parent element that the date range picker will be added to
         
-        * @property {external:DateTime|external:Date|string} startDate=DateTime.now().startOf('day') - The beginning date of the initially selected date range.<br/>
-        * Must be a `luxon.DateTime` or `Date` or `string` according to {@link ISO-8601} or a string matching {@link Options.locale.format}.<br/>
-        * Date value is rounded to match option {@link timePickerStepSize}<br/>
-        * Option {@link Options.isInvalidDate} and {@link Options.isInvalidTime} are not evaluated, you may set date/time which is not selectable in calendar.<br/>
-        * If the date does not fall into {@link Options.minDate` and {@link maxDate} then date is shifted and a warning is written to console.
-        * @property {external:DateTime|external:Date|string} endDate=DateTime.now().endOf('day') - The end date of the initially selected date range.<br/>
-        * Must be a `luxon.DateTime` or `Date` or `string` according to {@link ISO-8601} or a string matching {@link Options.locale.format}.<br/>
-        * Date value is rounded to match option {@link Options.timePickerStepSize}<br/>
-        * Option {@link Options.isInvalidDate}, {@link Options.isInvalidTime} and {@link Options.minSpan}, {@link Options.maxSpan} are not evaluated, you may set date/time which is not selectable in calendar.<br/>
-        * If the date does not fall into {@link Options.minDate} and {@link Options.maxDate} then date is shifted and a warning is written to console.<br/>
+        * @property {external:DateTime|external:Date|string} startDate - Default: `DateTime.now().startOf('day')`<br/>The beginning date of the initially selected date range.<br/>
+        * Must be a `luxon.DateTime` or `Date` or `string` according to {@link ISO-8601} or a string matching `locale.format`.<br/>
+        * Date value is rounded to match option `timePickerStepSize`<br/>
+        * Option `isInvalidDate` and `isInvalidTime` are not evaluated, you may set date/time which is not selectable in calendar.<br/>
+        * If the date does not fall into `minDate` and `maxDate` then date is shifted and a warning is written to console.
+        * @property {external:DateTime|external:Date|string} endDate - Defautl: `DateTime.now().endOf('day')`<br/>The end date of the initially selected date range.<br/>
+        * Must be a `luxon.DateTime` or `Date` or `string` according to {@link ISO-8601} or a string matching `locale.format`.<br/>
+        * Date value is rounded to match option `timePickerStepSize`<br/>
+        * Option `isInvalidDate`, `isInvalidTime` and `minSpan`, `maxSpan` are not evaluated, you may set date/time which is not selectable in calendar.<br/>
+        * If the date does not fall into `minDate` and `maxDate` then date is shifted and a warning is written to console.<br/>
 
         * @property {external:DateTime|external:Date|string|null} minDate - The earliest date a user may select or `null` for no limit.<br/>
-        * Must be a `luxon.DateTime` or `Date` or `string` according to {@link ISO-8601} or a string matching {@link locale.format}.
+        * Must be a `luxon.DateTime` or `Date` or `string` according to {@link ISO-8601} or a string matching `locale.format`.
         * @property {external:DateTime|external:Date|string|null} maxDate - The latest date a user may select or `null` for no limit.<br/>
-        * Must be a `luxon.DateTime` or `Date` or `string` according to {@link ISO-8601} or a string matching {@link locale.format}.
+        * Must be a `luxon.DateTime` or `Date` or `string` according to {@link ISO-8601} or a string matching `locale.format`.
         * @property {external:Duration|string|number|null} minSpan - The maximum span between the selected start and end dates.<br/>
         * Must be a `luxon.Duration` or number of seconds or a string according to {@link ISO-8601} duration.<br/>
         * Ignored when `singleDatePicker: true`
@@ -66,22 +66,22 @@
         * @property {boolean} singleDatePicker=false - Show only a single calendar to choose one date, instead of a range picker with two calendars.<br/>
         * The start and end dates provided to your callback will be the same single date chosen.
         * @property {boolean} showDropdowns=false - Show year and month select boxes above calendars to jump to a specific month and year
-        * @property {number} minYear=DateTime.now().minus({year:100}).year - The minimum year shown in the dropdowns when `showDropdowns: true`
-        * @property {number} maxYear=DateTime.now().plus({year:100}).year - The maximum  year shown in the dropdowns when `showDropdowns: true`
+        * @property {number} minYear - Default: `DateTime.now().minus({year:100}).year`<br/>The minimum year shown in the dropdowns when `showDropdowns: true`
+        * @property {number} maxYear - Default: `DateTime.now().plus({year:100}).year`<br/>The maximum  year shown in the dropdowns when `showDropdowns: true`
         * @property {boolean} showWeekNumbers=false - Show **localized** week numbers at the start of each week on the calendars
         * @property {boolean} showISOWeekNumbers=false - Show **ISO** week numbers at the start of each week on the calendars
         
         * @property {boolean} timePicker=false - Adds select boxes to choose times in addition to dates
         * @property {boolean} timePicker24Hour=false - Use 24-hour instead of 12-hour times, removing the AM/PM selection
-        * @property {external:Duration|string} timePickerStepSize=Duration.fromObject({minutes:1}) - Set the time picker step size.<br/>
+        * @property {external:Duration|string} timePickerStepSize - Default: `Duration.fromObject({minutes:1})`<br/>Set the time picker step size.<br/>
         * Must be a `luxon.Duration` or number of seconds or a string according to {@link ISO-8601} duration.<br/>
         * Valid values are 1,2,3,4,5,6,10,12,15,20,30 for `Duration.fromObject({seconds: ...})` and `Duration.fromObject({minutes: ...})` 
         * and 1,2,3,4,6,(8,12) for `Duration.fromObject({hours: ...})`.<br/>
-        * Duration must be greater than {@link minSpan} and smaller than {@link maxSpan}.<br/>
+        * Duration must be greater than `minSpan` and smaller than `maxSpan`.<br/>
         * For example `timePickerStepSize: 600` will disable time picker seconds and time picker minutes are set to step size of 10 Minutes.<br/>
         * Overwrites #timePickerIncrement and #timePickerSeconds
-        * @property {boolean} timePickerSeconds=boolean - **Deprecated**, use {@link timePickerStepSize}<br/>Show seconds in the timePicker
-        * @property {boolean} timePickerIncrement=1 - **Deprecated**, use {@link timePickerStepSize}<br/>Increment of the minutes selection list for times
+        * @property {boolean} timePickerSeconds=boolean - **Deprecated**, use `timePickerStepSize`<br/>Show seconds in the timePicker
+        * @property {boolean} timePickerIncrement=1 - **Deprecated**, use `timePickerStepSize`<br/>Increment of the minutes selection list for times
         
         * @property {boolean} autoUpdateInput=true - Indicates whether the date range picker should automatically update the value of the `<input>` 
         * element it's attached to at initialization and when the selected dates change.<br/>Value is reverted when use clicks on `Cancel`.
@@ -93,13 +93,13 @@
         * @property {function} isInvalidDate=false - A function that is passed each date in the two calendars before they are displayed,<br/> 
         * and may return `true` or `false` to indicate whether that date should be available for selection or not.<br/>
         * Signature: `isInvalidDate(date)`
-        * Function has no effect on date values set by {@link startDate}, {@link endDate}, {@link ranges}, {@link setStartDate}, {@link setEndDate}.
+        * Function has no effect on date values set by `startDate`, `endDate`, `ranges`, {@link dateRangePicker.setStartDate}, {@link setEndDate}.
         * @property {function} isInvalidTime=false - A function that is passed each hour/minute/second/am-pm in the two calendars before they are displayed,<br/> 
         * and may return `true` or `false` to indicate whether that date should be available for selection or not.<br/>
         * Signature: `isInvalidDate(time, side, unit)`<br/>
         * `side` is 'start' or 'end' or `null` for `singleDatePicker = true`<br/>
         * `unit` is `'hour'`, `'minute'`, `'second'` or `'ampm'`<br/>
-        * Function has no effect on time values set by {@link startDate}, {@link endDate}, {@link ranges}, {@link setStartDate}, {@link setEndDate}.<br/>
+        * Function has no effect on time values set by `startDate`, `endDate`, `ranges`, {@link DateRangePicker.setStartDate}, {@link setEndDate}.<br/>
         * Ensure that your function returns `false` for at least one item. Otherwise the calender is not rendered.<br/>
         * @property {function} isCustomDate=false - A function that is passed each date in the two calendars before they are displayed, 
         * and may return a string or array of CSS class names to apply to that date's calendar cell.<br/>
@@ -679,11 +679,11 @@
         /**
         * Sets the date range picker's currently selected start date to the provided date.<br/>
         * `startDate` must be a `luxon.DateTime` or `Date` or `string` according to {@link ISO-8601} or 
-        * a string matching {@link locale.format}.
+        * a string matching {@link Options.locale.format}.
         * The value of the attached `<input>` element is also updated.
-        * Date value is rounded to match option {@link timePickerStepSize}<br/>
-        * Functions {@link isInvalidDate} and {@link isInvalidTime} are not evaluated, you may set date/time which is not selectable in calendar.<br/>
-        * If the `startDate` does not fall into {@link minDate} and {@link maxDate} then {@link startDate} is shifted and a warning is written to console. 
+        * Date value is rounded to match option {@link Options.timePickerStepSize}<br/>
+        * Functions {@link Options.isInvalidDate} and {@link Options.isInvalidTime} are not evaluated, you may set date/time which is not selectable in calendar.<br/>
+        * If the `startDate` does not fall into {@link Options.minDate} and {@link Options.maxDate} then {@link Options.startDate} is shifted and a warning is written to console. 
         * @param {external:DateTime|external:Date|string} startDate - startDate to be set
         * @throws `RangeError` for invalid date values.
         * @example const DateTime = luxon.DateTime;
