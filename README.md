@@ -151,37 +151,37 @@ Licensed under the [MIT license](LICENSE).
 ## Events
 
 <dl>
-<dt><a href="#event_show">"show" (this)</a></dt>
+<dt><a href="#event_show.daterangepicker">"show.daterangepicker" (this)</a></dt>
 <dd><p>Emitted when the picker is shown</p>
 </dd>
-<dt><a href="#event_beforeHide">"beforeHide" (this)</a> ⇒ <code>boolean</code></dt>
+<dt><a href="#event_beforeHide.daterangepicker">"beforeHide.daterangepicker" (this)</a> ⇒ <code>boolean</code></dt>
 <dd><p>Emitted before the picker will hide. When EventHandler returns <code>true</code>, then picker remains visible</p>
 </dd>
-<dt><a href="#event_hide">"hide" (this)</a></dt>
+<dt><a href="#event_hide.daterangepicker">"hide.daterangepicker" (this)</a></dt>
 <dd><p>Emitted when the picker is hidden</p>
 </dd>
-<dt><a href="#event_outsideClick">"outsideClick" (this)</a></dt>
+<dt><a href="#event_outsideClick.daterangepicker">"outsideClick.daterangepicker" (this)</a></dt>
 <dd><p>Emitted when user clicks outside the picker. 
 Picker values is not updated, you may trigger <a href="#event_apply">apply</a> or <a href="#event_cancel">cancel</a> in your EventHandler.</p>
 </dd>
-<dt><a href="#event_showCalendar">"showCalendar" (this)</a></dt>
+<dt><a href="#event_showCalendar.daterangepicker">"showCalendar.daterangepicker" (this)</a></dt>
 <dd><p>Emitted when the calendar(s) are shown.
 Only useful when <a href="#Options.Ranges">custom ranges</a> are used.</p>
 </dd>
-<dt><a href="#event_showCalendar">"showCalendar" (this)</a></dt>
+<dt><a href="#event_hideCalendar.daterangepicker">"hideCalendar.daterangepicker" (this)</a></dt>
 <dd><p>Emitted when the calendar(s) are hidden.
 Only useful when <a href="#Options.Ranges">custom ranges</a> are used.</p>
 </dd>
-<dt><a href="#event_dateChange">"dateChange" (this, side)</a></dt>
+<dt><a href="#event_dateChange.daterangepicker">"dateChange.daterangepicker" (this, side)</a></dt>
 <dd><p>Emitted when the date changed. Does not trigger when time is changed, use <a href="event_timeChange">timeChange</a> to handle it</p>
 </dd>
-<dt><a href="#event_apply">"apply" (this)</a></dt>
+<dt><a href="#event_apply.daterangepicker">"apply.daterangepicker" (this)</a></dt>
 <dd><p>Emitted when the <code>Apply</code> button is clicked, or when a predefined <a href="#Options.Ranges">range</a> is clicked</p>
 </dd>
-<dt><a href="#event_cancel">"cancel" (this)</a></dt>
+<dt><a href="#event_cancel.daterangepicker">"cancel.daterangepicker" (this)</a></dt>
 <dd><p>Emitted when the <code>Cancel</code> button is clicked</p>
 </dd>
-<dt><a href="#event_timeChange">"timeChange" (this, side)</a></dt>
+<dt><a href="#event_timeChange.daterangepicker">"timeChange.daterangepicker" (this, side)</a></dt>
 <dd><p>Emitted when the time changed. Does not trigger when date is changed</p>
 </dd>
 </dl>
@@ -191,6 +191,12 @@ Only useful when <a href="#Options.Ranges">custom ranges</a> are used.</p>
 <dl>
 <dt><a href="#Options">Options</a></dt>
 <dd><p>Options for DateRangePicker</p>
+</dd>
+<dt><a href="#Ranges">Ranges</a> : <code>Object</code></dt>
+<dd><p>A set of predefined ranges</p>
+</dd>
+<dt><a href="#Range">Range</a> : <code>Object</code></dt>
+<dd><p>A single predefined range</p>
 </dd>
 <dt><a href="#callback">callback</a> : <code>function</code></dt>
 <dd></dd>
@@ -225,9 +231,12 @@ Only useful when <a href="#Options.Ranges">custom ranges</a> are used.</p>
 
 ### dateRangePicker.setStartDate(startDate)
 Sets the date range picker's currently selected start date to the provided date.<br/>
-`startDate` be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) or a string matching [locale.format](#Locale.format).
-Functions `isInvalidDate()` and `isInvalidTime()` are not evaluated, you may set date/time which is not selectable in calendar.<br/>
-If the `startDate` does not fall into `minDate` and `maxDate` then `startDate` is shifted and a warning is written to console.
+`startDate` must be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) or 
+a string matching [locale.format](locale.format).
+The value of the attached `<input>` element is also updated.
+Date value is rounded to match option [timePickerStepSize](timePickerStepSize)<br/>
+Functions [isInvalidDate](isInvalidDate) and [isInvalidTime](isInvalidTime) are not evaluated, you may set date/time which is not selectable in calendar.<br/>
+If the `startDate` does not fall into [minDate](minDate) and [maxDate](maxDate) then [startDate](startDate) is shifted and a warning is written to console.
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
 **Throws**:
@@ -239,13 +248,23 @@ If the `startDate` does not fall into `minDate` and `maxDate` then `startDate` i
 | --- | --- | --- |
 | startDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> | startDate to be set |
 
+**Example**  
+```js
+const DateTime = luxon.DateTime;
+const drp = $('#picker').data('daterangepicker');
+drp.setStartDate(DateTime.now().startOf('hour'));
+```
 <a name="DateRangePicker+setEndDate"></a>
 
 ### dateRangePicker.setEndDate(endDate)
 Sets the date range picker's currently selected end date to the provided date.<br/>
-`endDate` be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) or a string matching [locale.format](#Locale.format).
-Functions `isInvalidDate()` and `isInvalidTime()` are not evaluated, you may set date/time which is not selectable in calendar.<br/>
-If the `endDate` does not fall into `minDate` and `maxDate` then `endDate` or `minSpan` and `maxSpan` is shifted and a warning is written to console.
+`endDate` be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) or 
+a string matching [locale.format](locale.format).
+The value of the attached `<input>` element is also updated.
+Date value is rounded to match option [timePickerStepSize](timePickerStepSize)<br/>
+Functions [isInvalidDate](isInvalidDate) and [isInvalidTime](isInvalidTime) are not evaluated, you may set date/time which is not selectable in calendar.<br/>
+If the [endDate](endDate) does not fall into [minDate](minDate) and [maxDate](maxDate) or into [minSpan](minSpan) and [maxSpan](maxSpan) 
+then [endDate](endDate) is shifted and a warning is written to console.
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
 **Throws**:
@@ -257,10 +276,15 @@ If the `endDate` does not fall into `minDate` and `maxDate` then `endDate` or `m
 | --- | --- | --- |
 | endDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> | endDate to be set |
 
+**Example**  
+```js
+const drp = $('#picker').data('daterangepicker');
+drp.setEndDate('2025-03-28T18:30:00');
+```
 <a name="DateRangePicker+setPeriod"></a>
 
 ### dateRangePicker.setPeriod(startDate, endDate)
-Shortcut for [setStartDate](#setStartDate) and  [setEndDate](#setEndDate)
+Shortcut for [setStartDate](setStartDate) and [setEndDate](setEndDate)
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
 **Throws**:
@@ -273,10 +297,16 @@ Shortcut for [setStartDate](#setStartDate) and  [setEndDate](#setEndDate)
 | startDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> | startDate to be set |
 | endDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> | endDate to be set |
 
+**Example**  
+```js
+const DateTime = luxon.DateTime;
+const drp = $('#picker').data('daterangepicker');
+drp.setPeriod(DateTime.now().startOf('week'), DateTime.now().startOf('week').plus({days: 10}));
+```
 <a name="DateRangePicker+updateView"></a>
 
 ### dateRangePicker.updateView()
-Updates the picker when calendar is initiated or any date has been selected. Could be useful after running `setStartDate()` or `setEndDate()`
+Updates the picker when calendar is initiated or any date has been selected. Could be useful after running [setStartDate](setStartDate) or [setEndDate](setEndDate)
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
 <a name="DateRangePicker.daterangepicker"></a>
@@ -292,9 +322,9 @@ Initiate a new DateRangePicker
 | options | [<code>Options</code>](#Options) | Object to configure the DateRangePicker |
 | callback | [<code>callback</code>](#callback) | Callback function executed when date is changed. As alternative listen to the [apply](#event_apply) event |
 
-<a name="event_show"></a>
+<a name="event_show.daterangepicker"></a>
 
-## "show" (this)
+## "show.daterangepicker" (this)
 Emitted when the picker is shown
 
 **Kind**: event emitted  
@@ -303,9 +333,9 @@ Emitted when the picker is shown
 | --- | --- | --- |
 | this | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
 
-<a name="event_beforeHide"></a>
+<a name="event_beforeHide.daterangepicker"></a>
 
-## "beforeHide" (this) ⇒ <code>boolean</code>
+## "beforeHide.daterangepicker" (this) ⇒ <code>boolean</code>
 Emitted before the picker will hide. When EventHandler returns `true`, then picker remains visible
 
 **Kind**: event emitted  
@@ -315,9 +345,9 @@ Emitted before the picker will hide. When EventHandler returns `true`, then pick
 | --- | --- | --- |
 | this | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
 
-<a name="event_hide"></a>
+<a name="event_hide.daterangepicker"></a>
 
-## "hide" (this)
+## "hide.daterangepicker" (this)
 Emitted when the picker is hidden
 
 **Kind**: event emitted  
@@ -326,9 +356,9 @@ Emitted when the picker is hidden
 | --- | --- | --- |
 | this | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
 
-<a name="event_outsideClick"></a>
+<a name="event_outsideClick.daterangepicker"></a>
 
-## "outsideClick" (this)
+## "outsideClick.daterangepicker" (this)
 Emitted when user clicks outside the picker. 
 Picker values is not updated, you may trigger [apply](#event_apply) or [cancel](#event_cancel) in your EventHandler.
 
@@ -338,9 +368,9 @@ Picker values is not updated, you may trigger [apply](#event_apply) or [cancel](
 | --- | --- | --- |
 | this | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
 
-<a name="event_showCalendar"></a>
+<a name="event_showCalendar.daterangepicker"></a>
 
-## "showCalendar" (this)
+## "showCalendar.daterangepicker" (this)
 Emitted when the calendar(s) are shown.
 Only useful when [custom ranges](#Options.Ranges) are used.
 
@@ -350,9 +380,9 @@ Only useful when [custom ranges](#Options.Ranges) are used.
 | --- | --- | --- |
 | this | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
 
-<a name="event_showCalendar"></a>
+<a name="event_hideCalendar.daterangepicker"></a>
 
-## "showCalendar" (this)
+## "hideCalendar.daterangepicker" (this)
 Emitted when the calendar(s) are hidden.
 Only useful when [custom ranges](#Options.Ranges) are used.
 
@@ -362,9 +392,9 @@ Only useful when [custom ranges](#Options.Ranges) are used.
 | --- | --- | --- |
 | this | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
 
-<a name="event_dateChange"></a>
+<a name="event_dateChange.daterangepicker"></a>
 
-## "dateChange" (this, side)
+## "dateChange.daterangepicker" (this, side)
 Emitted when the date changed. Does not trigger when time is changed, use [timeChange](event_timeChange) to handle it
 
 **Kind**: event emitted  
@@ -374,9 +404,9 @@ Emitted when the date changed. Does not trigger when time is changed, use [timeC
 | this | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
 | side | <code>string</code> | Either `'start'` or `'end'` indicating whether startDate or endDate was changed. `null` when `singleDatePicker: true` |
 
-<a name="event_apply"></a>
+<a name="event_apply.daterangepicker"></a>
 
-## "apply" (this)
+## "apply.daterangepicker" (this)
 Emitted when the `Apply` button is clicked, or when a predefined [range](#Options.Ranges) is clicked
 
 **Kind**: event emitted  
@@ -385,9 +415,9 @@ Emitted when the `Apply` button is clicked, or when a predefined [range](#Option
 | --- | --- | --- |
 | this | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
 
-<a name="event_cancel"></a>
+<a name="event_cancel.daterangepicker"></a>
 
-## "cancel" (this)
+## "cancel.daterangepicker" (this)
 Emitted when the `Cancel` button is clicked
 
 **Kind**: event emitted  
@@ -396,9 +426,9 @@ Emitted when the `Cancel` button is clicked
 | --- | --- | --- |
 | this | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
 
-<a name="event_timeChange"></a>
+<a name="event_timeChange.daterangepicker"></a>
 
-## "timeChange" (this, side)
+## "timeChange.daterangepicker" (this, side)
 Emitted when the time changed. Does not trigger when date is changed
 
 **Kind**: event emitted  
@@ -419,8 +449,8 @@ Options for DateRangePicker
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | parentEl | <code>string</code> | <code>&quot;body&quot;</code> | [jQuery](external:jQuery) selector of the parent element that the date range picker will be added to |
-| startDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> | <code>DateTime.now().startOf(&#x27;day&#x27;)</code> | The beginning date of the initially selected date range.<br/> Must be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) or a string matching [locale.format](#Locale.format).<br/> Functions `isInvalidDate()` and `isInvalidTime()` are not evaluated, you may set date/time which is not selectable in calendar.<br/> If the date does not fall into `minDate` and `maxDate` then date is shifted and a warning is written to console. |
-| endDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> | <code>DateTime.now().endOf(&#x27;day&#x27;)</code> | The end date of the initially selected date range.<br/> Must be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) or a string matching [locale.format](#Locale.format).<br/> Functions `isInvalidDate()` and `isInvalidTime()` are not evaluated, you may set date/time which is not selectable in calendar.<br/> If the date does not fall into `minDate` and `maxDate` then date is shifted and a warning is written to console.<br/> Option `minSpan` and `maxSpan` are not evaluated.<br/> |
+| startDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> | <code>DateTime.now().startOf(&#x27;day&#x27;)</code> | The beginning date of the initially selected date range.<br/> Must be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) or a string matching [locale.format](#Locale.format).<br/> Date value is rounded to match option [timePickerStepSize](timePickerStepSize)<br/> Option [isInvalidDate](isInvalidDate) and [isInvalidTime](isInvalidTime) are not evaluated, you may set date/time which is not selectable in calendar.<br/> If the date does not fall into [and {@link maxDate](minDate`) then date is shifted and a warning is written to console. |
+| endDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> | <code>DateTime.now().endOf(&#x27;day&#x27;)</code> | The end date of the initially selected date range.<br/> Must be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) or a string matching [locale.format](#Locale.format).<br/> Date value is rounded to match option [timePickerStepSize](timePickerStepSize)<br/> Option [isInvalidDate](isInvalidDate), [isInvalidTime](isInvalidTime) and [minSpan](minSpan), [maxSpan](maxSpan) are not evaluated, you may set date/time which is not selectable in calendar.<br/> If the date does not fall into [minDate](minDate) and [maxDate](maxDate) then date is shifted and a warning is written to console.<br/> |
 | minDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> \| <code>null</code> |  | The earliest date a user may select or `null` for no limit.<br/> Must be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) or a string matching [locale.format](#Locale.format). |
 | maxDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> \| <code>null</code> |  | The latest date a user may select or `null` for no limit.<br/> Must be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) or a string matching [locale.format](#Locale.format). |
 | minSpan | [<code>Duration</code>](https://moment.github.io/luxon/api-docs/index.html#duration) \| <code>string</code> \| <code>number</code> \| <code>null</code> |  | The maximum span between the selected start and end dates.<br/> Must be a `luxon.Duration` or number of seconds or a string according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601#Time_intervals) duration.<br/> Ignored when `singleDatePicker: true` |
@@ -434,25 +464,26 @@ Options for DateRangePicker
 | showISOWeekNumbers | <code>boolean</code> | <code>false</code> | Show **ISO** week numbers at the start of each week on the calendars |
 | timePicker | <code>boolean</code> | <code>false</code> | Adds select boxes to choose times in addition to dates |
 | timePicker24Hour | <code>boolean</code> | <code>false</code> | Use 24-hour instead of 12-hour times, removing the AM/PM selection |
-| timePickerStepSize | [<code>Duration</code>](https://moment.github.io/luxon/api-docs/index.html#duration) \| <code>string</code> | <code>Duration.fromObject({minutes:1})</code> | Set the time picker step size.<br/> Must be a `luxon.Duration` or number of seconds or a string according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601#Time_intervals) duration.<br/> Valid values are 1,2,3,4,5,6,10,12,15,20,30 for `Duration.fromObject({seconds: ...})` and `Duration.fromObject({minutes: ...})`  and 1,2,3,4,6,(8,12) for `Duration.fromObject({hours: ...})`.<br/> Duration must be greater than `minSpan` and smaller than `maxSpan`.<br/> For example `timePickerStepSize: 600` will disable time picker seconds and time picker minutes are set to step size of 10 Minutes.<br/> Overwrites #timePickerIncrement and #timePickerSeconds |
-| timePickerSeconds | <code>boolean</code> | <code>boolean</code> | **Deprecated**, use `timePickerStepSize`<br/>Show seconds in the timePicker, use `timePickerStepSize` |
-| timePickerIncrement | <code>boolean</code> | <code>1</code> | **Deprecated**, use `timePickerStepSize`<br/>Increment of the minutes selection list for times |
-| autoUpdateInput | <code>boolean</code> | <code>true</code> | Indicates whether the date range picker should automatically update the value of the `<input>` element it's attached to at initialization and when the selected dates change. |
-| linkedCalendars | <code>boolean</code> | <code>true</code> | When enabled, the two calendars displayed will always be for two sequential months (i.e. January and February), and both will be advanced when clicking the left or right arrows above the calendars.<br/> When disabled, the two calendars can be individually advanced and display any month/year |
-| isInvalidDate | <code>function</code> | <code>false</code> | A function that is passed each date in the two calendars before they are displayed,<br/>  and may return `true` or `false` to indicate whether that date should be available for selection or not.<br/> Signature: `isInvalidDate(date)` Function has no effect on date values set by `startDate`, `endDate`, `ranges`, `setStartDate()`, `setEndDate()`. |
-| isInvalidTime | <code>function</code> | <code>false</code> | A function that is passed each hour/minute/second/am-pm in the two calendars before they are displayed,<br/>  and may return `true` or `false` to indicate whether that date should be available for selection or not.<br/> Signature: `isInvalidDate(time, side, unit)`<br/> `side` is 'start' or 'end' or `null` for `singleDatePicker = true`<br/> `unit` is `'hour'`, `'minute'`, `'second'` or `'ampm'`<br/> Function has no effect on time values set by `startDate`, `endDate`, `ranges`, `setStartDate()`, `setEndDate()`.<br/> Ensure that your function returns `false` for at least one item. Otherwise the calender is not rendered.<br/> |
-| isCustomDate | <code>function</code> | <code>false</code> | A function that is passed each date in the two calendars before they are displayed, and may return a string or array of CSS class names to apply to that date's calendar cell.<br/> Signature: `isCustomDate(date)` |
+| timePickerStepSize | [<code>Duration</code>](https://moment.github.io/luxon/api-docs/index.html#duration) \| <code>string</code> | <code>Duration.fromObject({minutes:1})</code> | Set the time picker step size.<br/> Must be a `luxon.Duration` or number of seconds or a string according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601#Time_intervals) duration.<br/> Valid values are 1,2,3,4,5,6,10,12,15,20,30 for `Duration.fromObject({seconds: ...})` and `Duration.fromObject({minutes: ...})`  and 1,2,3,4,6,(8,12) for `Duration.fromObject({hours: ...})`.<br/> Duration must be greater than [minSpan](minSpan) and smaller than [maxSpan](maxSpan).<br/> For example `timePickerStepSize: 600` will disable time picker seconds and time picker minutes are set to step size of 10 Minutes.<br/> Overwrites #timePickerIncrement and #timePickerSeconds |
+| timePickerSeconds | <code>boolean</code> | <code>boolean</code> | **Deprecated**, use [timePickerStepSize](timePickerStepSize)<br/>Show seconds in the timePicker |
+| timePickerIncrement | <code>boolean</code> | <code>1</code> | **Deprecated**, use [timePickerStepSize](timePickerStepSize)<br/>Increment of the minutes selection list for times |
+| autoUpdateInput | <code>boolean</code> | <code>true</code> | Indicates whether the date range picker should automatically update the value of the `<input>`  element it's attached to at initialization and when the selected dates change.<br/>Value is reverted when use clicks on `Cancel`. |
+| onOutsideClick | <code>string</code> | <code>&quot;none&quot;</code> | Defines what picker shall do when user clicks outside the calendar.  `'apply'` or `'cancel'`. Event ['onOutsideClick.daterangepicker']('onOutsideClick.daterangepicker') is always emitted. |
+| linkedCalendars | <code>boolean</code> | <code>true</code> | When enabled, the two calendars displayed will always be for two sequential months (i.e. January and February),  and both will be advanced when clicking the left or right arrows above the calendars.<br/> When disabled, the two calendars can be individually advanced and display any month/year |
+| isInvalidDate | <code>function</code> | <code>false</code> | A function that is passed each date in the two calendars before they are displayed,<br/>  and may return `true` or `false` to indicate whether that date should be available for selection or not.<br/> Signature: `isInvalidDate(date)` Function has no effect on date values set by [startDate](startDate), [endDate](endDate), [ranges](ranges), [setStartDate](setStartDate), [setEndDate](setEndDate). |
+| isInvalidTime | <code>function</code> | <code>false</code> | A function that is passed each hour/minute/second/am-pm in the two calendars before they are displayed,<br/>  and may return `true` or `false` to indicate whether that date should be available for selection or not.<br/> Signature: `isInvalidDate(time, side, unit)`<br/> `side` is 'start' or 'end' or `null` for `singleDatePicker = true`<br/> `unit` is `'hour'`, `'minute'`, `'second'` or `'ampm'`<br/> Function has no effect on time values set by [startDate](startDate), [endDate](endDate), [ranges](ranges), [setStartDate](setStartDate), [setEndDate](setEndDate).<br/> Ensure that your function returns `false` for at least one item. Otherwise the calender is not rendered.<br/> |
+| isCustomDate | <code>function</code> | <code>false</code> | A function that is passed each date in the two calendars before they are displayed,  and may return a string or array of CSS class names to apply to that date's calendar cell.<br/> Signature: `isCustomDate(date)` |
 | applyButtonClasses | <code>string</code> | <code>&quot;btn-primary&quot;</code> | CSS class names that will be added only to the apply button |
 | cancelButtonClasses | <code>string</code> | <code>&quot;btn-default&quot;</code> | CSS class names that will be added only to the cancel button |
 | buttonClasses | <code>string</code> | <code>&quot;btn&quot;</code> | btn-sm - CSS class names that will be added to both the apply and cancel buttons. |
 | opens | <code>string</code> | <code>&quot;right&quot;</code> | Whether the picker appears aligned to the left, to the right, or centered under the HTML element it's attached to.<br/> `'left' \| 'right' \| 'center'` |
 | drops | <code>string</code> | <code>&quot;down&quot;</code> | Whether the picker appears below or above the HTML element it's attached to.<br/> `'down' \| 'up' \| 'auto'` |
-| ranges | <code>Options.Ranges</code> | <code>{}</code> | Set predefined date ranges the user can select from. Each key is the label for the range, and its value an array with two dates representing the bounds of the range. |
-| showCustomRangeLabel | <code>boolean</code> | <code>true</code> | Displays "Custom Range" at the end of the list of predefined [ranges](Options.Ranges), when the ranges option is used.<br> This option will be highlighted whenever the current date range selection does not match one of the predefined ranges.<br/> Clicking it will display the calendars to select a new range. |
-| alwaysShowCalendars | <code>boolean</code> | <code>false</code> | Normally, if you use the ranges option to specify pre-defined date ranges, calendars for choosing a custom date range are not shown until the user clicks "Custom Range".<br/> When this option is set to true, the calendars for choosing a custom date range are always shown instead. |
-| locale | <code>object</code> | <code>{}</code> | Allows you to provide localized strings for buttons and labels, customize the date format, and change the first day of week for the calendars. |
+| ranges | <code>Options.Ranges</code> | <code>{}</code> | Set predefined date ranges the user can select from. Each key is the label for the range,  and its value an array with two dates representing the bounds of the range. |
+| showCustomRangeLabel | <code>boolean</code> | <code>true</code> | Displays "Custom Range" at the end of the list of predefined [Ranges](#Ranges),  when the ranges option is used.<br> This option will be highlighted whenever the current date range selection does not match one of the predefined ranges.<br/> Clicking it will display the calendars to select a new range. |
+| alwaysShowCalendars | <code>boolean</code> | <code>false</code> | Normally, if you use the ranges option to specify pre-defined date ranges,  calendars for choosing a custom date range are not shown until the user clicks "Custom Range".<br/> When this option is set to true, the calendars for choosing a custom date range are always shown instead. |
+| locale | <code>object</code> | <code>{}</code> | Allows you to provide localized strings for buttons and labels, customize the date format,  and change the first day of week for the calendars. |
 | locale.direction | <code>string</code> | <code>&quot;ltr&quot;</code> | Direction of reading, `'ltr'` or `'rtl'` |
-| locale.format | <code>object</code> \| <code>string</code> | <code>DateTime.DATE_SHORT</code> | Date formats. Either given as string,  see [Format Tokens](https://moment.github.io/luxon/#/formatting?id=table-of-tokens) or an object according to [Intl.DateTimeFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat)<br/> I recommend to use the luxon [Presets](https://moment.github.io/luxon/#/formatting?id=presets). |
+| locale.format | <code>object</code> \| <code>string</code> | <code>DateTime.DATE_SHORT</code> | Date formats. Either given as string,  see [Format Tokens](https://moment.github.io/luxon/#/formatting?id=table-of-tokens) or an object according  to [Intl.DateTimeFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat)<br/> I recommend to use the luxon [Presets](https://moment.github.io/luxon/#/formatting?id=presets). |
 | locale.separator= | <code>string</code> |  | Defaut: `' - '` - Separator for start and end time |
 | locale.weekLabel | <code>string</code> | <code>&quot;W&quot;</code> | Label for week numbers |
 | locale.daysOfWeek | <code>Array(string)</code> | <code>Info.weekdays(&#x27;short&#x27;)</code> | Array with weekday names, from Monday to Sunday |
@@ -461,8 +492,49 @@ Options for DateRangePicker
 | locale.applyLabel | <code>string</code> | <code>&quot;Apply&quot;</code> | Label of `Apply` Button |
 | locale.cancelLabel | <code>string</code> | <code>&quot;Cancel&quot;</code> | Label of `Cancel` Button |
 | locale.customRangeLabel | <code>string</code> | <code>&quot;Custom&quot;</code> | Range - Title for custom ranges |
-| locale.durationLabel | <code>object</code> \| <code>string</code> | <code>{}</code> | Format a custom label for selected duration, for example `'5 Days, 12 Hours'`.<br/> Define the format either as string, see [Duration.toFormat - Format Tokens](https://moment.github.io/luxon/api-docs/index.html#durationtoformat) or  an object according to [Intl.NumberFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#options), see [Duration.toHuamn](https://moment.github.io/luxon/api-docs/index.html#durationtohuman). |
+| locale.durationFormat | <code>object</code> \| <code>string</code> | <code>{}</code> | Format a custom label for selected duration, for example `'5 Days, 12 Hours'`.<br/> Define the format either as string, see [Duration.toFormat - Format Tokens](https://moment.github.io/luxon/api-docs/index.html#durationtoformat) or  an object according to [Intl.NumberFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#options),  see [Duration.toHuamn](https://moment.github.io/luxon/api-docs/index.html#durationtohuman). |
 
+<a name="Ranges"></a>
+
+## Ranges : <code>Object</code>
+A set of predefined ranges
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| name | <code>string</code> | The name of the range |
+| range | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> | Array of 2 elements with startDate and endDate |
+
+**Example**  
+```js
+{
+ 'Today': [DateTime.now().startOf('day'), DateTime.now().endOf('day')],
+ 'Yesterday': [DateTime.now().startOf('day').minus({days: 1}), DateTime.now().minus({days: 1}).endOf('day')],
+ 'Last 7 Days': [DateTime.now().startOf('day').minus({days: 6}), DateTime.now()],
+ 'Last 30 Days': [DateTime.now().startOf('day').minus({days: 29}), DateTime.now()],
+ 'This Month': [DateTime.now().startOf('day').startOf('month'), DateTime.now().endOf('month')],
+ 'Last Month': [DateTime.now().startOf('day').minus({months: 1}).startOf('month'), DateTime.now().minus({months: 1}).endOf('month')]
+}
+```
+<a name="Range"></a>
+
+## Range : <code>Object</code>
+A single predefined range
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| name | <code>string</code> | The name of the range |
+| range | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> | Array of 2 elements with startDate and endDate |
+
+**Example**  
+```js
+{ Today: [DateTime.now().startOf('day'), DateTime.now().endOf('day')] }        
+```
 <a name="callback"></a>
 
 ## callback : <code>function</code>
