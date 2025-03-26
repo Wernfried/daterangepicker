@@ -496,7 +496,7 @@ Options for DateRangePicker
 | buttonClasses | <code>string</code> | <code>&quot;btn&quot;</code> | btn-sm - CSS class names that will be added to both the apply and cancel buttons. |
 | opens | <code>string</code> | <code>&quot;right&quot;</code> | Whether the picker appears aligned to the left, to the right, or centered under the HTML element it's attached to.<br/> `'left' \| 'right' \| 'center'` |
 | drops | <code>string</code> | <code>&quot;down&quot;</code> | Whether the picker appears below or above the HTML element it's attached to.<br/> `'down' \| 'up' \| 'auto'` |
-| ranges | <code>Options.Ranges</code> | <code>{}</code> | Set predefined date ranges the user can select from. Each key is the label for the range,  and its value an array with two dates representing the bounds of the range. |
+| ranges | <code>object</code> | <code>{}</code> | Set predefined date [Ranges](#Ranges) the user can select from. Each key is the label for the range,  and its value an array with two dates representing the bounds of the range. |
 | showCustomRangeLabel | <code>boolean</code> | <code>true</code> | Displays "Custom Range" at the end of the list of predefined [Ranges](#Ranges),  when the ranges option is used.<br> This option will be highlighted whenever the current date range selection does not match one of the predefined ranges.<br/> Clicking it will display the calendars to select a new range. |
 | alwaysShowCalendars | <code>boolean</code> | <code>false</code> | Normally, if you use the ranges option to specify pre-defined date ranges,  calendars for choosing a custom date range are not shown until the user clicks "Custom Range".<br/> When this option is set to true, the calendars for choosing a custom date range are always shown instead. |
 | locale | <code>object</code> | <code>{}</code> | Allows you to provide localized strings for buttons and labels, customize the date format,  and change the first day of week for the calendars. |
@@ -504,8 +504,8 @@ Options for DateRangePicker
 | locale.format | <code>object</code> \| <code>string</code> |  | Default: `DateTime.DATE_SHORT`<br/>Date formats. Either given as string,  see [Format Tokens](https://moment.github.io/luxon/#/formatting?id=table-of-tokens) or an object according  to [Intl.DateTimeFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat)<br/> I recommend to use the luxon [Presets](https://moment.github.io/luxon/#/formatting?id=presets). |
 | locale.separator= | <code>string</code> |  | Defaut: `' - '` - Separator for start and end time |
 | locale.weekLabel | <code>string</code> | <code>&quot;W&quot;</code> | Label for week numbers |
-| locale.daysOfWeek | <code>Array(string)</code> |  | Default: `Info.weekdays('short')`<br/>Array with weekday names, from Monday to Sunday |
-| locale.monthNames | <code>Array(string)</code> |  | Default: `Info.months('long')`<br/>Array with month names |
+| locale.daysOfWeek | <code>Array</code> |  | Default: `Info.weekdays('short')`<br/>Array with weekday names, from Monday to Sunday |
+| locale.monthNames | <code>Array</code> |  | Default: `Info.months('long')`<br/>Array with month names |
 | locale.firstDay | <code>number</code> |  | Default: `Info.getStartOfWeek()`<br/>First day of the week, 1 for Monday through 7 for Sunday |
 | locale.applyLabel | <code>string</code> | <code>&quot;Apply&quot;</code> | Label of `Apply` Button |
 | locale.cancelLabel | <code>string</code> | <code>&quot;Cancel&quot;</code> | Label of `Cancel` Button |
