@@ -26,10 +26,10 @@
         module.exports = factory(moment, jQuery);
     } else {
         // Browser globals
-        root.daterangepickerM = factory(root.moment, root.jQuery);
+        root.daterangepicker = factory(root.moment, root.jQuery);
     }
 }(typeof window !== 'undefined' ? window : this, function (moment, $) {
-    var DateRangePickerM = function (element, options, cb) {
+    var daterangepicker = function (element, options, cb) {
 
         //default settings for options
         this.parentEl = 'body';
@@ -434,31 +434,31 @@
         //
 
         this.container.find('.drp-calendar')
-            .on('click.daterangepickerM', '.prev', $.proxy(this.clickPrev, this))
-            .on('click.daterangepickerM', '.next', $.proxy(this.clickNext, this))
-            .on('mousedown.daterangepickerM', 'td.available', $.proxy(this.clickDate, this))
-            .on('mouseenter.daterangepickerM', 'td.available', $.proxy(this.hoverDate, this))
-            .on('change.daterangepickerM', 'select.yearselect', $.proxy(this.monthOrYearChanged, this))
-            .on('change.daterangepickerM', 'select.monthselect', $.proxy(this.monthOrYearChanged, this))
-            .on('change.daterangepickerM', 'select.hourselect,select.minuteselect,select.secondselect,select.ampmselect', $.proxy(this.timeChanged, this));
+            .on('click.daterangepicker', '.prev', $.proxy(this.clickPrev, this))
+            .on('click.daterangepicker', '.next', $.proxy(this.clickNext, this))
+            .on('mousedown.daterangepicker', 'td.available', $.proxy(this.clickDate, this))
+            .on('mouseenter.daterangepicker', 'td.available', $.proxy(this.hoverDate, this))
+            .on('change.daterangepicker', 'select.yearselect', $.proxy(this.monthOrYearChanged, this))
+            .on('change.daterangepicker', 'select.monthselect', $.proxy(this.monthOrYearChanged, this))
+            .on('change.daterangepicker', 'select.hourselect,select.minuteselect,select.secondselect,select.ampmselect', $.proxy(this.timeChanged, this));
 
         this.container.find('.ranges')
-            .on('click.daterangepickerM', 'li', $.proxy(this.clickRange, this));
+            .on('click.daterangepicker', 'li', $.proxy(this.clickRange, this));
 
         this.container.find('.drp-buttons')
-            .on('click.daterangepickerM', 'button.applyBtn', $.proxy(this.clickApply, this))
-            .on('click.daterangepickerM', 'button.cancelBtn', $.proxy(this.clickCancel, this));
+            .on('click.daterangepicker', 'button.applyBtn', $.proxy(this.clickApply, this))
+            .on('click.daterangepicker', 'button.cancelBtn', $.proxy(this.clickCancel, this));
 
         if (this.element.is('input') || this.element.is('button')) {
             this.element.on({
-                'click.daterangepickerM': $.proxy(this.show, this),
-                'focus.daterangepickerM': $.proxy(this.show, this),
-                'keyup.daterangepickerM': $.proxy(this.elementChanged, this),
-                'keydown.daterangepickerM': $.proxy(this.keydown, this) //IE 11 compatibility
+                'click.daterangepicker': $.proxy(this.show, this),
+                'focus.daterangepicker': $.proxy(this.show, this),
+                'keyup.daterangepicker': $.proxy(this.elementChanged, this),
+                'keydown.daterangepicker': $.proxy(this.keydown, this) //IE 11 compatibility
             });
         } else {
-            this.element.on('click.daterangepickerM', $.proxy(this.toggle, this));
-            this.element.on('keydown.daterangepickerM', $.proxy(this.toggle, this));
+            this.element.on('click.daterangepicker', $.proxy(this.toggle, this));
+            this.element.on('keydown.daterangepicker', $.proxy(this.toggle, this));
         }
 
         //
@@ -469,9 +469,9 @@
 
     };
 
-    DateRangePickerM.prototype = {
+    daterangepicker.prototype = {
 
-        constructor: DateRangePickerM,
+        constructor: daterangepicker,
 
         setStartDate: function (startDate) {
             if (typeof startDate === 'string')
@@ -553,26 +553,6 @@
                 this.updateElement();
 
             this.updateMonthsInView();
-        },
-
-        setPeriod: function (startDate, endDate) {
-            let start, end;
-
-            if (typeof startDate === 'string')
-                start = moment(startDate, this.locale.format);
-            if (typeof startDate === 'object')
-                start = moment(startDate);
-            if (typeof endDate === 'string')
-                end = moment(endDate, this.locale.format);
-            if (typeof endDate === 'object')
-                end = moment(endDate);
-
-            if (this.singleDatePicker) {
-                this.setStartDate(start);
-            } else {
-                this.setStartDate(start);
-                this.setEndDate(end);
-            }
         },
 
         isInvalidDate: function () {
@@ -1237,16 +1217,16 @@
 
             // Bind global datepicker mousedown for hiding and
             $(document)
-                .on('mousedown.daterangepickerM', this._outsideClickProxy)
+                .on('mousedown.daterangepicker', this._outsideClickProxy)
                 // also support mobile devices
-                .on('touchend.daterangepickerM', this._outsideClickProxy)
+                .on('touchend.daterangepicker', this._outsideClickProxy)
                 // also explicitly play nice with Bootstrap dropdowns, which stopPropagation when clicking them
-                .on('click.daterangepickerM', '[data-toggle=dropdown]', this._outsideClickProxy)
+                .on('click.daterangepicker', '[data-toggle=dropdown]', this._outsideClickProxy)
                 // and also close when focus changes to outside the picker (eg. tabbing between controls)
-                .on('focusin.daterangepickerM', this._outsideClickProxy);
+                .on('focusin.daterangepicker', this._outsideClickProxy);
 
             // Reposition the picker if the window is resized while it's open
-            $(window).on('resize.daterangepickerM', $.proxy(function (e) { this.move(e); }, this));
+            $(window).on('resize.daterangepicker', $.proxy(function (e) { this.move(e); }, this));
 
             this.oldStartDate = this.startDate.clone();
             this.oldEndDate = this.endDate.clone();
@@ -1255,7 +1235,7 @@
             this.updateView();
             this.container.show();
             this.move();
-            this.element.trigger('show.daterangepickerM', this);
+            this.element.trigger('show.daterangepicker', this);
             this.isShowing = true;
         },
 
@@ -1275,13 +1255,10 @@
             //if picker is attached to a text input, update it
             this.updateElement();
 
-            const cancel = this.element.triggerHandler('beforeHide', this);
-            if (cancel)
-                return;
-            $(document).off('.daterangepickerM');
-            $(window).off('.daterangepickerM');
+            $(document).off('.daterangepicker');
+            $(window).off('.daterangepicker');
             this.container.hide();
-            this.element.trigger('hide.daterangepickerM', this);
+            this.element.trigger('hide.daterangepicker', this);
             this.isShowing = false;
         },
 
@@ -1305,18 +1282,18 @@
                 target.closest('.calendar-table').length
             ) return;
             this.hide();
-            this.element.trigger('outsideClick.daterangepickerM', this);
+            this.element.trigger('outsideClick.daterangepicker', this);
         },
 
         showCalendars: function () {
             this.container.addClass('show-calendar');
             this.move();
-            this.element.trigger('showCalendar.daterangepickerM', this);
+            this.element.trigger('showCalendar.daterangepicker', this);
         },
 
         hideCalendars: function () {
             this.container.removeClass('show-calendar');
-            this.element.trigger('hideCalendar.daterangepickerM', this);
+            this.element.trigger('hideCalendar.daterangepicker', this);
         },
 
         clickRange: function (e) {
@@ -1489,7 +1466,7 @@
             //This is to cancel the blur event handler if the mouse was in one of the inputs
             e.stopPropagation();
 
-            this.element.trigger('dateChange.daterangepickerM', [this, this.singleDatePicker ? null : side]);
+            this.element.trigger('dateChange.daterangepicker', [this, this.singleDatePicker ? null : side]);
 
         },
 
@@ -1527,14 +1504,14 @@
 
         clickApply: function (e) {
             this.hide();
-            this.element.trigger('apply.daterangepickerM', this);
+            this.element.trigger('apply.daterangepicker', this);
         },
 
         clickCancel: function (e) {
             this.startDate = this.oldStartDate;
             this.endDate = this.oldEndDate;
             this.hide();
-            this.element.trigger('cancel.daterangepickerM', this);
+            this.element.trigger('cancel.daterangepicker', this);
         },
 
         monthOrYearChanged: function (e) {
@@ -1633,7 +1610,7 @@
             this.renderTimePicker('left');
             this.renderTimePicker('right');
 
-            this.element.trigger('timeChange.daterangepickerM', [this, this.singleDatePicker ? null : (isLeft ? 'start' : 'stop')]);
+            this.element.trigger('timeChange.daterangepicker', [this, this.singleDatePicker ? null : (isLeft ? 'start' : 'stop')]);
         },
 
         elementChanged: function () {
@@ -1690,23 +1667,23 @@
 
         remove: function () {
             this.container.remove();
-            this.element.off('.daterangepickerM');
+            this.element.off('.daterangepicker');
             this.element.removeData();
         }
 
     };
 
-    $.fn.daterangepickerM = function (options, callback) {
-        var implementOptions = $.extend(true, {}, $.fn.daterangepickerM.defaultOptions, options);
+    $.fn.daterangepicker = function (options, callback) {
+        var implementOptions = $.extend(true, {}, $.fn.daterangepicker.defaultOptions, options);
         this.each(function () {
             var el = $(this);
-            if (el.data('daterangepickerM'))
-                el.data('daterangepickerM').remove();
-            el.data('daterangepickerM', new DateRangePickerM(el, implementOptions, callback));
+            if (el.data('daterangepicker'))
+                el.data('daterangepicker').remove();
+            el.data('daterangepicker', new daterangepicker(el, implementOptions, callback));
         });
         return this;
     };
 
-    return DateRangePickerM;
+    return daterangepicker;
 
 }));

@@ -42,16 +42,14 @@
 
       $('#picker').daterangepicker({
         timePicker: true,
-        timePickerStepMinute: 5,
         timePicker24Hour: true,
         maxSpan: Duration.fromObject({ days: 14 }),
         minSpan: Duration.fromObject({ days: 4 }),
-        timePickerStepSize: Duration.fromObject({ seconds: 30 }),
+        timePickerStepSize: Duration.fromObject({ minutes: 10 }),
         //minDate: DateTime.fromSQL($("#PwTime").attr('option-minDate')).toJSDate(),
         //maxDate: DateTime.now().plus({ year: 3 }).endOf('month').toJSDate(),
         //startDate: DateTime.fromSQL($("#PwTime").attr('option-startDate')).toJSDate(),
         //endDate: DateTime.fromSQL($("#PwTime").attr('option-endDate')).toJSDate(),
-        singleDatePicker: true,
         locale: {
           format: 'dd.MM.yyyy HH:mm',
           separator: ' - ',
@@ -60,29 +58,7 @@
           //firstDay: 1
         }
       });
-      $('#picker').trigger('click');
-
-
-      $('#picker-moment').daterangepickerM({
-        timePicker: true,
-        timePickerStepMinute: 5,
-        timePicker24Hour: true,
-        maxSpan: moment.duration(14, 'days'),
-        minSpan: moment.duration(4, 'days'),        
-        //minDate: DateTime.fromSQL($("#PwTime").attr('option-minDate')).toJSDate(),
-        //maxDate: DateTime.now().plus({ year: 3 }).endOf('month').toJSDate(),
-        //startDate: DateTime.fromSQL($("#PwTime").attr('option-startDate')).toJSDate(),
-        //endDate: DateTime.fromSQL($("#PwTime").attr('option-endDate')).toJSDate(),
-        singleDatePicker: true,
-        locale: {
-          format: 'DD.MM.YYYY HH:mm',
-          separator: ' - ',
-          //daysOfWeek: moment.weekdaysShort(),
-          //monthNames: moment.months(),
-          //firstDay: 1
-        }
-      });
-      $('#picker-moment').trigger('click');
+      //$('#picker').trigger('click');
 
     });
 
@@ -92,10 +68,6 @@
 <body>
   <div>
     <input type="text" id="picker" size="30" />
-  </div>
-
-  <div style="margin-top: 350px;">
-    <input type="text" id="picker-moment" size="30" />
   </div>
 
 </body>

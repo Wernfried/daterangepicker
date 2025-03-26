@@ -5,10 +5,9 @@
   "main": "daterangepicker.js",
   "style": "daterangepicker.css",
   "scripts": {
-    "preversion": "jsdoc2md --private daterangepicker.js > daterangepicker.md",
-    "postversion": "sed -i -e \"s/@version: .*/@version: %npm_package_version%/\" daterangepicker.js",
-    "prepack": "unix2dos daterangepicker.js daterangepicker.md",
-    "prepare": "git commit -a -m \"Updated doc and version\""
+    "prepack": "sed -i '/# API Documentation/q' README.md",
+    "prepare": "jsdoc2md --EOL win32 --example-lang js daterangepicker.js >> README.md",
+    "postpack": "git commit -a -m \"Updated README.md\""
   },
   "repository": {
     "type": "git",

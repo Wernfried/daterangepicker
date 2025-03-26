@@ -603,29 +603,18 @@ Options for DateRangePicker
 | ranges | <code>Options.Ranges</code> | <code>{}</code> | Set predefined date ranges the user can select from. Each key is the label for the range, and its value an array with two dates representing the bounds of the range. |
 | showCustomRangeLabel | <code>boolean</code> | <code>true</code> | Displays "Custom Range" at the end of the list of predefined [ranges](Options.Ranges), when the ranges option is used.<br> This option will be highlighted whenever the current date range selection does not match one of the predefined ranges.<br/> Clicking it will display the calendars to select a new range. |
 | alwaysShowCalendars | <code>boolean</code> | <code>false</code> | Normally, if you use the ranges option to specify pre-defined date ranges, calendars for choosing a custom date range are not shown until the user clicks "Custom Range".<br/> When this option is set to true, the calendars for choosing a custom date range are always shown instead. |
-| locale | [<code>Locale</code>](#Options.Locale) | <code>{}</code> | Allows you to provide localized strings for buttons and labels, customize the date format, and change the first day of week for the calendars. |
-
-<a name="Options.Locale"></a>
-
-### Options.Locale
-Locale options for DateRangePicker
-
-**Kind**: static typedef of [<code>Options</code>](#Options)  
-**Properties**
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| direction | <code>string</code> | <code>&quot;ltr&quot;</code> | Direction of reading, `'ltr'` or `'rtl'` |
-| format | <code>object</code> \| <code>string</code> | <code>DateTime.DATE_SHORT</code> | Date formats. Either given as string,  see [Format Tokens](https://moment.github.io/luxon/#/formatting?id=table-of-tokens) or an object according to [Intl.DateTimeFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat)<br/> I recommend to use the luxon [Presets](https://moment.github.io/luxon/#/formatting?id=presets). |
-| separator= | <code>string</code> |  | Defaut: `' - '` - Separator for start and end time |
-| weekLabel | <code>string</code> | <code>&quot;W&quot;</code> | Label for week numbers |
-| daysOfWeek | <code>Array(string)</code> | <code>Info.weekdays(&#x27;short&#x27;)</code> | Array with weekday names, from Monday to Sunday |
-| monthNames | <code>Array(string)</code> | <code>Info.months(&#x27;long&#x27;)</code> | Array with month names |
-| Info.getStartOfWeek() | <code>number</code> | <code>1</code> | First day of the week, 1 for Monday through 7 for Sunday |
-| applyLabel | <code>string</code> | <code>&quot;Apply&quot;</code> | Label of `Apply` Button |
-| cancelLabel | <code>string</code> | <code>&quot;Cancel&quot;</code> | Label of `Cancel` Button |
-| customRangeLabel | <code>string</code> | <code>&quot;Custom&quot;</code> | Range - Title for custom ranges |
-| durationLabel | <code>object</code> \| <code>string</code> | <code>{}</code> | Format a custom label for selected duration, for example '5 Days, 12 Hours'.<br/> Define the format either as string, see [Duration.toFormat - Format Tokens](https://moment.github.io/luxon/api-docs/index.html#durationtoformat) or  an object according to [Intl.NumberFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#options), see [Duration.toHuamn](https://moment.github.io/luxon/api-docs/index.html#durationtohuman). |
+| locale | <code>object</code> | <code>{}</code> | Allows you to provide localized strings for buttons and labels, customize the date format, and change the first day of week for the calendars. |
+| locale.direction | <code>string</code> | <code>&quot;ltr&quot;</code> | Direction of reading, `'ltr'` or `'rtl'` |
+| locale.format | <code>object</code> \| <code>string</code> | <code>DateTime.DATE_SHORT</code> | Date formats. Either given as string,  see [Format Tokens](https://moment.github.io/luxon/#/formatting?id=table-of-tokens) or an object according to [Intl.DateTimeFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat)<br/> I recommend to use the luxon [Presets](https://moment.github.io/luxon/#/formatting?id=presets). |
+| locale.separator= | <code>string</code> |  | Defaut: `' - '` - Separator for start and end time |
+| locale.weekLabel | <code>string</code> | <code>&quot;W&quot;</code> | Label for week numbers |
+| locale.daysOfWeek | <code>Array(string)</code> | <code>Info.weekdays(&#x27;short&#x27;)</code> | Array with weekday names, from Monday to Sunday |
+| locale.monthNames | <code>Array(string)</code> | <code>Info.months(&#x27;long&#x27;)</code> | Array with month names |
+| locale.firstDay | <code>number</code> | <code>Info.getStartOfWeek()</code> | First day of the week, 1 for Monday through 7 for Sunday |
+| locale.applyLabel | <code>string</code> | <code>&quot;Apply&quot;</code> | Label of `Apply` Button<br/>Example<br/>         `isInvalidDate: function(date) {`<br/>         &nbsp;&nbsp;&nbsp;`return date.isWeekend; `<br/>&nbsp;&nbsp;&nbsp;`// avoid selection of weekend days`<br/>         `}`<br/> |
+| locale.cancelLabel | <code>string</code> | <code>&quot;Cancel&quot;</code> | Label of `Cancel` Button |
+| locale.customRangeLabel | <code>string</code> | <code>&quot;Custom&quot;</code> | Range - Title for custom ranges |
+| locale.durationLabel | <code>object</code> \| <code>string</code> | <code>{}</code> | Format a custom label for selected duration, for example `'5 Days, 12 Hours'`.<br/> Define the format either as string, see [Duration.toFormat - Format Tokens](https://moment.github.io/luxon/api-docs/index.html#durationtoformat) or  an object according to [Intl.NumberFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#options), see [Duration.toHuamn](https://moment.github.io/luxon/api-docs/index.html#durationtohuman). |
 
 <a name="callback"></a>
 
