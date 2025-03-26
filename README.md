@@ -287,7 +287,7 @@ drp.setEndDate('2025-03-28T18:30:00');
 <a name="DateRangePicker+setPeriod"></a>
 
 ### dateRangePicker.setPeriod(startDate, endDate)
-Shortcut for [#DateRangePicker+setStartDatesetStartDate](#DateRangePicker+setStartDatesetStartDate) and [#DateRangePicker+setEndDatesetEndDate](#DateRangePicker+setEndDatesetEndDate)
+Shortcut for [setStartDate](#DateRangePicker+setStartDate) and [setEndDate](#DateRangePicker+setEndDate)
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
 **Throws**:
@@ -310,7 +310,7 @@ drp.setPeriod(DateTime.now().startOf('week'), DateTime.now().startOf('week').plu
 
 ### dateRangePicker.updateView()
 Updates the picker when calendar is initiated or any date has been selected. 
-Could be useful after running [#DateRangePicker+setStartDatesetStartDate](#DateRangePicker+setStartDatesetStartDate) or [#DateRangePicker+setEndDatesetEndDate](#DateRangePicker+setEndDatesetEndDate)
+Could be useful after running [setStartDate](#DateRangePicker+setStartDate) or [setEndDate](#DateRangePicker+setEndDate)
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
 <a name="DateRangePicker+outsideClick"></a>
@@ -488,8 +488,8 @@ Options for DateRangePicker
 | autoUpdateInput | <code>boolean</code> | <code>true</code> | Indicates whether the date range picker should automatically update the value of the `<input>`  element it's attached to at initialization and when the selected dates change.<br/>Value is reverted when use clicks on `Cancel`. |
 | onOutsideClick | <code>string</code> | <code>&quot;none&quot;</code> | Defines what picker shall do when user clicks outside the calendar.  `'apply'` or `'cancel'`. Event [onOutsideClick.daterangepicker](#event_outsideClick.daterangepicker) is always emitted. |
 | linkedCalendars | <code>boolean</code> | <code>true</code> | When enabled, the two calendars displayed will always be for two sequential months (i.e. January and February),  and both will be advanced when clicking the left or right arrows above the calendars.<br/> When disabled, the two calendars can be individually advanced and display any month/year |
-| isInvalidDate | <code>function</code> | <code>false</code> | A function that is passed each date in the two calendars before they are displayed,<br/>  and may return `true` or `false` to indicate whether that date should be available for selection or not.<br/> Signature: `isInvalidDate(date)` Function has no effect on date values set by `startDate`, `endDate`, `ranges`, [#DateRangePicker+setStartDatesetStartDate](#DateRangePicker+setStartDatesetStartDate), [#DateRangePicker+setEndDatesetEndDate](#DateRangePicker+setEndDatesetEndDate). |
-| isInvalidTime | <code>function</code> | <code>false</code> | A function that is passed each hour/minute/second/am-pm in the two calendars before they are displayed,<br/>  and may return `true` or `false` to indicate whether that date should be available for selection or not.<br/> Signature: `isInvalidDate(time, side, unit)`<br/> `side` is 'start' or 'end' or `null` for `singleDatePicker = true`<br/> `unit` is `'hour'`, `'minute'`, `'second'` or `'ampm'`<br/> Function has no effect on time values set by `startDate`, `endDate`, `ranges`, [#DateRangePicker+setStartDatesetStartDate](#DateRangePicker+setStartDatesetStartDate), [#DateRangePicker+setEndDatesetEndDate](#DateRangePicker+setEndDatesetEndDate).<br/> Ensure that your function returns `false` for at least one item. Otherwise the calender is not rendered.<br/> |
+| isInvalidDate | <code>function</code> | <code>false</code> | A function that is passed each date in the two calendars before they are displayed,<br/>  and may return `true` or `false` to indicate whether that date should be available for selection or not.<br/> Signature: `isInvalidDate(date)` Function has no effect on date values set by `startDate`, `endDate`, `ranges`, [setStartDate](#DateRangePicker+setStartDate), [setEndDate](#DateRangePicker+setEndDate). |
+| isInvalidTime | <code>function</code> | <code>false</code> | A function that is passed each hour/minute/second/am-pm in the two calendars before they are displayed,<br/>  and may return `true` or `false` to indicate whether that date should be available for selection or not.<br/> Signature: `isInvalidDate(time, side, unit)`<br/> `side` is 'start' or 'end' or `null` for `singleDatePicker = true`<br/> `unit` is `'hour'`, `'minute'`, `'second'` or `'ampm'`<br/> Function has no effect on time values set by `startDate`, `endDate`, `ranges`, [setStartDate](#DateRangePicker+setStartDate), [setEndDate](#DateRangePicker+setEndDate).<br/> Ensure that your function returns `false` for at least one item. Otherwise the calender is not rendered.<br/> |
 | isCustomDate | <code>function</code> | <code>false</code> | A function that is passed each date in the two calendars before they are displayed,  and may return a string or array of CSS class names to apply to that date's calendar cell.<br/> Signature: `isCustomDate(date)` |
 | applyButtonClasses | <code>string</code> | <code>&quot;btn-primary&quot;</code> | CSS class names that will be added only to the apply button |
 | cancelButtonClasses | <code>string</code> | <code>&quot;btn-default&quot;</code> | CSS class names that will be added only to the cancel button |
