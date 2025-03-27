@@ -1,6 +1,6 @@
 {
   "name": "daterangepicker-4.x",
-  "version": "4.1.7",
+  "version": "4.1.8",
   "description": "Date range picker with time component and pre-defined ranges",
   "main": "daterangepicker.js",
   "style": "daterangepicker.css",
