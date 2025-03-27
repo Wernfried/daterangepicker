@@ -5,8 +5,8 @@
   "main": "daterangepicker.js",
   "style": "daterangepicker.css",
   "scripts": {
-    "postversion": "sed -i -e 's/daterangepicker-4.x@4\\.[0-9]\\+\\.[0-9]\\+/daterangepicker-4.x@%npm_package_version%/' README.md",
-    "prepack": "sed -i '/# API Documentation/q' README.md",
+    "postversion": "sed -bi -e 's/daterangepicker-4.x@4\\.[0-9]\\+\\.[0-9]\\+/daterangepicker-4.x@%npm_package_version%/' README.md",
+    "prepack": "sed -bi '/# API Documentation/q' README.md",
     "prepare": "jsdoc2md --EOL win32 --example-lang js daterangepicker.js >> README.md",
     "postpack": "git commit -a -m \"Updated README.md\""
   },
