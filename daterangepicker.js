@@ -685,12 +685,14 @@
         * Functions `isInvalidDate` and `isInvalidTime` are not evaluated, you may set date/time which is not selectable in calendar.<br/>
         * If the `startDate` does not fall into `minDate` and `maxDate` then `startDate` is shifted and a warning is written to console. 
         * @param {external:DateTime|external:Date|string} startDate - startDate to be set
+        * @param {boolean} isValid=false - If `true` then the `startDate` is not checked against `minDate` and `maxDate`<br/>
+        * Use this option only if you are really sure about the value you put in.
         * @throws `RangeError` for invalid date values.
         * @example const DateTime = luxon.DateTime;
         * const drp = $('#picker').data('daterangepicker');
         * drp.setStartDate(DateTime.now().startOf('hour'));
         */
-        setStartDate: function (startDate, isValid) {
+        setStartDate: function (startDate, isValid = false) {
             // If isValid == true, then value is selected from calendar and stepSize, minDate, maxDate are already considered
             if (isValid === undefined || !isValid) {
                 if (typeof startDate === 'object') {
@@ -734,11 +736,13 @@
         * If the `endDate` does not fall into  `minDate` and `maxDate` or into `minSpan` and `maxSpan`
         * then `endDate` is shifted and a warning is written to console. 
         * @param {external:DateTime|external:Date|string} endDate - endDate to be set
+        * @param {boolean} isValid=false - If `true` then the `endDate` is not checked against `minDate`, `maxDate` and `minSpan`, `maxSpan`<br/>
+        * Use this option only if you are really sure about the value you put in.
         * @throws `RangeError` for invalid date values.
         * @example const drp = $('#picker').data('daterangepicker');
         * drp.setEndDate('2025-03-28T18:30:00');
         */
-        setEndDate: function (endDate, isValid) {
+        setEndDate: function (endDate, isValid = false) {
             // If isValid == true, then value is selected from calendar and stepSize, minDate, maxDate are already considered
             if (isValid === undefined || !isValid) {
                 if (typeof endDate === 'object') {
@@ -792,17 +796,21 @@
         * Shortcut for {@link #DateRangePicker+setStartDate|setStartDate} and {@link #DateRangePicker+setEndDate|setEndDate}
         * @param {external:DateTime|external:Date|string} startDate - startDate to be set
         * @param {external:DateTime|external:Date|string} endDate - endDate to be set
+        * @param {boolean} isValid=false - If `true` then the `startDate` and `endDate` are not checked against `minDate`, `maxDate` and `minSpan`, `maxSpan`<br/>
+        * Use this option only if you are really sure about the value you put in.
         * @throws `RangeError` for invalid date values.
         * @example const DateTime = luxon.DateTime;
         * const drp = $('#picker').data('daterangepicker');
         * drp.setPeriod(DateTime.now().startOf('week'), DateTime.now().startOf('week').plus({days: 10}));
         */
-        setPeriod: function (startDate, endDate) {
+        setPeriod: function (startDate, endDate, isValid = false) {
             if (this.singleDatePicker) {
-                this.setStartDate(startDate, false);
+                this.setStartDate(startDate, isValid);
             } else {
-                this.setStartDate(startDate, false);
-                this.setEndDate(endDate, false);
+                this.setStartDate(startDate, true);
+                this.setEndDate(endDate, true);
+                if (!isValid)
+                    this.constrainDate();
             }
         },
 
@@ -897,6 +905,9 @@
                     return [startDate, endDate];
                 }
             }
+
+            if (endDate == null)
+                return;
 
             if (stepSize && this.timePicker) {
                 // Round time to step size
@@ -2357,7 +2368,7 @@
     * @param {external:DateTime} endDate - Selected endDate 
     * @param {string} range
     */
-    
+
     /**
     * Initiate a new DateRangePicker
     * @name DateRangePicker.daterangepicker
