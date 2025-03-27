@@ -138,7 +138,7 @@ This table lists a few important differences between datarangepicker using momen
 
 The MIT License (MIT)
 
-Copyright (c) 2012-2019 Dan Grossman<br/> 
+Copyright (c) 2012-2019 Dan Grossman<br/>
 Copyright (c) 2025 Wernfried Domscheit
 
 Licensed under the [MIT license](LICENSE).
