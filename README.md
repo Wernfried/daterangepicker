@@ -18,8 +18,8 @@ Above samples are based on the [original repository](https://github.com/dangross
 ```html
 <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.1.8/daterangepicker.min.js"></script>
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.1.8/daterangepicker.min.css" rel="stylesheet" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.1.9/daterangepicker.min.js"></script>
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.1.9/daterangepicker.min.css" rel="stylesheet" />
 
 <input type="text" id="daterange" />
 
@@ -215,9 +215,9 @@ use <a href="#event_timeChange.daterangepicker">&quot;timeChange.daterangepicker
 * [DateRangePicker](#DateRangePicker)
     * [new DateRangePicker(element, options, cb)](#new_DateRangePicker_new)
     * _instance_
-        * [.setStartDate(startDate)](#DateRangePicker+setStartDate)
-        * [.setEndDate(endDate)](#DateRangePicker+setEndDate)
-        * [.setPeriod(startDate, endDate)](#DateRangePicker+setPeriod)
+        * [.setStartDate(startDate, isValid)](#DateRangePicker+setStartDate)
+        * [.setEndDate(endDate, isValid)](#DateRangePicker+setEndDate)
+        * [.setPeriod(startDate, endDate, isValid)](#DateRangePicker+setPeriod)
         * [.updateView()](#DateRangePicker+updateView)
         * [.outsideClick(e)](#DateRangePicker+outsideClick)
     * _static_
@@ -235,7 +235,7 @@ use <a href="#event_timeChange.daterangepicker">&quot;timeChange.daterangepicker
 
 <a name="DateRangePicker+setStartDate"></a>
 
-### dateRangePicker.setStartDate(startDate)
+### dateRangePicker.setStartDate(startDate, isValid)
 Sets the date range picker's currently selected start date to the provided date.<br/>
 `startDate` must be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](ISO-8601) or 
 a string matching `locale.format`.
@@ -250,9 +250,10 @@ If the `startDate` does not fall into `minDate` and `maxDate` then `startDate` i
 - `RangeError` for invalid date values.
 
 
-| Param | Type | Description |
-| --- | --- | --- |
-| startDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> | startDate to be set |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| startDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> |  | startDate to be set |
+| isValid | <code>boolean</code> | <code>false</code> | If `true` then the `startDate` is not checked against `minDate` and `maxDate`<br/> Use this option only if you are really sure about the value you put in. |
 
 **Example**  
 ```js
@@ -262,7 +263,7 @@ drp.setStartDate(DateTime.now().startOf('hour'));
 ```
 <a name="DateRangePicker+setEndDate"></a>
 
-### dateRangePicker.setEndDate(endDate)
+### dateRangePicker.setEndDate(endDate, isValid)
 Sets the date range picker's currently selected end date to the provided date.<br/>
 `endDate` must be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](ISO-8601) or 
 a string matching`locale.format`.
@@ -278,9 +279,10 @@ then `endDate` is shifted and a warning is written to console.
 - `RangeError` for invalid date values.
 
 
-| Param | Type | Description |
-| --- | --- | --- |
-| endDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> | endDate to be set |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| endDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> |  | endDate to be set |
+| isValid | <code>boolean</code> | <code>false</code> | If `true` then the `endDate` is not checked against `minDate`, `maxDate` and `minSpan`, `maxSpan`<br/> Use this option only if you are really sure about the value you put in. |
 
 **Example**  
 ```js
@@ -289,7 +291,7 @@ drp.setEndDate('2025-03-28T18:30:00');
 ```
 <a name="DateRangePicker+setPeriod"></a>
 
-### dateRangePicker.setPeriod(startDate, endDate)
+### dateRangePicker.setPeriod(startDate, endDate, isValid)
 Shortcut for [setStartDate](#DateRangePicker+setStartDate) and [setEndDate](#DateRangePicker+setEndDate)
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
@@ -298,10 +300,11 @@ Shortcut for [setStartDate](#DateRangePicker+setStartDate) and [setEndDate](#Dat
 - `RangeError` for invalid date values.
 
 
-| Param | Type | Description |
-| --- | --- | --- |
-| startDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> | startDate to be set |
-| endDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> | endDate to be set |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| startDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> |  | startDate to be set |
+| endDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> |  | endDate to be set |
+| isValid | <code>boolean</code> | <code>false</code> | If `true` then the `startDate` and `endDate` are not checked against `minDate`, `maxDate` and `minSpan`, `maxSpan`<br/> Use this option only if you are really sure about the value you put in. |
 
 **Example**  
 ```js
