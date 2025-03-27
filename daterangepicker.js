@@ -1324,7 +1324,7 @@
                     if (!classes.includes('disabled'))
                         classes.push('available');
 
-                    html += `<td class="${classes.join(' ')}" data-title="r${row}c${col}" data-date="${calendar[row][col].toISODate()}">${calendar[row][col].day}</td>`;
+                    html += `<td class="${classes.join(' ')}" data-title="r${row}c${col}">${calendar[row][col].day}</td>`;
 
                 }
                 html += '</tr>';
