@@ -100,18 +100,21 @@ isInvalidDate: function(date) {
 }
 ```
 ### Features
-Compared to [inital repository](https://github.com/dangrossman/daterangepicker), this fork added following features:
+Compared to [inital repository](https://github.com/dangrossman/daterangepicker), this fork added following features and changes:
 
+- Replaced [moment](https://momentjs.com/) by [luxon](https://moment.github.io/luxon/index.html) (see differences below)
 - Added CSS class `weekend-day` for weekend days in calendar 
 - Added option `timePickerStepSize` to succeed options `timePickerIncrement` and `timePickerSeconds`
-- Added events for `dateChange.daterangepicker` and `timeChange.daterangepicker`
-- Added method `setRange` to combine `setStartDate` and `setEndDate`
+- Added events `dateChange.daterangepicker` and `timeChange.daterangepicker` emitted when user clicks on a date/time
+- Added event `beforeHide.daterangepicker` enables you to keep the picker visible after click on `Apply` or `Cancel` button.
+- Added method `setRange(startDate, endDate)` to combine `setStartDate(startDate)` and `setEndDate(endDate)`
 - Added option `minSpan` similar to `maxSpan`
 - Added option `isInvalidTime` similar to `isInvalidDate`
 - Added option `onOutsideClick` where you can define whether picker shall apply or revert selected value
-- Replaced [moment](https://momentjs.com/) by [luxon](https://moment.github.io/luxon/index.html)
-- Better validation of input parameters, error are logged to console
+- Better validation of input parameters, errors are logged to console
 - Highlight range in calendar when hovering over pre-defined ranges
+- Option `autoUpdateInput` defines whether the attached `<input>` element is updated when the user clicks on a date value.<br/>
+In original daterangepicker this parameter defines whether the `<input>` is updated when the user clicks on `Apply` button.
 - Added option `locale.durationFormat` to show customized label for selected duration, e.g. `'4 Days, 6 Hours, 30 Minutes'` 
 - ... and maybe some new bugs 😉 
 
@@ -127,7 +130,7 @@ This table lists a few important differences between datarangepicker using momen
 | from ISO-8601 String    | `moment(...)`                                       | `DateIme.fromISO(...)`         | 
 | from [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) Object | `moment(...)` | `DateIme.fromJSDate(...)`         | 
 | current day             | `moment()`                                          | `DateTime.now()`  |
-| format to string        | `format(...)``                                      | `toFormat(...)`   |
+| format to string        | `format(...)`                                      | `toFormat(...)`   |
 | format tokens           | `'YYYY-MM-DD'`                                      | `'yyyy-MM-dd'`    |
 
 

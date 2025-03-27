@@ -83,8 +83,8 @@
         * @property {boolean} timePickerSeconds=boolean - **Deprecated**, use `timePickerStepSize`<br/>Show seconds in the timePicker
         * @property {boolean} timePickerIncrement=1 - **Deprecated**, use `timePickerStepSize`<br/>Increment of the minutes selection list for times
         
-        * @property {boolean} autoUpdateInput=true - Indicates whether the date range picker should automatically update the value of the `<input>` 
-        * element it's attached to at initialization and when the selected dates change.<br/>Value is reverted when use clicks on `Cancel`.
+        * @property {boolean} autoUpdateInput=true - Indicates whether the date range picker should instantly update the value of the attached `<input>` 
+        * element when the selected dates change.<br/>The `<input>` element will be always updated on `Apply` and reverted when user clicks on `Cancel`.
         * @property {string} onOutsideClick=none - Defines what picker shall do when user clicks outside the calendar. 
         * `'apply'` or `'cancel'`. Event {@link #event_outsideClick.daterangepicker|onOutsideClick.daterangepicker} is always emitted.
         * @property {boolean} linkedCalendars=true - When enabled, the two calendars displayed will always be for two sequential months (i.e. January and February), 
@@ -1158,11 +1158,13 @@
                 }
                 calendar[row][col] = theDate.set(time);
 
-                if (this.minDate && calendar[row][col].hasSame(this.minDate, 'month') && calendar[row][col] < this.minDate && side == 'left')
+                // I have no clue why and how this shall be used in original code. Skip it, maybe I will find out later
+                /*if (this.minDate && calendar[row][col].hasSame(this.minDate, 'month') && calendar[row][col] < this.minDate && side == 'left')
                     calendar[row][col] = this.minDate;
 
                 if (this.maxDate && calendar[row][col].hasSame(this.maxDate, 'month') && calendar[row][col] > this.maxDate && side == 'right')
                     calendar[row][col] = this.maxDate;
+                */
             }
 
             //make the calendar object available to hoverDate/clickDate
