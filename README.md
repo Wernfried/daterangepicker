@@ -99,6 +99,7 @@ Compared to [inital repository](https://github.com/dangrossman/daterangepicker),
 - Added option `minSpan` similar to `maxSpan`
 - Added option `isInvalidTime` similar to `isInvalidDate`
 - Added option `onOutsideClick` where you can define whether picker shall apply or revert selected value
+- Added option `initalMonth` to show datepicker without an initial date
 - Better validation of input parameters, errors are logged to console
 - Highlight range in calendar when hovering over pre-defined ranges
 - Option `autoUpdateInput` defines whether the attached `<input>` element is updated when the user clicks on a date value.<br/>
