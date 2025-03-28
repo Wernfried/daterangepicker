@@ -96,13 +96,14 @@
         * When disabled, the two calendars can be individually advanced and display any month/year
         * @property {function} isInvalidDate=false - A function that is passed each date in the two calendars before they are displayed,<br/> 
         * and may return `true` or `false` to indicate whether that date should be available for selection or not.<br/>
-        * Signature: `isInvalidDate(date)`
+        * Signature: `isInvalidDate(date)`<br/>
         * Function has no effect on date values set by `startDate`, `endDate`, `ranges`, {@link #DateRangePicker+setStartDate|setStartDate}, {@link #DateRangePicker+setEndDate|setEndDate}.
         * @property {function} isInvalidTime=false - A function that is passed each hour/minute/second/am-pm in the two calendars before they are displayed,<br/> 
         * and may return `true` or `false` to indicate whether that date should be available for selection or not.<br/>
         * Signature: `isInvalidDate(time, side, unit)`<br/>
-        * `side` is 'start' or 'end' or `null` for `singleDatePicker = true`<br/>
+        * `side` is `'start'` or `'end'` or `null` for `singleDatePicker: true`<br/>
         * `unit` is `'hour'`, `'minute'`, `'second'` or `'ampm'`<br/>
+        * Hours are always given as 24-hour clock<br/>
         * Function has no effect on time values set by `startDate`, `endDate`, `ranges`, {@link #DateRangePicker+setStartDate|setStartDate}, {@link #DateRangePicker+setEndDate|setEndDate}.<br/>
         * Ensure that your function returns `false` for at least one item. Otherwise the calender is not rendered.<br/>
         * @property {function} isCustomDate=false - A function that is passed each date in the two calendars before they are displayed, 
@@ -135,9 +136,9 @@
         * I recommend to use the luxon [Presets](https://moment.github.io/luxon/#/formatting?id=presets).
         * @property {string} locale.separator= - Defaut: `' - '` - Separator for start and end time
         * @property {string} locale.weekLabel=W - Label for week numbers
-        * @property {Array} locale.daysOfWeek - Default: `Info.weekdays('short')`<br/>Array with weekday names, from Monday to Sunday
-        * @property {Array} locale.monthNames - Default: `Info.months('long')`<br/>Array with month names
-        * @property {number} locale.firstDay - Default: `Info.getStartOfWeek()`<br/>First day of the week, 1 for Monday through 7 for Sunday
+        * @property {Array} locale.daysOfWeek - Default: `luxon.weekdays('short')`<br/>Array with weekday names, from Monday to Sunday
+        * @property {Array} locale.monthNames - Default: `luxon.Info.months('long')`<br/>Array with month names
+        * @property {number} locale.firstDay - Default: `luxon.Info.getStartOfWeek()`<br/>First day of the week, 1 for Monday through 7 for Sunday
         * @property {string} locale.applyLabel=Apply - Label of `Apply` Button
         * @property {string} locale.cancelLabel=Cancel - Label of `Cancel` Button
         * @property {string} locale.customRangeLabel=Custom Range - Title for custom ranges
