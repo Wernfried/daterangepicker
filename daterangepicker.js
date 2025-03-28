@@ -89,7 +89,7 @@
         
         * @property {boolean} autoUpdateInput=true - Indicates whether the date range picker should instantly update the value of the attached `<input>` 
         * element when the selected dates change.<br/>The `<input>` element will be always updated on `Apply` and reverted when user clicks on `Cancel`.
-        * @property {string} onOutsideClick=none - Defines what picker shall do when user clicks outside the calendar. 
+        * @property {string} onOutsideClick=apply - Defines what picker shall do when user clicks outside the calendar. 
         * `'apply'` or `'cancel'`. Event {@link #event_outsideClick.daterangepicker|onOutsideClick.daterangepicker} is always emitted.
         * @property {boolean} linkedCalendars=true - When enabled, the two calendars displayed will always be for two sequential months (i.e. January and February), 
         * and both will be advanced when clicking the left or right arrows above the calendars.<br/>
