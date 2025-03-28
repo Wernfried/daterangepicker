@@ -56,21 +56,9 @@ isInvalidDate: function(date) {
 
 ### `isInvalidTime`
 ```js
-const validRange = [DateTime.fromSQL('2025-03-01 11:30'), DateTime.fromSQL('2025-04-21 18:30')];
-
 isInvalidTime: (time, side, unit) => {   
-   if (side == 'start' && time.hasSame(validRange[0], 'day')) {
-      if (unit == 'hour') {
-         return time.hour < validRange[0].hour;
-      } else {
-         return time.hasSame(validRange[0], 'hour') ? time.minute < validRange[0].minute : false;
-      }
-   } else if (side == 'end' && t.hasSame(validRange[1], 'day')) {
-      if (unit == 'hour') {
-         return time.hour > validRange[1].hour;
-      } else {
-         return time.hasSame(validRange[1], 'hour') ? time.minute > validRange[1].minute : false;
-      }
+   if (unit == 'hour') {
+      return time.hour >= 10 && time.hour <= 14; // Works also with 12-hour clock      
    } else {
       return false;
    }

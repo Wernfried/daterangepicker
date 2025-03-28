@@ -72,7 +72,7 @@
         * @property {boolean} showISOWeekNumbers=false - Show **ISO** week numbers at the start of each week on the calendars
         
         * @property {boolean} timePicker=false - Adds select boxes to choose times in addition to dates
-        * @property {boolean} timePicker24Hour=false - Use 24-hour instead of 12-hour times, removing the AM/PM selection
+        * @property {boolean} timePicker24Hour=true - Use 24-hour instead of 12-hour times, removing the AM/PM selection
         * @property {external:Duration|string} timePickerStepSize - Default: `Duration.fromObject({minutes:1})`<br/>Set the time picker step size.<br/>
         * Must be a `luxon.Duration` or number of seconds or a string according to {@link ISO-8601} duration.<br/>
         * Valid values are 1,2,3,4,5,6,10,12,15,20,30 for `Duration.fromObject({seconds: ...})` and `Duration.fromObject({minutes: ...})` 
@@ -186,7 +186,7 @@
         this.showISOWeekNumbers = false;
         this.showCustomRangeLabel = true;
         this.timePicker = false;
-        this.timePicker24Hour = false;
+        this.timePicker24Hour = true;
         this.timePickerStepSize = Duration.fromObject({ minutes: 1 });
         this.linkedCalendars = true;
         this.autoUpdateInput = true;
@@ -425,8 +425,11 @@
             if (this.maxDate)
                 this.maxDate = this.maxDate.endOf('day');
         }
-        if (this.singleDatePicker)
+        if (this.singleDatePicker) {
             this.endDate = this.startDate;
+        } else if (this.endDate < this.startDate) {
+            this.endDate = this.startDate;
+        }
 
         // Do some sanity checks on startDate for minDate, maxDate
         this.constrainDate();
@@ -865,7 +868,7 @@
                     console.warn(`Set startDate${nLog} to ${this.timePicker ? startDate.toISO({ suppressMilliseconds: true }) : startDate.toISODate()} due to 'minDate'`);
                 } else if (this.maxDate && startDate > this.maxDate) {
                     if (this.timePicker) {
-                        while (startDate > this.minDate)
+                        while (startDate > this.maxDate)
                             startDate = startDate.minus(this.timePickerStepSize);
                     } else {
                         startDate = this.maxDate.startOf('day');
@@ -918,7 +921,15 @@
             }
 
             if (minMax) {
-                if (this.minDate && endDate < this.minDate) {
+                if (this.maxDate && endDate > this.maxDate) {
+                    if (this.timePicker) {
+                        while (endDate > this.maxDate)
+                            endDate = endDate.minus(this.timePickerStepSize);
+                    } else {
+                        endDate = this.maxDate.endOf('day');
+                    }
+                    console.warn(`Set endDate${nLog} to ${this.timePicker ? endDate.toISO({ suppressMilliseconds: true }) : endDate.toISODate()} due to 'maxDate'`);
+                } else if (this.minDate && endDate < this.minDate) {
                     if (this.timePicker) {
                         while (endDate < this.minDate)
                             endDate = endDate.plus(this.timePickerStepSize);
@@ -926,14 +937,6 @@
                         endDate = this.minDate;
                     }
                     console.warn(`Set endDate${nLog} to ${this.timePicker ? endDate.toISO({ suppressMilliseconds: true }) : endDate.toISODate()} due to 'minDate'`);
-                } else if (this.maxDate && endDate > this.maxDate) {
-                    if (this.timePicker) {
-                        while (endDate > this.minDate)
-                            endDate = endDate.minus(this.timePickerStepSize);
-                    } else {
-                        endDate = this.maxDate.endOf('day');
-                    }
-                    console.warn(`Set endDate${nLog} to ${this.timePicker ? endDate.toISO({ suppressMilliseconds: true }) : endDate.toISODate()} due to 'maxDate'`);
                 }
             }
 
@@ -1085,13 +1088,6 @@
                         if (isNaN(second))
                             second = parseInt(this.container.find('.left .secondselect option:last').val(), 10);
                     }
-                    if (!this.timePicker24Hour) {
-                        var ampm = this.container.find('.left .ampmselect').val();
-                        if (ampm === 'PM' && hour < 12)
-                            hour += 12;
-                        if (ampm === 'AM' && hour === 12)
-                            hour = 0;
-                    }
                 } else {
                     hour = parseInt(this.container.find('.right .hourselect').val(), 10);
                     if (isNaN(hour))
@@ -1109,14 +1105,6 @@
                         second = parseInt(this.container.find('.right .secondselect').val(), 10);
                         if (isNaN(second))
                             second = parseInt(this.container.find('.right .secondselect option:last').val(), 10);
-                    }
-
-                    if (!this.timePicker24Hour) {
-                        var ampm = this.container.find('.right .ampmselect').val();
-                        if (ampm === 'PM' && hour < 12)
-                            hour += 12;
-                        if (ampm === 'AM' && hour === 12)
-                            hour = 0;
                     }
                 }
                 this.leftCalendar.month = this.leftCalendar.month.set({ hour: hour, minute: minute, second: second });
@@ -1383,15 +1371,6 @@
                         minute: !isNaN(selected.minute) ? selected.minute : timeSelector.find('.minuteselect option:selected').val(),
                         second: !isNaN(selected.second) ? selected.second : timeSelector.find('.secondselect option:selected').val()
                     });
-
-                    if (!this.timePicker24Hour) {
-                        var ampm = timeSelector.find('.ampmselect option:selected').val();
-                        if (ampm === 'PM' && selected.hour < 12)
-                            selected = selected.set({ hour: selected.hour + 12 });
-                        if (ampm === 'AM' && selected.hour === 12)
-                            selected = selected.set({ hour: 0 });
-                    }
-
                 }
 
                 if (selected < this.startDate)
@@ -1406,16 +1385,13 @@
             //
 
             html = '<select class="hourselect">';
+            const ampm = selected.toFormat('a', { locale: 'en-US' });
+            let start = 0;
+            if (!this.timePicker24Hour)
+                start = ampm == 'AM' ? 1 : 13;
 
-            var start = this.timePicker24Hour ? 0 : 1;
-            var end = this.timePicker24Hour ? 23 : 12;
-
-            for (var i = start; i <= end; i += this.timePickerOpts.hourStep) {
-                var i_in_24 = i;
-                if (!this.timePicker24Hour)
-                    i_in_24 = selected.hour >= 12 ? (i == 12 ? 12 : i + 12) : (i == 12 ? 0 : i);
-
-                let time = selected.set({ hour: i_in_24 });
+            for (var i = start; i <= start + 23; i += this.timePickerOpts.hourStep) {
+                let time = selected.set({ hour: i % 24 });
                 let disabled = false;
                 if (minDate && time.set({ minute: 59 }) < minDate)
                     disabled = true;
@@ -1426,12 +1402,28 @@
                 if (!disabled && this.isInvalidTime(time, this.singleDatePicker ? null : (side == 'left' ? 'start' : 'end'), 'hour'))
                     disabled = true;
 
-                if (i_in_24 == selected.hour && !disabled) {
-                    html += `<option value="${i}" selected="selected">${i}</option>`;
-                } else if (disabled) {
-                    html += `<option value="${i}" disabled="disabled" class="disabled">${i}</option>`;
+                if (this.timePicker24Hour) {
+                    if (!disabled && i == selected.hour) {
+                        html += `<option value="${i}" selected="selected">${i}</option>`;
+                    } else if (disabled) {
+                        html += `<option value="${i}" disabled="disabled" class="disabled">${i}</option>`;
+                    } else {
+                        html += `<option value="${i}">${i}</option>`;
+                    }
                 } else {
-                    html += `<option value="${i}">${i}</option>`;
+                    const i_12 = DateTime.fromFormat(`${i % 24}`, 'H').toFormat('h');
+                    const i_ampm = DateTime.fromFormat(`${i % 24}`, 'H').toFormat('a', { locale: 'en-US' });
+                    if (ampm == i_ampm) {
+                        if (!disabled && i == selected.hour) {
+                            html += `<option ampm="${i_ampm}" value="${i % 24}" selected="selected">${i_12}</option>`;
+                        } else if (disabled) {
+                            html += `<option  ampm="${i_ampm}" value="${i % 24}" disabled="disabled" class="disabled">${i_12}</option>`;
+                        } else {
+                            html += `<option ampm="${i_ampm}" value="${i % 24}">${i_12}</option>`;
+                        }
+                    } else {
+                        html += `<option ampm="${i_ampm}" hidden="hidden" value="${i % 24}">${i_12}</option>`;
+                    }
                 }
             }
 
@@ -1512,26 +1504,32 @@
 
                 var am_html = '';
                 var pm_html = '';
+                let disabled = false;
 
-                if (minDate && selected.startOf('day').plus({ hour: 12 }) < minDate)
-                    am_html = ' disabled="disabled" class="disabled"';
-
-                if (maxDate && selected.startOf('day') > maxDate)
-                    pm_html = ' disabled="disabled" class="disabled"';
-
-                if (minLimit && selected.startOf('day') > minLimit)
-                    pm_html = ' disabled="disabled" class="disabled"';
-
-                if (this.isInvalidTime(time, this.singleDatePicker ? null : (side == 'left' ? 'start' : 'end'), 'ampm')) {
+                if (minDate && selected.startOf('day') < minDate)
+                    disabled = true;
+                if (maxDate && selected.endOf('day') > maxDate)
+                    disabled = true;
+                if (minLimit && selected.startOf('day') < minLimit)
+                    disabled = true;
+                if (disabled) {
                     am_html = ' disabled="disabled" class="disabled"';
                     pm_html = ' disabled="disabled" class="disabled"';
+                } else {
+                    if (this.isInvalidTime(selected, this.singleDatePicker ? null : (side == 'left' ? 'start' : 'end'), 'ampm')) {
+                        if (selected.toFormat('a', { locale: 'en-US' }) == 'AM') {
+                            pm_html = ' disabled="disabled" class="disabled"';
+                        } else {
+                            am_html = ' disabled="disabled" class="disabled"';
+                        }
+                    }
                 }
 
                 html += `<option value="AM"${am_html}`;
-                if (selected.hour < 12)
+                if (selected.toFormat('a', { locale: 'en-US' }) == 'AM')
                     html += ' selected="selected"';
                 html += `>${Info.meridiems()[0]}</option><option value="PM"${pm_html}`;
-                if (selected.hour >= 12)
+                if (selected.toFormat('a', { locale: 'en-US' }) == 'PM')
                     html += ' selected="selected"';
                 html += `>${Info.meridiems()[1]}</option>`;
 
@@ -1999,13 +1997,7 @@
                     let hour = parseInt(this.container.find('.left .hourselect').val(), 10);
                     if (isNaN(hour))
                         hour = parseInt(this.container.find('.left .hourselect option:last').val(), 10);
-                    if (!this.timePicker24Hour) {
-                        var ampm = this.container.find('.left .ampmselect').val();
-                        if (ampm === 'PM' && hour < 12)
-                            hour += 12;
-                        if (ampm === 'AM' && hour === 12)
-                            hour = 0;
-                    }
+
                     let minute = 0;
                     if (this.timePickerOpts.showMinutes) {
                         minute = parseInt(this.container.find('.left .minuteselect').val(), 10);
@@ -2035,13 +2027,6 @@
                     let hour = parseInt(this.container.find('.right .hourselect').val(), 10);
                     if (isNaN(hour))
                         hour = parseInt(this.container.find('.right .hourselect option:last').val(), 10);
-                    if (!this.timePicker24Hour) {
-                        var ampm = this.container.find('.right .ampmselect').val();
-                        if (ampm === 'PM' && hour < 12)
-                            hour += 12;
-                        if (ampm === 'AM' && hour === 12)
-                            hour = 0;
-                    }
 
                     let minute = 0;
                     if (this.timePickerOpts.showMinutes) {
@@ -2225,6 +2210,20 @@
             if (isNaN(hour))
                 hour = parseInt(cal.find('.hourselect option:last').val(), 10);
 
+            if (!this.timePicker24Hour) {
+                const ampm = cal.find('.ampmselect').val();
+                if (ampm == null)
+                    cal.find('.ampmselect option:last').val();
+                if (ampm != DateTime.fromFormat(`${hour}`, 'H').toFormat('a', { locale: 'en-US' })) {
+                    cal.find('.hourselect > option').each(function () {
+                        const hidden = $(this).attr('hidden') || false;
+                        $(this).attr('hidden', hidden);
+                    });
+                    const h = DateTime.fromFormat(`${hour}`, 'H').toFormat('h')
+                    hour = DateTime.fromFormat(`${h}${ampm}`, 'ha', { locale: 'en-US' }).hour;
+                }
+            }
+
             var minute = 0;
             if (this.timePickerOpts.showMinutes) {
                 minute = parseInt(cal.find('.minuteselect').val(), 10);
@@ -2237,14 +2236,6 @@
                 second = parseInt(cal.find('.secondselect').val(), 10);
                 if (isNaN(second))
                     second = parseInt(cal.find('.secondselect option:last').val(), 10);
-            }
-
-            if (!this.timePicker24Hour) {
-                var ampm = cal.find('.ampmselect').val();
-                if (ampm === 'PM' && hour < 12)
-                    hour += 12;
-                if (ampm === 'AM' && hour === 12)
-                    hour = 0;
             }
 
             if (isLeft) {
