@@ -77,13 +77,13 @@
         
         * @property {boolean} timePicker=false - Adds select boxes to choose times in addition to dates
         * @property {boolean} timePicker24Hour=true - Use 24-hour instead of 12-hour times, removing the AM/PM selection
-        * @property {external:Duration|string} timePickerStepSize - Default: `Duration.fromObject({minutes:1})`<br/>Set the time picker step size.<br/>
-        * Must be a `luxon.Duration` or number of seconds or a string according to {@link ISO-8601} duration.<br/>
+        * @property {external:Duration|string|number} timePickerStepSize - Default: `Duration.fromObject({minutes:1})`<br/>Set the time picker step size.<br/>
+        * Must be a `luxon.Duration` or the number of seconds or a string according to {@link ISO-8601} duration.<br/>
         * Valid values are 1,2,3,4,5,6,10,12,15,20,30 for `Duration.fromObject({seconds: ...})` and `Duration.fromObject({minutes: ...})` 
         * and 1,2,3,4,6,(8,12) for `Duration.fromObject({hours: ...})`.<br/>
         * Duration must be greater than `minSpan` and smaller than `maxSpan`.<br/>
         * For example `timePickerStepSize: 600` will disable time picker seconds and time picker minutes are set to step size of 10 Minutes.<br/>
-        * Overwrites #timePickerIncrement and #timePickerSeconds
+        * Overwrites `timePickerIncrement` and `timePickerSeconds`
         * @property {boolean} timePickerSeconds=boolean - **Deprecated**, use `timePickerStepSize`<br/>Show seconds in the timePicker
         * @property {boolean} timePickerIncrement=1 - **Deprecated**, use `timePickerStepSize`<br/>Increment of the minutes selection list for times
         
@@ -339,16 +339,17 @@
         if (typeof options.timePickerIncrement === 'number')  // backward compatibility
             this.timePickerStepSize = Duration.fromObject({ minutes: options.timePickerIncrement });
 
-        if (['string', 'object'].includes(typeof options.timePickerStepSize)) {
-            let duration = this.timePickerStepSize;
+        if (['string', 'object', 'number'].includes(typeof options.timePickerStepSize)) {
+            let duration;
             if (options.timePickerStepSize instanceof Duration && options.timePickerStepSize.isValid) {
                 duration = options.timePickerStepSize;
             } else if (Duration.fromISO(options.timePickerStepSize).isValid) {
                 duration = Duration.fromISO(options.timePickerStepSize);
-            } else if (typeof options[opt] === 'number' && Duration.fromObject({ seconds: this.timePickerStepSize }).isValid) {
-                duration = Duration.fromObject({ seconds: this.timePickerStepSize });
+            } else if (typeof options.timePickerStepSize === 'number' && Duration.fromObject({ seconds: options.timePickerStepSize }).isValid) {
+                duration = Duration.fromObject({ seconds: options.timePickerStepSize });
             } else {
                 console.error(`Option 'timePickerStepSize' is not valid`);
+                duration = this.timePickerStepSize;
             };
             var valid = [];
             for (let unit of ['minutes', 'seconds'])
@@ -360,13 +361,16 @@
             if (valid.some(x => duration.rescale().equals(x))) {
                 if (this.maxSpan && duration > this.maxSpan) {
                     console.error(`Option 'timePickerStepSize' ${JSON.stringify(duration.toObject())} must be smaller than 'maxSpan'`);
+                    duration = this.timePickerStepSize;
                 } else if (this.minSpan && duration < this.minSpan) {
                     console.error(`Option 'timePickerStepSize' ${JSON.stringify(duration.toObject())} must be greater than 'minSpan'`);
+                    duration = this.timePickerStepSize;
                 } else {
                     this.timePickerStepSize = duration.rescale();
                 }
             } else {
                 console.error(`Option 'timePickerStepSize' ${JSON.stringify(duration.toObject())} is not valid`);
+                duration = this.timePickerStepSize;
             }
         }
 
