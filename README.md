@@ -18,8 +18,8 @@ Above samples are based on the [original repository](https://github.com/dangross
 ```html
 <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.2.2/daterangepicker.min.js"></script>
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.2.2/daterangepicker.min.css" rel="stylesheet" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.2.3/daterangepicker.min.js"></script>
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.2.3/daterangepicker.min.css" rel="stylesheet" />
 
 <input type="text" id="daterange" />
 
@@ -164,8 +164,7 @@ Licensed under the [MIT license](LICENSE).
 </dd>
 <dt><a href="#event_outsideClick.daterangepicker">"outsideClick.daterangepicker" (this)</a></dt>
 <dd><p>Emitted when user clicks outside the picker. 
-Picker values is not updated, you may trigger <a href="#event_apply.daterangepicker">&quot;apply.daterangepicker&quot;</a> 
-or <a href="#event_cancel.daterangepicker">&quot;cancel.daterangepicker&quot;</a> in your EventHandler.</p>
+Use option <code>onOutsideClick</code> to define the default action, then you may not need to handle this event.</p>
 </dd>
 <dt><a href="#event_showCalendar.daterangepicker">"showCalendar.daterangepicker" (this)</a></dt>
 <dd><p>Emitted when the calendar(s) are shown.
@@ -218,7 +217,10 @@ use <a href="#event_timeChange.daterangepicker">&quot;timeChange.daterangepicker
         * [.setEndDate(endDate, isValid)](#DateRangePicker+setEndDate)
         * [.setPeriod(startDate, endDate, isValid)](#DateRangePicker+setPeriod)
         * [.updateView()](#DateRangePicker+updateView)
-        * [.outsideClick(e)](#DateRangePicker+outsideClick)
+        * [.showCalendars()](#DateRangePicker+showCalendars)
+        * [.hideCalendars()](#DateRangePicker+hideCalendars)
+        * [.updateElement()](#DateRangePicker+updateElement)
+        * [.remove()](#DateRangePicker+remove)
     * _static_
         * [.daterangepicker(options, callback)](#DateRangePicker.daterangepicker) ⇒
 
@@ -228,7 +230,7 @@ use <a href="#event_timeChange.daterangepicker">&quot;timeChange.daterangepicker
 
 | Param | Type | Description |
 | --- | --- | --- |
-| element | [<code>jQuery</code>](https://learn.jquery.com/using-jquery-core/jquery-object/) | jQuery selector of the parent element that the date range picker will be added to |
+| element | [<code>jQuery</code>](https://api.jquery.com/Types/#jQuery/) | jQuery selector of the parent element that the date range picker will be added to |
 | options | [<code>Options</code>](#Options) | Object to configure the DateRangePicker |
 | cb | <code>function</code> | Callback function executed when |
 
@@ -318,18 +320,33 @@ Updates the picker when calendar is initiated or any date has been selected.
 Could be useful after running [setStartDate](#DateRangePicker+setStartDate) or [setEndDate](#DateRangePicker+setEndDate)
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
-<a name="DateRangePicker+outsideClick"></a>
+<a name="DateRangePicker+showCalendars"></a>
 
-### dateRangePicker.outsideClick(e)
-Closes the picker when user clicks outside
+### dateRangePicker.showCalendars()
+Shows calendar when user selects "Custom Ranges"
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
-**Emits**: <code>event:&quot;outsideClick.daterangepicker&quot;</code>  
+**Emits**: <code>event:&quot;showCalendar.daterangepicker&quot;</code>  
+<a name="DateRangePicker+hideCalendars"></a>
 
-| Param | Type | Description |
-| --- | --- | --- |
-| e | [<code>jQuery</code>](https://learn.jquery.com/using-jquery-core/jquery-object/) | The Event target |
+### dateRangePicker.hideCalendars()
+Hides calendar when user selects a predefined range
 
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Emits**: <code>event:&quot;hideCalendar.daterangepicker&quot;</code>  
+<a name="DateRangePicker+updateElement"></a>
+
+### dateRangePicker.updateElement()
+Update attached `<input>` element with selected value
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Emits**: [<code>change</code>](https://api.jquery.com/change/)  
+<a name="DateRangePicker+remove"></a>
+
+### dateRangePicker.remove()
+Removes the picker from document
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
 <a name="DateRangePicker.daterangepicker"></a>
 
 ### DateRangePicker.daterangepicker(options, callback) ⇒
@@ -341,7 +358,7 @@ Initiate a new DateRangePicker
 | Param | Type | Description |
 | --- | --- | --- |
 | options | [<code>Options</code>](#Options) | Object to configure the DateRangePicker |
-| callback | [<code>callback</code>](#callback) | Callback function executed when date is changed.  As alternative listen to the ["apply.daterangepicker"](#event_apply.daterangepicker)  event |
+| callback | [<code>callback</code>](#callback) | Callback function executed when date is changed.<br/> Callback function is executed if selected date values has changed, before picker is hidden and before the attached `<input>` element is updated.  As alternative listen to the ["apply.daterangepicker"](#event_apply.daterangepicker) event |
 
 <a name="event_show.daterangepicker"></a>
 
@@ -381,8 +398,7 @@ Emitted when the picker is hidden
 
 ## "outsideClick.daterangepicker" (this)
 Emitted when user clicks outside the picker. 
-Picker values is not updated, you may trigger ["apply.daterangepicker"](#event_apply.daterangepicker) 
-or ["cancel.daterangepicker"](#event_cancel.daterangepicker) in your EventHandler.
+Use option `onOutsideClick` to define the default action, then you may not need to handle this event.
 
 **Kind**: event emitted  
 
