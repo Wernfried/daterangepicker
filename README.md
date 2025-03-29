@@ -107,6 +107,16 @@ In original daterangepicker this parameter defines whether the `<input>` is upda
 - Added option `locale.durationFormat` to show customized label for selected duration, e.g. `'4 Days, 6 Hours, 30 Minutes'` 
 - ... and maybe some new bugs 😉 
 
+## Methods
+
+Available methods are listed below in [API documentation](#DateRangePicker). You will mainly use 
+   * [.daterangepicker(options, callback)](#DateRangePicker.daterangepicker)
+   * [.setStartDate(startDate)](#DateRangePicker+setStartDate)
+   * [.setEndDate(endDate)](#DateRangePicker+setEndDate)
+   * [.setPeriod(startDate, endDate)](#DateRangePicker+setPeriod)
+
+all other methods are used rarely.
+
 ### Differences between `moment` and `luxon` library
 This table lists a few important differences between datarangepicker using moment and luxon. Check them carefully when you migrate from older daterangepicker.
 

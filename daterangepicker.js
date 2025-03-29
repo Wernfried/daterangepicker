@@ -1046,7 +1046,7 @@
         },
 
         /**
-        * Displays the months
+        * Shows calendar months based on selected date values
         * @private
         */
         updateMonthsInView: function () {
@@ -1086,7 +1086,7 @@
         },
 
         /**
-        * Updates the custome ranges 
+        * Updates the selected day value from calendar with selected time values
         * @private
         */
         updateCalendars: function () {
@@ -1569,7 +1569,7 @@
         },
 
         /**
-        * Update the linke `<input>` element with selected date
+        * Disable the `Apply` button if no date value is selected
         * @private
         */
         updateFormInputs: function () {
@@ -1582,7 +1582,7 @@
         },
 
         /**
-        * Positions the calendar
+        * Place the picker at the right place in the document
         * @private
         */
         move: function () {
@@ -1784,6 +1784,7 @@
         * Closes the picker when user clicks outside
         * @param {external:jQuery} e - The Event target
         * @emits "outsideClick.daterangepicker"
+        * @private
         */
         outsideClick: function (e) {
             var target = $(e.target);
@@ -1805,8 +1806,7 @@
 
             /**
             * Emitted when user clicks outside the picker. 
-            * Picker values is not updated, you may trigger {@link #event_apply.daterangepicker|"apply.daterangepicker"} 
-            * or {@link #event_cancel.daterangepicker|"cancel.daterangepicker"} in your EventHandler.
+            * Use option `onOutsideClick` to define the default action, then you may not need to handle this event.
             * @event
             * @name "outsideClick.daterangepicker"
             * @param {DateRangePicker} this - The daterangepicker object
@@ -1817,7 +1817,6 @@
         /**
         * Shows calendar when user selects "Custom Ranges"
         * @emits "showCalendar.daterangepicker"
-        * @private
         */
         showCalendars: function () {
             this.container.addClass('show-calendar');
@@ -1835,7 +1834,6 @@
         /**
         * Hides calendar when user selects a predefined range
         * @emits "hideCalendar.daterangepicker"
-        * @private
         */
         hideCalendars: function () {
             this.container.removeClass('show-calendar');
@@ -2114,7 +2112,6 @@
 
         /**
         * Hightlight selected predefined range in calendar
-        * @param {external:jQuery} e - The Event target
         * @private
         */
         calculateChosenLabel: function () {
@@ -2310,10 +2307,12 @@
         },
 
         /**
-        * User inserted value into `<input>` 
+        * Update the picker with value from attached `<input>` element.
+        * Error is written to console if input string cannot be parsed as a valid date/range
+        * @param {external:jQuery} e - The Event target
         * @private
         */
-        elementChanged: function () {
+        elementChanged: function (e) {
             if (!this.element.is('input')) return;
             if (!this.element.val().length) return;
 
@@ -2331,7 +2330,10 @@
                 end = start;
             }
 
-            if (!start.isValid || !end.isValid) return;
+            if (!start.isValid || !end.isValid) {
+                console.error(`Input string '${dateString}' is not valid`);
+                return;
+            }
 
             this.setStartDate(start, false);
             this.setEndDate(end, false);
@@ -2339,7 +2341,7 @@
         },
 
         /**
-        * Handles key press
+        * Handles key press, IE 11 compatibility
         * @param {external:jQuery} e - The Event target
         * @private
         */
@@ -2359,8 +2361,8 @@
         },
 
         /**
-        * Update linked `<input>` element with selected value
-        * @private
+        * Update attached `<input>` element with selected value
+        * @emits external:change
         */
         updateElement: function () {
             if (this.startDate == null && this.initalMonth)
@@ -2379,8 +2381,7 @@
         },
 
         /**
-        * Remove the picker from document
-        * @private
+        * Removes the picker from document
         */
         remove: function () {
             this.container.remove();
@@ -2402,8 +2403,9 @@
     * @name DateRangePicker.daterangepicker
     * @function
     * @param {Options} options - Object to configure the DateRangePicker
-    * @param {callback} callback - Callback function executed when date is changed. 
-    * As alternative listen to the {@link #event_apply.daterangepicker|"apply.daterangepicker"}  event
+    * @param {callback} callback - Callback function executed when date is changed.<br/>
+    * Callback function is executed if selected date values has changed, before picker is hidden and before the attached `<input>` element is updated. 
+    * As alternative listen to the {@link #event_apply.daterangepicker|"apply.daterangepicker"} event
     * @returns DateRangePicker
     */
     $.fn.daterangepicker = function (options, callback) {
@@ -2423,10 +2425,13 @@
 
 
 /** @external jQuery 
-@see {@link https://learn.jquery.com/using-jquery-core/jquery-object/|jQuery} */
+@see {@link https://api.jquery.com/Types/#jQuery/|jQuery} */
 
 /** @external Selector
-@see {@link https://learn.jquery.com/using-jquery-core/jquery-object/|jQuery Selector} */
+@see {@link https://api.jquery.com/category/selectors/|jQuery Selector} */
+
+/** @external change
+@see {@link https://api.jquery.com/change/|change event} */
 
 /** @external DateTime
 @see {@link https://moment.github.io/luxon/api-docs/index.html#datetime|DateTime} */
