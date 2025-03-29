@@ -61,7 +61,7 @@
         * Must be a `luxon.Duration` or number of seconds or a string according to {@link ISO-8601} duration.<br/>
         * Ignored when `singleDatePicker: true`
         * @property {external:DateTime|external:Date|string|null} initalMonth - Default: `DateTime.now().startOf('month')`<br/>
-        * The inital month shown when `startDate: null`. <br/>
+        * The inital month shown when `startDate: null`. Be aware, the attached `<input>` element must be also empty.`<br/>
         * Must be a `luxon.DateTime` or `Date` or `string` according to {@link ISO-8601} or a string matching `locale.format`.<br/>
         * When `initalMonth` is used, then `endDate` is ignored and it works only with `timePicker: false`
 
@@ -100,7 +100,7 @@
         * Function has no effect on date values set by `startDate`, `endDate`, `ranges`, {@link #DateRangePicker+setStartDate|setStartDate}, {@link #DateRangePicker+setEndDate|setEndDate}.
         * @property {function} isInvalidTime=false - A function that is passed each hour/minute/second/am-pm in the two calendars before they are displayed,<br/> 
         * and may return `true` or `false` to indicate whether that date should be available for selection or not.<br/>
-        * Signature: `isInvalidDate(time, side, unit)`<br/>
+        * Signature: `isInvalidTime(time, side, unit)`<br/>
         * `side` is `'start'` or `'end'` or `null` for `singleDatePicker: true`<br/>
         * `unit` is `'hour'`, `'minute'`, `'second'` or `'ampm'`<br/>
         * Hours are always given as 24-hour clock<br/>
@@ -435,16 +435,47 @@
             if (this.maxDate)
                 this.maxDate = this.maxDate.endOf('day');
         }
+
+        //if no start/end dates set, check if the input element contains initial values
+        if (typeof options.startDate === 'undefined' && typeof options.endDate === 'undefined') {
+            if ($(this.element).is(':text')) {
+                let start, end;
+                const val = $(this.element).val();
+                if (val != '') {
+                    const split = val.split(this.locale.separator);
+                    const format = typeof this.locale.format === 'string' ? this.locale.format : DateTime.parseFormatForOpts(this.locale.format);
+                    if (split.length == 2) {
+                        start = DateTime.fromFormat(split[0], format, { locale: DateTime.now().locale });
+                        end = DateTime.fromFormat(split[1], format, { locale: DateTime.now().locale });
+                    } else if (this.singleDatePicker) {
+                        start = DateTime.fromFormat(val, format, { locale: DateTime.now().locale });
+                        end = DateTime.fromFormat(val, format, { locale: DateTime.now().locale });
+                    }
+
+                    if (start.isValid && end.isValid) {
+                        this.setStartDate(start, false);
+                        this.setEndDate(end, false);
+                    } else {
+                        console.error(`Value in <input> is not a valid string`);
+                    }
+                }
+            }
+        }
+
         if (this.singleDatePicker) {
             this.endDate = this.startDate;
         } else if (this.endDate < this.startDate) {
             this.endDate = this.startDate;
+            console.warn(`Set endDate to ${this.timePicker ? endDate.toISO({ suppressMilliseconds: true }) : endDate.toISODate()}  because it was earlier than startDate`);
         }
-        if (!this.startDate && this.initalMonth)
-            this.endDate = null;
 
-        // Do some sanity checks on startDate for minDate, maxDate
-        this.constrainDate();
+        if (!this.startDate && this.initalMonth) {
+            // No initial date selected
+            this.endDate = null;
+        } else {
+            // Do some sanity checks on startDate for minDate, maxDate
+            this.constrainDate();
+        }
 
         if (typeof options.applyButtonClasses === 'string')
             this.applyButtonClasses = options.applyButtonClasses;
@@ -530,29 +561,6 @@
             while (iterator > 1) {
                 this.locale.daysOfWeek.push(this.locale.daysOfWeek.shift());
                 iterator--;
-            }
-        }
-
-        //if no start/end dates set, check if the input element contains initial values
-        if (typeof options.startDate === 'undefined' && typeof options.endDate === 'undefined') {
-            if ($(this.element).is(':text')) {
-                let start, end;
-                const val = $(this.element).val();
-                const split = val.split(this.locale.separator);
-
-                const format = typeof this.locale.format === 'string' ? this.locale.format : DateTime.parseFormatForOpts(this.locale.format);
-                if (split.length == 2) {
-                    start = DateTime.fromFormat(split[0], format, { locale: DateTime.now().locale });
-                    end = DateTime.fromFormat(split[1], format, { locale: DateTime.now().locale });
-                } else if (this.singleDatePicker && val !== "") {
-                    start = DateTime.fromFormat(val, format, { locale: DateTime.now().locale });
-                    end = DateTime.fromFormat(val, format, { locale: DateTime.now().locale });
-                }
-
-                if (start.isValid && end.isValid) {
-                    this.setStartDate(start, false);
-                    this.setEndDate(end, false);
-                }
             }
         }
 

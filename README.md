@@ -114,6 +114,7 @@ Available methods are listed below in [API documentation](#DateRangePicker). You
    * [.setStartDate(startDate)](#DateRangePicker+setStartDate)
    * [.setEndDate(endDate)](#DateRangePicker+setEndDate)
    * [.setPeriod(startDate, endDate)](#DateRangePicker+setPeriod)
+   * `$(...).data('daterangepicker')` to get the daterangepicker object
 
 all other methods are used rarely.
 
