@@ -850,19 +850,27 @@
         * then `endDate` is shifted and a warning is written to console. 
         * @property {boolean} invalidDate=false If `true` then and if `invalidDate` return `true`, then an error is logged to console
         * @property {boolean} invalidTime=false If `true` then and if `invalidTime` return `true`, then an error is logged to console
-        * @private
+        * @property {boolean} writeWarning=true If `true` then a warning is written to console if `startDate` or `endDate` is modified 
+        * with the exception of rounding due to `timePickerStepSize`.
+
         */
 
         /**
-        * Modifies and checks `startDate` and `endDate` against `timePickerStepSize`, `minDate`, `maxDate`, 
-        * `minSpan`, `maxSpan`, `invalidDate` and `invalidTime` 
-        * @param {constraintOptions} options - Defines which constraint shall apply
+        * Validate `startDate` and `endDate` or `range` against `timePickerStepSize`, `minDate`, `maxDate`, 
+        * `minSpan`, `maxSpan`, `invalidDate` and `invalidTime` and modifies them, if needed. 
+        * When `startDate` or `endDate` are modified, then a warning is written to console by default.
+        * @param {constraintOptions} options - Defines which constraints shall be validated
         * @param {Array} [range] - Used to check prefefined range instead of `startDate` and `endDate` => `[name, startDate, endDate]`
-        * @throws `RangeError` for invalid date values
-        * @returns {Array} - Corrected array of `[startDate, endDate]` or `null`
-        * @private
+        * When set, then function does not modify anything, just returning corrected range.
+        * @throws `RangeError` if 'minDate' contradicts to 'minSpan'
+        * @returns {Array} - Corrected range as array of `[startDate, endDate, isInvalid]` when range is set, otherwise just `isInvalid` object
+        * @example 
+        * constrainDate({}, [DateTime.fromISO('2025-02-03'), DateTime.fromISO('2025-02-25')]) => 
+        * [ DateTime.fromISO('2025-02-05'), DateTime.fromISO('2025-02-20'), { startDate: {modified: true}, endDate: {modified: true} } ]
+        * constrainDate({span: false, invalidDate: true, invalidTime: true}) => 
+        * { startDate: {modified: true, isInvalidDate: true, isInvalidTime: false}, endDate: {modified: false, isInvalidDate: false, isInvalidTime: true} } ]
         */
-        constrainDate: function ({ minMax = true, span = true, stepSize = true, invalidDate = false, invalidTime = false } = {}, range) {
+        constrainDate: function ({ minMax = true, span = true, stepSize = true, invalidDate = false, invalidTime = false, writeWarning = true } = {}, range) {
             const name = range === undefined ? null : range[0];
             const nLog = range === undefined ? '' : ` of range '${name}'`;
             let startDate = range === undefined ? this.startDate : range[1];
@@ -870,6 +878,12 @@
 
             if (!startDate)
                 return;
+
+            let isInvalid = { startDate: { modified: false } };
+            if (invalidDate)
+                isInvalid.startDate.isInvalidDate = false;
+            if (invalidTime)
+                isInvalid.startDate.isInvalidTime = false;
 
             if (stepSize && this.timePicker) {
                 // Round time to step size
@@ -887,7 +901,9 @@
                     } else {
                         startDate = this.minDate;
                     }
-                    console.warn(`Set startDate${nLog} to ${this.timePicker ? startDate.toISO({ suppressMilliseconds: true }) : startDate.toISODate()} due to 'minDate'`);
+                    isInvalid.startDate.modified = true;
+                    if (writeWarning)
+                        console.warn(`Set startDate${nLog} to ${this.timePicker ? startDate.toISO({ suppressMilliseconds: true }) : startDate.toISODate()} due to 'minDate'`);
                 } else if (this.maxDate && startDate > this.maxDate) {
                     if (this.timePicker) {
                         while (startDate > this.maxDate)
@@ -895,7 +911,9 @@
                     } else {
                         startDate = this.maxDate.startOf('day');
                     }
-                    console.warn(`Set startDate${nLog} to ${this.timePicker ? startDate.toISO({ suppressMilliseconds: true }) : startDate.toISODate()} due to 'maxDate'`);
+                    isInvalid.startDate.modified = true;
+                    if (writeWarning)
+                        console.warn(`Set startDate${nLog} to ${this.timePicker ? startDate.toISO({ suppressMilliseconds: true }) : startDate.toISODate()} due to 'maxDate'`);
                 }
             }
 
@@ -909,30 +927,42 @@
                     units.push('ampm');
             }
 
-            if (invalidDate && this.timePicker && this.isInvalidDate(startDate))
-                console.error(`The startDate${nLog} ${startDate.toISODate()} is invalid by 'isInvalidDate'`);
+            if (invalidDate && this.isInvalidDate(startDate)) {
+                isInvalid.startDate.isInvalidDate = true;
+                if (writeWarning)
+                    console.warn(`The startDate${nLog} ${startDate.toISODate()} is invalid by 'isInvalidDate'`);
+            }
 
             if (invalidTime && this.timePicker) {
                 for (let unit of units) {
                     if (this.isInvalidTime(startDate, unit, 'start'))
-                        console.error(`The startDate${nLog} ${startDate.toISO({ suppressMilliseconds: true })} ${unit} is invalid by 'invalidTime'`);
+                        isInvalid.startDate.isInvalidTime = true;
+                    if (writeWarning)
+                        console.warn(`The startDate${nLog} ${startDate.toISO({ suppressMilliseconds: true })} ${unit} is invalid by 'isInvalidTime'`);
                 }
             }
-
 
             if (this.singleDatePicker) {
                 endDate = startDate;
                 if (range === undefined) {
                     this.startDate = startDate;
                     this.endDate = endDate;
-                    return null;
+                    return isInvalid;
                 } else {
-                    return [startDate, endDate];
+                    return [startDate, endDate, isInvalid];
                 }
             }
 
             if (endDate == null)
-                return;
+                return isInvalid;
+
+            isInvalid.endDate = { modified: false };
+            if (invalidDate)
+                isInvalid.endDate.isInvalidDate = false;
+            if (invalidTime)
+                isInvalid.endDate.isInvalidTime = false;
+
+
 
             if (stepSize && this.timePicker) {
                 // Round time to step size
@@ -950,7 +980,9 @@
                     } else {
                         endDate = this.maxDate.endOf('day');
                     }
-                    console.warn(`Set endDate${nLog} to ${this.timePicker ? endDate.toISO({ suppressMilliseconds: true }) : endDate.toISODate()} due to 'maxDate'`);
+                    isInvalid.endDate.modified = true;
+                    if (writeWarning)
+                        console.warn(`Set endDate${nLog} to ${this.timePicker ? endDate.toISO({ suppressMilliseconds: true }) : endDate.toISODate()} due to 'maxDate'`);
                 } else if (this.minDate && endDate < this.minDate) {
                     if (this.timePicker) {
                         while (endDate < this.minDate)
@@ -958,7 +990,9 @@
                     } else {
                         endDate = this.minDate;
                     }
-                    console.warn(`Set endDate${nLog} to ${this.timePicker ? endDate.toISO({ suppressMilliseconds: true }) : endDate.toISODate()} due to 'minDate'`);
+                    isInvalid.endDate.modified = true;
+                    if (writeWarning)
+                        console.warn(`Set endDate${nLog} to ${this.timePicker ? endDate.toISO({ suppressMilliseconds: true }) : endDate.toISODate()} due to 'minDate'`);
                 }
             }
 
@@ -973,7 +1007,9 @@
                         } else {
                             endDate = maxDate.endOf('day');
                         }
-                        console.warn(`Set endDate${nLog} to ${this.timePicker ? endDate.toISO({ suppressMilliseconds: true }) : endDate.toISODate()} due to 'maxSpan'`);
+                        isInvalid.endDate.modified = true;
+                        if (writeWarning)
+                            console.warn(`Set endDate${nLog} to ${this.timePicker ? endDate.toISO({ suppressMilliseconds: true }) : endDate.toISODate()} due to 'maxSpan'`);
                     }
                 }
 
@@ -990,28 +1026,35 @@
                             } else {
                                 endDate = minDate.endOf('day');
                             }
-                            console.warn(`Set endDate${nLog} to ${this.timePicker ? endDate.toISO({ suppressMilliseconds: true }) : endDate.toISODate()} due to 'minSpan'`);
+                            iisInvalid.endDate.modified = true;
+                            if (writeWarning)
+                                console.warn(`Set endDate${nLog} to ${this.timePicker ? endDate.toISO({ suppressMilliseconds: true }) : endDate.toISODate()} due to 'minSpan'`);
                         }
                     }
                 }
             }
 
-            if (invalidDate && this.timePicker && this.isInvalidDate(endDate))
-                console.error(`The endDate${nLog} ${endDate.toISODate()} is invalid by 'isInvalidDate'`);
+            if (invalidDate && this.isInvalidDate(endDate)) {
+                isInvalid.endDate.isInvalidDate = true;
+                if (writeWarning)
+                    console.warn(`The endDate${nLog} ${endDate.toISODate()} is invalid by 'isInvalidDate'`);
+            }
 
             if (invalidTime && this.timePicker) {
                 for (let unit of units) {
                     if (this.isInvalidTime(endDate, unit, 'end'))
-                        console.error(`The endDate${nLog} ${endDate.toISO({ suppressMilliseconds: true })} ${unit} is invalid by 'invalidTime'`);
+                        isInvalid.endDate.isInvalidTime = true;
+                    if (writeWarning)
+                        console.warn(`The endDate${nLog} ${endDate.toISO({ suppressMilliseconds: true })} ${unit} is invalid by 'isInvalidTime'`);
                 }
             }
 
             if (range === undefined) {
                 this.startDate = startDate;
                 this.endDate = endDate;
-                return null;
+                return isInvalid;
             } else {
-                return [startDate, endDate];
+                return [startDate, endDate, isInvalid];
             }
 
         },
