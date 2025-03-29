@@ -18,8 +18,8 @@ Above samples are based on the [original repository](https://github.com/dangross
 ```html
 <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.2.4/daterangepicker.min.js"></script>
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.2.4/daterangepicker.min.css" rel="stylesheet" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.2.5/daterangepicker.min.js"></script>
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.2.5/daterangepicker.min.css" rel="stylesheet" />
 
 <input type="text" id="daterange" />
 
@@ -202,6 +202,8 @@ use <a href="#event_timeChange.daterangepicker">&quot;timeChange.daterangepicker
 <dt><a href="#Range">Range</a> : <code>Object</code></dt>
 <dd><p>A single predefined range</p>
 </dd>
+<dt><a href="#constraintOptions">constraintOptions</a> : <code>Object</code></dt>
+<dd></dd>
 <dt><a href="#callback">callback</a> : <code>function</code></dt>
 <dd></dd>
 </dl>
@@ -217,6 +219,7 @@ use <a href="#event_timeChange.daterangepicker">&quot;timeChange.daterangepicker
         * [.setStartDate(startDate, isValid)](#DateRangePicker+setStartDate)
         * [.setEndDate(endDate, isValid)](#DateRangePicker+setEndDate)
         * [.setPeriod(startDate, endDate, isValid)](#DateRangePicker+setPeriod)
+        * [.constrainDate(options, [range])](#DateRangePicker+constrainDate) ⇒ <code>Array</code>
         * [.updateView()](#DateRangePicker+updateView)
         * [.showCalendars()](#DateRangePicker+showCalendars)
         * [.hideCalendars()](#DateRangePicker+hideCalendars)
@@ -313,6 +316,32 @@ Shortcut for [setStartDate](#DateRangePicker+setStartDate) and [setEndDate](#Dat
 const DateTime = luxon.DateTime;
 const drp = $('#picker').data('daterangepicker');
 drp.setPeriod(DateTime.now().startOf('week'), DateTime.now().startOf('week').plus({days: 10}));
+```
+<a name="DateRangePicker+constrainDate"></a>
+
+### dateRangePicker.constrainDate(options, [range]) ⇒ <code>Array</code>
+Validate `startDate` and `endDate` or `range` against `timePickerStepSize`, `minDate`, `maxDate`, 
+`minSpan`, `maxSpan`, `invalidDate` and `invalidTime` and modifies them, if needed. 
+When `startDate` or `endDate` are modified, then a warning is written to console by default.
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Returns**: <code>Array</code> - - Corrected range as array of `[startDate, endDate, isInvalid]` when range is set, otherwise just `isInvalid` object  
+**Throws**:
+
+- `RangeError` if 'minDate' contradicts to 'minSpan'
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| options | [<code>constraintOptions</code>](#constraintOptions) | Defines which constraints shall be validated |
+| [range] | <code>Array</code> | Used to check prefefined range instead of `startDate` and `endDate` => `[name, startDate, endDate]` When set, then function does not modify anything, just returning corrected range. |
+
+**Example**  
+```js
+constrainDate({}, [DateTime.fromISO('2025-02-03'), DateTime.fromISO('2025-02-25')]) => 
+[ DateTime.fromISO('2025-02-05'), DateTime.fromISO('2025-02-20'), { startDate: {modified: true}, endDate: {modified: true} } ]
+constrainDate({span: false, invalidDate: true, invalidTime: true}) => 
+{ startDate: {modified: true, isInvalidDate: true, isInvalidTime: false}, endDate: {modified: false, isInvalidDate: false, isInvalidTime: true} } ]
 ```
 <a name="DateRangePicker+updateView"></a>
 
@@ -576,6 +605,21 @@ A single predefined range
 ```js
 { Today: [DateTime.now().startOf('day'), DateTime.now().endOf('day')] }        
 ```
+<a name="constraintOptions"></a>
+
+## constraintOptions : <code>Object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| stepSize | <code>boolean</code> | <code>true</code> | If `true`, then `startDate` and `endDate` are rounded to match `timePickerStepSize` (no warning) |
+| minMax | <code>boolean</code> | <code>true</code> | If `true` then and if the `startDate` and `endDate` do not fall into `minDate` and `maxDate` then dates are shifted and a warning is written to console. |
+| span | <code>boolean</code> | <code>true</code> | If `true` then and if the `startDate` and `endDate` do not fall into `minDate` and `maxSpan`  then `endDate` is shifted and a warning is written to console. |
+| invalidDate | <code>boolean</code> | <code>false</code> | If `true` then and if `invalidDate` return `true`, then an error is logged to console |
+| invalidTime | <code>boolean</code> | <code>false</code> | If `true` then and if `invalidTime` return `true`, then an error is logged to console |
+| writeWarning | <code>boolean</code> | <code>true</code> | If `true` then a warning is written to console if `startDate` or `endDate` is modified  with the exception of rounding due to `timePickerStepSize`. |
+
 <a name="callback"></a>
 
 ## callback : <code>function</code>
