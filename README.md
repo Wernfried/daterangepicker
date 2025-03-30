@@ -18,8 +18,8 @@ Above samples are based on the [original repository](https://github.com/dangross
 ```html
 <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.2.5/daterangepicker.min.js"></script>
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.2.5/daterangepicker.min.css" rel="stylesheet" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.2.6/daterangepicker.min.js"></script>
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.2.6/daterangepicker.min.css" rel="stylesheet" />
 
 <input type="text" id="daterange" />
 
@@ -531,7 +531,7 @@ Options for DateRangePicker
 | minYear | <code>number</code> |  | Default: `DateTime.now().minus({year:100}).year`<br/>The minimum year shown in the dropdowns when `showDropdowns: true` |
 | maxYear | <code>number</code> |  | Default: `DateTime.now().plus({year:100}).year`<br/>The maximum  year shown in the dropdowns when `showDropdowns: true` |
 | showWeekNumbers | <code>boolean</code> | <code>false</code> | Show **localized** week numbers at the start of each week on the calendars |
-| showISOWeekNumbers | <code>boolean</code> | <code>false</code> | Show **ISO** week numbers at the start of each week on the calendars |
+| showISOWeekNumbers | <code>boolean</code> | <code>false</code> | Show **ISO** week numbers at the start of each week on the calendars.<br/> Takes precedence over localized `showWeekNumbers` |
 | timePicker | <code>boolean</code> | <code>false</code> | Adds select boxes to choose times in addition to dates |
 | timePicker24Hour | <code>boolean</code> | <code>true</code> | Use 24-hour instead of 12-hour times, removing the AM/PM selection |
 | timePickerStepSize | [<code>Duration</code>](https://moment.github.io/luxon/api-docs/index.html#duration) \| <code>string</code> \| <code>number</code> |  | Default: `Duration.fromObject({minutes:1})`<br/>Set the time picker step size.<br/> Must be a `luxon.Duration` or the number of seconds or a string according to [ISO-8601](ISO-8601) duration.<br/> Valid values are 1,2,3,4,5,6,10,12,15,20,30 for `Duration.fromObject({seconds: ...})` and `Duration.fromObject({minutes: ...})`  and 1,2,3,4,6,(8,12) for `Duration.fromObject({hours: ...})`.<br/> Duration must be greater than `minSpan` and smaller than `maxSpan`.<br/> For example `timePickerStepSize: 600` will disable time picker seconds and time picker minutes are set to step size of 10 Minutes.<br/> Overwrites `timePickerIncrement` and `timePickerSeconds` |
