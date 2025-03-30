@@ -73,7 +73,8 @@
         * @property {number} minYear - Default: `DateTime.now().minus({year:100}).year`<br/>The minimum year shown in the dropdowns when `showDropdowns: true`
         * @property {number} maxYear - Default: `DateTime.now().plus({year:100}).year`<br/>The maximum  year shown in the dropdowns when `showDropdowns: true`
         * @property {boolean} showWeekNumbers=false - Show **localized** week numbers at the start of each week on the calendars
-        * @property {boolean} showISOWeekNumbers=false - Show **ISO** week numbers at the start of each week on the calendars
+        * @property {boolean} showISOWeekNumbers=false - Show **ISO** week numbers at the start of each week on the calendars.<br/>
+        * Takes precedence over localized `showWeekNumbers`
         
         * @property {boolean} timePicker=false - Adds select boxes to choose times in addition to dates
         * @property {boolean} timePicker24Hour=true - Use 24-hour instead of 12-hour times, removing the AM/PM selection
@@ -201,19 +202,12 @@
         this.isInvalidTime = null;
         this.isCustomDate = null;
         this.onOutsideClick = 'apply';
-        this.ranges = {};
-
-        this.opens = 'right';
-        if (this.element.hasClass('pull-right'))
-            this.opens = 'left';
-
-        this.drops = 'down';
-        if (this.element.hasClass('dropup'))
-            this.drops = 'up';
-
+        this.opens = this.element.hasClass('pull-right') ? 'left' : 'right';
+        this.drops = this.element.hasClass('dropup') ? 'up' : 'down';
         this.buttonClasses = 'btn btn-sm';
         this.applyButtonClasses = 'btn-primary';
         this.cancelButtonClasses = 'btn-default';
+        this.ranges = {};
 
         this.locale = {
             direction: 'ltr',
@@ -273,6 +267,10 @@
         //
 
         if (typeof options.locale === 'object') {
+            for (let key of ['separator', 'applyLabel', 'cancelLabel', 'weekLabel']) {
+                if (typeof options.locale[key] === 'string')
+                    this.locale[key] = options.locale[key];
+            }
 
             if (typeof options.locale.direction === 'string') {
                 if (['rtl', 'ltr'].includes(options.locale.direction))
@@ -283,9 +281,6 @@
 
             if (['string', 'object'].includes(typeof options.locale.format))
                 this.locale.format = options.locale.format;
-
-            if (typeof options.locale.separator === 'string')
-                this.locale.separator = options.locale.separator;
 
             if (Array.isArray(options.locale.daysOfWeek)) {
                 if (options.locale.daysOfWeek.some(x => typeof x !== 'string'))
@@ -304,15 +299,6 @@
             if (typeof options.locale.firstDay === 'number')
                 this.locale.firstDay = options.locale.firstDay;
 
-            if (typeof options.locale.applyLabel === 'string')
-                this.locale.applyLabel = options.locale.applyLabel;
-
-            if (typeof options.locale.cancelLabel === 'string')
-                this.locale.cancelLabel = options.locale.cancelLabel;
-
-            if (typeof options.locale.weekLabel === 'string')
-                this.locale.weekLabel = options.locale.weekLabel;
-
             if (typeof options.locale.customRangeLabel === 'string') {
                 //Support unicode chars in the custom range name.
                 var elem = document.createElement('textarea');
@@ -326,14 +312,28 @@
         }
         this.container.addClass(this.locale.direction);
 
-        if (typeof options.singleDatePicker === 'boolean')
-            this.singleDatePicker = options.singleDatePicker;
+        for (let key of ['timePicker', 'singleDatePicker', 'timePicker24Hour', 'showWeekNumbers', 'showISOWeekNumbers',
+            'showDropdowns', 'linkedCalendars', 'showCustomRangeLabel', 'alwaysShowCalendars', 'autoApply', 'autoUpdateInput']) {
+            if (typeof options[key] === 'boolean')
+                this[key] = options[key];
+        }
 
-        if (typeof options.timePicker === 'boolean')
-            this.timePicker = options.timePicker;
+        for (let key of ['applyButtonClasses', 'cancelButtonClasses']) {
+            if (typeof options[key] === 'string')
+                this[key] = options[key];
+        }
 
-        if (typeof options.timePicker24Hour === 'boolean')
-            this.timePicker24Hour = options.timePicker24Hour;
+        for (let key of ['minYear', 'maxYear']) {
+            if (typeof options[key] === 'number')
+                this[key] = options[key];
+        }
+
+        for (let key of ['isInvalidDate', 'isInvalidTime', 'isCustomDate']) {
+            if (typeof options[key] === 'function')
+                this[key] = options[key]
+            else
+                this[key] = function () { return false };
+        }
 
         if (typeof options.timePickerSeconds === 'boolean')  // backward compatibility            
             this.timePickerStepSize = Duration.fromObject({ [options.timePickerSeconds ? 'seconds' : 'minutes']: 1 });
@@ -402,7 +402,7 @@
             if (this.minSpan && this.maxSpan && this.minSpan > this.maxSpan) {
                 this.minSpan = null;
                 this.maxSpan = null;
-                console.error(`Ignore option 'minSpan' and 'maxSpan', because 'minSpan' must be smaller than 'maxSpan'`);
+                console.warn(`Ignore option 'minSpan' and 'maxSpan', because 'minSpan' must be smaller than 'maxSpan'`);
             }
         }
 
@@ -472,16 +472,12 @@
         if (!this.startDate && this.initalMonth) {
             // No initial date selected
             this.endDate = null;
+            if (this.timePicker)
+                console.error(`Option 'initalMonth' works only with 'timePicker: false'`);
         } else {
-            // Do some sanity checks on startDate for minDate, maxDate
+            // Do some sanity checks on startDate and endDate for minDate, maxDate, minSpan, maxSpan, etc.
             this.constrainDate();
         }
-
-        if (typeof options.applyButtonClasses === 'string')
-            this.applyButtonClasses = options.applyButtonClasses;
-
-        if (typeof options.cancelButtonClasses === 'string')
-            this.cancelButtonClasses = options.cancelButtonClasses;
 
         if (typeof options.opens === 'string') {
             if (['left', 'right', 'center'].includes(options.opens))
@@ -497,56 +493,11 @@
                 console.error(`Option 'options.drops' must be 'drop', 'down' or 'auto'`);
         }
 
-        if (typeof options.showWeekNumbers === 'boolean')
-            this.showWeekNumbers = options.showWeekNumbers;
-
-        if (typeof options.showISOWeekNumbers === 'boolean')
-            this.showISOWeekNumbers = options.showISOWeekNumbers;
-
         if (Array.isArray(options.buttonClasses)) {
             this.buttonClasses = options.buttonClasses.join(' ')
         } else if (typeof options.buttonClasses === 'string') {
             this.buttonClasses = options.buttonClasses;
         }
-
-        if (typeof options.showDropdowns === 'boolean')
-            this.showDropdowns = options.showDropdowns;
-
-        if (typeof options.minYear === 'number')
-            this.minYear = options.minYear;
-
-        if (typeof options.maxYear === 'number')
-            this.maxYear = options.maxYear;
-
-        if (typeof options.showCustomRangeLabel === 'boolean')
-            this.showCustomRangeLabel = options.showCustomRangeLabel;
-
-        if (typeof options.autoApply === 'boolean')
-            this.autoApply = options.autoApply;
-
-        if (typeof options.autoUpdateInput === 'boolean')
-            this.autoUpdateInput = options.autoUpdateInput;
-
-        if (typeof options.linkedCalendars === 'boolean')
-            this.linkedCalendars = options.linkedCalendars;
-
-        if (typeof options.isInvalidDate === 'function')
-            this.isInvalidDate = options.isInvalidDate
-        else
-            this.isInvalidDate = function () { return false };
-
-        if (typeof options.isInvalidTime === 'function')
-            this.isInvalidTime = options.isInvalidTime
-        else
-            this.isInvalidTime = function () { return false };
-
-        if (typeof options.isCustomDate === 'function')
-            this.isCustomDate = options.isCustomDate
-        else
-            this.isCustomDate = function () { return false };
-
-        if (typeof options.alwaysShowCalendars === 'boolean')
-            this.alwaysShowCalendars = options.alwaysShowCalendars;
 
         if (typeof options.onOutsideClick === 'string') {
             if (['cancel', 'apply'].includes(options.onOutsideClick))
@@ -637,14 +588,12 @@
             this.container.find('.drp-calendar.left').addClass('single');
             this.container.find('.drp-calendar.left').show();
             this.container.find('.drp-calendar.right').hide();
-            if (!this.timePicker && this.autoApply) {
-                this.container.addClass('auto-apply');
-            }
+            if (!this.timePicker && this.autoApply) 
+                this.container.addClass('auto-apply');            
         }
 
-        if ((typeof options.ranges === 'undefined' && !this.singleDatePicker) || this.alwaysShowCalendars) {
-            this.container.addClass('show-calendar');
-        }
+        if ((typeof options.ranges === 'undefined' && !this.singleDatePicker) || this.alwaysShowCalendars) 
+            this.container.addClass('show-calendar');        
 
         this.container.addClass('opens' + this.opens);
 
@@ -1182,9 +1131,7 @@
                             second = parseInt(this.container.find('.right .secondselect option:last').val(), 10);
                     }
                 }
-                //if (this.leftCalendar.month)
                 this.leftCalendar.month = this.leftCalendar.month.set({ hour: hour, minute: minute, second: second });
-                //if (this.rightCalendar.month)
                 this.rightCalendar.month = this.rightCalendar.month.set({ hour: hour, minute: minute, second: second });
             }
 
@@ -1209,7 +1156,7 @@
             //
             var calendar = side == 'left' ? this.leftCalendar : this.rightCalendar;
             if (calendar.month == null && !this.startDate && this.initalMonth)
-                calendar.month = this.initalMonth;
+                calendar.month = this.initalMonth.startOf('month');
 
             const firstDay = calendar.month.startOf('month');
             const lastDay = calendar.month.endOf('month').startOf('day');
@@ -1343,10 +1290,10 @@
                 html += '<tr>';
 
                 // add week number
-                if (this.showWeekNumbers)
-                    html += '<td class="week">' + calendar[row][0].localWeekNumber + '</td>';
-                else if (this.showISOWeekNumbers)
+                if (this.showISOWeekNumbers)
                     html += '<td class="week">' + calendar[row][0].weekNumber + '</td>';
+                else if (this.showWeekNumbers)
+                    html += '<td class="week">' + calendar[row][0].localWeekNumber + '</td>';
 
                 for (var col = 0; col < 7; col++) {
 
