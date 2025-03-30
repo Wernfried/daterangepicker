@@ -541,14 +541,14 @@
                     continue;
 
                 const validRange = this.constrainDate({ span: false }, [range, start, end]);
-                options.ranges[range] = validRange;
+                options.ranges[range] = [validRange[0], validRange[1]];
 
                 //Support unicode chars in the range names.
                 var elem = document.createElement('textarea');
                 elem.innerHTML = range;
                 var rangeHtml = elem.value;
 
-                this.ranges[rangeHtml] = validRange;
+                this.ranges[rangeHtml] = [validRange[0], validRange[1]];
             }
 
             var list = '<ul>';
@@ -588,12 +588,12 @@
             this.container.find('.drp-calendar.left').addClass('single');
             this.container.find('.drp-calendar.left').show();
             this.container.find('.drp-calendar.right').hide();
-            if (!this.timePicker && this.autoApply) 
-                this.container.addClass('auto-apply');            
+            if (!this.timePicker && this.autoApply)
+                this.container.addClass('auto-apply');
         }
 
-        if ((typeof options.ranges === 'undefined' && !this.singleDatePicker) || this.alwaysShowCalendars) 
-            this.container.addClass('show-calendar');        
+        if ((typeof options.ranges === 'undefined' && !this.singleDatePicker) || this.alwaysShowCalendars)
+            this.container.addClass('show-calendar');
 
         this.container.addClass('opens' + this.opens);
 
@@ -815,9 +815,9 @@
         * @returns {Array} - Corrected range as array of `[startDate, endDate, isInvalid]` when range is set, otherwise just `isInvalid` object
         * @example 
         * constrainDate({}, [DateTime.fromISO('2025-02-03'), DateTime.fromISO('2025-02-25')]) => 
-        * [ DateTime.fromISO('2025-02-05'), DateTime.fromISO('2025-02-20'), { startDate: {modified: true}, endDate: {modified: true} } ]
+        * [ DateTime.fromISO('2025-02-05'), DateTime.fromISO('2025-02-20'), { startDate: { stepped: ... }, endDate: { stepped: ..., modified: [{old: ... new: ..., reason: 'minSpan'}] } } ]
         * constrainDate({span: false, invalidDate: true, invalidTime: true}) => 
-        * { startDate: {modified: true, isInvalidDate: true, isInvalidTime: false}, endDate: {modified: false, isInvalidDate: false, isInvalidTime: true} } ]
+        * { startDate: {stepped: ..., modified: [{old: ... new: ..., reason: 'minDate'}], isInvalidDate: true, isInvalidTime: false}, endDate: {stepped: ..., isInvalidDate: false, isInvalidTime: true} } ]
         */
         constrainDate: function ({ minMax = true, span = true, stepSize = true, invalidDate = false, invalidTime = false, writeWarning = true } = {}, range) {
             const name = range === undefined ? null : range[0];
@@ -828,11 +828,11 @@
             if (!startDate)
                 return;
 
-            let isInvalid = { startDate: { modified: false } };
+            let result = { startDate: { modified: [] } };
             if (invalidDate)
-                isInvalid.startDate.isInvalidDate = false;
+                result.startDate.isInvalidDate = false;
             if (invalidTime)
-                isInvalid.startDate.isInvalidTime = false;
+                result.startDate.isInvalidTime = false;
 
             if (stepSize && this.timePicker) {
                 // Round time to step size
@@ -841,26 +841,31 @@
             } else {
                 startDate = startDate.startOf('day');
             }
+            result.startDate.stepped = startDate;
 
             if (minMax) {
                 if (this.minDate && startDate < this.minDate) {
+                    let modified = { old: startDate, reason: 'minDate' };
                     if (this.timePicker) {
                         while (startDate < this.minDate)
                             startDate = startDate.plus(this.timePickerStepSize);
                     } else {
                         startDate = this.minDate;
                     }
-                    isInvalid.startDate.modified = true;
+                    modified.new = startDate;
+                    result.startDate.modified.push(modified);
                     if (writeWarning)
                         console.warn(`Set startDate${nLog} to ${this.timePicker ? startDate.toISO({ suppressMilliseconds: true }) : startDate.toISODate()} due to 'minDate'`);
                 } else if (this.maxDate && startDate > this.maxDate) {
+                    let modified = { old: startDate, reason: 'maxDate' };
                     if (this.timePicker) {
                         while (startDate > this.maxDate)
                             startDate = startDate.minus(this.timePickerStepSize);
                     } else {
                         startDate = this.maxDate.startOf('day');
                     }
-                    isInvalid.startDate.modified = true;
+                    modified.new = startDate;
+                    result.startDate.modified.push(modified);
                     if (writeWarning)
                         console.warn(`Set startDate${nLog} to ${this.timePicker ? startDate.toISO({ suppressMilliseconds: true }) : startDate.toISODate()} due to 'maxDate'`);
                 }
@@ -877,7 +882,7 @@
             }
 
             if (invalidDate && this.isInvalidDate(startDate)) {
-                isInvalid.startDate.isInvalidDate = true;
+                result.startDate.isInvalidDate = true;
                 if (writeWarning)
                     console.warn(`The startDate${nLog} ${startDate.toISODate()} is invalid by 'isInvalidDate'`);
             }
@@ -885,33 +890,34 @@
             if (invalidTime && this.timePicker) {
                 for (let unit of units) {
                     if (this.isInvalidTime(startDate, unit, 'start'))
-                        isInvalid.startDate.isInvalidTime = true;
+                        result.startDate.isInvalidTime = true;
                     if (writeWarning)
                         console.warn(`The startDate${nLog} ${startDate.toISO({ suppressMilliseconds: true })} ${unit} is invalid by 'isInvalidTime'`);
                 }
             }
+
+            if (result.startDate.modified.length == 0)
+                delete result.startDate.modified;
 
             if (this.singleDatePicker) {
                 endDate = startDate;
                 if (range === undefined) {
                     this.startDate = startDate;
                     this.endDate = endDate;
-                    return isInvalid;
+                    return result;
                 } else {
-                    return [startDate, endDate, isInvalid];
+                    return [startDate, endDate, result];
                 }
             }
 
             if (endDate == null)
-                return isInvalid;
+                return result;
 
-            isInvalid.endDate = { modified: false };
+            result.endDate = { modified: [] };
             if (invalidDate)
-                isInvalid.endDate.isInvalidDate = false;
+                result.endDate.isInvalidDate = false;
             if (invalidTime)
-                isInvalid.endDate.isInvalidTime = false;
-
-
+                result.endDate.isInvalidTime = false;
 
             if (stepSize && this.timePicker) {
                 // Round time to step size
@@ -920,26 +926,31 @@
             } else {
                 endDate = endDate.endOf('day');
             }
+            result.endDate.stepped = endDate;
 
             if (minMax) {
                 if (this.maxDate && endDate > this.maxDate) {
+                    let modified = { old: endDate, reason: 'maxDate' };
                     if (this.timePicker) {
                         while (endDate > this.maxDate)
                             endDate = endDate.minus(this.timePickerStepSize);
                     } else {
                         endDate = this.maxDate.endOf('day');
                     }
-                    isInvalid.endDate.modified = true;
+                    modified.new = endDate;
+                    result.endDate.modified.push(modified);
                     if (writeWarning)
                         console.warn(`Set endDate${nLog} to ${this.timePicker ? endDate.toISO({ suppressMilliseconds: true }) : endDate.toISODate()} due to 'maxDate'`);
                 } else if (this.minDate && endDate < this.minDate) {
+                    let modified = { old: endDate, reason: 'minDate' };
                     if (this.timePicker) {
                         while (endDate < this.minDate)
                             endDate = endDate.plus(this.timePickerStepSize);
                     } else {
                         endDate = this.minDate;
                     }
-                    isInvalid.endDate.modified = true;
+                    modified.new = endDate;
+                    result.endDate.modified.push(modified);
                     if (writeWarning)
                         console.warn(`Set endDate${nLog} to ${this.timePicker ? endDate.toISO({ suppressMilliseconds: true }) : endDate.toISODate()} due to 'minDate'`);
                 }
@@ -950,13 +961,15 @@
                     // If the end date exceeds those allowed by the maxSpan option, shorten the range to the allowable period.
                     const maxDate = startDate.plus(this.maxSpan);
                     if (endDate > maxDate) {
+                        let modified = { old: endDate, reason: 'maxSpan' };
                         if (this.timePicker) {
                             while (endDate > maxDate)
                                 endDate = endDate.minus(this.timePickerStepSize);
                         } else {
                             endDate = maxDate.endOf('day');
                         }
-                        isInvalid.endDate.modified = true;
+                        modified.new = endDate;
+                        result.endDate.modified.push(modified);
                         if (writeWarning)
                             console.warn(`Set endDate${nLog} to ${this.timePicker ? endDate.toISO({ suppressMilliseconds: true }) : endDate.toISODate()} due to 'maxSpan'`);
                     }
@@ -969,13 +982,15 @@
                         if (this.minDate && endDate > this.minDate) {
                             throw RangeError(`Option${nLog} 'minDate' contradicts to option 'minSpan'`);
                         } else {
+                            let modified = { old: endDate, reason: 'minSpan' };
                             if (this.timePicker) {
                                 while (endDate < minDate)
                                     endDate = endDate.plus(this.timePickerStepSize);
                             } else {
                                 endDate = minDate.endOf('day');
                             }
-                            iisInvalid.endDate.modified = true;
+                            modified.new = endDate;
+                            result.endDate.modified.push(modified);
                             if (writeWarning)
                                 console.warn(`Set endDate${nLog} to ${this.timePicker ? endDate.toISO({ suppressMilliseconds: true }) : endDate.toISODate()} due to 'minSpan'`);
                         }
@@ -984,7 +999,7 @@
             }
 
             if (invalidDate && this.isInvalidDate(endDate)) {
-                isInvalid.endDate.isInvalidDate = true;
+                result.endDate.isInvalidDate = true;
                 if (writeWarning)
                     console.warn(`The endDate${nLog} ${endDate.toISODate()} is invalid by 'isInvalidDate'`);
             }
@@ -992,18 +1007,21 @@
             if (invalidTime && this.timePicker) {
                 for (let unit of units) {
                     if (this.isInvalidTime(endDate, unit, 'end'))
-                        isInvalid.endDate.isInvalidTime = true;
+                        result.endDate.isInvalidTime = true;
                     if (writeWarning)
                         console.warn(`The endDate${nLog} ${endDate.toISO({ suppressMilliseconds: true })} ${unit} is invalid by 'isInvalidTime'`);
                 }
             }
 
+            if (result.endDate.modified.length == 0)
+                delete result.endDate.modified;
+
             if (range === undefined) {
                 this.startDate = startDate;
                 this.endDate = endDate;
-                return isInvalid;
+                return result;
             } else {
-                return [startDate, endDate, isInvalid];
+                return [startDate, endDate, result];
             }
 
         },
@@ -1175,21 +1193,10 @@
             while (theDate.weekday != this.locale.firstDay)
                 theDate = theDate.minus({ day: 1 });
 
-            var row, col;
-            for (let i = 0, col = 0, row = 0; i < 42; i++, col++, theDate = theDate.plus({ day: 1 })) {
-                if (i > 0 && col % 7 === 0) {
-                    col = 0;
+            for (let col = 0, row = -1; col < 42; col++, theDate = theDate.plus({ day: 1 })) {
+                if (col % 7 === 0)
                     row++;
-                }
-                calendar[row][col] = theDate.set(time);
-
-                // I have no clue why and how this shall be used in original code. Skip it, maybe I will find out later
-                /*if (this.minDate && calendar[row][col].hasSame(this.minDate, 'month') && calendar[row][col] < this.minDate && side == 'left')
-                    calendar[row][col] = this.minDate;
-        
-                if (this.maxDate && calendar[row][col].hasSame(this.maxDate, 'month') && calendar[row][col] > this.maxDate && side == 'right')
-                    calendar[row][col] = this.maxDate;
-                */
+                calendar[row][col % 7] = theDate.set(time);
             }
 
             //make the calendar object available to hoverDate/clickDate
@@ -1286,7 +1293,7 @@
             if (this.endDate == null && this.minSpan)
                 minLimit = this.startDate.plus(this.minSpan).startOf('day');
 
-            for (var row = 0; row < 6; row++) {
+            for (let row = 0; row < 6; row++) {
                 html += '<tr>';
 
                 // add week number
@@ -1295,7 +1302,7 @@
                 else if (this.showWeekNumbers)
                     html += '<td class="week">' + calendar[row][0].localWeekNumber + '</td>';
 
-                for (var col = 0; col < 7; col++) {
+                for (let col = 0; col < 7; col++) {
 
                     var classes = [];
 
