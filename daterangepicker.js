@@ -1756,8 +1756,7 @@
             * @param {DateRangePicker} this - The daterangepicker object
             * @return {boolean} cancel - If `true`, then the picker remains visible
             */
-            const cancel = this.element.triggerHandler('beforeHide.daterangepicker', this);
-            if (cancel)
+            if (this.element.triggerHandler('beforeHide.daterangepicker', this))
                 return;
             $(document).off('.daterangepicker');
             $(window).off('.daterangepicker');
