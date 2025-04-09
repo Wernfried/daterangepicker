@@ -414,12 +414,14 @@
                     console.error(`Option '${opt}' must be a luxon.DateTime or Date or string`);
                 }
             } else if (typeof options[opt] === 'string') {
+                const format = typeof this.locale.format === 'string' ? this.locale.format : DateTime.parseFormatForOpts(this.locale.format);
                 if (DateTime.fromISO(options[opt]).isValid) {
                     this[opt] = DateTime.fromISO(options[opt]);
-                } else if (typeof this.locale.format === 'string' && DateTime.fromFormat(options[opt], this.locale.format).isValid) {
-                    this[opt] = DateTime.fromFormat(options[opt], this.locale.format);
+                } else if (DateTime.fromFormat(options[opt], format, { locale: DateTime.now().locale }).isValid) {
+                    this[opt] = DateTime.fromFormat(options[opt], format, { locale: DateTime.now().locale });
                 } else {
-                    console.error(`Option '${opt}' is not a valid string`);
+                    const invalid = DateTime.fromFormat(options[opt], format, { locale: DateTime.now().locale }).invalidExplanation;
+                    console.error(`Option '${opt}' is not a valid string: ${invalid}`);
                 }
             }
         }
@@ -450,7 +452,10 @@
                         this.setStartDate(start, false);
                         this.setEndDate(end, false);
                     } else {
-                        console.error(`Value in <input> is not a valid string`);
+                        if (this.singleDatePicker)
+                            console.error(`Value in <input> is not a valid string: ${start.invalidExplanation}`)
+                        else
+                            console.error(`Value in <input> is not a valid string: ${start.invalidExplanation} - ${end.invalidExplanation}`);
                     }
                 }
             }
@@ -519,7 +524,7 @@
                     } else if (typeof options.ranges[range][0] === 'string' && DateTime.fromISO(options.ranges[range][0]).isValid) {
                         start = DateTime.fromISO(options.ranges[range][0]);
                     } else {
-                        console.error(`Option 'ranges.${range}' is not a valid string or DateTime`);
+                        console.error(`Option 'ranges.${range}' is not a valid ISO-8601 string or DateTime`);
                     }
                 }
                 if (['string', 'object'].includes(typeof options.ranges[range][1])) {
@@ -528,7 +533,7 @@
                     } else if (typeof options.ranges[range][1] === 'string' && DateTime.fromISO(options.ranges[range][1]).isValid) {
                         end = DateTime.fromISO(options.ranges[range][1]);
                     } else {
-                        console.error(`Option 'ranges.${range}' is not a valid string or DateTime`);
+                        console.error(`Option 'ranges.${range}' is not a valid ISO-8601 string or DateTime`);
                     }
                 }
                 if (start == null || end == null)
@@ -668,7 +673,7 @@
                     } else if (startDate instanceof Date) {
                         this.startDate = DateTime.fromJSDate(startDate);
                     } else {
-                        throw RangeError(`Option '${key}' must be a luxon.DateTime or Date or string`);
+                        throw RangeError(`The 'startDate' must be a luxon.DateTime or Date or string`);
                     }
                 } else if (typeof startDate === 'string') {
                     const format = typeof this.locale.format === 'string' ? this.locale.format : DateTime.parseFormatForOpts(this.locale.format);
@@ -677,7 +682,8 @@
                     } else if (DateTime.fromFormat(startDate, format, { locale: DateTime.now().locale }).isValid) {
                         this.startDate = DateTime.fromFormat(startDate, format, { locale: DateTime.now().locale });
                     } else {
-                        throw RangeError(`Option '${key}' is not a valid string`);
+                        const invalid = DateTime.fromFormat(startDate, format, { locale: DateTime.now().locale }).invalidExplanation;
+                        throw RangeError(`The 'startDate' is not a valid string: ${invalid}`);
                     }
                 }
             } else {
@@ -718,7 +724,7 @@
                     } else if (endDate instanceof Date) {
                         this.endDate = DateTime.fromJSDate(endDate);
                     } else {
-                        throw RangeError(`Option '${key}' must be a luxon.DateTime or Date or string`);
+                        throw RangeError(`The 'endDate' must be a luxon.DateTime or Date or string`);
                     }
                 } else if (typeof endDate === 'string') {
                     const format = typeof this.locale.format === 'string' ? this.locale.format : DateTime.parseFormatForOpts(this.locale.format);
@@ -727,7 +733,8 @@
                     } else if (DateTime.fromFormat(endDate, format, { locale: DateTime.now().locale }).isValid) {
                         this.endDate = DateTime.fromFormat(endDate, format, { locale: DateTime.now().locale });
                     } else {
-                        throw RangeError(`Option '${key}' is not a valid string`);
+                        const invalid = DateTime.fromFormat(endDate, format, { locale: DateTime.now().locale }).invalidExplanation;
+                        throw RangeError(`The 'endDate' is not a valid string: ${invalid}`);
                     }
                 }
             } else {
