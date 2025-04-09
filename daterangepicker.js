@@ -834,6 +834,7 @@
             if (invalidTime)
                 result.startDate.isInvalidTime = false;
 
+            let modified = { old: startDate, reason: stepSize && this.timePicker ? 'timePickerStepSize' : 'No timePicker' };
             if (stepSize && this.timePicker) {
                 // Round time to step size
                 const secs = this.timePickerStepSize.as('seconds');
@@ -841,7 +842,10 @@
             } else {
                 startDate = startDate.startOf('day');
             }
-            result.startDate.stepped = startDate;
+            modified.new = startDate;
+            if (modified.new != modified.old)
+                result.startDate.modified.push(modified);
+
 
             if (minMax) {
                 if (this.minDate && startDate < this.minDate) {
@@ -853,9 +857,11 @@
                         startDate = this.minDate;
                     }
                     modified.new = startDate;
-                    result.startDate.modified.push(modified);
-                    if (writeWarning)
-                        console.warn(`Set startDate${nLog} to ${this.timePicker ? startDate.toISO({ suppressMilliseconds: true }) : startDate.toISODate()} due to 'minDate'`);
+                    if (modified.new != modified.old) {
+                        result.startDate.modified.push(modified);
+                        if (writeWarning)
+                            console.warn(`Set startDate${nLog} to ${this.timePicker ? startDate.toISO({ suppressMilliseconds: true }) : startDate.toISODate()} due to 'minDate'`);
+                    }
                 } else if (this.maxDate && startDate > this.maxDate) {
                     let modified = { old: startDate, reason: 'maxDate' };
                     if (this.timePicker) {
@@ -865,9 +871,11 @@
                         startDate = this.maxDate.startOf('day');
                     }
                     modified.new = startDate;
-                    result.startDate.modified.push(modified);
-                    if (writeWarning)
-                        console.warn(`Set startDate${nLog} to ${this.timePicker ? startDate.toISO({ suppressMilliseconds: true }) : startDate.toISODate()} due to 'maxDate'`);
+                    if (modified.new != modified.old) {
+                        result.startDate.modified.push(modified);
+                        if (writeWarning)
+                            console.warn(`Set startDate${nLog} to ${this.timePicker ? startDate.toISO({ suppressMilliseconds: true }) : startDate.toISODate()} due to 'maxDate'`);
+                    }
                 }
             }
 
@@ -919,6 +927,7 @@
             if (invalidTime)
                 result.endDate.isInvalidTime = false;
 
+            modified = { old: endDate, reason: stepSize && this.timePicker ? 'timePickerStepSize' : 'No timePicker' };
             if (stepSize && this.timePicker) {
                 // Round time to step size
                 const secs = this.timePickerStepSize.as('seconds');
@@ -926,7 +935,10 @@
             } else {
                 endDate = endDate.endOf('day');
             }
-            result.endDate.stepped = endDate;
+            modified.new = endDate;
+            if (modified.new != modified.old)
+                result.endDate.modified.push(modified);
+
 
             if (minMax) {
                 if (this.maxDate && endDate > this.maxDate) {
@@ -938,9 +950,11 @@
                         endDate = this.maxDate.endOf('day');
                     }
                     modified.new = endDate;
-                    result.endDate.modified.push(modified);
-                    if (writeWarning)
-                        console.warn(`Set endDate${nLog} to ${this.timePicker ? endDate.toISO({ suppressMilliseconds: true }) : endDate.toISODate()} due to 'maxDate'`);
+                    if (modified.new != modified.old) {
+                        result.endDate.modified.push(modified);
+                        if (writeWarning)
+                            console.warn(`Set endDate${nLog} to ${this.timePicker ? endDate.toISO({ suppressMilliseconds: true }) : endDate.toISODate()} due to 'maxDate'`);
+                    }
                 } else if (this.minDate && endDate < this.minDate) {
                     let modified = { old: endDate, reason: 'minDate' };
                     if (this.timePicker) {
@@ -950,9 +964,11 @@
                         endDate = this.minDate;
                     }
                     modified.new = endDate;
-                    result.endDate.modified.push(modified);
-                    if (writeWarning)
-                        console.warn(`Set endDate${nLog} to ${this.timePicker ? endDate.toISO({ suppressMilliseconds: true }) : endDate.toISODate()} due to 'minDate'`);
+                    if (modified.new != modified.old) {
+                        result.endDate.modified.push(modified);
+                        if (writeWarning)
+                            console.warn(`Set endDate${nLog} to ${this.timePicker ? endDate.toISO({ suppressMilliseconds: true }) : endDate.toISODate()} due to 'minDate'`);
+                    }
                 }
             }
 
@@ -969,9 +985,11 @@
                             endDate = maxDate.endOf('day');
                         }
                         modified.new = endDate;
-                        result.endDate.modified.push(modified);
-                        if (writeWarning)
-                            console.warn(`Set endDate${nLog} to ${this.timePicker ? endDate.toISO({ suppressMilliseconds: true }) : endDate.toISODate()} due to 'maxSpan'`);
+                        if (modified.new != modified.old) {
+                            result.endDate.modified.push(modified);
+                            if (writeWarning)
+                                console.warn(`Set endDate${nLog} to ${this.timePicker ? endDate.toISO({ suppressMilliseconds: true }) : endDate.toISODate()} due to 'maxSpan'`);
+                        }
                     }
                 }
 
@@ -979,17 +997,15 @@
                     // If the end date falls below those allowed by the minSpan option, expand the range to the allowable period.
                     const minDate = startDate.plus(this.minSpan);
                     if (endDate < minDate) {
-                        if (this.minDate && endDate > this.minDate) {
-                            throw RangeError(`Option${nLog} 'minDate' contradicts to option 'minSpan'`);
+                        let modified = { old: endDate, reason: 'minSpan' };
+                        if (this.timePicker) {
+                            while (endDate < minDate)
+                                endDate = endDate.plus(this.timePickerStepSize);
                         } else {
-                            let modified = { old: endDate, reason: 'minSpan' };
-                            if (this.timePicker) {
-                                while (endDate < minDate)
-                                    endDate = endDate.plus(this.timePickerStepSize);
-                            } else {
-                                endDate = minDate.endOf('day');
-                            }
-                            modified.new = endDate;
+                            endDate = minDate.endOf('day');
+                        }
+                        modified.new = endDate;
+                        if (modified.new != modified.old) {
                             result.endDate.modified.push(modified);
                             if (writeWarning)
                                 console.warn(`Set endDate${nLog} to ${this.timePicker ? endDate.toISO({ suppressMilliseconds: true }) : endDate.toISODate()} due to 'minSpan'`);
