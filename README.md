@@ -18,8 +18,8 @@ Above samples are based on the [original repository](https://github.com/dangross
 ```html
 <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.2.6/daterangepicker.min.js"></script>
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.2.6/daterangepicker.min.css" rel="stylesheet" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.3.0/daterangepicker.min.js"></script>
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.3.0/daterangepicker.min.css" rel="stylesheet" />
 
 <input type="text" id="daterange" />
 
@@ -339,9 +339,9 @@ When `startDate` or `endDate` are modified, then a warning is written to console
 **Example**  
 ```js
 constrainDate({}, [DateTime.fromISO('2025-02-03'), DateTime.fromISO('2025-02-25')]) => 
-[ DateTime.fromISO('2025-02-05'), DateTime.fromISO('2025-02-20'), { startDate: {modified: true}, endDate: {modified: true} } ]
+[ DateTime.fromISO('2025-02-05'), DateTime.fromISO('2025-02-20'), { startDate: { stepped: ... }, endDate: { stepped: ..., modified: [{old: ... new: ..., reason: 'minSpan'}] } } ]
 constrainDate({span: false, invalidDate: true, invalidTime: true}) => 
-{ startDate: {modified: true, isInvalidDate: true, isInvalidTime: false}, endDate: {modified: false, isInvalidDate: false, isInvalidTime: true} } ]
+{ startDate: {stepped: ..., modified: [{old: ... new: ..., reason: 'minDate'}], isInvalidDate: true, isInvalidTime: false}, endDate: {stepped: ..., isInvalidDate: false, isInvalidTime: true} } ]
 ```
 <a name="DateRangePicker+updateView"></a>
 
