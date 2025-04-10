@@ -113,7 +113,14 @@
         
         * @property {string} applyButtonClasses=btn-primary - CSS class names that will be added only to the apply button
         * @property {string} cancelButtonClasses=btn-default - CSS class names that will be added only to the cancel button
-        * @property {string} buttonClasses=btn btn-sm - CSS class names that will be added to both the apply and cancel buttons.
+        * @property {string} buttonClasses="btn btn-sm" - CSS class names that will be added to both the apply and cancel buttons.
+        * @property {string} weekendClasses=weekend - CSS class names that will be used to highlight weekend (Saturday+Sunday) days.<br/>
+        * Use `null` or empty string if you don't like to highlight weekend days.
+        * @property {string} weekendDayClasses=weekend-day - CSS class names that will be used to highlight weekend (Saturday+Sunday) day names.<br/>
+        * Use `null` or empty string if you don't like to highlight weekend day names.
+        * @property {string} todayClasses=today - CSS class names that will be used to highlight the current day.<br/>
+        * Use `null` or empty string if you don't like to highlight the current day.
+
         * @property {string} opens=right - Whether the picker appears aligned to the left, to the right, or centered under the HTML element it's attached to.<br/>
         * `'left' \| 'right' \| 'center'`
         * @property {string} drops=down - Whether the picker appears below or above the HTML element it's attached to.<br/>
@@ -207,6 +214,9 @@
         this.buttonClasses = 'btn btn-sm';
         this.applyButtonClasses = 'btn-primary';
         this.cancelButtonClasses = 'btn-default';
+        this.weekendClasses = 'weekend';
+        this.weekendDayClasses = 'weekend-day';
+        this.todayClasses = 'today';
         this.warnings = true;
         this.ranges = {};
 
@@ -319,9 +329,12 @@
                 this[key] = options[key];
         }
 
-        for (let key of ['applyButtonClasses', 'cancelButtonClasses']) {
-            if (typeof options[key] === 'string')
+        for (let key of ['applyButtonClasses', 'cancelButtonClasses', 'weekendClasses', 'weekendDayClasses', 'todayClasses']) {
+            if (typeof options[key] === 'string') {
                 this[key] = options[key];
+            } else if (['weekendClasses', 'weekendDayClasses', 'todayClasses'].includes(key) && options[key] === null) {
+                this[key] = options[key];
+            }
         }
 
         for (let key of ['minYear', 'maxYear']) {
@@ -693,6 +706,18 @@
             if (isValid === undefined || !isValid)
                 this.constrainDate();
 
+            if (!this.singleDatePicker) {
+                if (this.locale.durationFormat)
+                    this.container.find('.drp-duration-label').html('');
+                if (typeof this.locale.format === 'object') {
+                    const empty = `<span style="color: rgb(0,0,0,0);">${this.startDate.toLocaleString(this.locale.format)}</span>`;
+                    this.container.find('.drp-selected').html(this.startDate.toLocaleString(this.locale.format) + this.locale.separator + empty);
+                } else {
+                    const empty = `<span style="color: rgb(0,0,0,0);">${this.startDate.toFormat(this.locale.format)}</span>`;
+                    this.container.find('.drp-selected').html(this.startDate.toFormat(this.locale.format) + this.locale.separator + empty);
+                }
+            }
+
             if (!this.isShowing)
                 this.updateElement();
 
@@ -746,18 +771,20 @@
 
             this.previousRightTime = this.endDate;
 
-            if (this.locale.durationFormat && !this.singleDatePicker) {
-                const duration = this.endDate.diff(this.startDate).rescale();
-                if (typeof this.locale.durationFormat === 'object') {
-                    this.container.find('.drp-duration-label').html(duration.toHuman(this.locale.durationFormat));
-                } else {
-                    this.container.find('.drp-duration-label').html(duration.toFormat(this.locale.durationFormat));
+            if (!this.singleDatePicker) {
+                if (this.locale.durationFormat) {
+                    const duration = this.endDate.diff(this.startDate).rescale();
+                    if (typeof this.locale.durationFormat === 'object') {
+                        this.container.find('.drp-duration-label').html(duration.toHuman(this.locale.durationFormat));
+                    } else {
+                        this.container.find('.drp-duration-label').html(duration.toFormat(this.locale.durationFormat));
+                    }
                 }
-            }
-            if (typeof this.locale.format === 'object') {
-                this.container.find('.drp-selected').html(this.startDate.toLocaleString(this.locale.format) + this.locale.separator + this.endDate.toLocaleString(this.locale.format));
-            } else {
-                this.container.find('.drp-selected').html(this.startDate.toFormat(this.locale.format) + this.locale.separator + this.endDate.toFormat(this.locale.format));
+                if (typeof this.locale.format === 'object') {
+                    this.container.find('.drp-selected').html(this.startDate.toLocaleString(this.locale.format) + this.locale.separator + this.endDate.toLocaleString(this.locale.format));
+                } else {
+                    this.container.find('.drp-selected').html(this.startDate.toFormat(this.locale.format) + this.locale.separator + this.endDate.toFormat(this.locale.format));
+                }
             }
 
             if (!this.isShowing)
@@ -1265,16 +1292,15 @@
 
             // add week number label
             if (this.showWeekNumbers || this.showISOWeekNumbers)
-                html += '<th class="week">' + this.locale.weekLabel + '</th>';
+                html += `<th class="week">${this.locale.weekLabel}</th>`;
 
-            $.each(this.locale.daysOfWeek, function (index, dayOfWeek) {
-                if (Info.getWeekendWeekdays().includes(index + 1)) {
+            for (let [index, dayOfWeek] of this.locale.daysOfWeek.entries()) {
+                html += '<th';
+                if (this.weekendDayClasses && this.weekendDayClasses.length && Info.getWeekendWeekdays().includes(index + 1))
                     //highlight weekend day
-                    html += '<th class="weekend-day">' + dayOfWeek + '</th>';
-                } else {
-                    html += '<th>' + dayOfWeek + '</th>';
-                }
-            });
+                    html += ` class="${this.weekendDayClasses}"`;
+                html += `>${dayOfWeek}</th>`;
+            };
 
             html += '</tr>';
             html += '</thead>';
@@ -1304,16 +1330,15 @@
                     html += '<td class="week">' + calendar[row][0].localWeekNumber + '</td>';
 
                 for (let col = 0; col < 7; col++) {
-
                     var classes = [];
 
                     //highlight today's date
-                    if (calendar[row][col].hasSame(DateTime.now(), 'day'))
-                        classes.push('today');
+                    if (this.todayClasses && this.todayClasses.length && calendar[row][col].hasSame(DateTime.now(), 'day'))
+                        classes.push(this.todayClasses);
 
                     //highlight weekends
-                    if (Info.getWeekendWeekdays().includes(calendar[row][col].weekday))
-                        classes.push('weekend');
+                    if (this.weekendClasses && this.weekendClasses.length && Info.getWeekendWeekdays().includes(calendar[row][col].weekday))
+                        classes.push(this.weekendClasses);
 
                     //grey out the dates in other months displayed at beginning and end of this calendar
                     if (calendar[row][col].month != calendar[1][1].month)
@@ -2372,6 +2397,7 @@
         updateElement: function () {
             if (this.startDate == null && this.initalMonth)
                 return;
+
             if (this.element.is('input')) {
                 let newValue = typeof this.locale.format === 'object' ? this.startDate.toLocaleString(this.locale.format) : this.startDate.toFormat(this.locale.format);
                 if (!this.singleDatePicker) {

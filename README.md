@@ -91,7 +91,7 @@ isInvalidDate: function(date) {
 Compared to [inital repository](https://github.com/dangrossman/daterangepicker), this fork added following features and changes:
 
 - Replaced [moment](https://momentjs.com/) by [luxon](https://moment.github.io/luxon/index.html) (see differences below)
-- Added CSS class `weekend-day` for weekend days in calendar 
+- Added option `weekendClasses`, `weekendDayClasses`, `todayClasses` to highlight weekend days or today, respectively 
 - Added option `timePickerStepSize` to succeed options `timePickerIncrement` and `timePickerSeconds`
 - Added events `dateChange.daterangepicker` and `timeChange.daterangepicker` emitted when user clicks on a date/time
 - Added event `beforeHide.daterangepicker` enables you to keep the picker visible after click on `Apply` or `Cancel` button.
