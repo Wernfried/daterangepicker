@@ -30,7 +30,7 @@ $(function() {
    }
    $('#daterange').daterangepicker(options);
 });
-
+</script>
 ```
 
 ## Examples
