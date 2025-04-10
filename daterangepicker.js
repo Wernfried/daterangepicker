@@ -113,7 +113,7 @@
         
         * @property {string} applyButtonClasses=btn-primary - CSS class names that will be added only to the apply button
         * @property {string} cancelButtonClasses=btn-default - CSS class names that will be added only to the cancel button
-        * @property {string} buttonClasses="btn btn-sm" - CSS class names that will be added to both the apply and cancel buttons.
+        * @property {string} buttonClasses - Default: `'btn btn-sm'`<br/>CSS class names that will be added to both the apply and cancel buttons.
         * @property {string} weekendClasses=weekend - CSS class names that will be used to highlight weekend (Saturday+Sunday) days.<br/>
         * Use `null` or empty string if you don't like to highlight weekend days.
         * @property {string} weekendDayClasses=weekend-day - CSS class names that will be used to highlight weekend (Saturday+Sunday) day names.<br/>
@@ -142,7 +142,7 @@
         * see [Format Tokens](https://moment.github.io/luxon/#/formatting?id=table-of-tokens) or an object according 
         * to [Intl.DateTimeFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat)<br/>
         * I recommend to use the luxon [Presets](https://moment.github.io/luxon/#/formatting?id=presets).
-        * @property {string} locale.separator= - Defaut: `' - '` - Separator for start and end time
+        * @property {string} locale.separator - Defaut: `' - '`<br/>Separator for start and end time
         * @property {string} locale.weekLabel=W - Label for week numbers
         * @property {Array} locale.daysOfWeek - Default: `luxon.weekdays('short')`<br/>Array with weekday names, from Monday to Sunday
         * @property {Array} locale.monthNames - Default: `luxon.Info.months('long')`<br/>Array with month names

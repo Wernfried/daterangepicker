@@ -545,7 +545,7 @@ Options for DateRangePicker
 | isCustomDate | <code>function</code> | <code>false</code> | A function that is passed each date in the two calendars before they are displayed,  and may return a string or array of CSS class names to apply to that date's calendar cell.<br/> Signature: `isCustomDate(date)` |
 | applyButtonClasses | <code>string</code> | <code>&quot;btn-primary&quot;</code> | CSS class names that will be added only to the apply button |
 | cancelButtonClasses | <code>string</code> | <code>&quot;btn-default&quot;</code> | CSS class names that will be added only to the cancel button |
-| buttonClasses | <code>string</code> | <code>&quot;\&quot;btn&quot;</code> | btn-sm" - CSS class names that will be added to both the apply and cancel buttons. |
+| buttonClasses | <code>string</code> |  | Default: `'btn btn-sm'`<br/>CSS class names that will be added to both the apply and cancel buttons. |
 | weekendClasses | <code>string</code> | <code>&quot;weekend&quot;</code> | CSS class names that will be used to highlight weekend (Saturday+Sunday) days.<br/> Use `null` or empty string if you don't like to highlight weekend days. |
 | weekendDayClasses | <code>string</code> | <code>&quot;weekend-day&quot;</code> | CSS class names that will be used to highlight weekend (Saturday+Sunday) day names.<br/> Use `null` or empty string if you don't like to highlight weekend day names. |
 | todayClasses | <code>string</code> | <code>&quot;today&quot;</code> | CSS class names that will be used to highlight the current day.<br/> Use `null` or empty string if you don't like to highlight the current day. |
@@ -557,7 +557,7 @@ Options for DateRangePicker
 | locale | <code>object</code> | <code>{}</code> | Allows you to provide localized strings for buttons and labels, customize the date format,  and change the first day of week for the calendars. |
 | locale.direction | <code>string</code> | <code>&quot;ltr&quot;</code> | Direction of reading, `'ltr'` or `'rtl'` |
 | locale.format | <code>object</code> \| <code>string</code> |  | Default: `DateTime.DATE_SHORT`<br/>Date formats. Either given as string,  see [Format Tokens](https://moment.github.io/luxon/#/formatting?id=table-of-tokens) or an object according  to [Intl.DateTimeFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat)<br/> I recommend to use the luxon [Presets](https://moment.github.io/luxon/#/formatting?id=presets). |
-| locale.separator= | <code>string</code> |  | Defaut: `' - '` - Separator for start and end time |
+| locale.separator | <code>string</code> |  | Defaut: `' - '`<br/>Separator for start and end time |
 | locale.weekLabel | <code>string</code> | <code>&quot;W&quot;</code> | Label for week numbers |
 | locale.daysOfWeek | <code>Array</code> |  | Default: `luxon.weekdays('short')`<br/>Array with weekday names, from Monday to Sunday |
 | locale.monthNames | <code>Array</code> |  | Default: `luxon.Info.months('long')`<br/>Array with month names |
