@@ -357,6 +357,18 @@
   color: #fff;
 }
 
+.daterangepicker td.weekend {
+  color: red
+}
+
+.daterangepicker th.weekend-day {
+  color: red
+}
+
+.daterangepicker td.today {
+  color: blue
+}
+
 /*  Larger Screen Styling */
 @media (min-width: 564px) {
   .daterangepicker {

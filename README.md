@@ -18,8 +18,8 @@ Above samples are based on the [original repository](https://github.com/dangross
 ```html
 <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.3.3/daterangepicker.min.js"></script>
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.3.3/daterangepicker.min.css" rel="stylesheet" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.4.2/daterangepicker.min.js"></script>
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.4.2/daterangepicker.min.css" rel="stylesheet" />
 
 <input type="text" id="daterange" />
 
@@ -91,7 +91,7 @@ isInvalidDate: function(date) {
 Compared to [inital repository](https://github.com/dangrossman/daterangepicker), this fork added following features and changes:
 
 - Replaced [moment](https://momentjs.com/) by [luxon](https://moment.github.io/luxon/index.html) (see differences below)
-- Added CSS class `weekend-day` for weekend days in calendar 
+- Added option `weekendClasses`, `weekendDayClasses`, `todayClasses` to highlight weekend days or today, respectively 
 - Added option `timePickerStepSize` to succeed options `timePickerIncrement` and `timePickerSeconds`
 - Added events `dateChange.daterangepicker` and `timeChange.daterangepicker` emitted when user clicks on a date/time
 - Added event `beforeHide.daterangepicker` enables you to keep the picker visible after click on `Apply` or `Cancel` button.
@@ -106,6 +106,37 @@ Compared to [inital repository](https://github.com/dangrossman/daterangepicker),
 In original daterangepicker this parameter defines whether the `<input>` is updated when the user clicks on `Apply` button.
 - Added option `locale.durationFormat` to show customized label for selected duration, e.g. `'4 Days, 6 Hours, 30 Minutes'` 
 - ... and maybe some new bugs 😉 
+
+### Localization
+All date values are based on [luxon](https://moment.github.io/luxon/index.html#/intl) which provides great support for localization. Instead of providing date format, weekday and month names manually as strings, it is usually easier to set the default locale like this:
+```
+$(document).ready(function () {
+   const Settings = luxon.Settings;
+   Settings.defaultLocale = 'fr-CA'
+
+   $('#picker').daterangepicker({
+      timePicker: true,
+      singleDatePicker: false
+   };
+});
+
+```
+instead of 
+```
+$(document).ready(function () {
+   $('#picker').daterangepicker({
+      timePicker: true,
+      singleDatePicker: false,
+      locale: {
+         format: 'yyyyy-M-d H h m',
+         daysOfWeek: [ 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.', 'dim.' ],
+         monthNames: [ "janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre" ],
+         firstDay: 7
+      }
+   };
+});
+
+```
 
 ## Methods
 
@@ -130,7 +161,7 @@ This table lists a few important differences between datarangepicker using momen
 | from ISO-8601 String    | `moment(...)`                                       | `DateIme.fromISO(...)`         | 
 | from [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) Object | `moment(...)` | `DateIme.fromJSDate(...)`         | 
 | current day             | `moment()`                                          | `DateTime.now()`  |
-| format to string        | `format(...)`                                      | `toFormat(...)`   |
+| format to string        | `format(...)`                                       | `toFormat(...)`   |
 | format tokens           | `'YYYY-MM-DD'`                                      | `'yyyy-MM-dd'`    |
 
 
@@ -545,7 +576,10 @@ Options for DateRangePicker
 | isCustomDate | <code>function</code> | <code>false</code> | A function that is passed each date in the two calendars before they are displayed,  and may return a string or array of CSS class names to apply to that date's calendar cell.<br/> Signature: `isCustomDate(date)` |
 | applyButtonClasses | <code>string</code> | <code>&quot;btn-primary&quot;</code> | CSS class names that will be added only to the apply button |
 | cancelButtonClasses | <code>string</code> | <code>&quot;btn-default&quot;</code> | CSS class names that will be added only to the cancel button |
-| buttonClasses | <code>string</code> | <code>&quot;btn&quot;</code> | btn-sm - CSS class names that will be added to both the apply and cancel buttons. |
+| buttonClasses | <code>string</code> |  | Default: `'btn btn-sm'`<br/>CSS class names that will be added to both the apply and cancel buttons. |
+| weekendClasses | <code>string</code> | <code>&quot;weekend&quot;</code> | CSS class names that will be used to highlight weekend days.<br/> Use `null` or empty string if you don't like to highlight weekend days. |
+| weekendDayClasses | <code>string</code> | <code>&quot;weekend-day&quot;</code> | CSS class names that will be used to highlight weekend day names.<br/> Weekend days are evaluated by [Info.getWeekendWeekdays](https://moment.github.io/luxon/api-docs/index.html#infogetweekendweekdays) and depend on current  locale settings. Use `null` or empty string if you don't like to highlight weekend day names. |
+| todayClasses | <code>string</code> | <code>&quot;today&quot;</code> | CSS class names that will be used to highlight the current day.<br/> Use `null` or empty string if you don't like to highlight the current day. |
 | opens | <code>string</code> | <code>&quot;right&quot;</code> | Whether the picker appears aligned to the left, to the right, or centered under the HTML element it's attached to.<br/> `'left' \| 'right' \| 'center'` |
 | drops | <code>string</code> | <code>&quot;down&quot;</code> | Whether the picker appears below or above the HTML element it's attached to.<br/> `'down' \| 'up' \| 'auto'` |
 | ranges | <code>object</code> | <code>{}</code> | Set predefined date [Ranges](#Ranges) the user can select from. Each key is the label for the range,  and its value an array with two dates representing the bounds of the range. |
@@ -553,10 +587,10 @@ Options for DateRangePicker
 | alwaysShowCalendars | <code>boolean</code> | <code>false</code> | Normally, if you use the ranges option to specify pre-defined date ranges,  calendars for choosing a custom date range are not shown until the user clicks "Custom Range".<br/> When this option is set to true, the calendars for choosing a custom date range are always shown instead. |
 | locale | <code>object</code> | <code>{}</code> | Allows you to provide localized strings for buttons and labels, customize the date format,  and change the first day of week for the calendars. |
 | locale.direction | <code>string</code> | <code>&quot;ltr&quot;</code> | Direction of reading, `'ltr'` or `'rtl'` |
-| locale.format | <code>object</code> \| <code>string</code> |  | Default: `DateTime.DATE_SHORT`<br/>Date formats. Either given as string,  see [Format Tokens](https://moment.github.io/luxon/#/formatting?id=table-of-tokens) or an object according  to [Intl.DateTimeFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat)<br/> I recommend to use the luxon [Presets](https://moment.github.io/luxon/#/formatting?id=presets). |
-| locale.separator= | <code>string</code> |  | Defaut: `' - '` - Separator for start and end time |
+| locale.format | <code>object</code> \| <code>string</code> |  | Default: `DateTime.DATE_SHORT` or `DateTime.DATETIME_SHORT` when `timePicker: true`<br/>Date formats.  Either given as string, see [Format Tokens](https://moment.github.io/luxon/#/formatting?id=table-of-tokens) or an object according  to [Intl.DateTimeFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat)<br/> I recommend to use the luxon [Presets](https://moment.github.io/luxon/#/formatting?id=presets). |
+| locale.separator | <code>string</code> |  | Defaut: `' - '`<br/>Separator for start and end time |
 | locale.weekLabel | <code>string</code> | <code>&quot;W&quot;</code> | Label for week numbers |
-| locale.daysOfWeek | <code>Array</code> |  | Default: `luxon.weekdays('short')`<br/>Array with weekday names, from Monday to Sunday |
+| locale.daysOfWeek | <code>Array</code> |  | Default: `luxon.Info.weekdays('short')`<br/>Array with weekday names, from Monday to Sunday |
 | locale.monthNames | <code>Array</code> |  | Default: `luxon.Info.months('long')`<br/>Array with month names |
 | locale.firstDay | <code>number</code> |  | Default: `luxon.Info.getStartOfWeek()`<br/>First day of the week, 1 for Monday through 7 for Sunday |
 | locale.applyLabel | <code>string</code> | <code>&quot;Apply&quot;</code> | Label of `Apply` Button |
