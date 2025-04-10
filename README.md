@@ -107,6 +107,37 @@ In original daterangepicker this parameter defines whether the `<input>` is upda
 - Added option `locale.durationFormat` to show customized label for selected duration, e.g. `'4 Days, 6 Hours, 30 Minutes'` 
 - ... and maybe some new bugs 😉 
 
+### Localization
+All date values are based on [luxon](https://moment.github.io/luxon/index.html#/intl) which provides great support for localization. Instead of providing date format, weekday and month names manually as strings, it is usually easier to set the default locale like this:
+```
+$(document).ready(function () {
+   const Settings = luxon.Settings;
+   Settings.defaultLocale = 'fr-CA'
+
+   $('#picker').daterangepicker({
+      timePicker: true,
+      singleDatePicker: false
+   };
+});
+
+```
+instead of 
+```
+$(document).ready(function () {
+   $('#picker').daterangepicker({
+      timePicker: true,
+      singleDatePicker: false,
+      locale: {
+         format: 'yyyyy-M-d H h m',
+         daysOfWeek: [ 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.', 'dim.' ],
+         monthNames: [ "janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre" ],
+         firstDay: 7
+      }
+   };
+});
+
+```
+
 ## Methods
 
 Available methods are listed below in [API documentation](#DateRangePicker). You will mainly use 
@@ -130,7 +161,7 @@ This table lists a few important differences between datarangepicker using momen
 | from ISO-8601 String    | `moment(...)`                                       | `DateIme.fromISO(...)`         | 
 | from [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) Object | `moment(...)` | `DateIme.fromJSDate(...)`         | 
 | current day             | `moment()`                                          | `DateTime.now()`  |
-| format to string        | `format(...)`                                      | `toFormat(...)`   |
+| format to string        | `format(...)`                                       | `toFormat(...)`   |
 | format tokens           | `'YYYY-MM-DD'`                                      | `'yyyy-MM-dd'`    |
 
 

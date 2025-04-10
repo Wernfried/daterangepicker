@@ -114,9 +114,11 @@
         * @property {string} applyButtonClasses=btn-primary - CSS class names that will be added only to the apply button
         * @property {string} cancelButtonClasses=btn-default - CSS class names that will be added only to the cancel button
         * @property {string} buttonClasses - Default: `'btn btn-sm'`<br/>CSS class names that will be added to both the apply and cancel buttons.
-        * @property {string} weekendClasses=weekend - CSS class names that will be used to highlight weekend (Saturday+Sunday) days.<br/>
+        * @property {string} weekendClasses=weekend - CSS class names that will be used to highlight weekend days.<br/>
         * Use `null` or empty string if you don't like to highlight weekend days.
-        * @property {string} weekendDayClasses=weekend-day - CSS class names that will be used to highlight weekend (Saturday+Sunday) day names.<br/>
+        * @property {string} weekendDayClasses=weekend-day - CSS class names that will be used to highlight weekend day names.<br/>
+        * Weekend days are evaluated by [Info.getWeekendWeekdays](https://moment.github.io/luxon/api-docs/index.html#infogetweekendweekdays) and depend on current 
+        * locale settings.
         * Use `null` or empty string if you don't like to highlight weekend day names.
         * @property {string} todayClasses=today - CSS class names that will be used to highlight the current day.<br/>
         * Use `null` or empty string if you don't like to highlight the current day.
@@ -138,13 +140,13 @@
         * @property {object} locale={} - Allows you to provide localized strings for buttons and labels, customize the date format, 
         * and change the first day of week for the calendars.
         * @property {string} locale.direction=ltr - Direction of reading, `'ltr'` or `'rtl'`
-        * @property {object|string} locale.format - Default: `DateTime.DATE_SHORT`<br/>Date formats. Either given as string, 
-        * see [Format Tokens](https://moment.github.io/luxon/#/formatting?id=table-of-tokens) or an object according 
+        * @property {object|string} locale.format - Default: `DateTime.DATE_SHORT` or `DateTime.DATETIME_SHORT` when `timePicker: true`<br/>Date formats. 
+        * Either given as string, see [Format Tokens](https://moment.github.io/luxon/#/formatting?id=table-of-tokens) or an object according 
         * to [Intl.DateTimeFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat)<br/>
         * I recommend to use the luxon [Presets](https://moment.github.io/luxon/#/formatting?id=presets).
         * @property {string} locale.separator - Defaut: `' - '`<br/>Separator for start and end time
         * @property {string} locale.weekLabel=W - Label for week numbers
-        * @property {Array} locale.daysOfWeek - Default: `luxon.weekdays('short')`<br/>Array with weekday names, from Monday to Sunday
+        * @property {Array} locale.daysOfWeek - Default: `luxon.Info.weekdays('short')`<br/>Array with weekday names, from Monday to Sunday
         * @property {Array} locale.monthNames - Default: `luxon.Info.months('long')`<br/>Array with month names
         * @property {number} locale.firstDay - Default: `luxon.Info.getStartOfWeek()`<br/>First day of the week, 1 for Monday through 7 for Sunday
         * @property {string} locale.applyLabel=Apply - Label of `Apply` Button
@@ -222,7 +224,7 @@
 
         this.locale = {
             direction: 'ltr',
-            format: DateTime.DATE_SHORT,
+            format: DateTime.DATE_SHORT, // or DateTime.DATETIME_SHORT when timePicker: true
             separator: ' - ',
             applyLabel: 'Apply',
             cancelLabel: 'Cancel',
@@ -277,6 +279,11 @@
         // handle all the possible options overriding defaults
         //
 
+        if (typeof options.timePicker === 'boolean')
+            this.timePicker = options.timePicker;
+        if (this.timePicker)
+            this.locale.format = DateTime.DATETIME_SHORT;
+
         if (typeof options.locale === 'object') {
             for (let key of ['separator', 'applyLabel', 'cancelLabel', 'weekLabel']) {
                 if (typeof options.locale[key] === 'string')
@@ -323,7 +330,7 @@
         }
         this.container.addClass(this.locale.direction);
 
-        for (let key of ['timePicker', 'singleDatePicker', 'timePicker24Hour', 'showWeekNumbers', 'showISOWeekNumbers',
+        for (let key of ['singleDatePicker', 'timePicker24Hour', 'showWeekNumbers', 'showISOWeekNumbers',
             'showDropdowns', 'linkedCalendars', 'showCustomRangeLabel', 'alwaysShowCalendars', 'autoApply', 'autoUpdateInput', 'warnings']) {
             if (typeof options[key] === 'boolean')
                 this[key] = options[key];
