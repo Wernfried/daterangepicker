@@ -84,7 +84,7 @@
         * and 1,2,3,4,6,(8,12) for `Duration.fromObject({hours: ...})`.<br/>
         * Duration must be greater than `minSpan` and smaller than `maxSpan`.<br/>
         * For example `timePickerStepSize: 600` will disable time picker seconds and time picker minutes are set to step size of 10 Minutes.<br/>
-        * Overwrites `timePickerIncrement` and `timePickerSeconds`
+        * Overwrites `timePickerIncrement` and `timePickerSeconds`, ignored when `timePicker: false`
         * @property {boolean} timePickerSeconds=boolean - **Deprecated**, use `timePickerStepSize`<br/>Show seconds in the timePicker
         * @property {boolean} timePickerIncrement=1 - **Deprecated**, use `timePickerStepSize`<br/>Increment of the minutes selection list for times
         
@@ -379,46 +379,48 @@
             }
         }
 
-        if (typeof options.timePickerSeconds === 'boolean')  // backward compatibility            
-            this.timePickerStepSize = Duration.fromObject({ [options.timePickerSeconds ? 'seconds' : 'minutes']: 1 });
-        if (typeof options.timePickerIncrement === 'number')  // backward compatibility
-            this.timePickerStepSize = Duration.fromObject({ minutes: options.timePickerIncrement });
+        if (this.timePicker) {
+            if (typeof options.timePickerSeconds === 'boolean')  // backward compatibility            
+                this.timePickerStepSize = Duration.fromObject({ [options.timePickerSeconds ? 'seconds' : 'minutes']: 1 });
+            if (typeof options.timePickerIncrement === 'number')  // backward compatibility
+                this.timePickerStepSize = Duration.fromObject({ minutes: options.timePickerIncrement });
 
-        if (['string', 'object', 'number'].includes(typeof options.timePickerStepSize)) {
-            let duration;
-            if (options.timePickerStepSize instanceof Duration && options.timePickerStepSize.isValid) {
-                duration = options.timePickerStepSize;
-            } else if (Duration.fromISO(options.timePickerStepSize).isValid) {
-                duration = Duration.fromISO(options.timePickerStepSize);
-            } else if (typeof options.timePickerStepSize === 'number' && Duration.fromObject({ seconds: options.timePickerStepSize }).isValid) {
-                duration = Duration.fromObject({ seconds: options.timePickerStepSize });
-            } else {
-                console.error(`Option 'timePickerStepSize' is not valid`);
-                duration = this.timePickerStepSize;
-            };
-            var valid = [];
-            for (let unit of ['minutes', 'seconds'])
-                valid.push(...[1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30].map(x => { return Duration.fromObject({ [unit]: x }) }));
-            valid.push(...[1, 2, 3, 4, 6].map(x => { return Duration.fromObject({ hours: x }) }));
-            if (this.timePicker24Hour)
-                valid.push(...[8, 12].map(x => { return Duration.fromObject({ hours: x }) }));
+            if (['string', 'object', 'number'].includes(typeof options.timePickerStepSize)) {
+                let duration;
+                if (options.timePickerStepSize instanceof Duration && options.timePickerStepSize.isValid) {
+                    duration = options.timePickerStepSize;
+                } else if (Duration.fromISO(options.timePickerStepSize).isValid) {
+                    duration = Duration.fromISO(options.timePickerStepSize);
+                } else if (typeof options.timePickerStepSize === 'number' && Duration.fromObject({ seconds: options.timePickerStepSize }).isValid) {
+                    duration = Duration.fromObject({ seconds: options.timePickerStepSize });
+                } else {
+                    console.error(`Option 'timePickerStepSize' is not valid`);
+                    duration = this.timePickerStepSize;
+                };
+                var valid = [];
+                for (let unit of ['minutes', 'seconds'])
+                    valid.push(...[1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30].map(x => { return Duration.fromObject({ [unit]: x }) }));
+                valid.push(...[1, 2, 3, 4, 6].map(x => { return Duration.fromObject({ hours: x }) }));
+                if (this.timePicker24Hour)
+                    valid.push(...[8, 12].map(x => { return Duration.fromObject({ hours: x }) }));
 
-            if (valid.some(x => duration.rescale().equals(x))) {
-                this.timePickerStepSize = duration.rescale();
-            } else {
-                console.error(`Option 'timePickerStepSize' ${JSON.stringify(duration.toObject())} is not valid`);
+                if (valid.some(x => duration.rescale().equals(x))) {
+                    this.timePickerStepSize = duration.rescale();
+                } else {
+                    console.error(`Option 'timePickerStepSize' ${JSON.stringify(duration.toObject())} is not valid`);
+                }
             }
-        }
-        if (this.timePicker && this.maxSpan && this.timePickerStepSize > this.maxSpan)
-            console.error(`Option 'timePickerStepSize' ${JSON.stringify(this.timePickerStepSize.toObject())} must be smaller than 'maxSpan'`);
+            if (this.maxSpan && this.timePickerStepSize > this.maxSpan)
+                console.error(`Option 'timePickerStepSize' ${JSON.stringify(this.timePickerStepSize.toObject())} must be smaller than 'maxSpan'`);
 
-        this.timePickerOpts = {
-            showMinutes: this.timePickerStepSize < Duration.fromObject({ hours: 1 }),
-            showSeconds: this.timePickerStepSize < Duration.fromObject({ minutes: 1 }),
-            hourStep: this.timePickerStepSize >= Duration.fromObject({ hours: 1 }) ? this.timePickerStepSize.hours : 1,
-            minuteStep: this.timePickerStepSize >= Duration.fromObject({ minutes: 1 }) ? this.timePickerStepSize.minutes : 1,
-            secondStep: this.timePickerStepSize.seconds
-        };
+            this.timePickerOpts = {
+                showMinutes: this.timePickerStepSize < Duration.fromObject({ hours: 1 }),
+                showSeconds: this.timePickerStepSize < Duration.fromObject({ minutes: 1 }),
+                hourStep: this.timePickerStepSize >= Duration.fromObject({ hours: 1 }) ? this.timePickerStepSize.hours : 1,
+                minuteStep: this.timePickerStepSize >= Duration.fromObject({ minutes: 1 }) ? this.timePickerStepSize.minutes : 1,
+                secondStep: this.timePickerStepSize.seconds
+            };
+        }
 
         for (let opt of ['startDate', 'endDate', 'minDate', 'maxDate', 'initalMonth']) {
             if (opt == 'endDate' && this.singleDatePicker)
@@ -2158,10 +2160,12 @@
             var i = 0;
             for (var range in this.ranges) {
                 var unit = this.timePicker ? 'hour' : 'day';
-                if (this.timePickerOpts.showMinutes) {
-                    unit = 'minute';
-                } else if (this.timePickerOpts.showSeconds) {
-                    unit = 'second';
+                if (this.timePicker) {
+                    if (this.timePickerOpts.showMinutes) {
+                        unit = 'minute';
+                    } else if (this.timePickerOpts.showSeconds) {
+                        unit = 'second';
+                    }
                 }
                 if (this.startDate.startOf(unit) == this.ranges[range][0].startOf(unit) == this.endDate.startOf(unit) == this.ranges[range][1].startOf(unit)) {
                     customRange = false;
