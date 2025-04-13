@@ -18,8 +18,8 @@ Above samples are based on the [original repository](https://github.com/dangross
 ```html
 <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.6.0/daterangepicker.min.js"></script>
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.6.0/daterangepicker.min.css" rel="stylesheet" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.6.1/daterangepicker.min.js"></script>
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.6.1/daterangepicker.min.css" rel="stylesheet" />
 
 <input type="text" id="daterange" />
 
@@ -191,7 +191,7 @@ Licensed under the [MIT license](LICENSE).
 Useful to remove any manually added elements.</p>
 </dd>
 <dt><a href="#event_beforeRenderTimePicker.daterangepicker">"beforeRenderTimePicker.daterangepicker" (this)</a></dt>
-<dd><p>Emitted before the TimePicker is rendered
+<dd><p>Emitted before the TimePicker is rendered.
 Useful to remove any manually added elements.</p>
 </dd>
 <dt><a href="#event_show.daterangepicker">"show.daterangepicker" (this)</a></dt>
@@ -446,7 +446,7 @@ Useful to remove any manually added elements.
 <a name="event_beforeRenderTimePicker.daterangepicker"></a>
 
 ## "beforeRenderTimePicker.daterangepicker" (this)
-Emitted before the TimePicker is rendered
+Emitted before the TimePicker is rendered.
 Useful to remove any manually added elements.
 
 **Kind**: event emitted  
