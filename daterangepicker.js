@@ -1067,6 +1067,7 @@
         /**
         * Updates the picker when calendar is initiated or any date has been selected. 
         * Could be useful after running {@link #DateRangePicker+setStartDate|setStartDate} or {@link #DateRangePicker+setEndDate|setEndDate}
+        * @emits "viewChange.daterangepicker"
         */
         updateView: function () {
             if (this.timePicker) {
@@ -1098,6 +1099,14 @@
             this.updateMonthsInView();
             this.updateCalendars();
             this.updateFormInputs();
+
+            /**
+            * Emitted when the calendar view changed
+            * @event
+            * @name "viewChange.daterangepicker"
+            * @param {DateRangePicker} this - The daterangepicker object
+            */
+            this.element.trigger('viewChange.daterangepicker', this);
         },
 
         /**
