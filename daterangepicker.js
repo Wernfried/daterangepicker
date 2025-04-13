@@ -1067,10 +1067,11 @@
         /**
         * Updates the picker when calendar is initiated or any date has been selected. 
         * Could be useful after running {@link #DateRangePicker+setStartDate|setStartDate} or {@link #DateRangePicker+setEndDate|setEndDate}
-        * @emits "viewChange.daterangepicker"
+        * @emits "beforeRenderTimePicker.daterangepicker"
         */
         updateView: function () {
             if (this.timePicker) {
+                this.element.trigger('beforeRenderTimePicker.daterangepicker', this);
                 this.renderTimePicker('left');
                 this.renderTimePicker('right');
                 if (!this.endDate) {
@@ -1100,13 +1101,6 @@
             this.updateCalendars();
             this.updateFormInputs();
 
-            /**
-            * Emitted when the calendar view changed
-            * @event
-            * @name "viewChange.daterangepicker"
-            * @param {DateRangePicker} this - The daterangepicker object
-            */
-            this.element.trigger('viewChange.daterangepicker', this);
         },
 
         /**
@@ -1151,6 +1145,7 @@
 
         /**
         * Updates the selected day value from calendar with selected time values
+        * @emits "beforeRenderCalendar.daterangepicker"
         * @private
         */
         updateCalendars: function () {
@@ -1199,6 +1194,14 @@
                 this.rightCalendar.month = this.rightCalendar.month.set({ hour: hour, minute: minute, second: second });
             }
 
+            /**
+            * Emitted before the calendar is rendered. 
+            * Useful to remove any manually added elements.
+            * @event
+            * @name "beforeRenderCalendar.daterangepicker"
+            * @param {DateRangePicker} this - The daterangepicker object
+            */
+            this.element.trigger('beforeRenderCalendar.daterangepicker', this);
             this.renderCalendar('left');
             this.renderCalendar('right');
 
@@ -1207,6 +1210,7 @@
             if (this.endDate == null) return;
 
             this.calculateChosenLabel();
+
         },
 
         /**
@@ -1416,8 +1420,17 @@
         },
 
         /**
+        * Emitted before the TimePicker is rendered
+        * Useful to remove any manually added elements.
+        * @event
+        * @name "beforeRenderTimePicker.daterangepicker"
+        * @param {DateRangePicker} this - The daterangepicker object
+        */
+
+        /**
         * Renders the time pickers
         * @private
+        * @emits "beforeRenderTimePicker.daterangepicker"
         */
         renderTimePicker: function (side) {
 
@@ -2340,6 +2353,7 @@
             this.updateFormInputs();
 
             //re-render the time pickers because changing one selection can affect what's enabled in another
+            this.element.trigger('beforeRenderTimePicker.daterangepicker', this);
             this.renderTimePicker('left');
             this.renderTimePicker('right');
 
