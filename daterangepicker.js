@@ -1420,7 +1420,7 @@
         },
 
         /**
-        * Emitted before the TimePicker is rendered
+        * Emitted before the TimePicker is rendered.
         * Useful to remove any manually added elements.
         * @event
         * @name "beforeRenderTimePicker.daterangepicker"

@@ -95,6 +95,7 @@ Compared to [inital repository](https://github.com/dangrossman/daterangepicker),
 - Added option `timePickerStepSize` to succeed options `timePickerIncrement` and `timePickerSeconds`
 - Added events `dateChange.daterangepicker` and `timeChange.daterangepicker` emitted when user clicks on a date/time
 - Added event `beforeHide.daterangepicker` enables you to keep the picker visible after click on `Apply` or `Cancel` button.
+- Added event `beforeRenderTimePicker.daterangepicker` and `beforeRenderCalendar.daterangepicker` emitted before elements are rendered
 - Added method `setRange(startDate, endDate)` to combine `setStartDate(startDate)` and `setEndDate(endDate)`
 - Added option `minSpan` similar to `maxSpan`
 - Added option `isInvalidTime` similar to `isInvalidDate`
