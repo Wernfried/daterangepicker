@@ -18,8 +18,8 @@ Above samples are based on the [original repository](https://github.com/dangross
 ```html
 <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.5.0/daterangepicker.min.js"></script>
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.5.0/daterangepicker.min.css" rel="stylesheet" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.6.0/daterangepicker.min.js"></script>
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.6.0/daterangepicker.min.css" rel="stylesheet" />
 
 <input type="text" id="daterange" />
 
@@ -185,8 +185,13 @@ Licensed under the [MIT license](LICENSE).
 ## Events
 
 <dl>
-<dt><a href="#event_viewChange.daterangepicker">"viewChange.daterangepicker" (this)</a></dt>
-<dd><p>Emitted when the calendar view changed</p>
+<dt><a href="#event_beforeRenderCalendar.daterangepicker">"beforeRenderCalendar.daterangepicker" (this)</a></dt>
+<dd><p>Emitted before the calendar is rendered. 
+Useful to remove any manually added elements.</p>
+</dd>
+<dt><a href="#event_beforeRenderTimePicker.daterangepicker">"beforeRenderTimePicker.daterangepicker" (this)</a></dt>
+<dd><p>Emitted before the TimePicker is rendered
+Useful to remove any manually added elements.</p>
 </dd>
 <dt><a href="#event_show.daterangepicker">"show.daterangepicker" (this)</a></dt>
 <dd><p>Emitted when the picker is shown</p>
@@ -384,7 +389,7 @@ Updates the picker when calendar is initiated or any date has been selected.
 Could be useful after running [setStartDate](#DateRangePicker+setStartDate) or [setEndDate](#DateRangePicker+setEndDate)
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
-**Emits**: <code>event:&quot;viewChange.daterangepicker&quot;</code>  
+**Emits**: <code>event:&quot;beforeRenderTimePicker.daterangepicker&quot;</code>  
 <a name="DateRangePicker+showCalendars"></a>
 
 ### dateRangePicker.showCalendars()
@@ -425,10 +430,23 @@ Initiate a new DateRangePicker
 | options | [<code>Options</code>](#Options) | Object to configure the DateRangePicker |
 | callback | [<code>callback</code>](#callback) | Callback function executed when date is changed.<br/> Callback function is executed if selected date values has changed, before picker is hidden and before the attached `<input>` element is updated.  As alternative listen to the ["apply.daterangepicker"](#event_apply.daterangepicker) event |
 
-<a name="event_viewChange.daterangepicker"></a>
+<a name="event_beforeRenderCalendar.daterangepicker"></a>
 
-## "viewChange.daterangepicker" (this)
-Emitted when the calendar view changed
+## "beforeRenderCalendar.daterangepicker" (this)
+Emitted before the calendar is rendered. 
+Useful to remove any manually added elements.
+
+**Kind**: event emitted  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| this | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
+
+<a name="event_beforeRenderTimePicker.daterangepicker"></a>
+
+## "beforeRenderTimePicker.daterangepicker" (this)
+Emitted before the TimePicker is rendered
+Useful to remove any manually added elements.
 
 **Kind**: event emitted  
 
