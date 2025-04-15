@@ -41,7 +41,7 @@
       $('#picker').daterangepicker({
         timePicker: true,
         singleDatePicker: false,
-        singleMonthView: false,
+        singleMonthView: true,
         timePicker24Hour: true,
         timePickerStepSize: Duration.fromObject({ minutes: 10 }),
         //showDropdowns:true, 
@@ -51,7 +51,7 @@
         minDate: DateTime.now().startOf('month').minus({ month: 1 }).toJSDate(),
         maxDate: DateTime.now().plus({ month: 3 }).endOf('month').toJSDate(),
         startDate: DateTime.now().startOf('day').plus({ hours: 6, minutes: 22 }),
-        endDate: DateTime.now().startOf('day').plus({ days: 30, hours: 10, minutes: 30 }),
+        endDate: DateTime.now().startOf('day').plus({ days: 10, hours: 10, minutes: 30 }),
         /*ranges: {
           'Today': [DateTime.now().startOf('day'), DateTime.now().endOf('day')],
           'Yesterday': [DateTime.now().startOf('day').minus({ days: 1 }), DateTime.now().minus({ days: 1 }).endOf('day')],
@@ -63,7 +63,8 @@
         locale: {
           format: 'dd.MM.yyyy HH:mm',
           //durationFormat: { unitDisplay: "short" }
-        }
+        },
+        //isInvalidDate: (date) => {return date > DateTime.now().plus({ days: 10 })}
       });
       $('#picker').trigger('click');
 
