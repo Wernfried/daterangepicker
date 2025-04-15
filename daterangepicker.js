@@ -2367,7 +2367,7 @@
             * @param {DateRangePicker} this - The daterangepicker object
             * @param {string} side - Either `'start'` or `'end'` indicating whether startDate or endDate was changed
             */
-            this.element.trigger('timeChange.daterangepicker', [this, this.singleDatePicker ? null : (isLeft ? 'start' : 'stop')]);
+            this.element.trigger('timeChange.daterangepicker', [this, this.singleDatePicker ? null : (isLeft ? 'start' : 'end')]);
         },
 
         /**
