@@ -715,7 +715,7 @@
             if (isValid === undefined || !isValid)
                 this.constrainDate();
 
-            if (!this.singleDatePicker) {
+            if (!this.singleDatePicker && !this.endDate) {
                 if (this.locale.durationFormat)
                     this.container.find('.drp-duration-label').html('');
                 if (typeof this.locale.format === 'object') {
@@ -2338,8 +2338,8 @@
                 }
                 if (this.singleDatePicker) {
                     this.endDate = this.startDate;
-                } else if (this.endDate && this.endDate.hasSame(start, 'day') && this.endDate < start) {
-                    this.setEndDate(start, true);
+                } else if (this.endDate && this.endDate.hasSame(this.startDate, 'day') && this.endDate < this.startDate) {
+                    this.setEndDate(this.startDate, true);
                 }
             } else if (this.endDate) {
                 let end = this.endDate.set({ hour: hour, minute: minute, second: second });
