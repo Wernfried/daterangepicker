@@ -5,8 +5,7 @@
   <meta charset="UTF-8" />
   <title>daterangepicker</title>
   <script type="text/javascript" src="jquery.min.js"></script>
-  <script type="text/javascript" src="moment.min.js"></script>
-  <script type="text/javascript" src="luxon.min.js"></script>
+    <script type="text/javascript" src="luxon.min.js"></script>
   <link rel="stylesheet" type="text/css" href="daterangepicker.css" />
   <script type="text/javascript" src="daterangepicker.js"></script>
   <link rel="shortcut icon"
@@ -42,6 +41,7 @@
       $('#picker').daterangepicker({
         timePicker: true,
         singleDatePicker: false,
+        singleMonthView: false,
         timePicker24Hour: true,
         timePickerStepSize: Duration.fromObject({ minutes: 10 }),
         //showDropdowns:true, 
@@ -51,7 +51,7 @@
         minDate: DateTime.now().startOf('month').minus({ month: 1 }).toJSDate(),
         maxDate: DateTime.now().plus({ month: 3 }).endOf('month').toJSDate(),
         startDate: DateTime.now().startOf('day').plus({ hours: 6, minutes: 22 }),
-        endDate: DateTime.now().startOf('day').plus({ days: 1, hours: 10, minutes: 30 }),
+        endDate: DateTime.now().startOf('day').plus({ days: 30, hours: 10, minutes: 30 }),
         /*ranges: {
           'Today': [DateTime.now().startOf('day'), DateTime.now().endOf('day')],
           'Yesterday': [DateTime.now().startOf('day').minus({ days: 1 }), DateTime.now().minus({ days: 1 }).endOf('day')],
@@ -62,10 +62,10 @@
         }*/
         locale: {
           format: 'dd.MM.yyyy HH:mm',
-          durationFormat: { unitDisplay: "short" }
+          //durationFormat: { unitDisplay: "short" }
         }
       });
-      //$('#picker').trigger('click');
+      $('#picker').trigger('click');
 
     });
 
