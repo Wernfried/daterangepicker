@@ -361,6 +361,10 @@
   color: red
 }
 
+.daterangepicker td.weekend.disabled {
+  color: rgb(255, 163, 163)
+}
+
 .daterangepicker th.weekend-day {
   color: red
 }
