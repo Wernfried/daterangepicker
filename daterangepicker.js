@@ -37,32 +37,32 @@
         /**
         * Options for DateRangePicker
         * @typedef Options 
-        * @property {string} parentEl=body - {@link jQuery} selector of the parent element that the date range picker will be added to
+        * @property {string} parentEl=body - {@link https://api.jquery.com/category/selectors/|jQuery selector} of the parent element that the date range picker will be added to
         
         * @property {external:DateTime|external:Date|string} startDate - Default: `DateTime.now().startOf('day')`<br/>The beginning date of the initially selected date range.<br/>
-        * Must be a `luxon.DateTime` or `Date` or `string` according to {@link ISO-8601} or a string matching `locale.format`.<br/>
+        * Must be a `luxon.DateTime` or `Date` or `string` according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} or a string matching `locale.format`.<br/>
         * Date value is rounded to match option `timePickerStepSize`<br/>
         * Option `isInvalidDate` and `isInvalidTime` are not evaluated, you may set date/time which is not selectable in calendar.<br/>
         * If the date does not fall into `minDate` and `maxDate` then date is shifted and a warning is written to console.
         * @property {external:DateTime|external:Date|string} endDate - Defautl: `DateTime.now().endOf('day')`<br/>The end date of the initially selected date range.<br/>
-        * Must be a `luxon.DateTime` or `Date` or `string` according to {@link ISO-8601} or a string matching `locale.format`.<br/>
+        * Must be a `luxon.DateTime` or `Date` or `string` according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} or a string matching `locale.format`.<br/>
         * Date value is rounded to match option `timePickerStepSize`<br/>
         * Option `isInvalidDate`, `isInvalidTime` and `minSpan`, `maxSpan` are not evaluated, you may set date/time which is not selectable in calendar.<br/>
         * If the date does not fall into `minDate` and `maxDate` then date is shifted and a warning is written to console.<br/>
 
         * @property {external:DateTime|external:Date|string|null} minDate - The earliest date a user may select or `null` for no limit.<br/>
-        * Must be a `luxon.DateTime` or `Date` or `string` according to {@link ISO-8601} or a string matching `locale.format`.
+        * Must be a `luxon.DateTime` or `Date` or `string` according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} or a string matching `locale.format`.
         * @property {external:DateTime|external:Date|string|null} maxDate - The latest date a user may select or `null` for no limit.<br/>
-        * Must be a `luxon.DateTime` or `Date` or `string` according to {@link ISO-8601} or a string matching `locale.format`.
+        * Must be a `luxon.DateTime` or `Date` or `string` according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} or a string matching `locale.format`.
         * @property {external:Duration|string|number|null} minSpan - The maximum span between the selected start and end dates.<br/>
-        * Must be a `luxon.Duration` or number of seconds or a string according to {@link ISO-8601} duration.<br/>
+        * Must be a `luxon.Duration` or number of seconds or a string according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} duration.<br/>
         * Ignored when `singleDatePicker: true`
         * @property {external:Duration|string|number|null} maxSpan - The minimum span between the selected start and end dates.<br/>
-        * Must be a `luxon.Duration` or number of seconds or a string according to {@link ISO-8601} duration.<br/>
+        * Must be a `luxon.Duration` or number of seconds or a string according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} duration.<br/>
         * Ignored when `singleDatePicker: true`
         * @property {external:DateTime|external:Date|string|null} initalMonth - Default: `DateTime.now().startOf('month')`<br/>
         * The inital month shown when `startDate: null`. Be aware, the attached `<input>` element must be also empty.`<br/>
-        * Must be a `luxon.DateTime` or `Date` or `string` according to {@link ISO-8601} or a string matching `locale.format`.<br/>
+        * Must be a `luxon.DateTime` or `Date` or `string` according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} or a string matching `locale.format`.<br/>
         * When `initalMonth` is used, then `endDate` is ignored and it works only with `timePicker: false`
 
         * @property {boolean} autoApply=false - Hide the `Apply` and `Cancel` buttons, and automatically apply a new date range as soon as two dates are clicked.<br/>
@@ -81,7 +81,7 @@
         * @property {boolean} timePicker=false - Adds select boxes to choose times in addition to dates
         * @property {boolean} timePicker24Hour=true - Use 24-hour instead of 12-hour times, removing the AM/PM selection
         * @property {external:Duration|string|number} timePickerStepSize - Default: `Duration.fromObject({minutes:1})`<br/>Set the time picker step size.<br/>
-        * Must be a `luxon.Duration` or the number of seconds or a string according to {@link ISO-8601} duration.<br/>
+        * Must be a `luxon.Duration` or the number of seconds or a string according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} duration.<br/>
         * Valid values are 1,2,3,4,5,6,10,12,15,20,30 for `Duration.fromObject({seconds: ...})` and `Duration.fromObject({minutes: ...})` 
         * and 1,2,3,4,6,(8,12) for `Duration.fromObject({hours: ...})`.<br/>
         * Duration must be greater than `minSpan` and smaller than `maxSpan`.<br/>
@@ -112,7 +112,14 @@
         * @property {function} isCustomDate=false - A function that is passed each date in the two calendars before they are displayed, 
         * and may return a string or array of CSS class names to apply to that date's calendar cell.<br/>
         * Signature: `isCustomDate(date)`
-        
+        * @property {string|Array} altInput=null - A {@link https://api.jquery.com/category/selectors/|jQuery selector} string for an alternative
+        * ouput (typically hidden) `<input>` element. Requires `altFormat` to be set.<br/>
+        * Must be a single string for `singleDatePicker: true` or an array of two strings for `singleDatePicker: false`<br/>
+        * Example: `['#start', '#end']`
+        * @property {function|string}=null - The output format used for `altInput`.<br/>
+        * Either a string used with {@link https://moment.github.io/luxon/api-docs/index.html#datetimetoformat|toFormat()} or a function.<br/>
+        * Examples: `'yyyyMMddHHmm'`, `(date) => date.toUnixInteger()`
+
         * @property {string} applyButtonClasses=btn-primary - CSS class names that will be added only to the apply button
         * @property {string} cancelButtonClasses=btn-default - CSS class names that will be added only to the cancel button
         * @property {string} buttonClasses - Default: `'btn btn-sm'`<br/>CSS class names that will be added to both the apply and cancel buttons.
@@ -223,6 +230,8 @@
         this.weekendDayClasses = 'weekend-day';
         this.todayClasses = 'today';
         this.warnings = true;
+        this.altInput = null;
+        this.altFormat = null;
         this.ranges = {};
 
         this.locale = {
@@ -506,6 +515,16 @@
         } else if (this.endDate < this.startDate) {
             this.endDate = this.startDate;
             console.warn(`Set 'endDate' to ${this - this.logDate(endDate)}  because it was earlier than 'startDate'`);
+        }
+
+        if (['function', 'string'].includes(typeof options.altFormat))
+            this.altFormat = options.altFormat;
+        if (['object', 'string'].includes(typeof options.altInput) && options.altInput != null) {
+            if (this.singleDatePicker && typeof options.altInput === 'string') {
+                this.altInput = options.altInput
+            } else if (!this.singleDatePicker && Array.isArray(options.altInput) && options.altInput.length == 2) {
+                this.altInput = options.altInput;
+            }
         }
 
         if (!this.startDate && this.initalMonth) {
@@ -1502,7 +1521,7 @@
 
             //if (this.singleMonthView) // to do: localization options
             //    html = `<span style="font-family: arial; font-size: 12px;">${side == 'start' ? 'Start' : 'End'}: </span>`;
-            
+
             html += '<select class="hourselect">';
             const ampm = selected.toFormat('a', { locale: 'en-US' });
             let start = 0;
@@ -2476,6 +2495,19 @@
                 if (newValue !== this.element.val())
                     this.element.val(newValue).trigger('change');
             }
+
+            if (this.altInput != null && this.altFormat != null) {
+                if (this.singleDatePicker) {
+                    if ($(this.altInput).is('input'))
+                        $(this.altInput).val(typeof this.altFormat === 'function' ? this.altFormat(this.startDate) : this.startDate.toFormat(this.altFormat));
+                } else {
+                    if (this.altInput.every(x => $(x).is('input'))) {
+                        $(this.altInput[0]).val(typeof this.altFormat === 'function' ? this.altFormat(this.startDate) : this.startDate.toFormat(this.altFormat));
+                        $(this.altInput[1]).val(typeof this.altFormat === 'function' ? this.altFormat(this.endDate) : this.endDate.toFormat(this.altFormat));
+                    }
+                }
+            }
+
         },
 
         /**

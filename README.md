@@ -99,6 +99,7 @@ Compared to [inital repository](https://github.com/dangrossman/daterangepicker),
 - Added method `setRange(startDate, endDate)` to combine `setStartDate(startDate)` and `setEndDate(endDate)`
 - Added option `minSpan` similar to `maxSpan`
 - Added option `isInvalidTime` similar to `isInvalidDate`
+- Added option `altInput` and `altFormat` to provide an alternative output element for selected date value
 - Added option `onOutsideClick` where you can define whether picker shall apply or revert selected value
 - Added option `initalMonth` to show datepicker without an initial date
 - Added option `singleMonthView` to show single month calendar, useful for shorter ranges
