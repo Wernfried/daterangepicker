@@ -2503,7 +2503,11 @@
                 } else {
                     if (this.altInput.every(x => $(x).is('input'))) {
                         $(this.altInput[0]).val(typeof this.altFormat === 'function' ? this.altFormat(this.startDate) : this.startDate.toFormat(this.altFormat));
-                        $(this.altInput[1]).val(typeof this.altFormat === 'function' ? this.altFormat(this.endDate) : this.endDate.toFormat(this.altFormat));
+                        if (this.endDate) {
+                            $(this.altInput[1]).val(typeof this.altFormat === 'function' ? this.altFormat(this.endDate) : this.endDate.toFormat(this.altFormat));
+                        } else {
+                            $(this.altInput[1]).val(null);
+                        }
                     }
                 }
             }
