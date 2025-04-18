@@ -15,7 +15,7 @@
     "url": "git+https://github.com/wernfried/daterangepicker.git"
   },
   "devDependencies": {
-    "jsdoc-to-markdown": "^9.0.0"
+    "jsdoc-to-markdown": "^9.1.1"
   },
   "author": {
     "name": "Wernfried Domscheit",
@@ -41,7 +41,7 @@
   },
   "homepage": "https://github.com/wernfried/daterangepicker",
   "dependencies": {
-    "jquery": ">=1.10",
-    "luxon": "^3.5.0"
+    "jquery": ">=3.7",
+    "luxon": "^3.6.1"
   }
 }
