@@ -18,8 +18,8 @@ Above samples are based on the [original repository](https://github.com/dangross
 ```html
 <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.8.3/daterangepicker.min.js"></script>
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.8.3/daterangepicker.min.css" rel="stylesheet" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.9.0/daterangepicker.min.js"></script>
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.9.0/daterangepicker.min.css" rel="stylesheet" />
 
 <input type="text" id="daterange" />
 
@@ -229,6 +229,9 @@ use <a href="#event_timeChange.daterangepicker">&quot;timeChange.daterangepicker
 </dd>
 <dt><a href="#event_timeChange.daterangepicker">"timeChange.daterangepicker" (this, side)</a></dt>
 <dd><p>Emitted when the time changed. Does not trigger when date is changed</p>
+</dd>
+<dt><a href="#event_inputChanged.daterangepicker">"inputChanged.daterangepicker" (this)</a></dt>
+<dd><p>Emitted when the date is changed through <code>&lt;input&gt;</code> element. Event is only triggered when date string is valid date value/range has been changed</p>
 </dd>
 </dl>
 
@@ -573,6 +576,17 @@ Emitted when the time changed. Does not trigger when date is changed
 | --- | --- | --- |
 | this | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
 | side | <code>string</code> | Either `'start'` or `'end'` indicating whether startDate or endDate was changed |
+
+<a name="event_inputChanged.daterangepicker"></a>
+
+## "inputChanged.daterangepicker" (this)
+Emitted when the date is changed through `<input>` element. Event is only triggered when date string is valid date value/range has been changed
+
+**Kind**: event emitted  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| this | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
 
 <a name="Options"></a>
 
