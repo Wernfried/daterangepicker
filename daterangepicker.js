@@ -2426,6 +2426,7 @@
         * Update the picker with value from attached `<input>` element.
         * Error is written to console if input string cannot be parsed as a valid date/range
         * @param {external:jQuery} e - The Event target
+        * @emits "inputChanged.daterangepicker"
         * @private
         */
         elementChanged: function (e) {
@@ -2450,10 +2451,19 @@
                 console.error(`Input string '${dateString}' is not valid`);
                 return;
             }
+            const trigger = this.startDate != start || (!this.singleDatePicker && this.endDate != end);
 
             this.setStartDate(start, false);
             this.setEndDate(end, false);
             this.updateView();
+            /**
+            * Emitted when the date is changed through `<input>` element. Event is only triggered when date string is valid date value/range has been changed
+            * @event
+            * @name "inputChanged.daterangepicker"
+            * @param {DateRangePicker} this - The daterangepicker object
+            */
+            if (trigger)
+                this.element.trigger('inputChanged.daterangepicker', this);
         },
 
         /**
