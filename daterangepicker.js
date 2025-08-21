@@ -116,7 +116,7 @@
         * ouput (typically hidden) `<input>` element. Requires `altFormat` to be set.<br/>
         * Must be a single string for `singleDatePicker: true` or an array of two strings for `singleDatePicker: false`<br/>
         * Example: `['#start', '#end']`
-        * @property {function|string}=null - The output format used for `altInput`.<br/>
+        * @property {function|string} altFormat=null - The output format used for `altInput`.<br/>
         * Either a string used with {@link https://moment.github.io/luxon/api-docs/index.html#datetimetoformat|toFormat()} or a function.<br/>
         * Examples: `'yyyyMMddHHmm'`, `(date) => date.toUnixInteger()`
 
