@@ -18,8 +18,8 @@ Above samples are based on the [original repository](https://github.com/dangross
 ```html
 <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.8.0/daterangepicker.min.js"></script>
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.8.0/daterangepicker.min.css" rel="stylesheet" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.8.1/daterangepicker.min.js"></script>
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.8.1/daterangepicker.min.css" rel="stylesheet" />
 
 <input type="text" id="daterange" />
 
@@ -612,7 +612,7 @@ Options for DateRangePicker
 | isInvalidTime | <code>function</code> | <code>false</code> | A function that is passed each hour/minute/second/am-pm in the two calendars before they are displayed,<br/>  and may return `true` or `false` to indicate whether that date should be available for selection or not.<br/> Signature: `isInvalidTime(time, side, unit)`<br/> `side` is `'start'` or `'end'` or `null` for `singleDatePicker: true`<br/> `unit` is `'hour'`, `'minute'`, `'second'` or `'ampm'`<br/> Hours are always given as 24-hour clock<br/> Function has no effect on time values set by `startDate`, `endDate`, `ranges`, [setStartDate](#DateRangePicker+setStartDate), [setEndDate](#DateRangePicker+setEndDate).<br/> Ensure that your function returns `false` for at least one item. Otherwise the calender is not rendered.<br/> |
 | isCustomDate | <code>function</code> | <code>false</code> | A function that is passed each date in the two calendars before they are displayed,  and may return a string or array of CSS class names to apply to that date's calendar cell.<br/> Signature: `isCustomDate(date)` |
 | altInput | <code>string</code> \| <code>Array</code> | <code>null</code> | A [jQuery selector](https://api.jquery.com/category/selectors/) string for an alternative ouput (typically hidden) `<input>` element. Requires `altFormat` to be set.<br/> Must be a single string for `singleDatePicker: true` or an array of two strings for `singleDatePicker: false`<br/> Example: `['#start', '#end']` |
-| =null | <code>function</code> \| <code>string</code> |  | The output format used for `altInput`.<br/> Either a string used with [toFormat()](https://moment.github.io/luxon/api-docs/index.html#datetimetoformat) or a function.<br/> Examples: `'yyyyMMddHHmm'`, `(date) => date.toUnixInteger()` |
+| altFormat | <code>function</code> \| <code>string</code> | <code></code> | The output format used for `altInput`.<br/> Either a string used with [toFormat()](https://moment.github.io/luxon/api-docs/index.html#datetimetoformat) or a function.<br/> Examples: `'yyyyMMddHHmm'`, `(date) => date.toUnixInteger()` |
 | applyButtonClasses | <code>string</code> | <code>&quot;btn-primary&quot;</code> | CSS class names that will be added only to the apply button |
 | cancelButtonClasses | <code>string</code> | <code>&quot;btn-default&quot;</code> | CSS class names that will be added only to the cancel button |
 | buttonClasses | <code>string</code> |  | Default: `'btn btn-sm'`<br/>CSS class names that will be added to both the apply and cancel buttons. |
