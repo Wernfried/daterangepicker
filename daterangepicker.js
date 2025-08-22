@@ -119,6 +119,8 @@
         * @property {function|string} altFormat=null - The output format used for `altInput`.<br/>
         * Either a string used with {@link https://moment.github.io/luxon/api-docs/index.html#datetimetoformat|toFormat()} or a function.<br/>
         * Examples: `'yyyyMMddHHmm'`, `(date) => date.toUnixInteger()`
+        * @property {boolean} warnings=true - When enabled, then warning are printed to console if input date violates 
+        * `minDate`, `maxDate`, `minSpan`, `maxSpan`, `timePickerStepSize`, 'isInvalidDate', 'isInvalidTime'
 
         * @property {string} applyButtonClasses=btn-primary - CSS class names that will be added only to the apply button
         * @property {string} cancelButtonClasses=btn-default - CSS class names that will be added only to the cancel button
@@ -2448,7 +2450,8 @@
             }
 
             if (!start.isValid || !end.isValid) {
-                console.error(`Input string '${dateString}' is not valid`);
+                // Does not make much sense, because error would be printed on each character
+                //console.error(`Input string '${dateString}' is not valid`);
                 return;
             }
             const trigger = this.startDate != start || (!this.singleDatePicker && this.endDate != end);
@@ -2457,7 +2460,7 @@
             this.setEndDate(end, false);
             this.updateView();
             /**
-            * Emitted when the date is changed through `<input>` element. Event is only triggered when date string is valid date value/range has been changed
+            * Emitted when the date is changed through `<input>` element. Event is only triggered when date string is valid and date value has changed
             * @event
             * @name "inputChanged.daterangepicker"
             * @param {DateRangePicker} this - The daterangepicker object
