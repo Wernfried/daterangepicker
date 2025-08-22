@@ -18,8 +18,8 @@ Above samples are based on the [original repository](https://github.com/dangross
 ```html
 <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.9.0/daterangepicker.min.js"></script>
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.9.0/daterangepicker.min.css" rel="stylesheet" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.9.1/daterangepicker.min.js"></script>
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.9.1/daterangepicker.min.css" rel="stylesheet" />
 
 <input type="text" id="daterange" />
 
@@ -231,7 +231,7 @@ use <a href="#event_timeChange.daterangepicker">&quot;timeChange.daterangepicker
 <dd><p>Emitted when the time changed. Does not trigger when date is changed</p>
 </dd>
 <dt><a href="#event_inputChanged.daterangepicker">"inputChanged.daterangepicker" (this)</a></dt>
-<dd><p>Emitted when the date is changed through <code>&lt;input&gt;</code> element. Event is only triggered when date string is valid date value/range has been changed</p>
+<dd><p>Emitted when the date is changed through <code>&lt;input&gt;</code> element. Event is only triggered when date string is valid and date value has changed</p>
 </dd>
 </dl>
 
@@ -580,7 +580,7 @@ Emitted when the time changed. Does not trigger when date is changed
 <a name="event_inputChanged.daterangepicker"></a>
 
 ## "inputChanged.daterangepicker" (this)
-Emitted when the date is changed through `<input>` element. Event is only triggered when date string is valid date value/range has been changed
+Emitted when the date is changed through `<input>` element. Event is only triggered when date string is valid and date value has changed
 
 **Kind**: event emitted  
 
@@ -627,6 +627,7 @@ Options for DateRangePicker
 | isCustomDate | <code>function</code> | <code>false</code> | A function that is passed each date in the two calendars before they are displayed,  and may return a string or array of CSS class names to apply to that date's calendar cell.<br/> Signature: `isCustomDate(date)` |
 | altInput | <code>string</code> \| <code>Array</code> | <code>null</code> | A [jQuery selector](https://api.jquery.com/category/selectors/) string for an alternative ouput (typically hidden) `<input>` element. Requires `altFormat` to be set.<br/> Must be a single string for `singleDatePicker: true` or an array of two strings for `singleDatePicker: false`<br/> Example: `['#start', '#end']` |
 | altFormat | <code>function</code> \| <code>string</code> | <code></code> | The output format used for `altInput`.<br/> Either a string used with [toFormat()](https://moment.github.io/luxon/api-docs/index.html#datetimetoformat) or a function.<br/> Examples: `'yyyyMMddHHmm'`, `(date) => date.toUnixInteger()` |
+| warnings | <code>boolean</code> | <code>true</code> | When enabled, then warning are printed to console if input date violates  `minDate`, `maxDate`, `minSpan`, `maxSpan`, `timePickerStepSize`, 'isInvalidDate', 'isInvalidTime' |
 | applyButtonClasses | <code>string</code> | <code>&quot;btn-primary&quot;</code> | CSS class names that will be added only to the apply button |
 | cancelButtonClasses | <code>string</code> | <code>&quot;btn-default&quot;</code> | CSS class names that will be added only to the cancel button |
 | buttonClasses | <code>string</code> |  | Default: `'btn btn-sm'`<br/>CSS class names that will be added to both the apply and cancel buttons. |
