@@ -39,11 +39,12 @@
         * @typedef Options 
         * @property {string} parentEl=body - {@link https://api.jquery.com/category/selectors/|jQuery selector} of the parent element that the date range picker will be added to
         
-        * @property {external:DateTime|external:Date|string} startDate - Default: `DateTime.now().startOf('day')`<br/>The beginning date of the initially selected date range.<br/>
+        * @property {external:DateTime|external:Date|string|null} startDate - Default: `DateTime.now().startOf('day')`<br/>The beginning date of the initially selected date range.<br/>
         * Must be a `luxon.DateTime` or `Date` or `string` according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} or a string matching `locale.format`.<br/>
         * Date value is rounded to match option `timePickerStepSize`<br/>
         * Option `isInvalidDate` and `isInvalidTime` are not evaluated, you may set date/time which is not selectable in calendar.<br/>
-        * If the date does not fall into `minDate` and `maxDate` then date is shifted and a warning is written to console.
+        * If the date does not fall into `minDate` and `maxDate` then date is shifted and a warning is written to console.<br/>
+        * Use `startDate: null` to show calendar without an inital selected date.
         * @property {external:DateTime|external:Date|string} endDate - Defautl: `DateTime.now().endOf('day')`<br/>The end date of the initially selected date range.<br/>
         * Must be a `luxon.DateTime` or `Date` or `string` according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} or a string matching `locale.format`.<br/>
         * Date value is rounded to match option `timePickerStepSize`<br/>
@@ -61,7 +62,7 @@
         * Must be a `luxon.Duration` or number of seconds or a string according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} duration.<br/>
         * Ignored when `singleDatePicker: true`
         * @property {external:DateTime|external:Date|string|null} initalMonth - Default: `DateTime.now().startOf('month')`<br/>
-        * The inital month shown when `startDate: null`. Be aware, the attached `<input>` element must be also empty.`<br/>
+        * The inital month shown when `startDate: null`. Be aware, the attached `<input>` element must be also empty.<br/>
         * Must be a `luxon.DateTime` or `Date` or `string` according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} or a string matching `locale.format`.<br/>
         * When `initalMonth` is used, then `endDate` is ignored and it works only with `timePicker: false`
 
@@ -120,7 +121,7 @@
         * Either a string used with {@link https://moment.github.io/luxon/api-docs/index.html#datetimetoformat|toFormat()} or a function.<br/>
         * Examples: `'yyyyMMddHHmm'`, `(date) => date.toUnixInteger()`
         * @property {boolean} warnings=true - When enabled, then warning are printed to console if input date violates 
-        * `minDate`, `maxDate`, `minSpan`, `maxSpan`, `timePickerStepSize`, 'isInvalidDate', 'isInvalidTime'
+        * `minDate`, `maxDate`, `minSpan`, `maxSpan`, `timePickerStepSize`, `isInvalidDate`, `isInvalidTime`
 
         * @property {string} applyButtonClasses=btn-primary - CSS class names that will be added only to the apply button
         * @property {string} cancelButtonClasses=btn-default - CSS class names that will be added only to the cancel button

@@ -74,7 +74,7 @@ isInvalidTime: (time, side, unit) => {
   color: blue;
 }
 
-isInvalidDate: function(date) {
+isCustomDate: function(date) {
    if (date.isWeekend)
       return 'daterangepicker-weekend-day';
 
