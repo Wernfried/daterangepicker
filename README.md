@@ -18,8 +18,8 @@ Above samples are based on the [original repository](https://github.com/dangross
 ```html
 <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.9.2/daterangepicker.min.js"></script>
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.9.2/daterangepicker.min.css" rel="stylesheet" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.9.3/daterangepicker.min.js"></script>
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.9.3/daterangepicker.min.css" rel="stylesheet" />
 
 <input type="text" id="daterange" />
 
@@ -702,11 +702,11 @@ A single predefined range
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | stepSize | <code>boolean</code> | <code>true</code> | If `true`, then `startDate` and `endDate` are rounded to match `timePickerStepSize` (no warning) |
-| minMax | <code>boolean</code> | <code>true</code> | If `true` then and if the `startDate` and `endDate` do not fall into `minDate` and `maxDate` then dates are shifted and a warning is written to console. |
-| span | <code>boolean</code> | <code>true</code> | If `true` then and if the `startDate` and `endDate` do not fall into `minDate` and `maxSpan`  then `endDate` is shifted and a warning is written to console. |
-| invalidDate | <code>boolean</code> | <code>false</code> | If `true` then and if `invalidDate` return `true`, then an error is logged to console |
-| invalidTime | <code>boolean</code> | <code>false</code> | If `true` then and if `invalidTime` return `true`, then an error is logged to console |
-| writeWarning | <code>boolean</code> | <code>true</code> | If `true` then a warning is written to console if `startDate` or `endDate` is modified  with the exception of rounding due to `timePickerStepSize`. |
+| minMax | <code>boolean</code> | <code>true</code> | If `true` and `startDate` and `endDate` do not fall into `minDate` and `maxDate` then dates are shifted and a warning is written to console. |
+| span | <code>boolean</code> | <code>true</code> | If `true` and `startDate` and `endDate` do not fall into `minDate` and `maxSpan`  then `endDate` is shifted and a warning is written to console. |
+| invalidDate | <code>boolean</code> | <code>false</code> | If `true` and `invalidDate` returns `true`, then an error is logged to console |
+| invalidTime | <code>boolean</code> | <code>false</code> | If `true` and `invalidTime` returns `true`, then an error is logged to console |
+| writeWarning | <code>boolean</code> | <code>true</code> | If `true` a warning is written to console if `startDate` or `endDate` is modified  with the exception of rounding due to `timePickerStepSize`. |
 
 <a name="callback"></a>
 
