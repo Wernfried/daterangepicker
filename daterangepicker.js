@@ -70,7 +70,8 @@
         * Only useful when `timePicker: false`
         * @property {boolean} singleDatePicker=false - Show only a single calendar to choose one date, instead of a range picker with two calendars.<br/>
         * The start and end dates provided to your callback will be the same single date chosen.
-        * @property {boolean} singleMonthView=false - Show only a single month calendar, useful when typically selected ranges are rather short.<br/>
+        * @property {boolean} singleMonthView=false - Show only a single month calendar, useful when selected ranges are usually short<br/>
+        * or for smaller viewports like mobile devices.<br/>
         * Ignored for `singleDatePicker: true`. 
         * @property {boolean} showDropdowns=false - Show year and month select boxes above calendars to jump to a specific month and year
         * @property {number} minYear - Default: `DateTime.now().minus({year:100}).year`<br/>The minimum year shown in the dropdowns when `showDropdowns: true`
