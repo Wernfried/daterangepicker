@@ -871,13 +871,13 @@
         * @typedef constraintOptions
         * @type {Object}
         * @property {boolean} stepSize=true If `true`, then `startDate` and `endDate` are rounded to match `timePickerStepSize` (no warning)
-        * @property {boolean} minMax=true If `true` then and if the `startDate` and `endDate` do not fall into `minDate` and `maxDate`
+        * @property {boolean} minMax=true If `true` and `startDate` and `endDate` do not fall into `minDate` and `maxDate`
         * then dates are shifted and a warning is written to console. 
-        * @property {boolean} span=true If `true` then and if the `startDate` and `endDate` do not fall into `minDate` and `maxSpan` 
+        * @property {boolean} span=true If `true` and `startDate` and `endDate` do not fall into `minDate` and `maxSpan` 
         * then `endDate` is shifted and a warning is written to console. 
-        * @property {boolean} invalidDate=false If `true` then and if `invalidDate` return `true`, then an error is logged to console
-        * @property {boolean} invalidTime=false If `true` then and if `invalidTime` return `true`, then an error is logged to console
-        * @property {boolean} writeWarning=true If `true` then a warning is written to console if `startDate` or `endDate` is modified 
+        * @property {boolean} invalidDate=false If `true` and `invalidDate` returns `true`, then an error is logged to console
+        * @property {boolean} invalidTime=false If `true` and `invalidTime` returns `true`, then an error is logged to console
+        * @property {boolean} writeWarning=true If `true` a warning is written to console if `startDate` or `endDate` is modified 
         * with the exception of rounding due to `timePickerStepSize`.
         */
 
