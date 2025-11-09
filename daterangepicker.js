@@ -2245,7 +2245,7 @@
                         unit = 'second';
                     }
                 }
-                if (this.startDate.startOf(unit) == this.ranges[range][0].startOf(unit) == this.endDate.startOf(unit) == this.ranges[range][1].startOf(unit)) {
+                if (this.startDate.startOf(unit).equals(this.ranges[range][0].startOf(unit)) && this.endDate.startOf(unit).equals(this.ranges[range][1].startOf(unit))) {
                     customRange = false;
                     this.chosenLabel = this.container.find('.ranges li:eq(' + i + ')').addClass('active').attr('data-range-key');
                     break;
@@ -2593,4 +2593,3 @@
 
 /** @external ISO-8601
 @see {@link https://en.wikipedia.org/wiki/ISO_8601} */
-
