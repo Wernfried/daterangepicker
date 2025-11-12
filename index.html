@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8" />
   <title>daterangepicker</title>
-  <script type="text/javascript" src="jquery.min.js"></script>
-    <script type="text/javascript" src="luxon.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/luxon/3.5.0/luxon.min.js"></script>
   <link rel="stylesheet" type="text/css" href="daterangepicker.css" />
   <script type="text/javascript" src="daterangepicker.js"></script>
   <link rel="shortcut icon"
@@ -28,43 +28,9 @@
     const Settings = luxon.Settings;
 
     $(document).ready(function () {
-
-      const durs = [
-        Duration.fromObject({ hours: 6 }),
-        Duration.fromObject({ hours: 1 }),
-        Duration.fromObject({ minutes: 10 }),
-        Duration.fromObject({ minutes: 1 }),
-        Duration.fromObject({ seconds: 30 }),
-        Duration.fromObject({ seconds: 1 })
-      ];
-
       $('#picker').daterangepicker({
-        timePicker: true,
-        singleDatePicker: false,
-        singleMonthView: true,
-        timePicker24Hour: true,
-        timePickerStepSize: Duration.fromObject({ minutes: 10 }),
-        //showDropdowns:true, 
-        //maxSpan: Duration.fromObject({ days: 14 }),
-        //minSpan: Duration.fromObject({ days: 4 }),
-        //onOutsideClick: 'cancel',
-        minDate: DateTime.now().startOf('month').minus({ month: 1 }).toJSDate(),
-        maxDate: DateTime.now().plus({ month: 3 }).endOf('month').toJSDate(),
-        startDate: DateTime.now().startOf('day').plus({ hours: 6, minutes: 22 }),
-        endDate: DateTime.now().startOf('day').plus({ days: 10, hours: 10, minutes: 30 }),
-        /*ranges: {
-          'Today': [DateTime.now().startOf('day'), DateTime.now().endOf('day')],
-          'Yesterday': [DateTime.now().startOf('day').minus({ days: 1 }), DateTime.now().minus({ days: 1 }).endOf('day')],
-          'Last 7 Days': [DateTime.now().startOf('day').minus({ days: 6 }), DateTime.now()],
-          'Last 30 Days': [DateTime.now().startOf('day').minus({ days: 29 }), DateTime.now()],
-          'This Month': [DateTime.now().startOf('day').startOf('month'), DateTime.now().endOf('month')],
-          'Last Month': [DateTime.now().startOf('day').minus({ months: 1 }).startOf('month'), DateTime.now().minus({ months: 1 }).endOf('month')]
-        }*/
-        locale: {
-          format: 'dd.MM.yyyy HH:mm',
-          //durationFormat: { unitDisplay: "short" }
-        },
-        //isInvalidDate: (date) => {return date > DateTime.now().plus({ days: 10 })}
+        showDropdowns: true,
+        linkedCalendars: true
       });
       $('#picker').trigger('click');
 
