@@ -2338,7 +2338,7 @@
                 if (this.linkedCalendars)
                     this.rightCalendar.month = this.leftCalendar.month.plus({ month: 1 });
             } else {
-                this.leftCalendar.month = this.rightCalendar.month.set({ year: year, month: month });
+                this.rightCalendar.month = this.rightCalendar.month.set({ year: year, month: month });
                 if (this.linkedCalendars)
                     this.leftCalendar.month = this.rightCalendar.month.minus({ month: 1 });
             }
