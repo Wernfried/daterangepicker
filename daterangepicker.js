@@ -454,7 +454,7 @@
         }
 
         for (let opt of ['startDate', 'endDate', 'minDate', 'maxDate', 'initalMonth']) {
-            if (opt == 'endDate' && this.singleDatePicker)
+            if (opt === 'endDate' && this.singleDatePicker)
                 continue;
             if (typeof options[opt] === 'object') {
                 if (options[opt] instanceof DateTime && options[opt].isValid) {
@@ -493,7 +493,7 @@
                 if (val != '') {
                     const split = val.split(this.locale.separator);
                     const format = typeof this.locale.format === 'string' ? this.locale.format : DateTime.parseFormatForOpts(this.locale.format);
-                    if (split.length == 2) {
+                    if (split.length === 2) {
                         start = DateTime.fromFormat(split[0], format, { locale: DateTime.now().locale });
                         end = DateTime.fromFormat(split[1], format, { locale: DateTime.now().locale });
                     } else if (this.singleDatePicker) {
@@ -526,7 +526,7 @@
         if (['object', 'string'].includes(typeof options.altInput) && options.altInput != null) {
             if (this.singleDatePicker && typeof options.altInput === 'string') {
                 this.altInput = options.altInput
-            } else if (!this.singleDatePicker && Array.isArray(options.altInput) && options.altInput.length == 2) {
+            } else if (!this.singleDatePicker && Array.isArray(options.altInput) && options.altInput.length === 2) {
                 this.altInput = options.altInput;
             }
         }
@@ -979,7 +979,7 @@
                 }
             }
 
-            if (result.startDate.modified.length == 0)
+            if (result.startDate.modified.length === 0)
                 delete result.startDate.modified;
 
             if (this.singleDatePicker) {
@@ -1091,7 +1091,7 @@
                 }
             }
 
-            if (result.endDate.modified.length == 0)
+            if (result.endDate.modified.length === 0)
                 delete result.endDate.modified;
 
             if (range === undefined) {
@@ -1264,13 +1264,13 @@
         * @private
         */
         renderCalendar: function (side) {
-            if (side == 'right' && this.singleMonthView)
+            if (side === 'right' && this.singleMonthView)
                 return;
 
             //
             // Build the matrix of dates that will populate the calendar
             //
-            var calendar = side == 'left' ? this.leftCalendar : this.rightCalendar;
+            var calendar = side === 'left' ? this.leftCalendar : this.rightCalendar;
             if (calendar.month == null && !this.startDate && this.initalMonth)
                 calendar.month = this.initalMonth.startOf('month');
 
@@ -1298,7 +1298,7 @@
             }
 
             //make the calendar object available to hoverDate/clickDate
-            if (side == 'left') {
+            if (side === 'left') {
                 this.leftCalendar.calendar = calendar;
             } else {
                 this.rightCalendar.calendar = calendar;
@@ -1308,10 +1308,10 @@
             // Display the calendar
             //
 
-            var minDate = side == 'left' ? this.minDate : this.startDate;
+            var minDate = side === 'left' ? this.minDate : this.startDate;
             var maxDate = this.maxDate;
-            var selected = side == 'left' ? this.startDate : this.endDate;
-            var arrow = this.locale.direction == 'ltr' ? { left: 'chevron-left', right: 'chevron-right' } : { left: 'chevron-right', right: 'chevron-left' };
+            var selected = side === 'left' ? this.startDate : this.endDate;
+            var arrow = this.locale.direction === 'ltr' ? { left: 'chevron-left', right: 'chevron-right' } : { left: 'chevron-right', right: 'chevron-left' };
 
             var html = '<table class="table-condensed">';
             html += '<thead>';
@@ -1321,7 +1321,7 @@
             if (this.showWeekNumbers || this.showISOWeekNumbers)
                 html += '<th></th>';
 
-            if ((!minDate || minDate < calendar.firstDay) && (!this.linkedCalendars || side == 'left')) {
+            if ((!minDate || minDate < calendar.firstDay) && (!this.linkedCalendars || side === 'left')) {
                 html += '<th class="prev available"><span></span></th>';
             } else {
                 html += '<th></th>';
@@ -1351,7 +1351,7 @@
             }
 
             html += '<th colspan="5" class="month">' + dateHtml + '</th>';
-            if ((!maxDate || maxDate > calendar.lastDay.endOf('day')) && (!this.linkedCalendars || side == 'right' || this.singleDatePicker || this.singleMonthView)) {
+            if ((!maxDate || maxDate > calendar.lastDay.endOf('day')) && (!this.linkedCalendars || side === 'right' || this.singleDatePicker || this.singleMonthView)) {
                 html += '<th class="next available"><span></span></th>';
             } else {
                 html += '<th></th>';
@@ -1484,7 +1484,7 @@
 
             // Don't bother updating the time picker if it's currently disabled
             // because an end date hasn't been clicked yet
-            if (side == 'end' && !this.endDate) return;
+            if (side === 'end' && !this.endDate) return;
 
             var selected, minLimit, minDate, maxDate = this.maxDate;
             let html = '';
@@ -1492,13 +1492,13 @@
             if (this.maxSpan && (!this.maxDate || this.startDate.plus(this.maxSpan) < this.maxDate))
                 maxDate = this.startDate.plus(this.maxSpan);
 
-            if (this.minSpan && side == 'end')
+            if (this.minSpan && side === 'end')
                 minLimit = this.startDate.plus(this.minSpan);
 
-            if (side == 'start') {
+            if (side === 'start') {
                 selected = this.startDate;
                 minDate = this.minDate;
-            } else if (side == 'end') {
+            } else if (side === 'end') {
                 selected = this.endDate;
                 minDate = this.startDate;
 
@@ -1524,13 +1524,13 @@
             //
 
             //if (this.singleMonthView) // to do: localization options
-            //    html = `<span style="font-family: arial; font-size: 12px;">${side == 'start' ? 'Start' : 'End'}: </span>`;
+            //    html = `<span style="font-family: arial; font-size: 12px;">${side === 'start' ? 'Start' : 'End'}: </span>`;
 
             html += '<select class="hourselect">';
             const ampm = selected.toFormat('a', { locale: 'en-US' });
             let start = 0;
             if (!this.timePicker24Hour)
-                start = ampm == 'AM' ? 1 : 13;
+                start = ampm === 'AM' ? 1 : 13;
 
             for (var i = start; i <= start + 23; i += this.timePickerOpts.hourStep) {
                 let time = selected.set({ hour: i % 24 });
@@ -1659,7 +1659,7 @@
                     pm_html = ' disabled="disabled" class="disabled"';
                 } else {
                     if (this.isInvalidTime(selected, this.singleDatePicker ? null : side, 'ampm')) {
-                        if (selected.toFormat('a', { locale: 'en-US' }) == 'AM') {
+                        if (selected.toFormat('a', { locale: 'en-US' }) === 'AM') {
                             pm_html = ' disabled="disabled" class="disabled"';
                         } else {
                             am_html = ' disabled="disabled" class="disabled"';
@@ -1668,10 +1668,10 @@
                 }
 
                 html += `<option value="AM"${am_html}`;
-                if (selected.toFormat('a', { locale: 'en-US' }) == 'AM')
+                if (selected.toFormat('a', { locale: 'en-US' }) === 'AM')
                     html += ' selected="selected"';
                 html += `>${Info.meridiems()[0]}</option><option value="PM"${pm_html}`;
-                if (selected.toFormat('a', { locale: 'en-US' }) == 'PM')
+                if (selected.toFormat('a', { locale: 'en-US' }) === 'PM')
                     html += ' selected="selected"';
                 html += `>${Info.meridiems()[1]}</option>`;
 
@@ -1737,9 +1737,9 @@
             });
             var containerWidth = this.container.outerWidth();
 
-            this.container.toggleClass('drop-up', drops == 'up');
+            this.container.toggleClass('drop-up', drops === 'up');
 
-            if (this.opens == 'left') {
+            if (this.opens === 'left') {
                 var containerRight = parentRightEdge - this.element.offset().left - this.element.outerWidth();
                 if (containerWidth + containerRight > $(window).width()) {
                     this.container.css({
@@ -1754,7 +1754,7 @@
                         left: 'auto'
                     });
                 }
-            } else if (this.opens == 'center') {
+            } else if (this.opens === 'center') {
                 var containerLeft = this.element.offset().left - parentOffset.left + this.element.outerWidth() / 2 - containerWidth / 2;
                 if (containerLeft < 0) {
                     this.container.css({
@@ -1905,13 +1905,13 @@
             // itself then call this.hide()
             if (
                 // ie modal dialog fix
-                e.type == "focusin" ||
+                e.type === "focusin" ||
                 target.closest(this.element).length ||
                 target.closest(this.container).length ||
                 target.closest('.calendar-table').length
             ) return;
 
-            if (this.onOutsideClick == 'cancel') {
+            if (this.onOutsideClick === 'cancel') {
                 this.startDate = this.oldStartDate;
                 this.endDate = this.oldEndDate;
             }
@@ -2245,7 +2245,7 @@
                         unit = 'second';
                     }
                 }
-                if (this.startDate.startOf(unit) == this.ranges[range][0].startOf(unit) == this.endDate.startOf(unit) == this.ranges[range][1].startOf(unit)) {
+                if (this.startDate.startOf(unit).equals(this.ranges[range][0].startOf(unit)) && this.endDate.startOf(unit).equals(this.ranges[range][1].startOf(unit))) {
                     customRange = false;
                     this.chosenLabel = this.container.find('.ranges li:eq(' + i + ')').addClass('active').attr('data-range-key');
                     break;
@@ -2387,7 +2387,7 @@
                     second = parseInt(time.find('.secondselect option:last').val(), 10);
             }
 
-            if (side == 'start') {
+            if (side === 'start') {
                 if (this.startDate) {
                     let start = this.startDate.set({ hour: hour, minute: minute, second: second });
                     this.setStartDate(start, true);
