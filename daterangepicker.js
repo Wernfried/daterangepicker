@@ -121,8 +121,7 @@
         * @property {function|string} altFormat=null - The output format used for `altInput`.<br/>
         * Either a string used with {@link https://moment.github.io/luxon/api-docs/index.html#datetimetoformat|toFormat()} or a function.<br/>
         * Examples: `'yyyyMMddHHmm'`, `(date) => date.toUnixInteger()`
-        * @property {boolean} warnings=true - When enabled, then warning are printed to console if input date violates 
-        * `minDate`, `maxDate`, `minSpan`, `maxSpan`, `timePickerStepSize`, `isInvalidDate`, `isInvalidTime`
+        * @property {boolean} ~~warnings~~ - Not used anymore. Listen to event `violated.daterangepicker` to react on invalid input data
 
         * @property {string} applyButtonClasses=btn-primary - CSS class names that will be added only to the apply button
         * @property {string} cancelButtonClasses=btn-default - CSS class names that will be added only to the cancel button
@@ -233,7 +232,6 @@
         this.weekendClasses = 'weekend';
         this.weekendDayClasses = 'weekend-day';
         this.todayClasses = 'today';
-        this.warnings = true;
         this.altInput = null;
         this.altFormat = null;
         this.ranges = {};
@@ -362,7 +360,7 @@
 
         for (let key of ['timePicker24Hour', 'showWeekNumbers', 'showISOWeekNumbers',
             'showDropdowns', 'linkedCalendars', 'showCustomRangeLabel',
-            'alwaysShowCalendars', 'autoApply', 'autoUpdateInput', 'warnings']) {
+            'alwaysShowCalendars', 'autoApply', 'autoUpdateInput']) {
             if (typeof options[key] === 'boolean')
                 this[key] = options[key];
         }
@@ -411,7 +409,7 @@
         }
 
         if (this.timePicker) {
-            if (typeof options.timePickerSeconds === 'boolean')  // backward compatibility            
+            if (typeof options.timePickerSeconds === 'boolean')  // backward compatibility
                 this.timePickerStepSize = Duration.fromObject({ [options.timePickerSeconds ? 'seconds' : 'minutes']: 1 });
             if (typeof options.timePickerIncrement === 'number')  // backward compatibility
                 this.timePickerStepSize = Duration.fromObject({ minutes: options.timePickerIncrement });
@@ -531,6 +529,9 @@
             }
         }
 
+        if (options.warnings !== undefined)
+            console.warn(`Option 'warnings' not used anymore. Listen to event 'violated.daterangepicker'`);
+
         if (!this.startDate && this.initalMonth) {
             // No initial date selected
             this.endDate = null;
@@ -538,7 +539,7 @@
                 console.error(`Option 'initalMonth' works only with 'timePicker: false'`);
         } else {
             // Do some sanity checks on startDate and endDate for minDate, maxDate, minSpan, maxSpan, etc.
-            this.constrainDate();
+            this.validateInput();
         }
 
         if (typeof options.opens === 'string') {
@@ -602,7 +603,7 @@
                 if (start == null || end == null)
                     continue;
 
-                const validRange = this.constrainDate({ span: false }, [range, start, end]);
+                const validRange = this.validateInput({ span: false }, [range, start, end]);
                 options.ranges[range] = [validRange[0], validRange[1]];
 
                 //Support unicode chars in the range names.
@@ -716,12 +717,11 @@
         * `startDate` must be a `luxon.DateTime` or `Date` or `string` according to {@link ISO-8601} or 
         * a string matching `locale.format`.
         * The value of the attached `<input>` element is also updated.
-        * Date value is rounded to match option `timePickerStepSize`<br/>
-        * Functions `isInvalidDate` and `isInvalidTime` are not evaluated, you may set date/time which is not selectable in calendar.<br/>
-        * If the `startDate` does not fall into `minDate` and `maxDate` then `startDate` is shifted and a warning is written to console. 
+        * Date value is rounded to match option `timePickerStepSize` unless skipped by `violated.daterangepicker` event handler.<br/>
+        * If the `startDate` does not fall into `minDate` and `maxDate` then `startDate` is shifted unless skipped by `violated.daterangepicker` event handler.
         * @param {external:DateTime|external:Date|string} startDate - startDate to be set
         * @param {boolean} isValid=false - If `true` then the `startDate` is not checked against `minDate` and `maxDate`<br/>
-        * Use this option only if you are really sure about the value you put in.
+        * Use this option only if you are sure about the value you put in.
         * @throws `RangeError` for invalid date values.
         * @example const DateTime = luxon.DateTime;
         * const drp = $('#picker').data('daterangepicker');
@@ -754,7 +754,7 @@
             }
 
             if (isValid === undefined || !isValid)
-                this.constrainDate();
+                this.validateInput();
 
             if (!this.singleDatePicker && !this.endDate) {
                 if (this.locale.durationFormat)
@@ -779,13 +779,12 @@
         * `endDate` must be a `luxon.DateTime` or `Date` or `string` according to {@link ISO-8601} or 
         * a string matching`locale.format`.
         * The value of the attached `<input>` element is also updated.
-        * Date value is rounded to match option `timePickerStepSize`<br/>
-        * Functions `isInvalidDate` and `isInvalidTime` are not evaluated, you may set date/time which is not selectable in calendar.<br/>
+        * Date value is rounded to match option `timePickerStepSize` unless skipped by `violated.daterangepicker` event handler.<br/>
         * If the `endDate` does not fall into  `minDate` and `maxDate` or into `minSpan` and `maxSpan`
-        * then `endDate` is shifted and a warning is written to console. 
+        * then `endDate` is shifted unless skipped by `violated.daterangepicker` event handler
         * @param {external:DateTime|external:Date|string} endDate - endDate to be set
         * @param {boolean} isValid=false - If `true` then the `endDate` is not checked against `minDate`, `maxDate` and `minSpan`, `maxSpan`<br/>
-        * Use this option only if you are really sure about the value you put in.
+        * Use this option only if you are sure about the value you put in.
         * @throws `RangeError` for invalid date values.
         * @example const drp = $('#picker').data('daterangepicker');
         * drp.setEndDate('2025-03-28T18:30:00');
@@ -817,7 +816,7 @@
             }
 
             if (isValid === undefined || !isValid)
-                this.constrainDate();
+                this.validateInput();
 
             this.previousRightTime = this.endDate;
 
@@ -848,7 +847,7 @@
         * @param {external:DateTime|external:Date|string} startDate - startDate to be set
         * @param {external:DateTime|external:Date|string} endDate - endDate to be set
         * @param {boolean} isValid=false - If `true` then the `startDate` and `endDate` are not checked against `minDate`, `maxDate` and `minSpan`, `maxSpan`<br/>
-        * Use this option only if you are really sure about the value you put in.
+        * Use this option only if you are sure about the value you put in.
         * @throws `RangeError` for invalid date values.
         * @example const DateTime = luxon.DateTime;
         * const drp = $('#picker').data('daterangepicker');
@@ -861,7 +860,7 @@
                 this.setStartDate(startDate, true);
                 this.setEndDate(endDate, true);
                 if (!isValid)
-                    this.constrainDate();
+                    this.validateInput();
             }
         },
 
@@ -870,92 +869,81 @@
         },
 
         /**
-        * @typedef constraintOptions
+        * @typedef InputViolation
         * @type {Object}
-        * @property {boolean} stepSize=true If `true`, then `startDate` and `endDate` are rounded to match `timePickerStepSize` (no warning)
-        * @property {boolean} minMax=true If `true` and `startDate` and `endDate` do not fall into `minDate` and `maxDate`
-        * then dates are shifted and a warning is written to console. 
-        * @property {boolean} span=true If `true` and `startDate` and `endDate` do not fall into `minDate` and `maxSpan` 
-        * then `endDate` is shifted and a warning is written to console. 
-        * @property {boolean} invalidDate=false If `true` and `invalidDate` returns `true`, then an error is logged to console
-        * @property {boolean} invalidTime=false If `true` and `invalidTime` returns `true`, then an error is logged to console
-        * @property {boolean} writeWarning=true If `true` a warning is written to console if `startDate` or `endDate` is modified 
-        * with the exception of rounding due to `timePickerStepSize`.
+        * @property {external:DateTime} startDate - Violation of startDate
+        * @property {external:DateTime|undefined} endDate - Violation of endDate
+        * @property {Array} reason - The constraint which violates the input
+        * @property {external:DateTime} old - Old value startDate/endDate
+        * @property {external:DateTime} new - Corrected value of startDate/endDate
         */
 
         /**
         * Validate `startDate` and `endDate` or `range` against `timePickerStepSize`, `minDate`, `maxDate`, 
-        * `minSpan`, `maxSpan`, `invalidDate` and `invalidTime` and modifies them, if needed. 
-        * When `startDate` or `endDate` are modified, then a warning is written to console by default.
-        * @param {constraintOptions} options - Defines which constraints shall be validated
+        * `minSpan`, `maxSpan`, `invalidDate` and `invalidTime` and corrects them, if needed. 
+        * Correction can be skipped by returning `true` at event listener for `violated.daterangepicker` 
         * @param {Array} [range] - Used to check prefefined range instead of `startDate` and `endDate` => `[name, startDate, endDate]`
         * When set, then function does not modify anything, just returning corrected range.
-        * @throws `RangeError` if 'minDate' contradicts to 'minSpan'
-        * @returns {Array} - Corrected range as array of `[startDate, endDate, isInvalid]` when range is set, otherwise just `isInvalid` object
+        * @emits "violated.daterangepicker"
+        * @returns {Array|null} - Corrected range as array of `[startDate, endDate]` when `range` is defined
         * @example 
-        * constrainDate({}, [DateTime.fromISO('2025-02-03'), DateTime.fromISO('2025-02-25')]) => 
-        * [ DateTime.fromISO('2025-02-05'), DateTime.fromISO('2025-02-20'), { startDate: { stepped: ... }, endDate: { stepped: ..., modified: [{old: ... new: ..., reason: 'minSpan'}] } } ]
-        * constrainDate({span: false, invalidDate: true, invalidTime: true}) => 
-        * { startDate: {stepped: ..., modified: [{old: ... new: ..., reason: 'minDate'}], isInvalidDate: true, isInvalidTime: false}, endDate: {stepped: ..., isInvalidDate: false, isInvalidTime: true} } ]
+        * validateInput([DateTime.fromISO('2025-02-03'), DateTime.fromISO('2025-02-25')]) => 
+        * [ DateTime.fromISO('2025-02-05'), DateTime.fromISO('2025-02-20'), { startDate: { violations: [{old: ..., new: ..., reasson: 'minDate'}] } } ]
         */
-        constrainDate: function ({ minMax = true, span = true, stepSize = true, invalidDate = false, invalidTime = false, writeWarning = this.warnings } = {}, range) {
-            const name = range === undefined ? null : range[0];
-            const nLog = range === undefined ? '' : ` of range '${name}'`;
+        validateInput: function (range) {
             let startDate = range === undefined ? this.startDate : range[1];
             let endDate = range === undefined ? this.endDate : range[2];
+
+            /**
+            * Emitted if the input values are not compliant to all constraints
+            * @event
+            * @name "violated.daterangepicker"
+            * @param {DateRangePicker} this - The daterangepicker object
+            * @param {InputViolation} violations - An object of input violations
+            * @return {boolean} skip - If `true`, then input values are not corrected and remain invalid
+            * @example 
+            * $('#picker').on('violated.daterangepicker', (ev, picker, violations))
+            * [ DateTime.fromISO('2025-02-05'), DateTime.fromISO('2025-02-20'), { startDate: { violations: [{old: ..., new: ..., reasson: 'minDate'}] } } ]
+            */
 
             if (!startDate)
                 return;
 
-            let result = { startDate: { modified: [] } };
-            if (invalidDate)
-                result.startDate.isInvalidDate = false;
-            if (invalidTime)
-                result.startDate.isInvalidTime = false;
+            let result = { startDate: { violations: [] } };
 
-            if (stepSize) {
-                let modified = { old: startDate, reason: stepSize && this.timePicker ? 'timePickerStepSize' : 'No timePicker' };
-                if (this.timePicker) {
-                    // Round time to step size
-                    const secs = this.timePickerStepSize.as('seconds');
-                    startDate = DateTime.fromSeconds(secs * Math.round(startDate.toSeconds() / secs));
-                } else {
-                    startDate = startDate.startOf('day');
-                }
-                modified.new = startDate;
-                if (modified.new != modified.old)
-                    result.startDate.modified.push(modified);
+            let violation = { old: startDate, reason: this.timePicker ? 'timePickerStepSize' : 'timePicker' };
+            if (this.timePicker) {
+                // Round time to step size
+                const secs = this.timePickerStepSize.as('seconds');
+                startDate = DateTime.fromSeconds(secs * Math.round(startDate.toSeconds() / secs));
+            } else {
+                startDate = startDate.startOf('day');
             }
+            violation.new = startDate;
+            if (!violation.new.equals(violation.old))
+                result.startDate.violations.push(violation);
 
 
-            if (minMax) {
-                if (this.minDate && startDate < this.minDate) {
-                    // If the startDate is earlier than minDate option, shift the startDate to allowable date
-                    let modified = { old: startDate, reason: 'minDate' };
-                    while (startDate < this.minDate)
-                        startDate = startDate.plus(this.timePicker ? this.timePickerStepSize : { days: 1 });
-                    modified.new = startDate;
-                    if (modified.new != modified.old) {
-                        result.startDate.modified.push(modified);
-                        if (writeWarning)
-                            console.warn(`Set 'startDate'${nLog} to ${this.logDate(startDate)} due to 'minDate'`);
-                    }
-                } else if (this.maxDate && startDate > this.maxDate) {
-                    // If the startDate is later than maxDate option, shift the startDate to allowable date
-                    let modified = { old: startDate, reason: 'maxDate' };
-                    while (startDate > this.maxDate)
-                        startDate = startDate.minus(this.timePicker ? this.timePickerStepSize : { days: 1 });
-                    modified.new = startDate;
-                    if (modified.new != modified.old) {
-                        result.startDate.modified.push(modified);
-                        if (writeWarning)
-                            console.warn(`Set 'startDate'${nLog} to ${this.logDate(startDate)} due to 'maxDate'`);
-                    }
-                }
+            if (this.minDate && startDate < this.minDate) {
+                // If the startDate is earlier than minDate option, shift the startDate to allowable date
+                violation = { old: startDate, reason: 'minDate' };
+                while (startDate < this.minDate)
+                    startDate = startDate.plus(this.timePicker ? this.timePickerStepSize : { days: 1 });
+                violation.new = startDate;
+                if (!violation.new.equals(violation.old))
+                    result.startDate.violations.push(violation);
+            } else if (this.maxDate && startDate > this.maxDate) {
+                // If the startDate is later than maxDate option, shift the startDate to allowable date
+                violation = { old: startDate, reason: 'maxDate' };
+                while (startDate > this.maxDate)
+                    startDate = startDate.minus(this.timePicker ? this.timePickerStepSize : { days: 1 });
+                violation.new = startDate;
+                if (!violation.new.equals(violation.old))
+                    result.startDate.violations.push(violation);
             }
 
             let units = ['hour'];
-            if (invalidTime && this.timePicker) {
+            if (this.timePicker) {
                 if (this.timePickerOpts.showMinutes)
                     units.push('minute');
                 if (this.timePickerOpts.showSeconds)
@@ -964,140 +952,107 @@
                     units.push('ampm');
             }
 
-            if (invalidDate && this.isInvalidDate(startDate)) {
-                result.startDate.isInvalidDate = true;
-                if (writeWarning)
-                    console.warn(`The 'startDate'${nLog} ${this.logDate(startDate)} is invalid by 'isInvalidDate'`);
-            }
-
-            if (invalidTime && this.timePicker) {
+            if (this.isInvalidDate(startDate))
+                result.startDate.violations.push({ old: startDate, new: startDate, reason: 'isInvalidDate' });
+            if (this.timePicker) {
                 for (let unit of units) {
                     if (this.isInvalidTime(startDate, unit, 'start'))
-                        result.startDate.isInvalidTime = true;
-                    if (writeWarning)
-                        console.warn(`The 'startDate'${nLog} ${this.logDate(startDate)} ${unit} is invalid by 'isInvalidTime'`);
+                        result.startDate.violations.push({ old: startDate, new: startDate, reason: 'isInvalidTime', unit: unit });
                 }
             }
-
-            if (result.startDate.modified.length === 0)
-                delete result.startDate.modified;
 
             if (this.singleDatePicker) {
                 endDate = startDate;
                 if (range === undefined) {
-                    this.startDate = startDate;
-                    this.endDate = endDate;
-                    return result;
+                    if (result.startDate.violations.length > 0) {
+                        if (!this.element.triggerHandler('violated.daterangepicker', [this, result])) {
+                            this.startDate = startDate;
+                            this.endDate = endDate;
+                        }
+                    }
+                    return;
                 } else {
                     return [startDate, endDate, result];
                 }
             }
-
             if (endDate == null)
-                return result;
+                return;
 
-            result.endDate = { modified: [] };
-            if (invalidDate)
-                result.endDate.isInvalidDate = false;
-            if (invalidTime)
-                result.endDate.isInvalidTime = false;
+            result.endDate = { violations: [] };
 
-            if (stepSize) {
-                let modified = { old: endDate, reason: stepSize && this.timePicker ? 'timePickerStepSize' : 'No timePicker' };
-                if (this.timePicker) {
-                    // Round time to step size
-                    const secs = this.timePickerStepSize.as('seconds');
-                    endDate = DateTime.fromSeconds(secs * Math.round(endDate.toSeconds() / secs));
-                } else {
-                    endDate = endDate.endOf('day');
-                }
-                modified.new = endDate;
-                if (modified.new != modified.old)
-                    result.endDate.modified.push(modified);
+            violation = { old: endDate, reason: this.timePicker ? 'stepSize' : 'timePicker' };
+            if (this.timePicker) {
+                // Round time to step size
+                const secs = this.timePickerStepSize.as('seconds');
+                endDate = DateTime.fromSeconds(secs * Math.round(endDate.toSeconds() / secs));
+            } else {
+                endDate = endDate.endOf('day');
+            }
+            violation.new = endDate;
+            if (!violation.new.equals(violation.old))
+                result.endDate.violations.push(violation);
+
+            if (this.maxDate && endDate > this.maxDate) {
+                // If the endDate is later than maxDate option, shorten the range to the allowable period.
+                violation = { old: endDate, reason: 'maxDate' };
+                while (endDate > this.maxDate)
+                    endDate = endDate.minus(this.timePicker ? this.timePickerStepSize : { days: 1 });
+                violation.new = endDate;
+                if (!violation.new.equals(violation.old))
+                    result.endDate.violations.push(violation);
+            } else if (this.minDate && endDate < this.minDate) {
+                // If the endDate is earlier than minDate option, shorten the range to the allowable period.
+                violation = { old: endDate, reason: 'minDate' };
+                while (endDate < this.minDate)
+                    endDate = endDate.plus(this.timePicker ? this.timePickerStepSize : { days: 1 });
+                violation.new = endDate;
+                if (!violation.new.equals(violation.old))
+                    result.endDate.violations.push(violation);
             }
 
-            if (minMax) {
-                if (this.maxDate && endDate > this.maxDate) {
-                    // If the endDate is later than maxDate option, shorten the range to the allowable period.
-                    let modified = { old: endDate, reason: 'maxDate' };
-                    while (endDate > this.maxDate)
+            if (this.maxSpan) {
+                // If the endDate exceeds those allowed by the maxSpan option, shorten the range to the allowable period.
+                const maxDate = startDate.plus(this.maxSpan);
+                if (endDate > maxDate) {
+                    violation = { old: endDate, reason: 'maxSpan' };
+                    while (endDate > maxDate)
                         endDate = endDate.minus(this.timePicker ? this.timePickerStepSize : { days: 1 });
-                    modified.new = endDate;
-                    if (modified.new != modified.old) {
-                        result.endDate.modified.push(modified);
-                        if (writeWarning)
-                            console.warn(`Set 'endDate'${nLog} to ${this.logDate(endDate)} due to 'maxDate'`);
-                    }
-                } else if (this.minDate && endDate < this.minDate) {
-                    // If the endDate is earlier than minDate option, shorten the range to the allowable period.
-                    let modified = { old: endDate, reason: 'minDate' };
-                    while (endDate < this.minDate)
+                    violation.new = endDate;
+                    if (!violation.new.equals(violation.old))
+                        result.endDate.violations.push(violation);
+                }
+            }
+
+            if (this.minSpan) {
+                // If the endDate falls below those allowed by the minSpan option, expand the range to the allowable period.
+                const minDate = startDate.plus(this.minSpan);
+                if (endDate < minDate) {
+                    violation = { old: endDate, reason: 'minSpan' };
+                    while (endDate < minDate)
                         endDate = endDate.plus(this.timePicker ? this.timePickerStepSize : { days: 1 });
-                    modified.new = endDate;
-                    if (modified.new != modified.old) {
-                        result.endDate.modified.push(modified);
-                        if (writeWarning)
-                            console.warn(`Set 'endDate'${nLog} to ${this.logDate(endDate)} due to 'minDate'`);
-                    }
+                    violation.new = endDate;
+                    if (!violation.new.equals(violation.old))
+                        result.endDate.violations.push(violation);
                 }
             }
 
-            if (span) {
-                if (this.maxSpan) {
-                    // If the endDate exceeds those allowed by the maxSpan option, shorten the range to the allowable period.
-                    const maxDate = startDate.plus(this.maxSpan);
-                    if (endDate > maxDate) {
-                        let modified = { old: endDate, reason: 'maxSpan' };
-                        while (endDate > maxDate)
-                            endDate = endDate.minus(this.timePicker ? this.timePickerStepSize : { days: 1 });
-                        modified.new = endDate;
-                        if (modified.new != modified.old) {
-                            result.endDate.modified.push(modified);
-                            if (writeWarning)
-                                console.warn(`Set 'endDate'${nLog} to ${this.logDate(endDate)} due to 'maxSpan'`);
-                        }
-                    }
-                }
-
-                if (this.minSpan) {
-                    // If the endDate falls below those allowed by the minSpan option, expand the range to the allowable period.
-                    const minDate = startDate.plus(this.minSpan);
-                    if (endDate < minDate) {
-                        let modified = { old: endDate, reason: 'minSpan' };
-                        while (endDate < minDate)
-                            endDate = endDate.plus(this.timePicker ? this.timePickerStepSize : { days: 1 });
-                        modified.new = endDate;
-                        if (modified.new != modified.old) {
-                            result.endDate.modified.push(modified);
-                            if (writeWarning)
-                                console.warn(`Set 'endDate'${nLog} to ${this.logDate(endDate)} due to 'minSpan'`);
-                        }
-                    }
-                }
-            }
-
-            if (invalidDate && this.isInvalidDate(endDate)) {
-                result.endDate.isInvalidDate = true;
-                if (writeWarning)
-                    console.warn(`The 'endDate'${nLog} ${this.logDate(endDate)} is invalid by 'isInvalidDate'`);
-            }
-
-            if (invalidTime && this.timePicker) {
+            if (this.isInvalidDate(endDate))
+                result.endDate.violations.push({ old: endDate, new: endDate, reason: 'isInvalidDate' });
+            if (this.timePicker) {
                 for (let unit of units) {
                     if (this.isInvalidTime(endDate, unit, 'end'))
-                        result.endDate.isInvalidTime = true;
-                    if (writeWarning)
-                        console.warn(`The 'endDate'${nLog} ${this.logDate(endDate)} ${unit} is invalid by 'isInvalidTime'`);
+                        result.endDate.violations.push({ old: endDate, new: endDate, reason: 'isInvalidTime', unit: unit });
                 }
             }
 
-            if (result.endDate.modified.length === 0)
-                delete result.endDate.modified;
-
             if (range === undefined) {
-                this.startDate = startDate;
-                this.endDate = endDate;
-                return result;
+                if (result.startDate.violations.length > 0 + result.endDate.violations.length > 0) {
+                    if (!this.element.triggerHandler('violated.daterangepicker', [this, result])) {
+                        this.startDate = startDate;
+                        this.endDate = endDate;
+                    }
+                }
+                return;
             } else {
                 return [startDate, endDate, result];
             }

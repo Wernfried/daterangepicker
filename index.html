@@ -28,14 +28,23 @@
     const Settings = luxon.Settings;
 
     $(document).ready(function () {
+      const Settings = luxon.Settings;
+      Settings.defaultLocale = 'de-CH'
+
       $('#picker').daterangepicker({
-        showDropdowns: true,
-        linkedCalendars: true
+        startDate: DateTime.fromISO('2025-01-01'),
+        singleDatePicker: true,
+        timePicker: true,
+        timePickerStepSize: Duration.fromObject({
+          minutes: 10
+        })
+      }).on('violated.daterangepicker', (ev, picker, violations) => {
+        console.log(JSON.stringify(violations))
+        return true;
       });
       $('#picker').trigger('click');
 
     });
-
   </script>
 </head>
 
