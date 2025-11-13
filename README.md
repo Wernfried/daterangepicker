@@ -18,8 +18,8 @@ Above samples are based on the [original repository](https://github.com/dangross
 ```html
 <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.9.7/daterangepicker.min.js"></script>
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.9.7/daterangepicker.min.css" rel="stylesheet" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.10.0/daterangepicker.min.js"></script>
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.10.0/daterangepicker.min.css" rel="stylesheet" />
 
 <input type="text" id="daterange" />
 
@@ -188,6 +188,9 @@ Licensed under the [MIT license](LICENSE).
 ## Events
 
 <dl>
+<dt><a href="#event_violated.daterangepicker">"violated.daterangepicker" (this, violations)</a> ⇒ <code>boolean</code></dt>
+<dd><p>Emitted if the input values are not compliant to all constraints</p>
+</dd>
 <dt><a href="#event_beforeRenderCalendar.daterangepicker">"beforeRenderCalendar.daterangepicker" (this)</a></dt>
 <dd><p>Emitted before the calendar is rendered. 
 Useful to remove any manually added elements.</p>
@@ -247,7 +250,7 @@ use <a href="#event_timeChange.daterangepicker">&quot;timeChange.daterangepicker
 <dt><a href="#Range">Range</a> : <code>Object</code></dt>
 <dd><p>A single predefined range</p>
 </dd>
-<dt><a href="#constraintOptions">constraintOptions</a> : <code>Object</code></dt>
+<dt><a href="#InputViolation">InputViolation</a> : <code>Object</code></dt>
 <dd></dd>
 <dt><a href="#callback">callback</a> : <code>function</code></dt>
 <dd></dd>
@@ -264,7 +267,7 @@ use <a href="#event_timeChange.daterangepicker">&quot;timeChange.daterangepicker
         * [.setStartDate(startDate, isValid)](#DateRangePicker+setStartDate)
         * [.setEndDate(endDate, isValid)](#DateRangePicker+setEndDate)
         * [.setPeriod(startDate, endDate, isValid)](#DateRangePicker+setPeriod)
-        * [.constrainDate(options, [range])](#DateRangePicker+constrainDate) ⇒ <code>Array</code>
+        * [.validateInput([range])](#DateRangePicker+validateInput) ⇒ <code>Array</code> \| <code>null</code>
         * [.updateView()](#DateRangePicker+updateView)
         * [.showCalendars()](#DateRangePicker+showCalendars)
         * [.hideCalendars()](#DateRangePicker+hideCalendars)
@@ -290,9 +293,8 @@ Sets the date range picker's currently selected start date to the provided date.
 `startDate` must be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](ISO-8601) or 
 a string matching `locale.format`.
 The value of the attached `<input>` element is also updated.
-Date value is rounded to match option `timePickerStepSize`<br/>
-Functions `isInvalidDate` and `isInvalidTime` are not evaluated, you may set date/time which is not selectable in calendar.<br/>
-If the `startDate` does not fall into `minDate` and `maxDate` then `startDate` is shifted and a warning is written to console.
+Date value is rounded to match option `timePickerStepSize` unless skipped by `violated.daterangepicker` event handler.<br/>
+If the `startDate` does not fall into `minDate` and `maxDate` then `startDate` is shifted unless skipped by `violated.daterangepicker` event handler.
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
 **Throws**:
@@ -303,7 +305,7 @@ If the `startDate` does not fall into `minDate` and `maxDate` then `startDate` i
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | startDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> |  | startDate to be set |
-| isValid | <code>boolean</code> | <code>false</code> | If `true` then the `startDate` is not checked against `minDate` and `maxDate`<br/> Use this option only if you are really sure about the value you put in. |
+| isValid | <code>boolean</code> | <code>false</code> | If `true` then the `startDate` is not checked against `minDate` and `maxDate`<br/> Use this option only if you are sure about the value you put in. |
 
 **Example**  
 ```js
@@ -318,10 +320,9 @@ Sets the date range picker's currently selected end date to the provided date.<b
 `endDate` must be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](ISO-8601) or 
 a string matching`locale.format`.
 The value of the attached `<input>` element is also updated.
-Date value is rounded to match option `timePickerStepSize`<br/>
-Functions `isInvalidDate` and `isInvalidTime` are not evaluated, you may set date/time which is not selectable in calendar.<br/>
+Date value is rounded to match option `timePickerStepSize` unless skipped by `violated.daterangepicker` event handler.<br/>
 If the `endDate` does not fall into  `minDate` and `maxDate` or into `minSpan` and `maxSpan`
-then `endDate` is shifted and a warning is written to console.
+then `endDate` is shifted unless skipped by `violated.daterangepicker` event handler
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
 **Throws**:
@@ -332,7 +333,7 @@ then `endDate` is shifted and a warning is written to console.
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | endDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> |  | endDate to be set |
-| isValid | <code>boolean</code> | <code>false</code> | If `true` then the `endDate` is not checked against `minDate`, `maxDate` and `minSpan`, `maxSpan`<br/> Use this option only if you are really sure about the value you put in. |
+| isValid | <code>boolean</code> | <code>false</code> | If `true` then the `endDate` is not checked against `minDate`, `maxDate` and `minSpan`, `maxSpan`<br/> Use this option only if you are sure about the value you put in. |
 
 **Example**  
 ```js
@@ -354,7 +355,7 @@ Shortcut for [setStartDate](#DateRangePicker+setStartDate) and [setEndDate](#Dat
 | --- | --- | --- | --- |
 | startDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> |  | startDate to be set |
 | endDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> |  | endDate to be set |
-| isValid | <code>boolean</code> | <code>false</code> | If `true` then the `startDate` and `endDate` are not checked against `minDate`, `maxDate` and `minSpan`, `maxSpan`<br/> Use this option only if you are really sure about the value you put in. |
+| isValid | <code>boolean</code> | <code>false</code> | If `true` then the `startDate` and `endDate` are not checked against `minDate`, `maxDate` and `minSpan`, `maxSpan`<br/> Use this option only if you are sure about the value you put in. |
 
 **Example**  
 ```js
@@ -362,31 +363,25 @@ const DateTime = luxon.DateTime;
 const drp = $('#picker').data('daterangepicker');
 drp.setPeriod(DateTime.now().startOf('week'), DateTime.now().startOf('week').plus({days: 10}));
 ```
-<a name="DateRangePicker+constrainDate"></a>
+<a name="DateRangePicker+validateInput"></a>
 
-### dateRangePicker.constrainDate(options, [range]) ⇒ <code>Array</code>
+### dateRangePicker.validateInput([range]) ⇒ <code>Array</code> \| <code>null</code>
 Validate `startDate` and `endDate` or `range` against `timePickerStepSize`, `minDate`, `maxDate`, 
-`minSpan`, `maxSpan`, `invalidDate` and `invalidTime` and modifies them, if needed. 
-When `startDate` or `endDate` are modified, then a warning is written to console by default.
+`minSpan`, `maxSpan`, `invalidDate` and `invalidTime` and corrects them, if needed. 
+Correction can be skipped by returning `true` at event listener for `violated.daterangepicker`
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
-**Returns**: <code>Array</code> - - Corrected range as array of `[startDate, endDate, isInvalid]` when range is set, otherwise just `isInvalid` object  
-**Throws**:
-
-- `RangeError` if 'minDate' contradicts to 'minSpan'
-
+**Returns**: <code>Array</code> \| <code>null</code> - - Corrected range as array of `[startDate, endDate]` when `range` is defined  
+**Emits**: <code>event:&quot;violated.daterangepicker&quot;</code>  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| options | [<code>constraintOptions</code>](#constraintOptions) | Defines which constraints shall be validated |
 | [range] | <code>Array</code> | Used to check prefefined range instead of `startDate` and `endDate` => `[name, startDate, endDate]` When set, then function does not modify anything, just returning corrected range. |
 
 **Example**  
 ```js
-constrainDate({}, [DateTime.fromISO('2025-02-03'), DateTime.fromISO('2025-02-25')]) => 
-[ DateTime.fromISO('2025-02-05'), DateTime.fromISO('2025-02-20'), { startDate: { stepped: ... }, endDate: { stepped: ..., modified: [{old: ... new: ..., reason: 'minSpan'}] } } ]
-constrainDate({span: false, invalidDate: true, invalidTime: true}) => 
-{ startDate: {stepped: ..., modified: [{old: ... new: ..., reason: 'minDate'}], isInvalidDate: true, isInvalidTime: false}, endDate: {stepped: ..., isInvalidDate: false, isInvalidTime: true} } ]
+validateInput([DateTime.fromISO('2025-02-03'), DateTime.fromISO('2025-02-25')]) => 
+[ DateTime.fromISO('2025-02-05'), DateTime.fromISO('2025-02-20'), { startDate: { violations: [{old: ..., new: ..., reasson: 'minDate'}] } } ]
 ```
 <a name="DateRangePicker+updateView"></a>
 
@@ -436,6 +431,24 @@ Initiate a new DateRangePicker
 | options | [<code>Options</code>](#Options) | Object to configure the DateRangePicker |
 | callback | [<code>callback</code>](#callback) | Callback function executed when date is changed.<br/> Callback function is executed if selected date values has changed, before picker is hidden and before the attached `<input>` element is updated.  As alternative listen to the ["apply.daterangepicker"](#event_apply.daterangepicker) event |
 
+<a name="event_violated.daterangepicker"></a>
+
+## "violated.daterangepicker" (this, violations) ⇒ <code>boolean</code>
+Emitted if the input values are not compliant to all constraints
+
+**Kind**: event emitted  
+**Returns**: <code>boolean</code> - skip - If `true`, then input values are not corrected and remain invalid  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| this | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
+| violations | [<code>InputViolation</code>](#InputViolation) | An object of input violations |
+
+**Example**  
+```js
+$('#picker').on('violated.daterangepicker', (ev, picker, violations))
+[ DateTime.fromISO('2025-02-05'), DateTime.fromISO('2025-02-20'), { startDate: { violations: [{old: ..., new: ..., reasson: 'minDate'}] } } ]
+```
 <a name="event_beforeRenderCalendar.daterangepicker"></a>
 
 ## "beforeRenderCalendar.daterangepicker" (this)
@@ -627,7 +640,7 @@ Options for DateRangePicker
 | isCustomDate | <code>function</code> | <code>false</code> | A function that is passed each date in the two calendars before they are displayed,  and may return a string or array of CSS class names to apply to that date's calendar cell.<br/> Signature: `isCustomDate(date)` |
 | altInput | <code>string</code> \| <code>Array</code> | <code>null</code> | A [jQuery selector](https://api.jquery.com/category/selectors/) string for an alternative ouput (typically hidden) `<input>` element. Requires `altFormat` to be set.<br/> Must be a single string for `singleDatePicker: true` or an array of two strings for `singleDatePicker: false`<br/> Example: `['#start', '#end']` |
 | altFormat | <code>function</code> \| <code>string</code> | <code></code> | The output format used for `altInput`.<br/> Either a string used with [toFormat()](https://moment.github.io/luxon/api-docs/index.html#datetimetoformat) or a function.<br/> Examples: `'yyyyMMddHHmm'`, `(date) => date.toUnixInteger()` |
-| warnings | <code>boolean</code> | <code>true</code> | When enabled, then warning are printed to console if input date violates  `minDate`, `maxDate`, `minSpan`, `maxSpan`, `timePickerStepSize`, `isInvalidDate`, `isInvalidTime` |
+| ~~warnings~~ | <code>boolean</code> |  | Not used anymore. Listen to event `violated.daterangepicker` to react on invalid input data |
 | applyButtonClasses | <code>string</code> | <code>&quot;btn-primary&quot;</code> | CSS class names that will be added only to the apply button |
 | cancelButtonClasses | <code>string</code> | <code>&quot;btn-default&quot;</code> | CSS class names that will be added only to the cancel button |
 | buttonClasses | <code>string</code> |  | Default: `'btn btn-sm'`<br/>CSS class names that will be added to both the apply and cancel buttons. |
@@ -693,20 +706,19 @@ A single predefined range
 ```js
 { Today: [DateTime.now().startOf('day'), DateTime.now().endOf('day')] }        
 ```
-<a name="constraintOptions"></a>
+<a name="InputViolation"></a>
 
-## constraintOptions : <code>Object</code>
+## InputViolation : <code>Object</code>
 **Kind**: global typedef  
 **Properties**
 
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| stepSize | <code>boolean</code> | <code>true</code> | If `true`, then `startDate` and `endDate` are rounded to match `timePickerStepSize` (no warning) |
-| minMax | <code>boolean</code> | <code>true</code> | If `true` and `startDate` and `endDate` do not fall into `minDate` and `maxDate` then dates are shifted and a warning is written to console. |
-| span | <code>boolean</code> | <code>true</code> | If `true` and `startDate` and `endDate` do not fall into `minDate` and `maxSpan`  then `endDate` is shifted and a warning is written to console. |
-| invalidDate | <code>boolean</code> | <code>false</code> | If `true` and `invalidDate` returns `true`, then an error is logged to console |
-| invalidTime | <code>boolean</code> | <code>false</code> | If `true` and `invalidTime` returns `true`, then an error is logged to console |
-| writeWarning | <code>boolean</code> | <code>true</code> | If `true` a warning is written to console if `startDate` or `endDate` is modified  with the exception of rounding due to `timePickerStepSize`. |
+| Name | Type | Description |
+| --- | --- | --- |
+| startDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | Violation of startDate |
+| endDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| <code>undefined</code> | Violation of endDate |
+| reason | <code>Array</code> | The constraint which violates the input |
+| old | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | Old value startDate/endDate |
+| new | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | Corrected value of startDate/endDate |
 
 <a name="callback"></a>
 
