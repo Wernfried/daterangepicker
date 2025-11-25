@@ -8,5 +8,6 @@ npm-debug.log
 *.sw[onp]
 .vscode
 test*.html
+debug*.html
 daterangepicker-org.js
 

@@ -55,12 +55,15 @@
         * Must be a `luxon.DateTime` or `Date` or `string` according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} or a string matching `locale.format`.
         * @property {external:DateTime|external:Date|string|null} maxDate - The latest date a user may select or `null` for no limit.<br/>
         * Must be a `luxon.DateTime` or `Date` or `string` according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} or a string matching `locale.format`.
-        * @property {external:Duration|string|number|null} minSpan - The maximum span between the selected start and end dates.<br/>
+        * @property {external:Duration|string|number|null} minSpan - The minimum span between the selected start and end dates.<br/>
         * Must be a `luxon.Duration` or number of seconds or a string according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} duration.<br/>
         * Ignored when `singleDatePicker: true`
-        * @property {external:Duration|string|number|null} maxSpan - The minimum span between the selected start and end dates.<br/>
+        * @property {external:Duration|string|number|null} maxSpan - The maximum  span between the selected start and end dates.<br/>
         * Must be a `luxon.Duration` or number of seconds or a string according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} duration.<br/>
         * Ignored when `singleDatePicker: true`
+        * @property {external:Duration|string|number|null} defaultSpan - The span which is used when endDate is automatically updated due to wrong user input<br/>
+        * Must be a `luxon.Duration` or number of seconds or a string according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} duration.<br/>
+        * Ignored when `singleDatePicker: true`. Not relevant if `minSpan: null`
         * @property {external:DateTime|external:Date|string|null} initalMonth - Default: `DateTime.now().startOf('month')`<br/>
         * The inital month shown when `startDate: null`. Be aware, the attached `<input>` element must be also empty.<br/>
         * Must be a `luxon.DateTime` or `Date` or `string` according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} or a string matching `locale.format`.<br/>
@@ -204,6 +207,7 @@
         this.maxDate = null;
         this.maxSpan = null;
         this.minSpan = null;
+        this.defaultSpan = null;
         this.initalMonth = DateTime.now().startOf('month');
         this.autoApply = false;
         this.singleDatePicker = false;
@@ -386,7 +390,7 @@
         }
 
         if (!this.singleDatePicker) {
-            for (let opt of ['minSpan', 'maxSpan']) {
+            for (let opt of ['minSpan', 'maxSpan', 'defaultSpan']) {
                 if (['string', 'number', 'object'].includes(typeof options[opt])) {
                     if (options[opt] instanceof Duration && options[opt].isValid) {
                         this[opt] = options[opt];
@@ -405,6 +409,13 @@
                 this.minSpan = null;
                 this.maxSpan = null;
                 console.warn(`Ignore option 'minSpan' and 'maxSpan', because 'minSpan' must be smaller than 'maxSpan'`);
+            }
+            if (this.defaultSpan && this.minSpan && this.minSpan > this.defaultSpan) {
+                this.defaultSpan = null;
+                console.warn(`Ignore option 'defaultSpan', because 'defaultSpan' must be greater than 'minSpan'`);
+            } else if (this.defaultSpan && this.maxSpan && this.maxSpan < this.defaultSpan) {
+                this.defaultSpan = null;
+                console.warn(`Ignore option 'defaultSpan', because 'defaultSpan' must be smaller than 'maxSpan'`);
             }
         }
 
@@ -1025,7 +1036,7 @@
 
             if (this.minSpan) {
                 // If the endDate falls below those allowed by the minSpan option, expand the range to the allowable period.
-                const minDate = startDate.plus(this.minSpan);
+                const minDate = startDate.plus(this.defaultSpan ?? this.minSpan);
                 if (endDate < minDate) {
                     violation = { old: endDate, reason: 'minSpan' };
                     while (endDate < minDate)
@@ -1448,7 +1459,7 @@
                 maxDate = this.startDate.plus(this.maxSpan);
 
             if (this.minSpan && side === 'end')
-                minLimit = this.startDate.plus(this.minSpan);
+                minLimit = this.startDate.plus(this.defaultSpan ?? this.minSpan);
 
             if (side === 'start') {
                 selected = this.startDate;
