@@ -596,33 +596,44 @@
                 if (['string', 'object'].includes(typeof options.ranges[range][0])) {
                     if (options.ranges[range][0] instanceof DateTime && options.ranges[range][0].isValid) {
                         start = options.ranges[range][0];
+                    } else if (options.ranges[range][0] instanceof Date) {
+                        start = DateTime.fromJSDate(options.ranges[range][0]);
                     } else if (typeof options.ranges[range][0] === 'string' && DateTime.fromISO(options.ranges[range][0]).isValid) {
                         start = DateTime.fromISO(options.ranges[range][0]);
                     } else {
-                        console.error(`Option 'ranges.${range}' is not a valid ISO-8601 string or DateTime`);
+                        console.error(`Option ranges['${range}'] is not am array of valid ISO-8601 string or luxon.DateTime or Date`);
                     }
                 }
                 if (['string', 'object'].includes(typeof options.ranges[range][1])) {
                     if (options.ranges[range][1] instanceof DateTime && options.ranges[range][1].isValid) {
                         end = options.ranges[range][1];
+                    } else if (options.ranges[range][1] instanceof Date) {
+                        end = DateTime.fromJSDate(options.ranges[range][1]);
                     } else if (typeof options.ranges[range][1] === 'string' && DateTime.fromISO(options.ranges[range][1]).isValid) {
                         end = DateTime.fromISO(options.ranges[range][1]);
                     } else {
-                        console.error(`Option 'ranges.${range}' is not a valid ISO-8601 string or DateTime`);
+                        console.error(`Option ranges['${range}'] is not a valid ISO-8601 string or luxon.DateTime or Date`);
                     }
                 }
                 if (start == null || end == null)
                     continue;
 
-                const validRange = this.validateInput({ span: false }, [range, start, end]);
-                options.ranges[range] = [validRange[0], validRange[1]];
+                const validRange = this.validateInput([range, start, end]);
+                if (validRange[2].startDate.violations.map(x => x.reason).some(x => ['minDate', 'maxDate', 'minSpan', 'maxSpan'].includes(x))) {
+                    const vio = validRange[2].startDate.violations.map(x => x.reason).filter(x => ['minDate', 'maxDate', 'minSpan', 'maxSpan'].includes(x));
+                    console.error(`Option ranges['${range}'] is not valid, violating ${vio.join(',')}`);
+                } else if (validRange[2].endDate.violations.map(x => x.reason).some(x => ['minDate', 'maxDate', 'minSpan', 'maxSpan'].includes(x))) {
+                    const vio = validRange[2].endDate.violations.map(x => x.reason).filter(x => ['minDate', 'maxDate', 'minSpan', 'maxSpan'].includes(x));
+                    console.error(`Option ranges['${range}'] is not valid, violating ${vio.join(',')}`);
+                } else {
+                    options.ranges[range] = [validRange[0], validRange[1]];
+                    //Support unicode chars in the range names.
+                    var elem = document.createElement('textarea');
+                    elem.innerHTML = range;
+                    var rangeHtml = elem.value;
 
-                //Support unicode chars in the range names.
-                var elem = document.createElement('textarea');
-                elem.innerHTML = range;
-                var rangeHtml = elem.value;
-
-                this.ranges[rangeHtml] = [validRange[0], validRange[1]];
+                    this.ranges[rangeHtml] = [validRange[0], validRange[1]];
+                }
             }
 
             var list = '<ul>';
@@ -771,10 +782,10 @@
                 if (this.locale.durationFormat)
                     this.container.find('.drp-duration-label').html('');
                 if (typeof this.locale.format === 'object') {
-                    const empty = `<span style="color: rgb(0,0,0,0);">${this.startDate.toLocaleString(this.locale.format)}</span>`;
+                    const empty = `<span>${this.startDate.toLocaleString(this.locale.format)}</span>`;
                     this.container.find('.drp-selected').html(this.startDate.toLocaleString(this.locale.format) + this.locale.separator + empty);
                 } else {
-                    const empty = `<span style="color: rgb(0,0,0,0);">${this.startDate.toFormat(this.locale.format)}</span>`;
+                    const empty = `<span>${this.startDate.toFormat(this.locale.format)}</span>`;
                     this.container.find('.drp-selected').html(this.startDate.toFormat(this.locale.format) + this.locale.separator + empty);
                 }
             }
@@ -934,11 +945,13 @@
             if (!violation.new.equals(violation.old))
                 result.startDate.violations.push(violation);
 
+            const shiftStep = this.timePicker ? this.timePickerStepSize.as('seconds') : Duration.fromObject({ days: 1 }).as('seconds');
 
             if (this.minDate && startDate < this.minDate) {
                 // If the startDate is earlier than minDate option, shift the startDate to allowable date
                 violation = { old: startDate, reason: 'minDate' };
-                while (startDate < this.minDate)
+                startDate = startDate.plus({ seconds: Math.trunc(this.minDate.diff(startDate).as('seconds') / shiftStep) * shiftStep });
+                if (startDate < this.minDate)
                     startDate = startDate.plus(this.timePicker ? this.timePickerStepSize : { days: 1 });
                 violation.new = startDate;
                 if (!violation.new.equals(violation.old))
@@ -946,7 +959,8 @@
             } else if (this.maxDate && startDate > this.maxDate) {
                 // If the startDate is later than maxDate option, shift the startDate to allowable date
                 violation = { old: startDate, reason: 'maxDate' };
-                while (startDate > this.maxDate)
+                startDate = startDate.minus({ seconds: Math.trunc(startDate.diff(this.maxDate).as('seconds') / shiftStep) * shiftStep });
+                if (startDate > this.maxDate)
                     startDate = startDate.minus(this.timePicker ? this.timePickerStepSize : { days: 1 });
                 violation.new = startDate;
                 if (!violation.new.equals(violation.old))
@@ -1006,7 +1020,8 @@
             if (this.maxDate && endDate > this.maxDate) {
                 // If the endDate is later than maxDate option, shorten the range to the allowable period.
                 violation = { old: endDate, reason: 'maxDate' };
-                while (endDate > this.maxDate)
+                endDate = endDate.minus({ seconds: Math.trunc(endDate.diff(this.maxDate).as('seconds') / shiftStep) * shiftStep });
+                if (endDate > this.maxDate)
                     endDate = endDate.minus(this.timePicker ? this.timePickerStepSize : { days: 1 });
                 violation.new = endDate;
                 if (!violation.new.equals(violation.old))
@@ -1014,7 +1029,8 @@
             } else if (this.minDate && endDate < this.minDate) {
                 // If the endDate is earlier than minDate option, shorten the range to the allowable period.
                 violation = { old: endDate, reason: 'minDate' };
-                while (endDate < this.minDate)
+                endDate = endDate.plus({ seconds: Math.trunc(this.minDate.diff(endDate).as('seconds') / shiftStep) * shiftStep });
+                if (endDate < this.minDate)
                     endDate = endDate.plus(this.timePicker ? this.timePickerStepSize : { days: 1 });
                 violation.new = endDate;
                 if (!violation.new.equals(violation.old))
@@ -1026,7 +1042,8 @@
                 const maxDate = startDate.plus(this.maxSpan);
                 if (endDate > maxDate) {
                     violation = { old: endDate, reason: 'maxSpan' };
-                    while (endDate > maxDate)
+                    endDate = endDate.minus({ seconds: Math.trunc(maxDate.diff(endDate).as('seconds') / shiftStep) * shiftStep });
+                    if (endDate > maxDate)
                         endDate = endDate.minus(this.timePicker ? this.timePickerStepSize : { days: 1 });
                     violation.new = endDate;
                     if (!violation.new.equals(violation.old))
@@ -1039,7 +1056,8 @@
                 const minDate = startDate.plus(this.defaultSpan ?? this.minSpan);
                 if (endDate < minDate) {
                     violation = { old: endDate, reason: 'minSpan' };
-                    while (endDate < minDate)
+                    endDate = endDate.plus({ seconds: Math.trunc(minDate.diff(endDate).as('seconds') / shiftStep) * shiftStep });
+                    if (endDate < minDate)
                         endDate = endDate.plus(this.timePicker ? this.timePickerStepSize : { days: 1 });
                     violation.new = endDate;
                     if (!violation.new.equals(violation.old))
@@ -1057,7 +1075,7 @@
             }
 
             if (range === undefined) {
-                if (result.startDate.violations.length > 0 + result.endDate.violations.length > 0) {
+                if (result.startDate.violations.length > 0 || result.endDate.violations.length > 0) {
                     if (!this.element.triggerHandler('violated.daterangepicker', [this, result])) {
                         this.startDate = startDate;
                         this.endDate = endDate;
@@ -1253,7 +1271,7 @@
             for (var i = 0; i < 6; i++)
                 calendar[i] = [];
 
-            // compute the startDay in month            
+            // compute the startDay in month
             while (theDate.weekday != this.locale.firstDay)
                 theDate = theDate.minus({ day: 1 });
 
@@ -1488,9 +1506,6 @@
             //
             // hours
             //
-
-            //if (this.singleMonthView) // to do: localization options
-            //    html = `<span style="font-family: arial; font-size: 12px;">${side === 'start' ? 'Start' : 'End'}: </span>`;
 
             html += '<select class="hourselect">';
             const ampm = selected.toFormat('a', { locale: 'en-US' });
@@ -1946,8 +1961,10 @@
                     this.endDate.endOf('day');
                 }
 
-                if (!this.alwaysShowCalendars)
-                    this.hideCalendars();
+                if (!this.alwaysShowCalendars) {
+                    if (!this.element.triggerHandler('beforeHide.daterangepicker', this))
+                        this.hideCalendars();
+                }
                 this.clickApply();
             }
         },
@@ -2040,9 +2057,8 @@
         * @private
         */
         hoverRange: function (e) {
-            // Not tested yet
             const label = e.target.getAttribute('data-range-key');
-            const dates = this.ranges[label];
+            const dates = this.ranges[label] ?? [this.startDate, this.endDate];
             const leftCalendar = this.leftCalendar;
             const rightCalendar = this.rightCalendar;
 
@@ -2056,23 +2072,24 @@
                 const cal = $(el).parents('.drp-calendar');
                 const dt = cal.hasClass('left') ? leftCalendar.calendar[row][col] : rightCalendar.calendar[row][col];
 
-                if (dates == null) {
-                    // Hover over custom range
-                    $(el).removeClass('in-range');
+                let classAdded = false;
+                if (dt.hasSame(dates[0], 'day')) {
+                    $(el).addClass('start-date');
+                    classAdded = true;
+                }
+                if (dt.hasSame(dates[1], 'day')) {
+                    $(el).addClass('end-date');
+                    classAdded = true;
+                }
+                if (dt.startOf('day') >= dates[0].startOf('day') && dt.startOf('day') <= dates[1].startOf('day')) {
+                    $(el).addClass('in-range');
+                    classAdded = true;
+                }
+                if (!classAdded) {
                     $(el).removeClass('start-date');
                     $(el).removeClass('end-date');
-                } else {
-                    if (dt.hasSame(dates[0], 'day')) {
-                        $(el).addClass('start-date');
-                    } else if (dt.hasSame(dates[1], 'day')) {
-                        $(el).addClass('end-date');
-                    } else if (dt.startOf('day') > dates[0].startOf('day') && dt.startOf('day') < dates[1].startOf('day')) {
-                        $(el).addClass('in-range');
-                    } else {
-                        $(el).removeClass('in-range');
-                    }
+                    $(el).removeClass('in-range');
                 }
-
             });
         },
 
@@ -2083,7 +2100,6 @@
         * @private
         */
         clickDate: function (e) {
-
             if (!$(e.target).hasClass('available')) return;
 
             var title = $(e.target).attr('data-title');
