@@ -1,3 +1,15 @@
+:root {
+  --drp-background: #fff;
+  --drp-border: #ddd;
+
+
+  --drp-arrow: #000;
+  --drp-weekend: red;
+  --drp-weekend-disabled: rgb(255, 163, 163);
+  --drp-today: blue;
+}
+
+
 .daterangepicker {
   position: absolute;
   color: inherit;
@@ -236,8 +248,12 @@
   text-decoration: line-through;
 }
 
+.daterangepicker select.yearselect,
 .daterangepicker select.monthselect,
-.daterangepicker select.yearselect {
+.daterangepicker select.hourselect,
+.daterangepicker select.minuteselect,
+.daterangepicker select.secondselect,
+.daterangepicker select.ampmselect {
   font-size: 12px;
   padding: 1px;
   height: auto;
@@ -258,13 +274,8 @@
 .daterangepicker select.minuteselect,
 .daterangepicker select.secondselect,
 .daterangepicker select.ampmselect {
-  width: 50px;
-  margin: 0 auto;
-  background: #eee;
-  border: 1px solid #eee;
+  width: 45px;
   padding: 2px;
-  outline: 0;
-  font-size: 12px;
 }
 
 .daterangepicker .calendar-time {
@@ -294,6 +305,7 @@
   display: inline-block;
   font-size: 12px;
   padding-right: 8px;
+  color: black;
 }
 
 .daterangepicker .drp-duration-label {
