@@ -1961,10 +1961,11 @@
                     this.endDate.endOf('day');
                 }
 
-                if (!this.alwaysShowCalendars) {
-                    if (!this.element.triggerHandler('beforeHide.daterangepicker', this))
-                        this.hideCalendars();
-                }
+                if (!this.alwaysShowCalendars)
+                    this.hideCalendars();
+
+                if (this.element.triggerHandler('beforeHide.daterangepicker', this))
+                    this.updateView();
                 this.clickApply();
             }
         },
