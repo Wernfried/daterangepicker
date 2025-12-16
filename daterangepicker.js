@@ -82,7 +82,7 @@
         * @property {boolean} showWeekNumbers=false - Show **localized** week numbers at the start of each week on the calendars
         * @property {boolean} showISOWeekNumbers=false - Show **ISO** week numbers at the start of each week on the calendars.<br/>
         * Takes precedence over localized `showWeekNumbers`
-        
+
         * @property {boolean} timePicker=false - Adds select boxes to choose times in addition to dates
         * @property {boolean} timePicker24Hour=true - Use 24-hour instead of 12-hour times, removing the AM/PM selection
         * @property {external:Duration|string|number} timePickerStepSize - Default: `Duration.fromObject({minutes:1})`<br/>Set the time picker step size.<br/>
@@ -705,7 +705,8 @@
 
         this.container.find('.ranges')
             .on('click.daterangepicker', 'li', this.clickRange.bind(this))
-            .on('mouseenter.daterangepicker', 'li', this.hoverRange.bind(this));
+            .on('mouseenter.daterangepicker', 'li', this.hoverRange.bind(this))
+            .on('mouseleave.daterangepicker', 'li', this.leaveRange.bind(this));
 
         this.container.find('.drp-buttons')
             .on('click.daterangepicker', 'button.applyBtn', this.clickApply.bind(this))
@@ -2059,6 +2060,7 @@
         */
         hoverRange: function (e) {
             const label = e.target.getAttribute('data-range-key');
+            const previousDates = [this.startDate, this.endDate];
             const dates = this.ranges[label] ?? [this.startDate, this.endDate];
             const leftCalendar = this.leftCalendar;
             const rightCalendar = this.rightCalendar;
@@ -2074,23 +2076,44 @@
                 const dt = cal.hasClass('left') ? leftCalendar.calendar[row][col] : rightCalendar.calendar[row][col];
 
                 let classAdded = false;
-                if (dt.hasSame(dates[0], 'day')) {
-                    $(el).addClass('start-date');
-                    classAdded = true;
-                }
-                if (dt.hasSame(dates[1], 'day')) {
-                    $(el).addClass('end-date');
-                    classAdded = true;
-                }
-                if (dt.startOf('day') >= dates[0].startOf('day') && dt.startOf('day') <= dates[1].startOf('day')) {
-                    $(el).addClass('in-range');
-                    classAdded = true;
-                }
+                if (dt.hasSame(dates[0], 'day'))
+                    classAdded = $(el).addClass('start-hover').length > 0;
+                if (dt.hasSame(previousDates[0], 'day'))
+                    classAdded = $(el).addClass('start-date').length > 0;
+
+                if (dt.hasSame(dates[1], 'day'))
+                    classAdded = $(el).addClass('end-hover').length > 0;
+                if (previousDates[1] != null && dt.hasSame(previousDates[1], 'day'))
+                    classAdded = $(el).addClass('end-date').length > 0;
+
+                if (dt.startOf('day') >= dates[0].startOf('day') && dt.startOf('day') <= dates[1].startOf('day'))
+                    classAdded = $(el).addClass('range-hover').length > 0;
+                if (dt.startOf('day') >= previousDates[0].startOf('day') && previousDates[1] != null && dt.startOf('day') <= previousDates[1].startOf('day'))
+                    classAdded = $(el).addClass('in-range').length > 0;
+
                 if (!classAdded) {
+                    $(el).removeClass('start-hover');
+                    $(el).removeClass('end-hover');
                     $(el).removeClass('start-date');
                     $(el).removeClass('end-date');
                     $(el).removeClass('in-range');
+                    $(el).removeClass('range-hover');
                 }
+            });
+        },
+
+        /**
+        * User leave ranges, remove hightlight from dates
+        * @param {external:jQuery} e - The Event target
+        * @private
+        */
+        leaveRange: function (e) {
+            this.container.find('.drp-calendar tbody td').each(function (index, el) {
+                //skip week numbers, only look at dates
+                if ($(el).hasClass('week')) return;
+                $(el).removeClass('start-hover');
+                $(el).removeClass('end-hover');
+                $(el).removeClass('range-hover');
             });
         },
 
