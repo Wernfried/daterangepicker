@@ -84,7 +84,8 @@
         * Takes precedence over localized `showWeekNumbers`
 
         * @property {boolean} timePicker=false - Adds select boxes to choose times in addition to dates
-        * @property {boolean} timePicker24Hour=true - Use 24-hour instead of 12-hour times, removing the AM/PM selection
+        * @property {boolean} timePicker24Hour=true|false - Use 24-hour instead of 12-hour times, removing the AM/PM selection.<br/>
+        * Default is derived from current locale [Intl.DateTimeFormat.resolvedOptions.hour12](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/resolvedOptions#hour12).
         * @property {external:Duration|string|number} timePickerStepSize - Default: `Duration.fromObject({minutes:1})`<br/>Set the time picker step size.<br/>
         * Must be a `luxon.Duration` or the number of seconds or a string according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} duration.<br/>
         * Valid values are 1,2,3,4,5,6,10,12,15,20,30 for `Duration.fromObject({seconds: ...})` and `Duration.fromObject({minutes: ...})` 
@@ -137,12 +138,13 @@
         * Use `null` or empty string if you don't like to highlight weekend day names.
         * @property {string} todayClasses=today - CSS class names that will be used to highlight the current day.<br/>
         * Use `null` or empty string if you don't like to highlight the current day.
+        * @property {string} externalStyle=null - External CSS Framework to style the picker. Currently only `'bulma'` is supported.
 
         * @property {string} opens=right - Whether the picker appears aligned to the left, to the right, or centered under the HTML element it's attached to.<br/>
         * `'left' \| 'right' \| 'center'`
         * @property {string} drops=down - Whether the picker appears below or above the HTML element it's attached to.<br/>
         * `'down' \| 'up' \| 'auto'`
-        
+
         * @property {object} ranges={} - Set predefined date {@link #Ranges|Ranges} the user can select from. Each key is the label for the range, 
         * and its value an array with two dates representing the bounds of the range.
         * @property {boolean} showCustomRangeLabel=true - Displays "Custom Range" at the end of the list of predefined {@link #Ranges|Ranges}, 
@@ -219,7 +221,8 @@
         this.showISOWeekNumbers = false;
         this.showCustomRangeLabel = true;
         this.timePicker = false;
-        this.timePicker24Hour = true;
+        const usesMeridiems = new Intl.DateTimeFormat(DateTime.now().locale, { hour: 'numeric' }).resolvedOptions();
+        this.timePicker24Hour = !usesMeridiems.hour12;
         this.timePickerStepSize = Duration.fromObject({ minutes: 1 });
         this.linkedCalendars = true;
         this.autoUpdateInput = true;
@@ -238,6 +241,7 @@
         this.todayClasses = 'today';
         this.altInput = null;
         this.altFormat = null;
+        this.externalStyle = null;
         this.ranges = {};
 
         this.locale = {
@@ -278,29 +282,58 @@
         //data-api options will be overwritten with custom javascript options
         options = $.extend(this.element.data(), options);
 
-        //html template for the picker UI
+        if (typeof options.externalStyle === 'string' && ['bulma'].includes(options.externalStyle))
+            this.externalStyle = options.externalStyle;
+
+        // html template for the picker UI. Custom template would be possible, but this option is not documented
         if (typeof options.template !== 'string' && !(options.template instanceof $)) {
             let template = [
                 '<div class="daterangepicker">',
                 '<div class="ranges"></div>',
                 '<div class="drp-calendar left">',
-                '<div class="calendar-table"></div>',
-                '<div class="calendar-time start-time"></div>'];
+                '<table class="calendar-table">',
+                '<thead></thead>',
+                '<tbody></tbody>',
+                '<tfoot>',
+                '<tr class="calendar-time start-time"></tr>'
+            ];
             if (this.singleMonthView)
-                template.push('<div class="calendar-time end-time"></div>');
+                template.push('<tr class="calendar-time end-time"></tr>');
             template.push(...[
-                '</div>',
-                '<div class="drp-calendar right">',
-                '<div class="calendar-table"></div>',
-                '<div class="calendar-time end-time"></div>',
-                '</div>',
-                '<div class="drp-buttons">',
-                '<span class="drp-duration-label"></span>',
-                '<span class="drp-selected"></span>',
-                '<button class="cancelBtn" type="button"></button>',
-                '<button class="applyBtn" disabled="disabled" type="button"></button> ',
-                '</div>',
+                '</tfoot>',
+                '</table>',
                 '</div>']);
+
+            template.push(...[
+                '<div class="drp-calendar right">',
+                '<table class="calendar-table">',
+                '<thead></thead>',
+                '<tbody></tbody>',
+                '<tfoot>',
+                '<tr class="calendar-time end-time"></tr>',
+                '</tfoot>',
+                '</table>',
+                '</div>']);
+
+            template.push(...[
+                '<div class="drp-buttons">',
+                '<div class="drp-duration-label"></div>',
+                '<div class="drp-selected"></div>']);
+            if (this.externalStyle === 'bulma') {
+                template.push(...[
+                    '<div class="buttons">',
+                    '<button class="cancelBtn button is-small" type="button"></button>',
+                    '<button class="applyBtn button is-small" disabled type="button"></button>',
+                    '</div>'
+                ]);
+            } else {
+                template.push(...[
+                    '<div>',
+                    '<button class="cancelBtn" type="button"></button>',
+                    '<button class="applyBtn" disabled type="button"></button>',
+                    '</div>']);
+            }
+            template.push('</div></div>');
             options.template = template.join('');
         }
 
@@ -1222,6 +1255,10 @@
                 this.leftCalendar.month = this.leftCalendar.month.set({ hour: hour, minute: minute, second: second });
                 if (!this.singleMonthView)
                     this.rightCalendar.month = this.rightCalendar.month.set({ hour: hour, minute: minute, second: second });
+            } else {
+                this.leftCalendar.month = this.leftCalendar.month.set({ hour: 0, minute: 0, second: 0 });
+                if (!this.singleMonthView)
+                    this.rightCalendar.month = this.rightCalendar.month.set({ hour: 0, minute: 0, second: 0 });
             }
 
             /**
@@ -1295,13 +1332,10 @@
 
             var minDate = side === 'left' ? this.minDate : this.startDate;
             var maxDate = this.maxDate;
-            var selected = side === 'left' ? this.startDate : this.endDate;
-            var arrow = this.locale.direction === 'ltr' ? { left: 'chevron-left', right: 'chevron-right' } : { left: 'chevron-right', right: 'chevron-left' };
+            //var selected = side === 'left' ? this.startDate : this.endDate;
+            //var arrow = this.locale.direction === 'ltr' ? { left: 'chevron-left', right: 'chevron-right' } : { left: 'chevron-right', right: 'chevron-left' };
 
-            var html = '<table class="table-condensed">';
-            html += '<thead>';
-            html += '<tr>';
-
+            var html = '<tr>';
             // add empty cell for week number
             if (this.showWeekNumbers || this.showISOWeekNumbers)
                 html += '<th></th>';
@@ -1318,19 +1352,25 @@
                 const maxYear = (maxDate && maxDate.year) ?? this.maxYear;
                 const minYear = (minDate && minDate.year) ?? this.minYear;
 
-                var monthHtml = '<select class="monthselect">';
+                let div = this.externalStyle === 'bulma' ? '<div class="select is-small mr-1">' : '';
+                var monthHtml = `${div}<select class="monthselect">`;
                 for (var m = 1; m <= 12; m++) {
-                    monthHtml += `<option value="${m}"${m === calendar.firstDay.month ? ' selected="selected"' : ''}`;
+                    monthHtml += `<option value="${m}"${m === calendar.firstDay.month ? ' selected' : ''}`;
                     if ((minDate && calendar.firstDay.set({ month: m }) < minDate.startOf('month')) || (maxDate && calendar.firstDay.set({ month: m }) > maxDate.endOf('month')))
-                        monthHtml += ` disabled="disabled"`;
+                        monthHtml += ` disabled`;
                     monthHtml += `>${this.locale.monthNames[m - 1]}</option>`;
                 }
                 monthHtml += "</select>";
+                if (this.externalStyle === 'bulma')
+                    monthHtml += "</div>";
 
-                var yearHtml = '<select class="yearselect">';
+                div = this.externalStyle === 'bulma' ? '<div class="select is-small ml-1">' : '';
+                var yearHtml = `${div}<select class="yearselect">`;
                 for (var y = minYear; y <= maxYear; y++)
-                    yearHtml += `<option value="${y}"${y === calendar.firstDay.year ? ' selected="selected"' : ''}>${y}</option>`;
+                    yearHtml += `<option value="${y}"${y === calendar.firstDay.year ? ' selected' : ''}>${y}</option>`;
                 yearHtml += '</select>';
+                if (this.externalStyle === 'bulma')
+                    yearHtml += "</div>";
 
                 dateHtml = monthHtml + yearHtml;
             }
@@ -1341,10 +1381,10 @@
             } else {
                 html += '<th></th>';
             }
-
             html += '</tr>';
-            html += '<tr>';
 
+            // weekday header
+            html += '<tr>';
             // add week number label
             if (this.showWeekNumbers || this.showISOWeekNumbers)
                 html += `<th class="week">${this.locale.weekLabel}</th>`;
@@ -1358,9 +1398,10 @@
             };
 
             html += '</tr>';
-            html += '</thead>';
-            html += '<tbody>';
+            this.container.find('.drp-calendar.' + side + ' .calendar-table thead').html(html);
 
+            // table body
+            html = '';
             //adjust maxDate to reflect the maxSpan setting in order to
             //grey out end dates beyond the maxSpan
             if (this.endDate == null && this.maxSpan) {
@@ -1445,10 +1486,7 @@
                 html += '</tr>';
             }
 
-            html += '</tbody>';
-            html += '</table>';
-
-            this.container.find('.drp-calendar.' + side + ' .calendar-table').html(html);
+            this.container.find('.drp-calendar.' + side + ' .calendar-table tbody').html(html);
 
         },
 
@@ -1473,6 +1511,8 @@
 
             var selected, minLimit, minDate, maxDate = this.maxDate;
             let html = '';
+            if (this.showWeekNumbers || this.showISOWeekNumbers)
+                html += '<th></th>';
 
             if (this.maxSpan && (!this.maxDate || this.startDate.plus(this.maxSpan) < this.maxDate))
                 maxDate = this.startDate.plus(this.maxSpan);
@@ -1504,10 +1544,12 @@
                     selected = maxDate;
             }
 
+            html += `<th colspan="7">`;
             //
             // hours
             //
-
+            if (this.externalStyle === 'bulma')
+                html += '<div class="select is-small mx-1">';
             html += '<select class="hourselect">';
             const ampm = selected.toFormat('a', { locale: 'en-US' });
             let start = 0;
@@ -1528,9 +1570,9 @@
 
                 if (this.timePicker24Hour) {
                     if (!disabled && i == selected.hour) {
-                        html += `<option value="${i}" selected="selected">${i}</option>`;
+                        html += `<option value="${i}" selected>${i}</option>`;
                     } else if (disabled) {
-                        html += `<option value="${i}" disabled="disabled" class="disabled">${i}</option>`;
+                        html += `<option value="${i}" disabled class="disabled">${i}</option>`;
                     } else {
                         html += `<option value="${i}">${i}</option>`;
                     }
@@ -1539,9 +1581,9 @@
                     const i_ampm = DateTime.fromFormat(`${i % 24}`, 'H').toFormat('a', { locale: 'en-US' });
                     if (ampm == i_ampm) {
                         if (!disabled && i == selected.hour) {
-                            html += `<option ampm="${i_ampm}" value="${i % 24}" selected="selected">${i_12}</option>`;
+                            html += `<option ampm="${i_ampm}" value="${i % 24}" selected>${i_12}</option>`;
                         } else if (disabled) {
-                            html += `<option  ampm="${i_ampm}" value="${i % 24}" disabled="disabled" class="disabled">${i_12}</option>`;
+                            html += `<option  ampm="${i_ampm}" value="${i % 24}" disabled class="disabled">${i_12}</option>`;
                         } else {
                             html += `<option ampm="${i_ampm}" value="${i % 24}">${i_12}</option>`;
                         }
@@ -1550,15 +1592,19 @@
                     }
                 }
             }
-
-            html += '</select> ';
+            html += '</select>';
+            if (this.externalStyle === 'bulma')
+                html += '</div>';
 
             //
             // minutes
             //
 
             if (this.timePickerOpts.showMinutes) {
-                html += ': <select class="minuteselect">';
+                html += ' : ';
+                if (this.externalStyle === 'bulma')
+                    html += '<div class="select is-small mx-1">';
+                html += '<select class="minuteselect">';
 
                 for (var i = 0; i < 60; i += this.timePickerOpts.minuteStep) {
                     var padded = i < 10 ? '0' + i : i;
@@ -1575,15 +1621,16 @@
                         disabled = true;
 
                     if (selected.minute == i && !disabled) {
-                        html += `<option value="${i}" selected="selected">${padded}</option>`;
+                        html += `<option value="${i}" selected>${padded}</option>`;
                     } else if (disabled) {
-                        html += `<option value="${i}" disabled="disabled" class="disabled">${padded}</option>`;
+                        html += `<option value="${i}" disabled class="disabled">${padded}</option>`;
                     } else {
                         html += `<option value="${i}">${padded}</option>`;
                     }
                 }
-
-                html += '</select> ';
+                html += '</select>';
+                if (this.externalStyle === 'bulma')
+                    html += '</div>';
             }
 
             //
@@ -1591,7 +1638,10 @@
             //
 
             if (this.timePickerOpts.showSeconds) {
-                html += ': <select class="secondselect">';
+                html += ' : ';
+                if (this.externalStyle === 'bulma')
+                    html += '<div class="select is-small mx-1">';
+                html += '<select class="secondselect">';
 
                 for (var i = 0; i < 60; i += this.timePickerOpts.secondStep) {
                     var padded = i < 10 ? '0' + i : i;
@@ -1608,15 +1658,16 @@
                         disabled = true;
 
                     if (selected.second == i && !disabled) {
-                        html += `<option value="${i}" selected="selected">${padded}</option>`;
+                        html += `<option value="${i}" selected>${padded}</option>`;
                     } else if (disabled) {
-                        html += `<option value="${i}" disabled="disabled" class="disabled">${padded}</option>`;
+                        html += `<option value="${i}" disabled class="disabled">${padded}</option>`;
                     } else {
                         html += `<option value="${i}">${padded}</option>`;
                     }
                 }
-
-                html += '</select> ';
+                html += '</select>';
+                if (this.externalStyle === 'bulma')
+                    html += '</div>';
             }
 
             //
@@ -1624,6 +1675,8 @@
             //
 
             if (!this.timePicker24Hour) {
+                if (this.externalStyle === 'bulma')
+                    html += '<div class="select is-small mx-1">';
                 html += '<select class="ampmselect">';
 
                 var am_html = '';
@@ -1637,29 +1690,32 @@
                 if (minLimit && selected.startOf('day') < minLimit)
                     disabled = true;
                 if (disabled) {
-                    am_html = ' disabled="disabled" class="disabled"';
-                    pm_html = ' disabled="disabled" class="disabled"';
+                    am_html = ' disabled class="disabled "';
+                    pm_html = ' disabled class="disabled"';
                 } else {
                     if (this.isInvalidTime(selected, this.singleDatePicker ? null : side, 'ampm')) {
                         if (selected.toFormat('a', { locale: 'en-US' }) === 'AM') {
-                            pm_html = ' disabled="disabled" class="disabled"';
+                            pm_html = ' disabled class="disabled"';
                         } else {
-                            am_html = ' disabled="disabled" class="disabled"';
+                            am_html = ' disabled class="disabled"';
                         }
                     }
                 }
 
                 html += `<option value="AM"${am_html}`;
                 if (selected.toFormat('a', { locale: 'en-US' }) === 'AM')
-                    html += ' selected="selected"';
+                    html += ' selected';
                 html += `>${Info.meridiems()[0]}</option><option value="PM"${pm_html}`;
                 if (selected.toFormat('a', { locale: 'en-US' }) === 'PM')
-                    html += ' selected="selected"';
+                    html += ' selected';
                 html += `>${Info.meridiems()[1]}</option>`;
 
                 html += '</select>';
+                if (this.externalStyle === 'bulma')
+                    html += '</div>';
             }
 
+            html += '</div></th>';
             this.container.find(`.drp-calendar .calendar-time.${side}-time`).html(html);
 
         },
@@ -2544,6 +2600,7 @@
             this.element.removeData();
         }
 
+
     };
 
     /**
@@ -2573,6 +2630,8 @@
         });
         return this;
     };
+
+
 
     return DateRangePicker;
 

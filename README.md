@@ -1,6 +1,6 @@
 # Date Range Picker
 
-![Improvely.com](https://i.imgur.com/UTRlaar.png)
+![Daterangepicker Exsample](example/default-style.png)
 
 This date range picker component creates a dropdown menu from which a user can
 select a range of dates.
@@ -108,7 +108,9 @@ Compared to [inital repository](https://github.com/dangrossman/daterangepicker),
 - Highlight range in calendar when hovering over pre-defined ranges
 - Option `autoUpdateInput` defines whether the attached `<input>` element is updated when the user clicks on a date value.<br/>
 In original daterangepicker this parameter defines whether the `<input>` is updated when the user clicks on `Apply` button.
-- Added option `locale.durationFormat` to show customized label for selected duration, e.g. `'4 Days, 6 Hours, 30 Minutes'` 
+- Added option `locale.durationFormat` to show customized label for selected duration, e.g. `'4 Days, 6 Hours, 30 Minutes'`
+- Added option `externalStyle` to use daterangepicker with external CSS Frameworks. Currently only [Bulma](https://bulma.io/) is supported<br/>
+but other frameworks may be added in future releases
 - ... and maybe some new bugs 😉 
 
 ### Localization
@@ -141,6 +143,18 @@ $(document).ready(function () {
 });
 
 ```
+
+### Style and themes
+
+You can style this daterangepicker with [Bulma CSS Framework](https://bulma.io/). In order to do so, set option `externalStyle: 'bulma'` and load 
+stylsheets `https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css` (or equivalent) and `daterangepicker.bulma.css`.
+
+Light and dark theme are supported:
+
+![Bulma dark example](example/bulma-dark.png)
+
+![Bulma light example](example/bulma-light.png)
+
 
 ## Methods
 
@@ -665,7 +679,7 @@ Options for DateRangePicker
 | locale.applyLabel | <code>string</code> | <code>&quot;Apply&quot;</code> | Label of `Apply` Button |
 | locale.cancelLabel | <code>string</code> | <code>&quot;Cancel&quot;</code> | Label of `Cancel` Button |
 | locale.customRangeLabel | <code>string</code> | <code>&quot;Custom&quot;</code> | Range - Title for custom ranges |
-| locale.durationFormat | <code>object</code> \| <code>string</code> | <code>{}</code> | Format a custom label for selected duration, for example `'5 Days, 12 Hours'`.<br/> Define the format either as string, see [Duration.toFormat - Format Tokens](https://moment.github.io/luxon/api-docs/index.html#durationtoformat) or  an object according to [Intl.NumberFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#options),  see [Duration.toHuamn](https://moment.github.io/luxon/api-docs/index.html#durationtohuman). |
+| locale.durationFormat | <code>object</code> \| <code>string</code> | <code>{}</code> | Format a custom label for selected duration, for example `'5 Days, 12 Hours'`.<br/> Define the format either as string, see [Duration.toFormat - Format Tokens](https://moment.github.io/luxon/api-docs/index.html#durationtoformat) or  an object according to [Intl.NumberFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#options),  see [Duration.toHuman](https://moment.github.io/luxon/api-docs/index.html#durationtohuman). |
 
 <a name="Ranges"></a>
 
