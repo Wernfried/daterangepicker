@@ -8,8 +8,8 @@
 @media (prefers-color-scheme: light) {
   :root {
     --datepicker-disabled: hsl(var(--bulma-text-h), var(--bulma-text-s), calc(var(--bulma-text-weak-l) + 30%));
-    --bulma-text-weakend: hsl(0, 85%, 50%);
-    --bulma-text-weakend-disabled: hsl(0, 85%, 80%);
+    --bulma-text-weekend: hsl(0, 85%, 50%);
+    --bulma-text-weekend-disabled: hsl(0, 85%, 80%);
     --datepicker-today: hsl(240, 100%, 50%);
   }
 }
@@ -17,8 +17,8 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --datepicker-disabled: hsl(var(--bulma-text-h), var(--bulma-text-s), calc(var(--bulma-text-weak-l) - 20%));
-    --bulma-text-weakend: hsl(0, 85%, 50%);
-    --bulma-text-weakend-disabled: hsl(0, 85%, 30%);
+    --bulma-text-weekend: hsl(0, 85%, 50%);
+    --bulma-text-weekend-disabled: hsl(0, 85%, 30%);
     --datepicker-today: hsl(240, 85%, 60%);
   }
 }
@@ -26,16 +26,16 @@
 [data-theme=light],
 .theme-light {
   --datepicker-disabled: hsl(var(--bulma-text-h), var(--bulma-text-s), calc(var(--bulma-text-weak-l) + 30%));
-  --bulma-text-weakend: hsl(0, 85%, 50%);
-  --bulma-text-weakend-disabled: hsl(0, 85%, 80%);
+  --bulma-text-weekend: hsl(0, 85%, 50%);
+  --bulma-text-weekend-disabled: hsl(0, 85%, 80%);
   --datepicker-today: hsl(240, 100%, 50%);
 }
 
 [data-theme=dark],
 .theme-dark {
   --datepicker-disabled: hsl(var(--bulma-text-h), var(--bulma-text-s), calc(var(--bulma-text-weak-l) - 20%));
-  --bulma-text-weakend: hsl(0, 85%, 50%);
-  --bulma-text-weakend-disabled: hsl(0, 85%, 30%);
+  --bulma-text-weekend: hsl(0, 85%, 50%);
+  --bulma-text-weekend-disabled: hsl(0, 85%, 30%);
   --datepicker-today: hsl(240, 85%, 60%);
 }
 
@@ -368,12 +368,12 @@
 
 .daterangepicker td.weekend,
 .daterangepicker th.weekend-day {
-  color: var(--bulma-text-weakend)
+  color: var(--bulma-text-weekend)
 }
 
 .daterangepicker td.weekend.disabled,
 .daterangepicker td.weekend.off {
-  color: var(--bulma-text-weakend-disabled);
+  color: var(--bulma-text-weekend-disabled);
 }
 
 .daterangepicker td.today {
