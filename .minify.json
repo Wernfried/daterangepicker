@@ -1,0 +1,8 @@
+{
+    "js": {
+        "type": "terser",
+        "terser": {
+            "mangle": true
+        }
+    }
+}

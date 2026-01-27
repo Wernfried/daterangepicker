@@ -6,9 +6,10 @@
   "style": "daterangepicker.css",
   "scripts": {
     "postversion": "sed -bi -e 's/daterangepicker-4.x@4\\.[0-9]\\+\\.[0-9]\\+/daterangepicker-4.x@%npm_package_version%/' README.md",
-    "prepack": "sed -bi '/# API Documentation/q' README.md",
+    "prepack": "sed -bi '/# API Documentation/q' README.md && npm run minifyFiles",
     "prepare": "jsdoc2md --EOL win32 --example-lang js daterangepicker.js >> README.md",
-    "postpack": "git commit -a -m \"Updated README.md\""
+    "postpack": "git commit -a -m \"Updated README.md\"",
+    "minifyFiles": "minify daterangepicker.js > daterangepicker.min.js && minify daterangepicker.css > daterangepicker.min.css && minify daterangepicker.bulma.css > daterangepicker.bulma.min.css"
   },
   "repository": {
     "type": "git",
@@ -33,7 +34,11 @@
   ],
   "files": [
     "daterangepicker.js",
-    "daterangepicker.css"
+    "daterangepicker.min.js",
+    "daterangepicker.css",
+    "daterangepicker.bulma.css",
+    "daterangepicker.min.css",
+    "daterangepicker.bulma.min.css"
   ],
   "license": "MIT",
   "bugs": {
@@ -42,6 +47,7 @@
   "homepage": "https://github.com/wernfried/daterangepicker",
   "dependencies": {
     "jquery": ">=1.10",
-    "luxon": "^3.5.0"
+    "luxon": "^3.5.0",
+    "minify": "^15.0.1"
   }
 }
