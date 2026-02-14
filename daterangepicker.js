@@ -122,9 +122,10 @@
         * ouput (typically hidden) `<input>` element. Requires `altFormat` to be set.<br/>
         * Must be a single string for `singleDatePicker: true` or an array of two strings for `singleDatePicker: false`<br/>
         * Example: `['#start', '#end']`
-        * @property {function|string} altFormat=null - The output format used for `altInput`.<br/>
-        * Either a string used with {@link https://moment.github.io/luxon/api-docs/index.html#datetimetoformat|toFormat()} or a function.<br/>
-        * Examples: `'yyyyMMddHHmm'`, `(date) => date.toUnixInteger()`
+        * @property {function|string} altFormat - The output format used for `altInput`.<br/>
+        * Default: ISO-8601 basic format without time zone, e.g. `yyyyMMdd'T'HHmm` derived from `timePicker` and `timePickerStepSize`<br/>
+        * If defined, either a string used with {@link https://moment.github.io/luxon/#/formatting?id=table-of-tokens|Format tokens} or a function.<br/>
+        * Examples: `"yyyy:MM:dd'T'HH:mm"`, `(date) => date.toUnixInteger()`
         * @property {boolean} ~~warnings~~ - Not used anymore. Listen to event `violated.daterangepicker` to react on invalid input data
 
         * @property {string} applyButtonClasses=btn-primary - CSS class names that will be added only to the apply button
@@ -2573,17 +2574,43 @@
                     this.element.val(newValue).trigger('change');
             }
 
-            if (this.altInput != null && this.altFormat != null) {
-                if (this.singleDatePicker) {
-                    if ($(this.altInput).is('input'))
-                        $(this.altInput).val(typeof this.altFormat === 'function' ? this.altFormat(this.startDate) : this.startDate.toFormat(this.altFormat));
-                } else {
-                    if (this.altInput.every(x => $(x).is('input'))) {
-                        $(this.altInput[0]).val(typeof this.altFormat === 'function' ? this.altFormat(this.startDate) : this.startDate.toFormat(this.altFormat));
-                        if (this.endDate) {
-                            $(this.altInput[1]).val(typeof this.altFormat === 'function' ? this.altFormat(this.endDate) : this.endDate.toFormat(this.altFormat));
+            if (this.altInput != null) {
+                if (this.altFormat == null) {
+                    let precision = 'day';
+                    if (this.timePicker) {
+                        if (this.timePickerOpts.showSeconds) {
+                            precision = 'second';
+                        } else if (this.timePickerOpts.showMinutes) {
+                            precision = 'minute';
                         } else {
-                            $(this.altInput[1]).val(null);
+                            precision = 'hour';
+                        }
+                    }
+                    if (this.singleDatePicker) {
+                        if ($(this.altInput).is('input'))
+                            $(this.altInput).val(this.startDate.toISO({ format: 'basic', precision: precision, includeOffset: false }));
+                    } else {
+                        if (this.altInput.every(x => $(x).is('input'))) {
+                            $(this.altInput[0]).val(this.startDate.toISO({ format: 'basic', precision: precision, includeOffset: false }));
+                            if (this.endDate) {
+                                $(this.altInput[1]).val(this.endDatetoISO({ format: 'basic', precision: precision, includeOffset: false }));
+                            } else {
+                                $(this.altInput[1]).val(null);
+                            }
+                        }
+                    }
+                } else {
+                    if (this.singleDatePicker) {
+                        if ($(this.altInput).is('input'))
+                            $(this.altInput).val(typeof this.altFormat === 'function' ? this.altFormat(this.startDate) : this.startDate.toFormat(this.altFormat));
+                    } else {
+                        if (this.altInput.every(x => $(x).is('input'))) {
+                            $(this.altInput[0]).val(typeof this.altFormat === 'function' ? this.altFormat(this.startDate) : this.startDate.toFormat(this.altFormat));
+                            if (this.endDate) {
+                                $(this.altInput[1]).val(typeof this.altFormat === 'function' ? this.altFormat(this.endDate) : this.endDate.toFormat(this.altFormat));
+                            } else {
+                                $(this.altInput[1]).val(null);
+                            }
                         }
                     }
                 }
