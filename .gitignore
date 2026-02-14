@@ -3,11 +3,12 @@ node_modules
 npm-debug.log
 *.sublime-workspace
 *.sublime-project
-*.min.js
-*.min.css
 *.sw[onp]
 .vscode
 test*.html
 debug*.html
 daterangepicker-org.js
-
+jquery.*
+luxon.*
+moment.*
+package-lock.json
