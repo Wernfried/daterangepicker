@@ -2593,7 +2593,7 @@
                         if (this.altInput.every(x => $(x).is('input'))) {
                             $(this.altInput[0]).val(this.startDate.toISO({ format: 'basic', precision: precision, includeOffset: false }));
                             if (this.endDate) {
-                                $(this.altInput[1]).val(this.endDatetoISO({ format: 'basic', precision: precision, includeOffset: false }));
+                                $(this.altInput[1]).val(this.endDate.toISO({ format: 'basic', precision: precision, includeOffset: false }));
                             } else {
                                 $(this.altInput[1]).val(null);
                             }
