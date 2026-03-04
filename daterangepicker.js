@@ -671,7 +671,7 @@
             }
 
             var list = '<ul>';
-            for (range in this.ranges) {
+            for (let range in this.ranges) {
                 list += '<li data-range-key="' + range + '">' + range + '</li>';
             }
             if (this.showCustomRangeLabel) {
