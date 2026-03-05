@@ -22,10 +22,9 @@
         root.daterangepicker = factory(root.luxon, root.jQuery);
     }
 }(typeof window !== 'undefined' ? window : this, function (luxon, $) {
-    const DateTime = luxon.DateTime;
-    const Duration = luxon.Duration;
-    const Info = luxon.Info;
-    const Settings = luxon.Settings;
+    const DateTime = window.luxon?.DateTime ?? luxon.DateTime;
+    const Duration = window.luxon?.Duration ?? luxon.Duration;
+    const Info = window.luxon?.Info ?? luxon.Info;
 
     /**
     * @constructs DateRangePicker
