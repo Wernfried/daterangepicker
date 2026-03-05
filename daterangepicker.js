@@ -16,15 +16,15 @@
             if (!jQuery.fn) jQuery.fn = {};
         }
         var luxon = (typeof window != 'undefined' && typeof window.luxon != 'undefined') ? window.luxon : require('luxon');
+        if (luxon && luxon.default) luxon = luxon.default; // ESM interop (added by AI advise)
         module.exports = factory(luxon, jQuery);
     } else {
         // Browser globals
         root.daterangepicker = factory(root.luxon, root.jQuery);
     }
 }(typeof window !== 'undefined' ? window : this, function (luxon, $) {
-    const DateTime = window.luxon?.DateTime ?? luxon.DateTime;
-    const Duration = window.luxon?.Duration ?? luxon.Duration;
-    const Info = window.luxon?.Info ?? luxon.Info;
+    const Luxon = (typeof globalThis !== 'undefined' && globalThis.luxon) ? globalThis.luxon : luxon;
+    const { DateTime, Duration, Info, Settings } = Luxon;
 
     /**
     * @constructs DateRangePicker
@@ -118,13 +118,14 @@
         * and may return a string or array of CSS class names to apply to that date's calendar cell.<br/>
         * Signature: `isCustomDate(date)`
         * @property {string|Array} altInput=null - A {@link https://api.jquery.com/category/selectors/|jQuery selector} string for an alternative
-        * ouput (typically hidden) `<input>` element. Requires `altFormat` to be set.<br/>
+        * output (typically hidden) `<input>` element. Uses `altFormat` to format the value.<br/>
         * Must be a single string for `singleDatePicker: true` or an array of two strings for `singleDatePicker: false`<br/>
         * Example: `['#start', '#end']`
         * @property {function|string} altFormat - The output format used for `altInput`.<br/>
-        * Default: ISO-8601 basic format without time zone, e.g. `yyyyMMdd'T'HHmm` derived from `timePicker` and `timePickerStepSize`<br/>
+        * Default: ISO-8601 basic format without time zone, precisison is derived from `timePicker` and `timePickerStepSize`<br/>
+        * Example `yyyyMMdd'T'HHmm` for `timePicker=true` and display of Minutes<br/> 
         * If defined, either a string used with {@link https://moment.github.io/luxon/#/formatting?id=table-of-tokens|Format tokens} or a function.<br/>
-        * Examples: `"yyyy:MM:dd'T'HH:mm"`, `(date) => date.toUnixInteger()`
+        * Examples: `"yyyy:MM:dd'T'HH:mm"`,<br/>`(date) => date.toUnixInteger()`
         * @property {boolean} ~~warnings~~ - Not used anymore. Listen to event `violated.daterangepicker` to react on invalid input data
 
         * @property {string} applyButtonClasses=btn-primary - CSS class names that will be added only to the apply button
@@ -425,7 +426,7 @@
         if (!this.singleDatePicker) {
             for (let opt of ['minSpan', 'maxSpan', 'defaultSpan']) {
                 if (['string', 'number', 'object'].includes(typeof options[opt])) {
-                    if (options[opt] instanceof Duration && options[opt].isValid) {
+                    if (Duration.isDuration(options[opt]) && options[opt].isValid) {
                         this[opt] = options[opt];
                     } else if (Duration.fromISO(options[opt]).isValid) {
                         this[opt] = Duration.fromISO(options[opt]);
@@ -460,7 +461,7 @@
 
             if (['string', 'object', 'number'].includes(typeof options.timePickerStepSize)) {
                 let duration;
-                if (options.timePickerStepSize instanceof Duration && options.timePickerStepSize.isValid) {
+                if (Duration.isDuration(options.timePickerStepSize) && options.timePickerStepSize.isValid) {
                     duration = options.timePickerStepSize;
                 } else if (Duration.fromISO(options.timePickerStepSize).isValid) {
                     duration = Duration.fromISO(options.timePickerStepSize);
@@ -499,7 +500,7 @@
             if (opt === 'endDate' && this.singleDatePicker)
                 continue;
             if (typeof options[opt] === 'object') {
-                if (options[opt] instanceof DateTime && options[opt].isValid) {
+                if (DateTime.isDateTime(options[opt]) && options[opt].isValid) {
                     this[opt] = options[opt];
                 } else if (options[opt] instanceof Date) {
                     this[opt] = DateTime.fromJSDate(options[opt]);
@@ -627,7 +628,7 @@
             for (let range in options.ranges) {
                 let start, end;
                 if (['string', 'object'].includes(typeof options.ranges[range][0])) {
-                    if (options.ranges[range][0] instanceof DateTime && options.ranges[range][0].isValid) {
+                    if (DateTime.isDateTime(options.ranges[range][0]) && options.ranges[range][0].isValid) {
                         start = options.ranges[range][0];
                     } else if (options.ranges[range][0] instanceof Date) {
                         start = DateTime.fromJSDate(options.ranges[range][0]);
@@ -638,7 +639,7 @@
                     }
                 }
                 if (['string', 'object'].includes(typeof options.ranges[range][1])) {
-                    if (options.ranges[range][1] instanceof DateTime && options.ranges[range][1].isValid) {
+                    if (DateTime.isDateTime(options.ranges[range][1]) && options.ranges[range][1].isValid) {
                         end = options.ranges[range][1];
                     } else if (options.ranges[range][1] instanceof Date) {
                         end = DateTime.fromJSDate(options.ranges[range][1]);
@@ -787,7 +788,7 @@
             // If isValid == true, then value is selected from calendar and stepSize, minDate, maxDate are already considered
             if (isValid === undefined || !isValid) {
                 if (typeof startDate === 'object') {
-                    if (startDate instanceof DateTime && startDate.isValid) {
+                    if (DateTime.isDateTime(startDate) && startDate.isValid) {
                         this.startDate = startDate;
                     } else if (startDate instanceof Date) {
                         this.startDate = DateTime.fromJSDate(startDate);
@@ -815,13 +816,8 @@
             if (!this.singleDatePicker && !this.endDate) {
                 if (this.locale.durationFormat)
                     this.container.find('.drp-duration-label').html('');
-                if (typeof this.locale.format === 'object') {
-                    const empty = `<span>${this.startDate.toLocaleString(this.locale.format)}</span>`;
-                    this.container.find('.drp-selected').html(this.startDate.toLocaleString(this.locale.format) + this.locale.separator + empty);
-                } else {
-                    const empty = `<span>${this.startDate.toFormat(this.locale.format)}</span>`;
-                    this.container.find('.drp-selected').html(this.startDate.toFormat(this.locale.format) + this.locale.separator + empty);
-                }
+                const empty = `<span>${this.formatDate(this.startDate)}</span>`;
+                this.container.find('.drp-selected').html(this.formatDate(this.startDate) + this.locale.separator + empty);
             }
 
             if (!this.isShowing)
@@ -885,11 +881,7 @@
                         this.container.find('.drp-duration-label').html(duration.toFormat(this.locale.durationFormat));
                     }
                 }
-                if (typeof this.locale.format === 'object') {
-                    this.container.find('.drp-selected').html(this.startDate.toLocaleString(this.locale.format) + this.locale.separator + this.endDate.toLocaleString(this.locale.format));
-                } else {
-                    this.container.find('.drp-selected').html(this.startDate.toFormat(this.locale.format) + this.locale.separator + this.endDate.toFormat(this.locale.format));
-                }
+                this.container.find('.drp-selected').html(this.formatDate(this.startDate) + this.locale.separator + this.formatDate(this.endDate));
             }
 
             if (!this.isShowing)
@@ -922,6 +914,20 @@
 
         logDate: function (date) {
             return this.timePicker ? date.toISO({ suppressMilliseconds: true }) : date.toISODate();
+        },
+
+        formatDate: function (date, format = this.locale.format) {
+            if (typeof format === 'object') {
+                return date.toLocaleString(format);
+            } else {
+                if (Settings.defaultLocale === null) {
+                    // Limitation/bug, see https://github.com/moment/luxon/issues/1366
+                    const locale = DateTime.now().locale;
+                    return date.toFormat(format, { locale: locale });
+                } else {
+                    return date.toFormat(format);
+                }
+            }
         },
 
         /**
@@ -1149,11 +1155,7 @@
                     }
                 }
                 if (this.startDate) {
-                    if (typeof this.locale.format === 'object') {
-                        this.container.find('.drp-selected').html(this.startDate.toLocaleString(this.locale.format) + this.locale.separator + this.endDate.toLocaleString(this.locale.format));
-                    } else {
-                        this.container.find('.drp-selected').html(this.startDate.toFormat(this.locale.format) + this.locale.separator + this.endDate.toFormat(this.locale.format));
-                    }
+                    this.container.find('.drp-selected').html(this.formatDate(this.startDate) + this.locale.separator + this.formatDate(this.endDate));
                 }
             }
             this.updateMonthsInView();
@@ -2562,11 +2564,11 @@
                 return;
 
             if (this.element.is('input')) {
-                let newValue = typeof this.locale.format === 'object' ? this.startDate.toLocaleString(this.locale.format) : this.startDate.toFormat(this.locale.format);
+                let newValue = this.formatDate(this.startDate);
                 if (!this.singleDatePicker) {
                     newValue += this.locale.separator
                     if (this.endDate)
-                        newValue += typeof this.locale.format === 'object' ? this.endDate.toLocaleString(this.locale.format) : this.endDate.toFormat(this.locale.format);
+                        newValue += this.formatDate(this.endDate);
                 }
 
                 if (newValue !== this.element.val())
@@ -2601,12 +2603,12 @@
                 } else {
                     if (this.singleDatePicker) {
                         if ($(this.altInput).is('input'))
-                            $(this.altInput).val(typeof this.altFormat === 'function' ? this.altFormat(this.startDate) : this.startDate.toFormat(this.altFormat));
+                            $(this.altInput).val(typeof this.altFormat === 'function' ? this.altFormat(this.startDate) : this.formatDate(this.startDate, this.altFormat));
                     } else {
                         if (this.altInput.every(x => $(x).is('input'))) {
-                            $(this.altInput[0]).val(typeof this.altFormat === 'function' ? this.altFormat(this.startDate) : this.startDate.toFormat(this.altFormat));
+                            $(this.altInput[0]).val(typeof this.altFormat === 'function' ? this.altFormat(this.startDate) : this.formatDate(this.startDate, this.altFormat));
                             if (this.endDate) {
-                                $(this.altInput[1]).val(typeof this.altFormat === 'function' ? this.altFormat(this.endDate) : this.endDate.toFormat(this.altFormat));
+                                $(this.altInput[1]).val(typeof this.altFormat === 'function' ? this.altFormat(this.endDate) : this.formatDate(this.endDate, this.altFormat));
                             } else {
                                 $(this.altInput[1]).val(null);
                             }
