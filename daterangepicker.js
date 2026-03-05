@@ -4,7 +4,7 @@
         // AMD. Make globaly available as well
         define(['luxon', 'jquery'], function (luxon, jquery) {
             if (!jquery.fn) jquery.fn = {}; // webpack server rendering
-            if (typeof luxon !== 'function' && luxon.hasOwnProperty('default')) luxon = luxon['default']
+            if (typeof luxon !== 'function' && luxon.hasOwnProperty('default')) luxon = luxon['default'] // ESM interop
             return factory(luxon, jquery);
         });
     } else if (typeof module === 'object' && module.exports) {
