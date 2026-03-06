@@ -1,4 +1,3 @@
-bower_components
 node_modules
 npm-debug.log
 *.sublime-workspace
@@ -7,8 +6,6 @@ npm-debug.log
 .vscode
 test*.html
 debug*.html
-daterangepicker-org.js
 jquery.*
 luxon.*
-moment.*
 package-lock.json

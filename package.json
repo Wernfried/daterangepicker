@@ -2,21 +2,40 @@
   "name": "daterangepicker-4.x",
   "version": "4.13.14",
   "description": "Date range picker with time component and pre-defined ranges",
-  "main": "daterangepicker.js",
-  "style": "daterangepicker.css",
+  "main": "dist/cjs/daterangepicker.js",
+  "module": "dist/esm/daterangepicker.js",
+  "browser": "dist/umd/daterangepicker.min.js",
+  "jsdelivr": "dist/umd/daterangepicker.min.js",
+  "unpkg": "dist/umd/daterangepicker.min.js",
+  "style": "/css/daterangepicker.css",
+  "source": "src/daterangepicker.js",
   "scripts": {
+    "build": "npm run build_esm && npm run build_cjs && npm run build_umd",
+    "postbuild": "npm run minify_esm && npm run minify_cjs && npm run minify_umd && npm run minify_css",
+    "build_esm": "esbuild src/daterangepicker.js --outfile=dist/esm/daterangepicker.min.js --format=esm",
+    "build_cjs": "esbuild src/daterangepicker.js --outfile=dist/cjs/daterangepicker.min.js --format=cjs",
+    "build_umd": "esbuild src/daterangepicker.js --outfile=dist/umd/daterangepicker.min.js --format=iife --global-name=DateRangePicker",
+    "minify_esm": "esbuild src/daterangepicker.js --outfile=dist/esm/daterangepicker.min.js --minify --format=esm",
+    "minify_cjs": "esbuild src/daterangepicker.js --outfile=dist/cjs/daterangepicker.min.js --minify --format=cjs",
+    "minify_umd": "esbuild src/daterangepicker.js --outfile=dist/umd/daterangepicker.min.js --minify --format=iife --global-name=DateRangePicker",
+    "minify_esm_x": "minify dist/esm/daterangepicker.js > dist/esm/daterangepicker.min.js",
+    "minify_cjs_x": "minify dist/cjs/daterangepicker.js > dist/cjs/daterangepicker.min.js",
+    "minify_umd_x": "minify dist/umd/daterangepicker.js > dist/umd/daterangepicker.min.js",
+    "minify_css": "minify css/daterangepicker.css > css/daterangepicker.min.css && minify css/daterangepicker.bulma.css > css/daterangepicker.bulma.min.css",
+
     "postversion": "sed -bi -e 's/daterangepicker-4.x@4\\.[0-9]\\+\\.[0-9]\\+/daterangepicker-4.x@%npm_package_version%/' README.md",
-    "prepack": "sed -bi '/# API Documentation/q' README.md && npm run minifyFiles",
-    "prepare": "jsdoc2md --EOL win32 --example-lang js daterangepicker.js >> README.md",
-    "postpack": "git commit -a -m \"Updated README.md\"",
-    "minifyFiles": "minify daterangepicker.js > daterangepicker.min.js && minify daterangepicker.css > daterangepicker.min.css && minify daterangepicker.bulma.css > daterangepicker.bulma.min.css"
+    "prepack": "sed -bi '/# API Documentation/q' README.md",
+    "prepare": "jsdoc2md --EOL win32 --example-lang js src/daterangepicker.js >> README.md",
+    "postpack": "git commit -a -m \"Updated README.md\""
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/wernfried/daterangepicker.git"
   },
   "devDependencies": {
-    "jsdoc-to-markdown": "^9.0.0"
+    "esbuild": "^0.27.3",
+    "jsdoc-to-markdown": "^9.1.3",
+    "minify": "^15.2.0"
   },
   "author": {
     "name": "Wernfried Domscheit",
@@ -33,12 +52,8 @@
     "calendar"
   ],
   "files": [
-    "daterangepicker.js",
-    "daterangepicker.min.js",
-    "daterangepicker.css",
-    "daterangepicker.bulma.css",
-    "daterangepicker.min.css",
-    "daterangepicker.bulma.min.css"
+    "/dist",
+    "/css"
   ],
   "license": "MIT",
   "bugs": {
@@ -46,8 +61,7 @@
   },
   "homepage": "https://github.com/wernfried/daterangepicker",
   "dependencies": {
-    "jquery": ">=1.10",
-    "luxon": "^3.5.0",
-    "minify": "^15.0.1"
+    "jquery": ">=4.0",
+    "luxon": "^3.7.2"
   }
 }
