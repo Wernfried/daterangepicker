@@ -1,58 +1,39 @@
 <!DOCTYPE html>
 <html>
 
-<head>
-  <meta charset="UTF-8" />
-  <title>daterangepicker</title>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/luxon/3.5.0/luxon.min.js"></script>
-  <link rel="stylesheet" type="text/css" href="daterangepicker.css" />
-  <script type="text/javascript" src="daterangepicker.js"></script>
-  <link rel="shortcut icon"
-    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='1em' font-size='80'>📅</text></svg>" />
+  <head>
+    <meta charset="UTF-8" />
+    <title>daterangepicker</title>
+    <link rel="icon" href="data:,">
+    <script type="importmap">
+      {
+        "imports": {
+          "jquery": "/node_modules/jquery/dist-module/jquery.module.min.js",
+          "luxon": "/node_modules/luxon/build/es6/luxon.mjs",
+          "daterangepicker": "/dist/esm/daterangepicker.js"
+        }
+      }
+    </script>
+    <link rel="stylesheet" type="text/css" href="css/daterangepicker.css" />
+    <script type="module">
+      import { $, jQuery } from 'jquery';
+      window.$ = window.jQuery = jQuery; // not needed for daterangepicker, but useful
+      import { DateTime, Duration, Info, Settings } from 'luxon';
+      import DateRangePicker from 'daterangepicker';
 
-  <style type="text/css">
-    .weekend {
-      color: red
-    }
-
-    .weekend-day {
-      color: red
-    }
-  </style>
-
-  <script type="text/javascript">
-    const DateTime = luxon.DateTime;
-    const Duration = luxon.Duration;
-    const Info = luxon.Info;
-    const Settings = luxon.Settings;
-
-    $(document).ready(function () {
-      const Settings = luxon.Settings;
-      Settings.defaultLocale = 'de-CH'
-
-      $('#picker').daterangepicker({
-        startDate: DateTime.fromISO('2025-01-01'),
-        singleDatePicker: true,
-        timePicker: true,
-        timePickerStepSize: Duration.fromObject({
-          minutes: 10
-        })
-      }).on('violated.daterangepicker', (ev, picker, violations) => {
-        console.log(JSON.stringify(violations))
-        return true;
+      $(function () {
+        $('#picker').daterangepicker({
+          startDate: DateTime.now()
+        });
+        $('#picker').trigger('click');
       });
-      $('#picker').trigger('click');
+    </script>
+  </head>
 
-    });
-  </script>
-</head>
-
-<body>
-  <div>
-    <input type="text" id="picker" size="30" />
-  </div>
-
-</body>
+  <body>
+    <div>
+      <input type="text" id="picker" size="30" />
+    </div>
+  </body>
 
 </html>

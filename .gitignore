@@ -1,11 +1,6 @@
 node_modules
 npm-debug.log
-*.sublime-workspace
-*.sublime-project
 *.sw[onp]
 .vscode
-test*.html
-debug*.html
-jquery.*
-luxon.*
 package-lock.json
+src/__daterangepicker.js

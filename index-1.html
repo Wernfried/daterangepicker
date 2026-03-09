@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>daterangepicker</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" type="text/css" href="css/daterangepicker.css" />
+
+  <script type="text/javascript" src="node_modules/jquery/dist/jquery.min.js"></script>
+  <script type="text/javascript" src="node_modules/luxon/build/global/luxon.min.js"></script>
+  <script type="text/javascript" src="dist/global/daterangepicker.js"></script>
+  <script type="text/javascript">
+    const DateTime = luxon.DateTime;
+    const Duration = luxon.Duration;
+    const Info = luxon.Info;
+
+    $(function () {
+      $('#picker').daterangepicker({
+        startDate: DateTime.now()
+      });
+      $('#picker').trigger('click');
+    });
+  </script>
+</head>
+
+<body>
+  <div>
+    <input type="text" id="picker" size="30" />
+  </div>
+</body>
+
+</html>

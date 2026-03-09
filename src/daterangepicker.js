@@ -1,6 +1,5 @@
 import { DateTime, Duration, Info, Settings } from 'luxon';
-import $ from 'jquery';
-
+import { $ } from 'jquery';
 
 /**
 * @constructs DateRangePicker
@@ -2610,26 +2609,28 @@ class DateRangePicker {
 * @param {string} range
 */
 
-/**
-* Initiate a new DateRangePicker
-* @name DateRangePicker.daterangepicker
-* @function
-* @param {Options} options - Object to configure the DateRangePicker
-* @param {callback} callback - Callback function executed when date is changed.<br/>
-* Callback function is executed if selected date values has changed, before picker is hidden and before the attached `<input>` element is updated. 
-* As alternative listen to the {@link #event_apply.daterangepicker|"apply.daterangepicker"} event
-* @returns DateRangePicker
-*/
-$.fn.daterangepicker = function (options, callback) {
-    const implementOptions = $.extend(true, {}, $.fn.daterangepicker.defaultOptions, options);
-    this.each(function () {
-        const el = $(this);
-        if (el.data('daterangepicker'))
-            el.data('daterangepicker').remove();
-        el.data('daterangepicker', new DateRangePicker(el, implementOptions, callback));
-    });
-    return this;
-};
+if (!$.fn.daterangepicker) {
+    /**
+    * Initiate a new DateRangePicker
+    * @name DateRangePicker.daterangepicker
+    * @function
+    * @param {Options} options - Object to configure the DateRangePicker
+    * @param {callback} callback - Callback function executed when date is changed.<br/>
+    * Callback function is executed if selected date values has changed, before picker is hidden and before the attached `<input>` element is updated. 
+    * As alternative listen to the {@link #event_apply.daterangepicker|"apply.daterangepicker"} event
+    * @returns DateRangePicker
+    */
+    $.fn.daterangepicker = function (options, callback) {
+        const implementOptions = $.extend(true, {}, $.fn.daterangepicker.defaultOptions, options);
+        this.each(function () {
+            const el = $(this);
+            if (el.data('daterangepicker'))
+                el.data('daterangepicker').remove();
+            el.data('daterangepicker', new DateRangePicker(el, implementOptions, callback));
+        });
+        return this;
+    };
+}
 
 
 
