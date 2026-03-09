@@ -41,9 +41,9 @@ Above samples are based on the [original repository](https://github.com/dangross
 <script type="importmap">
 {
    "imports": {
-      "jquery": "https://cdn.jsdelivr.net/npm/jquery@4.0.0/dist-module/jquery.module.min.js",
-      "luxon": "https://moment.github.io/luxon/es6/luxon.min.js",
-      "daterangepicker": "https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.14.0/dist/esm/daterangepicker.min.js"
+      "jquery": "https://cdn.jsdelivr.net/npm/jquery@4.0.0/+esm",
+      "luxon": "https://cdn.jsdelivr.net/npm/luxon@3.7.2/+esm",
+      "daterangepicker": "https://cdn.jsdelivr.net/npm/daterangepicker-4.x@4.14.0/+esm"
    }
 }
 </script>
