@@ -22,8 +22,9 @@
     "minify_umd": "esbuild src/daterangepicker.js --outfile=dist/umd/daterangepicker.min.js --minify --format=iife --global-name=DateRangePicker",
     "minify_global": "esbuild src/__daterangepicker.js --outfile=dist/global/daterangepicker.min.js --minify --format=iife --global-name=DateRangePicker",
     "minify_css": "minify css/daterangepicker.css > css/daterangepicker.min.css && minify css/daterangepicker.bulma.css > css/daterangepicker.bulma.min.css",
+    "unix2dos": "unix2dos dist/cjs/*.js dist/esm/*.js dist/global/*.js dist/umd/*.js",
     "postversion": "sed -bi -e 's/daterangepicker-4.x@4\\.[0-9]\\+\\.[0-9]\\+/daterangepicker-4.x@%npm_package_version%/' README.md",
-    "prepack": "sed -bi '/# API Documentation/q' README.md && npm run build",
+    "prepack": "sed -bi '/# API Documentation/q' README.md && npm run build && npm run unix2dos",
     "prepare": "jsdoc2md --EOL win32 --example-lang js src/daterangepicker.js >> README.md",
     "postpack": "git commit -a -m \"Updated README.md\""
   },
