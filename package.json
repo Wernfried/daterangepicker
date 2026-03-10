@@ -10,7 +10,7 @@
   "style": "css/daterangepicker.css",
   "source": "src/daterangepicker.js",
   "scripts": {
-    "prebuild": "sed -b 's/^import .*//' src/daterangepicker.js > src/__daterangepicker.js",
+    "prebuild": "cat src/global.js > src/__daterangepicker.js && sed -b -E \"s/^(im|ex)port .*//\" src/daterangepicker.js >> src/__daterangepicker.js",
     "build": "npm run build_esm && npm run build_global",
     "postbuild": "npm run minify_esm && npm run minify_global && npm run minify_css",
     "build_esm": "esbuild src/daterangepicker.js --outfile=dist/esm/daterangepicker.js --format=esm",
