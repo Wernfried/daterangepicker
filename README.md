@@ -81,6 +81,20 @@ Above samples are based on the [original repository](https://github.com/dangross
 </script>
 ```
 
+#### Use of `data-*` attributes
+```html
+<script ...></script>
+<input type="text" id="picker" data-start-date="2026-02-01" data-end-date="2026-02-20" data-show-week-numbers="true" />
+
+<script type="text/javascript">
+   $(function() {
+      $('#picker').daterangepicker();
+   });
+</script>
+```
+See [HTML5 data-* Attributes](https://api.jquery.com/data/#data-html5)<br/>
+Options in `daterangepicker({...})` take precedence over `data-*` attributes.
+
 
 
 ## Examples
