@@ -1,25 +1,8 @@
 var DateRangePicker = (() => {
-  var __defProp = Object.defineProperty;
-  var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
-  var __getOwnPropNames = Object.getOwnPropertyNames;
-  var __hasOwnProp = Object.prototype.hasOwnProperty;
-  var __export = (target, all) => {
-    for (var name in all)
-      __defProp(target, name, { get: all[name], enumerable: true });
-  };
-  var __copyProps = (to, from, except, desc) => {
-    if (from && typeof from === "object" || typeof from === "function") {
-      for (let key2 of __getOwnPropNames(from))
-        if (!__hasOwnProp.call(to, key2) && key2 !== except)
-          __defProp(to, key2, { get: () => from[key2], enumerable: !(desc = __getOwnPropDesc(from, key2)) || desc.enumerable });
-    }
-    return to;
-  };
-  var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
-  var daterangepicker_exports = {};
-  __export(daterangepicker_exports, {
-    default: () => daterangepicker_default
-  });
+  const DateTime = luxon.DateTime;
+  const Duration = luxon.Duration;
+  const Info = luxon.Info;
+  const Settings = luxon.Settings;
   class DateRangePicker {
     constructor(element, options, cb) {
       this.parentEl = "body";
@@ -1962,6 +1945,4 @@ var DateRangePicker = (() => {
       return this;
     };
   }
-  var daterangepicker_default = DateRangePicker;
-  return __toCommonJS(daterangepicker_exports);
 })();
