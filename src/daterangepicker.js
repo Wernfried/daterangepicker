@@ -242,6 +242,14 @@ class DateRangePicker {
         this.leftCalendar = {};
         this.rightCalendar = {};
 
+        //custom options from user
+        if (typeof options !== 'object' || options === null)
+            options = {};
+
+        //allow setting options with data attributes
+        //data-api options will be overwritten with custom javascript options
+        options = $.extend(this.element.data(), options);
+
         if (typeof options.singleDatePicker === 'boolean')
             this.singleDatePicker = options.singleDatePicker;
 
@@ -250,14 +258,6 @@ class DateRangePicker {
         } else {
             this.singleMonthView = false;
         }
-
-        //custom options from user
-        if (typeof options !== 'object' || options === null)
-            options = {};
-
-        //allow setting options with data attributes
-        //data-api options will be overwritten with custom javascript options
-        options = $.extend(this.element.data(), options);
 
         if (typeof options.externalStyle === 'string' && ['bulma'].includes(options.externalStyle))
             this.externalStyle = options.externalStyle;
@@ -547,6 +547,9 @@ class DateRangePicker {
                 this.altInput = options.altInput
             } else if (!this.singleDatePicker && Array.isArray(options.altInput) && options.altInput.length === 2) {
                 this.altInput = options.altInput;
+            } else {
+                const note = `Value of "altInput" must be ` + (this.singleDatePicker ? 'a string' : 'an array of two string elements');
+                console.error(`Option 'altInput' ${JSON.stringify(options.altInput)} is not valid\n`, note);
             }
         }
 
@@ -844,17 +847,9 @@ class DateRangePicker {
 
         this.previousRightTime = this.endDate;
 
-        if (!this.singleDatePicker) {
-            if (this.locale.durationFormat) {
-                const duration = this.endDate.diff(this.startDate).rescale();
-                if (typeof this.locale.durationFormat === 'object') {
-                    this.container.find('.drp-duration-label').html(duration.toHuman(this.locale.durationFormat));
-                } else {
-                    this.container.find('.drp-duration-label').html(duration.toFormat(this.locale.durationFormat));
-                }
-            }
+        this.updateDurationLabel();
+        if (!this.singleDatePicker)
             this.container.find('.drp-selected').html(this.formatDate(this.startDate) + this.locale.separator + this.formatDate(this.endDate));
-        }
 
         if (!this.isShowing)
             this.updateElement();
@@ -899,6 +894,27 @@ class DateRangePicker {
             } else {
                 return date.toFormat(format);
             }
+        }
+    }
+
+
+    updateDurationLabel() {
+        if (this.singleDatePicker || this.locale.durationFormat == null)
+            return;
+        if (!this.endDate) {
+            this.container.find('.drp-duration-label').html('');
+            return;
+        }
+
+        let duration = this.endDate.plus({ milliseconds: 1 }).diff(this.startDate).rescale().set({ milliseconds: 0 });
+        if (!this.timePicker)
+            duration = duration.set({ seconds: 0, minutes: 0, hours: 0 });
+        duration = duration.removeZeros();
+
+        if (typeof this.locale.durationFormat === 'object') {
+            this.container.find('.drp-duration-label').html(duration.toHuman(this.locale.durationFormat));
+        } else {
+            this.container.find('.drp-duration-label').html(duration.toFormat(this.locale.durationFormat));
         }
     }
 
@@ -1117,19 +1133,10 @@ class DateRangePicker {
                 this.container.find('.calendar-time.end-time select').prop('disabled', false).removeClass('disabled');
             }
         }
-        if (this.endDate) {
-            if (this.locale.durationFormat && !this.singleDatePicker) {
-                const duration = this.endDate.diff(this.startDate).rescale();
-                if (typeof this.locale.durationFormat === 'object') {
-                    this.container.find('.drp-duration-label').html(duration.toHuman(this.locale.durationFormat));
-                } else {
-                    this.container.find('.drp-duration-label').html(duration.toFormat(this.locale.durationFormat));
-                }
-            }
-            if (this.startDate) {
-                this.container.find('.drp-selected').html(this.formatDate(this.startDate) + this.locale.separator + this.formatDate(this.endDate));
-            }
-        }
+        this.updateDurationLabel();
+        if (this.startDate && this.endDate)
+            this.container.find('.drp-selected').html(this.formatDate(this.startDate) + this.locale.separator + this.formatDate(this.endDate));
+
         this.updateMonthsInView();
         this.updateCalendars();
         this.updateFormInputs();
@@ -1807,11 +1814,9 @@ class DateRangePicker {
 
     /**
     * Shows the picker
-    * @param {external:jQuery} e - The Event target
     * @emits "show.daterangepicker"
-    * @private
     */
-    show(e) {
+    show() {
         if (this.isShowing) return;
 
         // Create a click proxy that is private to this instance of datepicker, for unbinding
@@ -1849,12 +1854,10 @@ class DateRangePicker {
 
     /**
     * Hides the picker
-    * @param {external:jQuery} e - The Event target
     * @emits "beforeHide.daterangepicker"
     * @emits "hide.daterangepicker"
-    * @private
     */
-    hide(e) {
+    hide() {
         if (!this.isShowing) return;
 
         //incomplete date selection, revert to last values
@@ -1894,10 +1897,8 @@ class DateRangePicker {
 
     /**
     * Toggles visibility of the picker
-    * @param {external:jQuery} e - The Event target
-    * @private
     */
-    toggle(e) {
+    toggle() {
         if (this.isShowing) {
             this.hide();
         } else {
@@ -2300,11 +2301,10 @@ class DateRangePicker {
 
     /**
     * User clicked `Apply` button
-    * @param {external:jQuery} e - The Event target
     * @emits "apply.daterangepicker"
     * @private
     */
-    clickApply(e) {
+    clickApply() {
         this.hide();
         /**
         * Emitted when the `Apply` button is clicked, or when a predefined {@link #Ranges|Ranges} is clicked 
@@ -2317,11 +2317,10 @@ class DateRangePicker {
 
     /**
     * User clicked `Cancel` button
-    * @param {external:jQuery} e - The Event target
     * @emits "cancel.daterangepicker"
     * @private
     */
-    clickCancel(e) {
+    clickCancel() {
         this.startDate = this.oldStartDate;
         this.endDate = this.oldEndDate;
         this.hide();
