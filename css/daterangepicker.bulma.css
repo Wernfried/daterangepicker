@@ -309,6 +309,7 @@
   border-top: 1px solid var(--bulma-border);
   padding: 12px 12px;
   display: flex;
+  justify-content: flex-end;
   align-items: center;
   gap: 12px;
   white-space: nowrap;
