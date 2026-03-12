@@ -63,6 +63,9 @@ class DateRangePicker {
     this.isShowing = false;
     this.leftCalendar = {};
     this.rightCalendar = {};
+    if (typeof options !== "object" || options === null)
+      options = {};
+    options = $.extend(this.element.data(), options);
     if (typeof options.singleDatePicker === "boolean")
       this.singleDatePicker = options.singleDatePicker;
     if (!this.singleDatePicker && typeof options.singleMonthView === "boolean") {
@@ -70,9 +73,6 @@ class DateRangePicker {
     } else {
       this.singleMonthView = false;
     }
-    if (typeof options !== "object" || options === null)
-      options = {};
-    options = $.extend(this.element.data(), options);
     if (typeof options.externalStyle === "string" && ["bulma"].includes(options.externalStyle))
       this.externalStyle = options.externalStyle;
     if (typeof options.template !== "string" && !(options.template instanceof $)) {
@@ -166,7 +166,7 @@ class DateRangePicker {
         var rangeHtml = elem.value;
         this.locale.customRangeLabel = rangeHtml;
       }
-      if (["string", "object"].includes(typeof options.locale.durationFormat) && options.locale.durationFormat != null)
+      if (["string", "object", "function"].includes(typeof options.locale.durationFormat) && options.locale.durationFormat != null)
         this.locale.durationFormat = options.locale.durationFormat;
     }
     this.container.addClass(this.locale.direction);
@@ -344,11 +344,15 @@ class DateRangePicker {
     }
     if (["function", "string"].includes(typeof options.altFormat))
       this.altFormat = options.altFormat;
-    if (["object", "string"].includes(typeof options.altInput) && options.altInput != null) {
+    if (typeof options.altInput === "string" || Array.isArray(options.altInput)) {
       if (this.singleDatePicker && typeof options.altInput === "string") {
-        this.altInput = options.altInput;
+        this.altInput = $(options.altInput).is("input") ? options.altInput : null;
       } else if (!this.singleDatePicker && Array.isArray(options.altInput) && options.altInput.length === 2) {
-        this.altInput = options.altInput;
+        this.altInput = options.altInput.every((x) => typeof x === "string" && $(x).is("input")) ? options.altInput : null;
+      } else {
+        const note = `Value of "altInput" must be ` + (this.singleDatePicker ? "a string" : "an array of two string elements");
+        console.error(`Option 'altInput' ${JSON.stringify(options.altInput)} is not valid
+`, note);
       }
     }
     if (options.warnings !== void 0)
@@ -585,17 +589,9 @@ class DateRangePicker {
     if (isValid === void 0 || !isValid)
       this.validateInput();
     this.previousRightTime = this.endDate;
-    if (!this.singleDatePicker) {
-      if (this.locale.durationFormat) {
-        const duration = this.endDate.diff(this.startDate).rescale();
-        if (typeof this.locale.durationFormat === "object") {
-          this.container.find(".drp-duration-label").html(duration.toHuman(this.locale.durationFormat));
-        } else {
-          this.container.find(".drp-duration-label").html(duration.toFormat(this.locale.durationFormat));
-        }
-      }
+    this.updateDurationLabel();
+    if (!this.singleDatePicker)
       this.container.find(".drp-selected").html(this.formatDate(this.startDate) + this.locale.separator + this.formatDate(this.endDate));
-    }
     if (!this.isShowing)
       this.updateElement();
     this.updateMonthsInView();
@@ -633,6 +629,27 @@ class DateRangePicker {
         return date.toFormat(format, { locale });
       } else {
         return date.toFormat(format);
+      }
+    }
+  }
+  updateDurationLabel() {
+    if (this.singleDatePicker || this.locale.durationFormat == null)
+      return;
+    if (!this.endDate) {
+      this.container.find(".drp-duration-label").html("");
+      return;
+    }
+    if (typeof this.locale.durationFormat === "function") {
+      this.container.find(".drp-duration-label").html(this.locale.durationFormat(this.startDate, this.endDate));
+    } else {
+      let duration = this.endDate.plus({ milliseconds: 1 }).diff(this.startDate).rescale().set({ milliseconds: 0 });
+      if (!this.timePicker)
+        duration = duration.set({ seconds: 0, minutes: 0, hours: 0 });
+      duration = duration.removeZeros();
+      if (typeof this.locale.durationFormat === "object") {
+        this.container.find(".drp-duration-label").html(duration.toHuman(this.locale.durationFormat));
+      } else {
+        this.container.find(".drp-duration-label").html(duration.toFormat(this.locale.durationFormat));
       }
     }
   }
@@ -812,19 +829,9 @@ class DateRangePicker {
         this.container.find(".calendar-time.end-time select").prop("disabled", false).removeClass("disabled");
       }
     }
-    if (this.endDate) {
-      if (this.locale.durationFormat && !this.singleDatePicker) {
-        const duration = this.endDate.diff(this.startDate).rescale();
-        if (typeof this.locale.durationFormat === "object") {
-          this.container.find(".drp-duration-label").html(duration.toHuman(this.locale.durationFormat));
-        } else {
-          this.container.find(".drp-duration-label").html(duration.toFormat(this.locale.durationFormat));
-        }
-      }
-      if (this.startDate) {
-        this.container.find(".drp-selected").html(this.formatDate(this.startDate) + this.locale.separator + this.formatDate(this.endDate));
-      }
-    }
+    this.updateDurationLabel();
+    if (this.startDate && this.endDate)
+      this.container.find(".drp-selected").html(this.formatDate(this.startDate) + this.locale.separator + this.formatDate(this.endDate));
     this.updateMonthsInView();
     this.updateCalendars();
     this.updateFormInputs();
@@ -1341,18 +1348,16 @@ class DateRangePicker {
   }
   /**
   * Shows the picker
-  * @param {external:jQuery} e - The Event target
   * @emits "show.daterangepicker"
-  * @private
   */
-  show(e) {
+  show() {
     if (this.isShowing) return;
-    this._outsideClickProxy = function(e2) {
-      this.outsideClick(e2);
+    this._outsideClickProxy = function(e) {
+      this.outsideClick(e);
     }.bind(this);
     $(document).on("mousedown.daterangepicker", this._outsideClickProxy).on("touchend.daterangepicker", this._outsideClickProxy).on("click.daterangepicker", "[data-toggle=dropdown]", this._outsideClickProxy).on("focusin.daterangepicker", this._outsideClickProxy);
-    $(window).on("resize.daterangepicker", function(e2) {
-      this.move(e2);
+    $(window).on("resize.daterangepicker", function(e) {
+      this.move(e);
     }.bind(this));
     this.oldStartDate = this.startDate;
     this.oldEndDate = this.endDate;
@@ -1365,12 +1370,10 @@ class DateRangePicker {
   }
   /**
   * Hides the picker
-  * @param {external:jQuery} e - The Event target
   * @emits "beforeHide.daterangepicker"
   * @emits "hide.daterangepicker"
-  * @private
   */
-  hide(e) {
+  hide() {
     if (!this.isShowing) return;
     if (!this.endDate) {
       this.startDate = this.oldStartDate;
@@ -1389,10 +1392,8 @@ class DateRangePicker {
   }
   /**
   * Toggles visibility of the picker
-  * @param {external:jQuery} e - The Event target
-  * @private
   */
-  toggle(e) {
+  toggle() {
     if (this.isShowing) {
       this.hide();
     } else {
@@ -1697,21 +1698,19 @@ class DateRangePicker {
   }
   /**
   * User clicked `Apply` button
-  * @param {external:jQuery} e - The Event target
   * @emits "apply.daterangepicker"
   * @private
   */
-  clickApply(e) {
+  clickApply() {
     this.hide();
     this.element.trigger("apply.daterangepicker", this);
   }
   /**
   * User clicked `Cancel` button
-  * @param {external:jQuery} e - The Event target
   * @emits "cancel.daterangepicker"
   * @private
   */
-  clickCancel(e) {
+  clickCancel() {
     this.startDate = this.oldStartDate;
     this.endDate = this.oldEndDate;
     this.hide();
@@ -1844,6 +1843,7 @@ class DateRangePicker {
     this.setStartDate(start, false);
     this.setEndDate(end, false);
     this.updateView();
+    this.updateAltInput();
     if (trigger)
       this.element.trigger("inputChanged.daterangepicker", this);
   }
@@ -1876,47 +1876,51 @@ class DateRangePicker {
         if (this.endDate)
           newValue += this.formatDate(this.endDate);
       }
+      this.updateAltInput();
       if (newValue !== this.element.val())
         this.element.val(newValue).trigger("change");
+    } else {
+      this.updateAltInput();
     }
-    if (this.altInput != null) {
-      if (this.altFormat == null) {
-        let precision = "day";
-        if (this.timePicker) {
-          if (this.timePickerOpts.showSeconds) {
-            precision = "second";
-          } else if (this.timePickerOpts.showMinutes) {
-            precision = "minute";
-          } else {
-            precision = "hour";
-          }
-        }
-        if (this.singleDatePicker) {
-          if ($(this.altInput).is("input"))
-            $(this.altInput).val(this.startDate.toISO({ format: "basic", precision, includeOffset: false }));
+  }
+  /**
+  * Update altInput `<input>` element with selected value
+  */
+  updateAltInput() {
+    if (this.altInput == null)
+      return;
+    if (!this.singleDatePicker && !this.endDate)
+      $(this.altInput[1]).val(null);
+    if (this.altFormat == null) {
+      let precision = "day";
+      if (this.timePicker) {
+        if (this.timePickerOpts.showSeconds) {
+          precision = "second";
+        } else if (this.timePickerOpts.showMinutes) {
+          precision = "minute";
         } else {
-          if (this.altInput.every((x) => $(x).is("input"))) {
-            $(this.altInput[0]).val(this.startDate.toISO({ format: "basic", precision, includeOffset: false }));
-            if (this.endDate) {
-              $(this.altInput[1]).val(this.endDate.toISO({ format: "basic", precision, includeOffset: false }));
-            } else {
-              $(this.altInput[1]).val(null);
-            }
-          }
+          precision = "hour";
         }
+      }
+      const startDate = this.startDate.toISO({ format: "basic", precision, includeOffset: false });
+      if (this.singleDatePicker) {
+        $(this.altInput).val(startDate);
       } else {
-        if (this.singleDatePicker) {
-          if ($(this.altInput).is("input"))
-            $(this.altInput).val(typeof this.altFormat === "function" ? this.altFormat(this.startDate) : this.formatDate(this.startDate, this.altFormat));
-        } else {
-          if (this.altInput.every((x) => $(x).is("input"))) {
-            $(this.altInput[0]).val(typeof this.altFormat === "function" ? this.altFormat(this.startDate) : this.formatDate(this.startDate, this.altFormat));
-            if (this.endDate) {
-              $(this.altInput[1]).val(typeof this.altFormat === "function" ? this.altFormat(this.endDate) : this.formatDate(this.endDate, this.altFormat));
-            } else {
-              $(this.altInput[1]).val(null);
-            }
-          }
+        $(this.altInput[0]).val(startDate);
+        if (this.endDate) {
+          const endDate2 = this.endDate.toISO({ format: "basic", precision, includeOffset: false });
+          $(this.altInput[1]).val(endDate2);
+        }
+      }
+    } else {
+      const startDate = typeof this.altFormat === "function" ? this.altFormat(this.startDate) : this.formatDate(this.startDate, this.altFormat);
+      if (this.singleDatePicker) {
+        $(this.altInput).val(startDate);
+      } else {
+        $(this.altInput[0]).val(startDate);
+        if (this.endDate) {
+          const endDate2 = typeof this.altFormat === "function" ? this.altFormat(this.endDate) : this.formatDate(this.endDate, this.altFormat);
+          $(this.altInput[1]).val(endDate2);
         }
       }
     }
