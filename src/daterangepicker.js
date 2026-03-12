@@ -146,10 +146,11 @@ class DateRangePicker {
         * @property {string} locale.applyLabel=Apply - Label of `Apply` Button
         * @property {string} locale.cancelLabel=Cancel - Label of `Cancel` Button
         * @property {string} locale.customRangeLabel=Custom Range - Title for custom ranges
-        * @property {object|string} locale.durationFormat={} - Format a custom label for selected duration, for example `'5 Days, 12 Hours'`.<br/>
+        * @property {object|string|function} locale.durationFormat={} - Format a custom label for selected duration, for example `'5 Days, 12 Hours'`.<br/>
         * Define the format either as string, see [Duration.toFormat - Format Tokens](https://moment.github.io/luxon/api-docs/index.html#durationtoformat) or 
         * an object according to [Intl.NumberFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#options), 
-        * see [Duration.toHuamn](https://moment.github.io/luxon/api-docs/index.html#durationtohuman).
+        * see [Duration.toHuamn](https://moment.github.io/luxon/api-docs/index.html#durationtohuman).<br/>
+        * Or custom function as `(startDate, endDate) => {}`
         */
 
         /**
@@ -367,7 +368,7 @@ class DateRangePicker {
                 this.locale.customRangeLabel = rangeHtml;
             }
 
-            if (['string', 'object'].includes(typeof options.locale.durationFormat) && options.locale.durationFormat != null)
+            if (['string', 'object', 'function'].includes(typeof options.locale.durationFormat) && options.locale.durationFormat != null)
                 this.locale.durationFormat = options.locale.durationFormat;
         }
         this.container.addClass(this.locale.direction);
@@ -542,11 +543,11 @@ class DateRangePicker {
 
         if (['function', 'string'].includes(typeof options.altFormat))
             this.altFormat = options.altFormat;
-        if (['object', 'string'].includes(typeof options.altInput) && options.altInput != null) {
+        if (typeof options.altInput === 'string' || Array.isArray(options.altInput)) {
             if (this.singleDatePicker && typeof options.altInput === 'string') {
-                this.altInput = options.altInput
+                this.altInput = $(options.altInput).is('input') ? options.altInput : null;
             } else if (!this.singleDatePicker && Array.isArray(options.altInput) && options.altInput.length === 2) {
-                this.altInput = options.altInput;
+                this.altInput = options.altInput.every(x => typeof x === 'string' && $(x).is('input')) ? options.altInput : null;
             } else {
                 const note = `Value of "altInput" must be ` + (this.singleDatePicker ? 'a string' : 'an array of two string elements');
                 console.error(`Option 'altInput' ${JSON.stringify(options.altInput)} is not valid\n`, note);
@@ -906,15 +907,19 @@ class DateRangePicker {
             return;
         }
 
-        let duration = this.endDate.plus({ milliseconds: 1 }).diff(this.startDate).rescale().set({ milliseconds: 0 });
-        if (!this.timePicker)
-            duration = duration.set({ seconds: 0, minutes: 0, hours: 0 });
-        duration = duration.removeZeros();
-
-        if (typeof this.locale.durationFormat === 'object') {
-            this.container.find('.drp-duration-label').html(duration.toHuman(this.locale.durationFormat));
+        if (typeof this.locale.durationFormat === 'function') {
+            this.container.find('.drp-duration-label').html(this.locale.durationFormat(this.startDate, this.endDate));
         } else {
-            this.container.find('.drp-duration-label').html(duration.toFormat(this.locale.durationFormat));
+            let duration = this.endDate.plus({ milliseconds: 1 }).diff(this.startDate).rescale().set({ milliseconds: 0 });
+            if (!this.timePicker)
+                duration = duration.set({ seconds: 0, minutes: 0, hours: 0 });
+            duration = duration.removeZeros();
+
+            if (typeof this.locale.durationFormat === 'object') {
+                this.container.find('.drp-duration-label').html(duration.toHuman(this.locale.durationFormat));
+            } else {
+                this.container.find('.drp-duration-label').html(duration.toFormat(this.locale.durationFormat));
+            }
         }
     }
 
@@ -949,11 +954,15 @@ class DateRangePicker {
         * @event
         * @name "violated.daterangepicker"
         * @param {DateRangePicker} this - The daterangepicker object
-        * @param {InputViolation} violations - An object of input violations
+        * @param {InputViolation} result - An object of input violations
         * @return {boolean} skip - If `true`, then input values are not corrected and remain invalid
         * @example 
-        * $('#picker').on('violated.daterangepicker', (ev, picker, violations))
-        * [ DateTime.fromISO('2025-02-05'), DateTime.fromISO('2025-02-20'), { startDate: { violations: [{old: ..., new: ..., reasson: 'minDate'}] } } ]
+        * $('#picker').on('violated.daterangepicker', (ev, picker, result) => {
+        *   for (let vio of result.startDate.violations ) {
+        *     if (vio.reason === 'maxDate') 
+        *        return true; // Ignore if startDate is later than maxDate
+        *   }
+        * })
         */
 
         if (!startDate)
@@ -2496,6 +2505,7 @@ class DateRangePicker {
         this.setStartDate(start, false);
         this.setEndDate(end, false);
         this.updateView();
+        this.updateAltInput();
         /**
         * Emitted when the date is changed through `<input>` element. Event is only triggered when date string is valid and date value has changed
         * @event
@@ -2541,53 +2551,57 @@ class DateRangePicker {
                 if (this.endDate)
                     newValue += this.formatDate(this.endDate);
             }
-
+            this.updateAltInput();
             if (newValue !== this.element.val())
                 this.element.val(newValue).trigger('change');
+        } else {
+            this.updateAltInput()
         }
+    }
 
-        if (this.altInput != null) {
-            if (this.altFormat == null) {
-                let precision = 'day';
-                if (this.timePicker) {
-                    if (this.timePickerOpts.showSeconds) {
-                        precision = 'second';
-                    } else if (this.timePickerOpts.showMinutes) {
-                        precision = 'minute';
-                    } else {
-                        precision = 'hour';
-                    }
-                }
-                if (this.singleDatePicker) {
-                    if ($(this.altInput).is('input'))
-                        $(this.altInput).val(this.startDate.toISO({ format: 'basic', precision: precision, includeOffset: false }));
+    /**
+    * Update altInput `<input>` element with selected value
+    */
+    updateAltInput() {
+        if (this.altInput == null)
+            return;
+
+        if (!this.singleDatePicker && !this.endDate)
+            $(this.altInput[1]).val(null);
+
+        if (this.altFormat == null) {
+            let precision = 'day';
+            if (this.timePicker) {
+                if (this.timePickerOpts.showSeconds) {
+                    precision = 'second';
+                } else if (this.timePickerOpts.showMinutes) {
+                    precision = 'minute';
                 } else {
-                    if (this.altInput.every(x => $(x).is('input'))) {
-                        $(this.altInput[0]).val(this.startDate.toISO({ format: 'basic', precision: precision, includeOffset: false }));
-                        if (this.endDate) {
-                            $(this.altInput[1]).val(this.endDate.toISO({ format: 'basic', precision: precision, includeOffset: false }));
-                        } else {
-                            $(this.altInput[1]).val(null);
-                        }
-                    }
+                    precision = 'hour';
                 }
+            }
+            const startDate = this.startDate.toISO({ format: 'basic', precision: precision, includeOffset: false });
+            if (this.singleDatePicker) {
+                $(this.altInput).val(startDate);
             } else {
-                if (this.singleDatePicker) {
-                    if ($(this.altInput).is('input'))
-                        $(this.altInput).val(typeof this.altFormat === 'function' ? this.altFormat(this.startDate) : this.formatDate(this.startDate, this.altFormat));
-                } else {
-                    if (this.altInput.every(x => $(x).is('input'))) {
-                        $(this.altInput[0]).val(typeof this.altFormat === 'function' ? this.altFormat(this.startDate) : this.formatDate(this.startDate, this.altFormat));
-                        if (this.endDate) {
-                            $(this.altInput[1]).val(typeof this.altFormat === 'function' ? this.altFormat(this.endDate) : this.formatDate(this.endDate, this.altFormat));
-                        } else {
-                            $(this.altInput[1]).val(null);
-                        }
-                    }
+                $(this.altInput[0]).val(startDate);
+                if (this.endDate) {
+                    const endDate = this.endDate.toISO({ format: 'basic', precision: precision, includeOffset: false });
+                    $(this.altInput[1]).val(endDate);
+                }
+            }
+        } else {
+            const startDate = typeof this.altFormat === 'function' ? this.altFormat(this.startDate) : this.formatDate(this.startDate, this.altFormat);
+            if (this.singleDatePicker) {
+                $(this.altInput).val(startDate);
+            } else {
+                $(this.altInput[0]).val(startDate);
+                if (this.endDate) {
+                    const endDate = typeof this.altFormat === 'function' ? this.altFormat(this.endDate) : this.formatDate(this.endDate, this.altFormat);
+                    $(this.altInput[1]).val(endDate);
                 }
             }
         }
-
     }
 
     /**
