@@ -17,7 +17,7 @@ test('daterangepicker is shown', () => {
         timePicker: true
     });
     const input = document.querySelector('#p');
-    input.dispatchEvent(new Event('click', { bubbles: true }));
+    input.click();
     expect(isVisible(document.querySelector('div.daterangepicker .drp-calendar.left .calendar-table'))).toBe(true);
     expect(isVisible(document.querySelector('div.daterangepicker .drp-calendar.left .calendar-table tfoot .calendar-time'))).toBe(true);
     expect(isVisible(document.querySelector('div.daterangepicker .drp-calendar.right .calendar-table'))).toBe(true);
@@ -37,7 +37,7 @@ test('daterangepicker process input and apply', () => {
     });
     const drp = $('#p').data('daterangepicker');
     const input = document.querySelector('#p');
-    input.dispatchEvent(new Event('click', { bubbles: true }));
+    input.click();
     const applyBtn = document.querySelector('.applyBtn');
 
     const startDay = document.querySelector('.drp-calendar.left .calendar-table tbody td[data-title="r3c3"]'); // -> 2026-03-19
@@ -60,12 +60,13 @@ test('daterangepicker process input and apply', () => {
     minuteEnd.value = 30;
     hourEnd.dispatchEvent(new Event('change', { bubbles: true }));
 
-    applyBtn.dispatchEvent(new Event('click', { bubbles: true }));
+    applyBtn.click();
 
     expect(drp.startDate.toString()).toBe(DateTime.fromISO('2026-03-19T09:15').toString());
     expect(drp.endDate.toString()).toBe(DateTime.fromISO('2026-04-07T15:30').toString());
     expect(document.querySelector('#altStart').value).toBe('20260319T0915');
     expect(document.querySelector('#altEnd').value).toBe('20260407T1530');
+    expect(isVisible(document.querySelector('div.daterangepicker'))).toBe(false);
 
 });
 
@@ -81,7 +82,7 @@ test('daterangepicker process input and cancel', () => {
     });
     const drp = $('#p').data('daterangepicker');
     const input = document.querySelector('#p');
-    input.dispatchEvent(new Event('click', { bubbles: true }));
+    input.click();
 
     const startDay = document.querySelector('.drp-calendar.left .calendar-table tbody td[data-title="r3c3"]'); // -> 2026-03-19
     startDay.dispatchEvent(new Event('mousedown', { bubbles: true }));
@@ -97,12 +98,13 @@ test('daterangepicker process input and cancel', () => {
     hourEnd.dispatchEvent(new Event('change', { bubbles: true }));
 
     const cancelBtn = document.querySelector('.cancelBtn');
-    cancelBtn.dispatchEvent(new Event('click', { bubbles: true }));
+    cancelBtn.click();
 
     expect(drp.startDate.toString()).toBe(DateTime.fromISO('20260302T00:00').toString());
     expect(drp.endDate.toString()).toBe(DateTime.fromISO('20260306T00:00').toString());
     expect(document.querySelector('#altStart').value).toBe('20260302T0000');
     expect(document.querySelector('#altEnd').value).toBe('20260306T0000');
+    expect(isVisible(document.querySelector('div.daterangepicker'))).toBe(false);
 
 });
 
@@ -123,14 +125,15 @@ test('daterangepicker select range and apply', () => {
     });
     const drp = $('#p').data('daterangepicker');
     const input = document.querySelector('#p');
-    input.dispatchEvent(new Event('click', { bubbles: true }));
+    input.click();
 
     const range = document.querySelector('.ranges li[data-range-key="Yesterday"]');
-    range.dispatchEvent(new Event('click', { bubbles: true }));
+    range.click();
 
     expect(drp.startDate.toString()).toBe(yesterday[0].toString());
     expect(drp.endDate.toString()).toBe(yesterday[1].toString());
-    expect(document.querySelector('#altStart').value).toBe(yesterday[0].toISODate({ format: 'basic', precision: 'minute', includeOffset: false }));
-    expect(document.querySelector('#altEnd').value).toBe(yesterday[1].toISODate({ format: 'basic', precision: 'minute', includeOffset: false }));
+    expect(document.querySelector('#altStart').value).toBe(yesterday[0].toISODate({ format: 'basic'}));
+    expect(document.querySelector('#altEnd').value).toBe(yesterday[1].toISODate({ format: 'basic' }));
+    expect(isVisible(document.querySelector('div.daterangepicker'))).toBe(false);
 
 });

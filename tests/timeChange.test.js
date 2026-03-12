@@ -2,7 +2,7 @@ import { $ } from 'jquery';
 import DateRangePicker from '../src/daterangepicker.js';
 import { DateTime } from 'luxon';
 
-test('timeChange event fires correctly - jQuery binding', () => {
+test('timeChange event fires correctly', () => {
     let called = false;
     document.body.innerHTML = `<input id="p">`;
     $('#p').daterangepicker({
@@ -19,7 +19,7 @@ test('timeChange event fires correctly - jQuery binding', () => {
 
     const drp = $('#p').data('daterangepicker');
     const input = document.querySelector('#p');
-    input.dispatchEvent(new Event('click', { bubbles: true }));
+    input.click();
 
     let left = true;
     const hourStart = document.querySelector(`.drp-calendar.left .calendar-table .hourselect`)
