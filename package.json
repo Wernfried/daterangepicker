@@ -1,5 +1,5 @@
 {
-  "name": "daterangepicker-4.x",
+  "name": "@wernfried/daterangepicker",
   "version": "4.14.5",
   "description": "Date range picker with time component and pre-defined ranges",
   "main": "dist/global/daterangepicker.js",
@@ -9,6 +9,7 @@
   "unpkg": "dist/global/daterangepicker.min.js",
   "style": "css/daterangepicker.css",
   "source": "src/daterangepicker.js",
+  "type": "module",
   "scripts": {
     "prebuild": "cat src/global.js > src/__daterangepicker.js && sed -b -E \"s/^(im|ex)port .*//\" src/daterangepicker.js >> src/__daterangepicker.js",
     "build": "npm run build_esm && npm run build_global",
@@ -19,10 +20,15 @@
     "minify_global": "esbuild src/__daterangepicker.js --outfile=dist/global/daterangepicker.min.js --minify --format=iife --global-name=DateRangePicker",
     "minify_css": "minify css/daterangepicker.css > css/daterangepicker.min.css && minify css/daterangepicker.bulma.css > css/daterangepicker.bulma.min.css",
     "unix2dos": "unix2dos dist/esm/*.js dist/global/*.js css/*.min.css",
-    "postversion": "sed -bi -e 's/daterangepicker-4.x@4\\.[0-9]\\+\\.[0-9]\\+/daterangepicker-4.x@%npm_package_version%/' README.md",
+    "postversion": "sed -bi -e 's/daterangepicker@\\.[0-9]\\+\\.[0-9]\\+/daterangepicker@%npm_package_version%/' README.md",
     "prepack": "sed -bi '/# API Documentation/q' README.md && npm run build && npm run unix2dos",
     "prepare": "jsdoc2md --EOL win32 --example-lang js src/daterangepicker.js >> README.md",
-    "postpack": "git commit -a -m \"Updated README.md\""
+    "postpack": "git commit -a -m \"Updated README.md\"",
+    "test": "node --experimental-vm-modules --no-warnings ./node_modules/jest/bin/jest.js --runInBand"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "transform": {}
   },
   "repository": {
     "type": "git",
@@ -30,6 +36,8 @@
   },
   "devDependencies": {
     "esbuild": "^0.27.3",
+    "jest": "^30.3.0",
+    "jest-environment-jsdom": "^30.3.0",
     "jsdoc-to-markdown": "^9.1.3",
     "minify": "^15.2.0"
   },
