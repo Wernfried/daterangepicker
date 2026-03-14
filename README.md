@@ -176,6 +176,7 @@ In original daterangepicker this parameter defines whether the `<input>` is upda
 - Added option `locale.durationFormat` to show customized label for selected duration, e.g. `'4 Days, 6 Hours, 30 Minutes'`
 - Added option `externalStyle` to use daterangepicker with external CSS Frameworks. Currently only [Bulma](https://bulma.io/) is supported<br/>
 but other frameworks may be added in future releases
+- [Jest](https://jestjs.io/) unit testing
 - ... and maybe some new bugs 😉 
 
 ### Localization
@@ -223,8 +224,7 @@ You can style this daterangepicker with [Bulma CSS Framework](https://bulma.io/)
 Available methods are listed below in [API documentation](#DateRangePicker). You will mainly use 
    * [.daterangepicker(options, callback)](#DateRangePicker.daterangepicker)
    * [.setStartDate(startDate)](#DateRangePicker+setStartDate)
-   * [.setEndDate(endDate)](#DateRangePicker+setEndDate)
-   * [.setPeriod(startDate, endDate)](#DateRangePicker+setPeriod)
+   * [.setRange(startDate, endDate)](#DateRangePicker+setRange)
    * `$(...).data('daterangepicker')` to get the daterangepicker object
 
 all other methods are used rarely.
