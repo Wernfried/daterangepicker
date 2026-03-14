@@ -20,7 +20,7 @@
     "minify_global": "esbuild src/__daterangepicker.js --outfile=dist/global/daterangepicker.min.js --minify --format=iife --global-name=DateRangePicker",
     "minify_css": "minify css/daterangepicker.css > css/daterangepicker.min.css && minify css/daterangepicker.bulma.css > css/daterangepicker.bulma.min.css",
     "unix2dos": "unix2dos dist/esm/*.js dist/global/*.js css/*.min.css",
-    "postversion": "sed -bi -e 's/daterangepicker@\\.[0-9]\\+\\.[0-9]\\+/daterangepicker@%npm_package_version%/' README.md",
+    "postversion": "sed -bi -e 's/daterangepicker@daterangepicker@[[:digit:]]\\.[[:digit:]]\\+\\.[[:digit:]]\\+/daterangepicker@%npm_package_version%/' README.md",
     "prepack": "sed -bi '/# API Documentation/q' README.md && npm run build && npm run unix2dos",
     "prepare": "jsdoc2md --EOL win32 --example-lang js src/daterangepicker.js >> README.md",
     "postpack": "git commit -a -m \"Updated README.md\"",
