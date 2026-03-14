@@ -254,7 +254,9 @@ Copyright (c) 2025 Wernfried Domscheit
 
 Licensed under the [MIT license](LICENSE).
 
-# API Documentation
+## API Documentation
+[API Documentation](API_Doc.md)
+
 ## Options
 Options for DateRangePicker
 
