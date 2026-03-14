@@ -57,7 +57,8 @@
   ],
   "files": [
     "/dist",
-    "/css"
+    "/css",
+    "API_Doc.md"
   ],
   "license": "MIT",
   "bugs": {
