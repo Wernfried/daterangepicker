@@ -747,7 +747,7 @@ class DateRangePicker {
   /**
   * Validate `startDate` and `endDate` against `timePickerStepSize`, `minDate`, `maxDate`, 
   * `minSpan`, `maxSpan`, `invalidDate` and `invalidTime`.
-  * @param {Array} range=[startDate, endDate] - Range to be checked, defaults to current `startDate` and `endDate`
+  * @param {Array} range - `[startDate, endDate]`<br>Range to be checked, defaults to current `startDate` and `endDate`
   * @param {boolean} dipatch=false - If `true` then event "violated.daterangepicker" is dispated.<br>
   * If eventHandler returns `true`, then `null` is returned, otherwiese the object of violations.
   * @emits "violated.daterangepicker"

@@ -11,6 +11,7 @@
   "source": "src/daterangepicker.js",
   "type": "module",
   "scripts": {
+    "postversion": "sed -bi -e 's/daterangepicker@[[:digit:]]\\.[[:digit:]]\\+\\.[[:digit:]]\\+/daterangepicker@%npm_package_version%/' README.md",
     "prebuild": "cat src/global.js > src/__daterangepicker.js && sed -b -E \"s/^(im|ex)port .*//\" src/daterangepicker.js >> src/__daterangepicker.js",
     "build": "npm run build_esm && npm run build_global",
     "postbuild": "npm run minify_esm && npm run minify_global && npm run minify_css",
@@ -19,10 +20,10 @@
     "minify_esm": "esbuild src/daterangepicker.js --outfile=dist/esm/daterangepicker.min.js --minify --format=esm",
     "minify_global": "esbuild src/__daterangepicker.js --outfile=dist/global/daterangepicker.min.js --minify --format=iife --global-name=DateRangePicker",
     "minify_css": "minify css/daterangepicker.css > css/daterangepicker.min.css && minify css/daterangepicker.bulma.css > css/daterangepicker.bulma.min.css",
-    "postversion": "sed -bi -e 's/daterangepicker@[[:digit:]]\\.[[:digit:]]\\+\\.[[:digit:]]\\+/daterangepicker@%npm_package_version%/' README.md",
     "unix2dos": "unix2dos dist/esm/*.js dist/global/*.js css/*.min.css",
     "prepack": "sed -bi '/# API Documentation/q' README.md && npm run build && npm run unix2dos",
-    "prepare": "jsdoc2md --EOL win32 --example-lang js src/daterangepicker.js >> README.md",
+    "prepare": "jsdoc2md --EOL win32 --example-lang js src/daterangepicker.js >> API_Doc.md",
+    "postprepare": "sed -n '/## Options$/,$p' API_Doc.md >> README.md",
     "postpack": "git commit -a -m \"Updated README.md\"",
     "test": "node --experimental-vm-modules --no-warnings ./node_modules/jest/bin/jest.js --runInBand"
   },
