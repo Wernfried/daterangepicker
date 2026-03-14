@@ -2,9 +2,8 @@ import { $ } from 'jquery';
 import DateRangePicker from '../src/daterangepicker.js';
 import { DateTime, Settings, Duration } from 'luxon';
 
-test('inputChanged events fire correctly', () => {
+test('setStartDate method violation fires', () => {
    document.body.innerHTML = `<input id="p"> <input id="altStart" hidden>`;
-   let inputChanged = false;
    let violated = false;
 
    const values = ['2026-03-01', '2000-01-01', '2026-05-15'];
@@ -18,18 +17,10 @@ test('inputChanged events fire correctly', () => {
          minDate: '2026-01-01',
          locale: { format: 'yyyy-MM-dd' }
       }
-   ).on('inputChanged.daterangepicker', (ev, picker) => {
-      // Fires only for valid input
-      expect(picker).toBe(drp);
-      expect(picker.startDate.toISODate()).toBe(values[2]);
-      expect(altStart.value).toBe(DateTime.fromISO(values[2]).toISODate({ format: 'basic' }));
-      expect(violated).toBe(false);
-      inputChanged = true;
-   }).on('violated.daterangepicker', (ev, picker, result, newDate) => {
+   ).on('violated.daterangepicker', (ev, picker, result, newDate) => {
       expect(picker).toBe(drp);
       expect(picker.startDate.toISODate()).toBe(values[0]);
       expect(altStart.value).toBe(DateTime.fromISO(values[0]).toISODate({ format: 'basic' }));
-      expect(inputChanged).toBe(false);
       violated = true;
    });
    const drp = $('#p').data('daterangepicker');
@@ -40,8 +31,8 @@ test('inputChanged events fire correctly', () => {
    let month = document.querySelector('.drp-calendar.left .calendar-table .month');
    expect(month.innerHTML).toBe('March 2026');
 
-   input.value = values[1];
-   input.dispatchEvent(new Event('keyup', { bubbles: true }));
+   drp.setStartDate(DateTime.fromISO(values[1]))
+
    // Invalid value, must revert to old value
    month = document.querySelector('.drp-calendar.left .calendar-table .month');
    let selectedDay = document.querySelector('.drp-calendar.left .calendar-table tbody td.active.available.start-date');
@@ -49,13 +40,10 @@ test('inputChanged events fire correctly', () => {
    expect(parseInt(selectedDay.innerHTML)).toBe(DateTime.fromISO(values[1]).day);
    expect(drp.startDate.toISODate()).toBe(values[0]);
    expect(altStart.value).toBe(DateTime.fromISO(values[0]).toISODate({ format: 'basic' }));
-   expect(inputChanged).toBe(false);
    expect(violated).toBe(true);
 
-   inputChanged = false;
    violated = false;
-   input.value = values[2];
-   input.dispatchEvent(new Event('keyup', { bubbles: true }));
+   drp.setStartDate(DateTime.fromISO(values[2]))
 
    month = document.querySelector('.drp-calendar.left .calendar-table .month');
    selectedDay = document.querySelector('.drp-calendar.left .calendar-table tbody td.active.available.start-date');
@@ -64,15 +52,13 @@ test('inputChanged events fire correctly', () => {
    expect(parseInt(selectedDay.innerHTML)).toBe(DateTime.fromISO(values[2]).day);
    expect(drp.startDate.toISODate()).toBe(values[2]);
    expect(altStart.value).toBe(DateTime.fromISO(values[2]).toISODate({ format: 'basic' }));
-   expect(inputChanged).toBe(true);
    expect(violated).toBe(false);
 
 });
 
 
-test('inputChanged events fire correctly with correction', () => {
+test('setStartDate method violation fires with correction', () => {
    document.body.innerHTML = `<input id="p"> <input id="altStart" hidden>`;
-   let inputChanged = false;
    let violated = false;
 
    const values = ['2026-03-01', '2000-01-01', '2026-06-25'];
@@ -86,13 +72,10 @@ test('inputChanged events fire correctly with correction', () => {
          minDate: '2026-01-01',
          locale: { format: 'yyyy-MM-dd' }
       }
-   ).on('inputChanged.daterangepicker', (ev, picker) => {
-      inputChanged = true;
-   }).on('violated.daterangepicker', (ev, picker, result, newDate) => {
+   ).on('violated.daterangepicker', (ev, picker, result, newDate) => {
       expect(picker).toBe(drp);
       expect(picker.startDate.toISODate()).toBe(values[0]);
       expect(altStart.value).toBe(DateTime.fromISO(values[0]).toISODate({ format: 'basic' }));
-      expect(inputChanged).toBe(false);
       violated = true;
       newDate.startDate = DateTime.fromISO(values[2]);
       return true;
@@ -105,9 +88,8 @@ test('inputChanged events fire correctly with correction', () => {
    let month = document.querySelector('.drp-calendar.left .calendar-table .month');
    expect(month.innerHTML).toBe('March 2026');
 
-   let newValue = values[1]
-   input.value = newValue;
-   input.dispatchEvent(new Event('keyup', { bubbles: true }));
+   drp.setStartDate(DateTime.fromISO(values[1]))
+
    // Invalid value, must revert to old value
    month = document.querySelector('.drp-calendar.left .calendar-table .month');
    let selectedDay = document.querySelector('.drp-calendar.left .calendar-table tbody td.active.available.start-date');
@@ -115,7 +97,6 @@ test('inputChanged events fire correctly with correction', () => {
    expect(parseInt(selectedDay.innerHTML)).toBe(DateTime.fromISO(values[2]).day);
    expect(drp.startDate.toISODate()).toBe(values[2]);
    expect(altStart.value).toBe(DateTime.fromISO(values[2]).toISODate({ format: 'basic' }));
-   expect(inputChanged).toBe(true);
    expect(violated).toBe(true);
 
 });

@@ -26,9 +26,8 @@ test('daterangepicker is shown', () => {
 });
 
 
-
 test('daterangepicker process input and apply', () => {
-    document.body.innerHTML = `<input id="p"> <input id="altStart" hidden> <input id="altEnd" hidden>`;
+    document.body.innerHTML = `<input id="p" /> <input id="altStart" hidden /> <input id="altEnd" hidden />`;
     $('#p').daterangepicker({
         startDate: '2026-03-02',
         endDate: DateTime.fromISO('2026-03-06'),
