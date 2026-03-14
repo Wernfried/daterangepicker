@@ -8,7 +8,7 @@
 ## Events
 
 <dl>
-<dt><a href="#event_violated.daterangepicker">"violated.daterangepicker" (this, picker, result, newDate)</a> ÔçÆ <code>boolean</code></dt>
+<dt><a href="#event_violated.daterangepicker">"violated.daterangepicker" (this, picker, result, newDate)</a> ⇒ <code>boolean</code></dt>
 <dd><p>Emitted when the date is changed through <code>&lt;input&gt;</code> element or via <a href="#DateRangePicker+setStartDate">setStartDate</a> or 
 <a href="#DateRangePicker+setRange">setRange</a> and date is not valid due to 
 <code>minDate</code>, <code>maxDate</code>, <code>minSpan</code>, <code>maxSpan</code>, <code>invalidDate</code> and <code>invalidTime</code> constraints.<br>
@@ -25,7 +25,7 @@ Useful to remove any manually added elements.</p>
 <dt><a href="#event_show.daterangepicker">"show.daterangepicker" (this)</a></dt>
 <dd><p>Emitted when the picker is shown</p>
 </dd>
-<dt><a href="#event_beforeHide.daterangepicker">"beforeHide.daterangepicker" (this)</a> ÔçÆ <code>boolean</code></dt>
+<dt><a href="#event_beforeHide.daterangepicker">"beforeHide.daterangepicker" (this)</a> ⇒ <code>boolean</code></dt>
 <dd><p>Emitted before the picker will hide. When EventHandler returns <code>true</code>, then picker remains visible</p>
 </dd>
 <dt><a href="#event_hide.daterangepicker">"hide.daterangepicker" (this)</a></dt>
@@ -90,12 +90,12 @@ Ranges are not validated against <code>minDate</code>, <code>maxDate</code>, <co
     * _instance_
         * [.startDate](#DateRangePicker+startDate) : [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime)
         * [.endDate](#DateRangePicker+endDate) : [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime)
-        * [.setStartDate(startDate, updateView)](#DateRangePicker+setStartDate) ÔçÆ [<code>InputViolation</code>](#InputViolation)
-        * [.setEndDate(endDate, updateView)](#DateRangePicker+setEndDate) ÔçÆ [<code>InputViolation</code>](#InputViolation)
-        * [.setRange(startDate, endDate, updateView)](#DateRangePicker+setRange) ÔçÆ [<code>InputViolation</code>](#InputViolation)
-        * [.parseDate(value)](#DateRangePicker+parseDate) ÔçÆ [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime)
-        * [.formatDate(date, format)](#DateRangePicker+formatDate) ÔçÆ <code>string</code>
-        * [.validateInput(range, dipatch)](#DateRangePicker+validateInput) ÔçÆ [<code>InputViolation</code>](#InputViolation) \| <code>null</code>
+        * [.setStartDate(startDate, updateView)](#DateRangePicker+setStartDate) ⇒ [<code>InputViolation</code>](#InputViolation)
+        * [.setEndDate(endDate, updateView)](#DateRangePicker+setEndDate) ⇒ [<code>InputViolation</code>](#InputViolation)
+        * [.setRange(startDate, endDate, updateView)](#DateRangePicker+setRange) ⇒ [<code>InputViolation</code>](#InputViolation)
+        * [.parseDate(value)](#DateRangePicker+parseDate) ⇒ [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime)
+        * [.formatDate(date, format)](#DateRangePicker+formatDate) ⇒ <code>string</code>
+        * [.validateInput(range, dipatch)](#DateRangePicker+validateInput) ⇒ [<code>InputViolation</code>](#InputViolation) \| <code>null</code>
         * [.updateView()](#DateRangePicker+updateView)
         * [.show()](#DateRangePicker+show)
         * [.hide()](#DateRangePicker+hide)
@@ -106,7 +106,7 @@ Ranges are not validated against <code>minDate</code>, <code>maxDate</code>, <co
         * [.updateAltInput()](#DateRangePicker+updateAltInput)
         * [.remove()](#DateRangePicker+remove)
     * _static_
-        * [.daterangepicker(options, callback)](#DateRangePicker.daterangepicker) ÔçÆ
+        * [.daterangepicker(options, callback)](#DateRangePicker.daterangepicker) ⇒
 
 <a name="new_DateRangePicker_new"></a>
 
@@ -132,7 +132,7 @@ endDate
 **Kind**: instance property of [<code>DateRangePicker</code>](#DateRangePicker)  
 <a name="DateRangePicker+setStartDate"></a>
 
-### dateRangePicker.setStartDate(startDate, updateView) ÔçÆ [<code>InputViolation</code>](#InputViolation)
+### dateRangePicker.setStartDate(startDate, updateView) ⇒ [<code>InputViolation</code>](#InputViolation)
 Sets the date range picker's currently selected start date to the provided date.<br>
 `startDate` must be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](ISO-8601) or a string matching `locale.format`.<br>
 Invalid date values are handled by [violated](#DateRangePicker+violated) Event
@@ -152,7 +152,7 @@ drp.setStartDate(DateTime.now().startOf('hour'));
 ```
 <a name="DateRangePicker+setEndDate"></a>
 
-### dateRangePicker.setEndDate(endDate, updateView) ÔçÆ [<code>InputViolation</code>](#InputViolation)
+### dateRangePicker.setEndDate(endDate, updateView) ⇒ [<code>InputViolation</code>](#InputViolation)
 Sets the date range picker's currently selected start date to the provided date.<br>
 `endDate` must be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](ISO-8601) or a string matching `locale.format`.<br>
 Invalid date values are handled by [violated](#DateRangePicker+violated) Event
@@ -172,7 +172,7 @@ drp.setEndDate(DateTime.now().startOf('hour'));
 ```
 <a name="DateRangePicker+setRange"></a>
 
-### dateRangePicker.setRange(startDate, endDate, updateView) ÔçÆ [<code>InputViolation</code>](#InputViolation)
+### dateRangePicker.setRange(startDate, endDate, updateView) ⇒ [<code>InputViolation</code>](#InputViolation)
 Sets the date range picker's currently selected start date to the provided date.<br>
 `startDate` and `endDate` must be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](ISO-8601) or a string matching `locale.format`.<br>
 Invalid date values are handled by [violated](#DateRangePicker+violated) Event
@@ -193,7 +193,7 @@ drp.setRange(DateTime.now().startOf('hour'), DateTime.now().endOf('day'));
 ```
 <a name="DateRangePicker+parseDate"></a>
 
-### dateRangePicker.parseDate(value) ÔçÆ [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime)
+### dateRangePicker.parseDate(value) ⇒ [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime)
 Parse date value
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
@@ -205,7 +205,7 @@ Parse date value
 
 <a name="DateRangePicker+formatDate"></a>
 
-### dateRangePicker.formatDate(date, format) ÔçÆ <code>string</code>
+### dateRangePicker.formatDate(date, format) ⇒ <code>string</code>
 Format a DateTime object
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
@@ -218,7 +218,7 @@ Format a DateTime object
 
 <a name="DateRangePicker+validateInput"></a>
 
-### dateRangePicker.validateInput(range, dipatch) ÔçÆ [<code>InputViolation</code>](#InputViolation) \| <code>null</code>
+### dateRangePicker.validateInput(range, dipatch) ⇒ [<code>InputViolation</code>](#InputViolation) \| <code>null</code>
 Validate `startDate` and `endDate` against `timePickerStepSize`, `minDate`, `maxDate`, 
 `minSpan`, `maxSpan`, `invalidDate` and `invalidTime`.
 
@@ -321,7 +321,7 @@ Removes the picker from document
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
 <a name="DateRangePicker.daterangepicker"></a>
 
-### DateRangePicker.daterangepicker(options, callback) ÔçÆ
+### DateRangePicker.daterangepicker(options, callback) ⇒
 Initiate a new DateRangePicker
 
 **Kind**: static method of [<code>DateRangePicker</code>](#DateRangePicker)  
@@ -334,7 +334,7 @@ Initiate a new DateRangePicker
 
 <a name="event_violated.daterangepicker"></a>
 
-## "violated.daterangepicker" (this, picker, result, newDate) ÔçÆ <code>boolean</code>
+## "violated.daterangepicker" (this, picker, result, newDate) ⇒ <code>boolean</code>
 Emitted when the date is changed through `<input>` element or via [setStartDate](#DateRangePicker+setStartDate) or 
 [setRange](#DateRangePicker+setRange) and date is not valid due to 
 `minDate`, `maxDate`, `minSpan`, `maxSpan`, `invalidDate` and `invalidTime` constraints.<br>
@@ -410,7 +410,7 @@ Emitted when the picker is shown
 
 <a name="event_beforeHide.daterangepicker"></a>
 
-## "beforeHide.daterangepicker" (this) ÔçÆ <code>boolean</code>
+## "beforeHide.daterangepicker" (this) ⇒ <code>boolean</code>
 Emitted before the picker will hide. When EventHandler returns `true`, then picker remains visible
 
 **Kind**: event emitted  
