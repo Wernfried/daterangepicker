@@ -3,7 +3,6 @@ import { $ } from "jquery";
 class DateRangePicker {
   #startDate = null;
   #endDate = null;
-  #setRange = false;
   constructor(element, options, cb) {
     this.parentEl = "body";
     this.element = $(element);
@@ -514,9 +513,17 @@ class DateRangePicker {
     }
     this.updateElement();
   }
+  /**
+   * startDate
+   * @type {external:DateTime}
+   */
   get startDate() {
     return this.#startDate;
   }
+  /**
+   * endDate
+   * @type {external:DateTime}
+   */
   get endDate() {
     return this.singleDatePicker ? null : this.#endDate;
   }
@@ -693,7 +700,7 @@ class DateRangePicker {
   }
   /**
   * Emitted when the date is changed through `<input>` element or via {@link #DateRangePicker+setStartDate|setStartDate} or 
-  * {@link #DateRangePicker+setRange|setRange} and date is not valid due to.<br>
+  * {@link #DateRangePicker+setRange|setRange} and date is not valid due to 
   * `minDate`, `maxDate`, `minSpan`, `maxSpan`, `invalidDate` and `invalidTime` constraints.<br>
   * Event is only triggered when date string is valid and date value is changing<br>
   * @event
@@ -725,23 +732,23 @@ class DateRangePicker {
   * // Try to set date outside permitted range by code
   * const drp = $('#picker').data('daterangepicker').setStartDate(DateTime.now().minus({ years: 10 })
   * 
-  * -> Calendar selects and shows "today - 3 days"
+  * // -> Calendar selects and shows "today - 3 days"
   */
   /**
   * @typedef InputViolation
   * @type {Object}
   * @property {external:DateTime} startDate - Violation of startDate
-  * @property {external:DateTime|undefined}? endDate - Violation of endDate, if existing
+  * @property {external:DateTime|undefined} endDate? - Violation of endDate, if existing
   * @property {Array} violations - The constraints which violates the input
   * @property {Array} reason - The type/reson of violation
   * @property {external:DateTime} old - Old value startDate/endDate
-  * @property {external:DateTime}? new - Corrected value of startDate/endDate if existing
+  * @property {external:DateTime} new? - Corrected value of startDate/endDate if existing
   */
   /**
   * Validate `startDate` and `endDate` against `timePickerStepSize`, `minDate`, `maxDate`, 
   * `minSpan`, `maxSpan`, `invalidDate` and `invalidTime`.
-  * @param {Array} [startDate, endDate] - Range to be checked, defaults to current `startDate` and `endDate`
-  * @param {boolean} dipatch=false - If 'true' then event "violated.daterangepicker" is dispated.<br>
+  * @param {Array} range=[startDate, endDate] - Range to be checked, defaults to current `startDate` and `endDate`
+  * @param {boolean} dipatch=false - If `true` then event "violated.daterangepicker" is dispated.<br>
   * If eventHandler returns `true`, then `null` is returned, otherwiese the object of violations.
   * @emits "violated.daterangepicker"
   * @returns {InputViolation|null} - Object of violations and corrected values or `null` if no violation have been found

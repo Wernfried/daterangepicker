@@ -20,8 +20,8 @@ Above samples are based on the [original repository](https://github.com/dangross
 ```html
 <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@4.16.9/dist/global/daterangepicker.min.js"></script>
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@4.16.9/css/daterangepicker.min.css" rel="stylesheet" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@4.16.10/dist/global/daterangepicker.min.js"></script>
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@4.16.10/css/daterangepicker.min.css" rel="stylesheet" />
 
 <input type="text" id="picker" />
 
@@ -43,11 +43,11 @@ Above samples are based on the [original repository](https://github.com/dangross
    "imports": {
       "jquery": "https://cdn.jsdelivr.net/npm/jquery@4.0.0/+esm",
       "luxon": "https://cdn.jsdelivr.net/npm/luxon@3.7.2/+esm",
-      "daterangepicker": "https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@4.16.9/+esm"
+      "daterangepicker": "https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@4.16.10/+esm"
    }
 }
 </script>
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@4.16.9/css/daterangepicker.min.css" rel="stylesheet" />
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@4.16.10/css/daterangepicker.min.css" rel="stylesheet" />
 
 <input type="text" id="picker" />
 
@@ -68,7 +68,7 @@ Above samples are based on the [original repository](https://github.com/dangross
 ```html
 <script ...></script>
 <link type="text/css" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css" rel="stylesheet" />
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@4.16.9/css/daterangepicker.bulma.min.css" rel="stylesheet" />
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@4.16.10/css/daterangepicker.bulma.min.css" rel="stylesheet" />
 
 <input type="text" id="picker" />
 
@@ -267,7 +267,7 @@ Licensed under the [MIT license](LICENSE).
 <dl>
 <dt><a href="#event_violated.daterangepicker">"violated.daterangepicker" (this, picker, result, newDate)</a> ⇒ <code>boolean</code></dt>
 <dd><p>Emitted when the date is changed through <code>&lt;input&gt;</code> element or via <a href="#DateRangePicker+setStartDate">setStartDate</a> or 
-<a href="#DateRangePicker+setRange">setRange</a> and date is not valid due to.<br>
+<a href="#DateRangePicker+setRange">setRange</a> and date is not valid due to 
 <code>minDate</code>, <code>maxDate</code>, <code>minSpan</code>, <code>maxSpan</code>, <code>invalidDate</code> and <code>invalidTime</code> constraints.<br>
 Event is only triggered when date string is valid and date value is changing<br></p>
 </dd>
@@ -345,12 +345,14 @@ Ranges are not validated against <code>minDate</code>, <code>maxDate</code>, <co
 * [DateRangePicker](#DateRangePicker)
     * [new DateRangePicker(element, options, cb)](#new_DateRangePicker_new)
     * _instance_
+        * [.startDate](#DateRangePicker+startDate) : [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime)
+        * [.endDate](#DateRangePicker+endDate) : [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime)
         * [.setStartDate(startDate, updateView)](#DateRangePicker+setStartDate) ⇒ [<code>InputViolation</code>](#InputViolation)
         * [.setEndDate(endDate, updateView)](#DateRangePicker+setEndDate) ⇒ [<code>InputViolation</code>](#InputViolation)
         * [.setRange(startDate, endDate, updateView)](#DateRangePicker+setRange) ⇒ [<code>InputViolation</code>](#InputViolation)
         * [.parseDate(value)](#DateRangePicker+parseDate) ⇒ [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime)
         * [.formatDate(date, format)](#DateRangePicker+formatDate) ⇒ <code>string</code>
-        * [.validateInput([startDate, endDate], dipatch)](#DateRangePicker+validateInput) ⇒ [<code>InputViolation</code>](#InputViolation) \| <code>null</code>
+        * [.validateInput(range, dipatch)](#DateRangePicker+validateInput) ⇒ [<code>InputViolation</code>](#InputViolation) \| <code>null</code>
         * [.updateView()](#DateRangePicker+updateView)
         * [.show()](#DateRangePicker+show)
         * [.hide()](#DateRangePicker+hide)
@@ -373,6 +375,18 @@ Ranges are not validated against <code>minDate</code>, <code>maxDate</code>, <co
 | options | [<code>Options</code>](#Options) | Object to configure the DateRangePicker |
 | cb | <code>function</code> | Callback function executed when |
 
+<a name="DateRangePicker+startDate"></a>
+
+### dateRangePicker.startDate : [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime)
+startDate
+
+**Kind**: instance property of [<code>DateRangePicker</code>](#DateRangePicker)  
+<a name="DateRangePicker+endDate"></a>
+
+### dateRangePicker.endDate : [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime)
+endDate
+
+**Kind**: instance property of [<code>DateRangePicker</code>](#DateRangePicker)  
 <a name="DateRangePicker+setStartDate"></a>
 
 ### dateRangePicker.setStartDate(startDate, updateView) ⇒ [<code>InputViolation</code>](#InputViolation)
@@ -461,7 +475,7 @@ Format a DateTime object
 
 <a name="DateRangePicker+validateInput"></a>
 
-### dateRangePicker.validateInput([startDate, endDate], dipatch) ⇒ [<code>InputViolation</code>](#InputViolation) \| <code>null</code>
+### dateRangePicker.validateInput(range, dipatch) ⇒ [<code>InputViolation</code>](#InputViolation) \| <code>null</code>
 Validate `startDate` and `endDate` against `timePickerStepSize`, `minDate`, `maxDate`, 
 `minSpan`, `maxSpan`, `invalidDate` and `invalidTime`.
 
@@ -471,8 +485,8 @@ Validate `startDate` and `endDate` against `timePickerStepSize`, `minDate`, `max
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| [startDate, endDate] | <code>Array</code> |  | Range to be checked, defaults to current `startDate` and `endDate` |
-| dipatch | <code>boolean</code> | <code>false</code> | If 'true' then event "violated.daterangepicker" is dispated.<br> If eventHandler returns `true`, then `null` is returned, otherwiese the object of violations. |
+| range | <code>Array</code> | <code>[startDate,</code> | endDate] - Range to be checked, defaults to current `startDate` and `endDate` |
+| dipatch | <code>boolean</code> | <code>false</code> | If `true` then event "violated.daterangepicker" is dispated.<br> If eventHandler returns `true`, then `null` is returned, otherwiese the object of violations. |
 
 **Example**  
 ```js
@@ -579,7 +593,7 @@ Initiate a new DateRangePicker
 
 ## "violated.daterangepicker" (this, picker, result, newDate) ⇒ <code>boolean</code>
 Emitted when the date is changed through `<input>` element or via [setStartDate](#DateRangePicker+setStartDate) or 
-[setRange](#DateRangePicker+setRange) and date is not valid due to.<br>
+[setRange](#DateRangePicker+setRange) and date is not valid due to 
 `minDate`, `maxDate`, `minSpan`, `maxSpan`, `invalidDate` and `invalidTime` constraints.<br>
 Event is only triggered when date string is valid and date value is changing<br>
 
@@ -614,7 +628,7 @@ $('#picker').val(DateTime.now().minus({ years: 10 })).toLocaleString(DateTime.DA
 // Try to set date outside permitted range by code
 const drp = $('#picker').data('daterangepicker').setStartDate(DateTime.now().minus({ years: 10 })
 
--> Calendar selects and shows "today - 3 days"
+// -> Calendar selects and shows "today - 3 days"
 ```
 <a name="event_beforeRenderCalendar.daterangepicker"></a>
 
@@ -886,11 +900,11 @@ A single predefined range
 | Name | Type | Description |
 | --- | --- | --- |
 | startDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | Violation of startDate |
-| ? | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| <code>undefined</code> | endDate - Violation of endDate, if existing |
+| endDate? | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| <code>undefined</code> | Violation of endDate, if existing |
 | violations | <code>Array</code> | The constraints which violates the input |
 | reason | <code>Array</code> | The type/reson of violation |
 | old | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | Old value startDate/endDate |
-| ? | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | new - Corrected value of startDate/endDate if existing |
+| new? | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | Corrected value of startDate/endDate if existing |
 
 <a name="callback"></a>
 
