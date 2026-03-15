@@ -171,11 +171,12 @@ Compared to [inital repository](https://github.com/dangrossman/daterangepicker),
 - Added option `singleMonthView` to show single month calendar, useful for shorter ranges
 - Better validation of input parameters, errors are logged to console
 - Highlight range in calendar when hovering over pre-defined ranges
-- Option `autoUpdateInput` defines whether the attached `<input>` element is updated when the user clicks on a date value.<br/>
+- Option `autoUpdateInput` defines whether the attached `<input>` element is updated when the user clicks on a date value.<br>
 In original daterangepicker this parameter defines whether the `<input>` is updated when the user clicks on `Apply` button.
 - Added option `locale.durationFormat` to show customized label for selected duration, e.g. `'4 Days, 6 Hours, 30 Minutes'`
-- Added option `externalStyle` to use daterangepicker with external CSS Frameworks. Currently only [Bulma](https://bulma.io/) is supported<br/>
+- Added option `externalStyle` to use daterangepicker with external CSS Frameworks. Currently only [Bulma](https://bulma.io/) is supported<br>
 but other frameworks may be added in future releases
+- [ESM](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules) Module Import
 - [Jest](https://jestjs.io/) unit testing
 - ... and maybe some new bugs 😉 
 
