@@ -2,7 +2,7 @@ import { $ } from 'jquery';
 import DateRangePicker from '../src/daterangepicker.js';
 import { DateTime, Settings, Duration } from 'luxon';
 
-test('inputChanged events fire correctly', () => {
+test('inputChanged singleDate events fire correctly', () => {
    document.body.innerHTML = `<input id="p"> <input id="altStart" hidden>`;
    let inputChanged = false;
    let violated = false;
@@ -119,4 +119,44 @@ test('inputChanged events fire correctly with correction', () => {
    expect(violated).toBe(true);
 
 });
+
+
+test('inputChanged range events fire correctly', () => {
+   document.body.innerHTML = `<input id="p"> <input id="altStart" hidden> <input id="altEnd" hidden>`;
+   let inputChanged = false;
+
+   Settings.defaultLocale = 'en-US';
+   $('#p').daterangepicker(
+      {
+         timePicker: false,
+         startDate: '2026-03-01',
+         endDate: '2026-03-03',
+         altInput: ['#altStart', '#altEnd'],
+         locale: { format: 'yyyy-MM-dd' }
+      }
+   ).on('inputChanged.daterangepicker', (ev, picker) => {
+      // Fires only for valid input
+      expect(picker).toBe(drp);
+      expect(picker.startDate.toISODate()).toBe('2026-05-10');
+      expect(altStart.value).toBe(DateTime.fromISO('2026-05-10').toISODate({ format: 'basic' }));
+      expect(picker.endDate.toISODate()).toBe('2026-05-20');
+      expect(altEnd.value).toBe(DateTime.fromISO('2026-05-20').toISODate({ format: 'basic' }));
+      inputChanged = true;
+   });
+   const drp = $('#p').data('daterangepicker');
+   const altStart = document.querySelector('#altStart');
+   const input = document.querySelector('#p');
+   input.click();
+
+   input.value = '2026-05-10 - 2026-05-20';
+   input.dispatchEvent(new Event('keyup', { bubbles: true }));
+
+   expect(drp.startDate.toISODate()).toBe('2026-05-10');
+   expect(altStart.value).toBe(DateTime.fromISO('2026-05-10').toISODate({ format: 'basic' }));
+   expect(drp.endDate.toISODate()).toBe('2026-05-20');
+   expect(altEnd.value).toBe(DateTime.fromISO('2026-05-20').toISODate({ format: 'basic' }));
+   expect(inputChanged).toBe(true);
+
+});
+
 
