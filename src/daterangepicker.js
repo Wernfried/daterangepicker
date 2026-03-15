@@ -687,9 +687,8 @@ class DateRangePicker {
          this.container.addClass('show-ranges');
       }
 
-      if (typeof cb === 'function') {
+      if (typeof cb === 'function')
          this.callback = cb;
-      }
 
       if (!this.timePicker) {
          if (this.#startDate)
@@ -774,12 +773,12 @@ class DateRangePicker {
     * startDate
     * @type {external:DateTime}
     */
-   get startDate() { return this.#startDate; }
+   get startDate() { return this.timePicker ? this.#startDate : this.#startDate.startOf('day'); }
    /**
     * endDate
     * @type {external:DateTime}
     */
-   get endDate() { return this.singleDatePicker ? null : this.#endDate; }
+   get endDate() { return this.singleDatePicker ? null : (this.timePicker ? this.#endDate : this.#endDate.endOf('day')); }
    set startDate(val) { this.#startDate = val }
    set endDate(val) { this.#endDate = val }
 
@@ -813,6 +812,10 @@ class DateRangePicker {
       }
       this.#startDate = newDate;
       this.#endDate = this.#startDate;
+      if (!this.timePicker) {
+         this.#startDate = this.#startDate.startOf('day');
+         this.#endDate = this.#endDate.endOf('day');
+      }
 
       this.updateElement();
       if (updateView)
@@ -856,7 +859,7 @@ class DateRangePicker {
       const oldDate = [this.#startDate, this.#endDate];
       let newDate = [this.parseDate(startDate), this.parseDate(endDate)];
 
-      if ((oldDate[0].equals(newDate[0]) && oldDate[1].equals(newDate[1]) || newDate[1] > newDate[0]))
+      if ((oldDate[0].equals(newDate[0]) && oldDate[1].equals(newDate[1]) || newDate[0] > newDate[1]))
          return;
 
       const violations = this.validateInput([newDate[0], newDate[1]], true);
@@ -870,6 +873,10 @@ class DateRangePicker {
       }
       this.#startDate = newDate[0];
       this.#endDate = newDate[1];
+      if (!this.timePicker) {
+         this.#startDate = this.#startDate.startOf('day');
+         this.#endDate = this.#endDate.endOf('day');
+      }
 
       this.updateElement();
       if (updateView)
@@ -1063,12 +1070,12 @@ class DateRangePicker {
          // Round time to step size
          const secs = this.timePickerStepSize.as('seconds');
          startDate = DateTime.fromSeconds(secs * Math.round(startDate.toSeconds() / secs));
+         violation.new = startDate;
+         if (!violation.new.equals(violation.old))
+            result.startDate.violations.push(violation);
       } else {
          startDate = startDate.startOf('day');
       }
-      violation.new = startDate;
-      if (!violation.new.equals(violation.old))
-         result.startDate.violations.push(violation);
 
       const shiftStep = this.timePicker ? this.timePickerStepSize.as('seconds') : Duration.fromObject({ days: 1 }).as('seconds');
 
@@ -1136,12 +1143,12 @@ class DateRangePicker {
          // Round time to step size
          const secs = this.timePickerStepSize.as('seconds');
          endDate = DateTime.fromSeconds(secs * Math.round(endDate.toSeconds() / secs));
+         violation.new = endDate;
+         if (!violation.new.equals(violation.old))
+            result.endDate.violations.push(violation);
       } else {
          endDate = endDate.endOf('day');
       }
-      violation.new = endDate;
-      if (!violation.new.equals(violation.old))
-         result.endDate.violations.push(violation);
 
       if (this.maxDate && endDate > this.maxDate) {
          // If the endDate is later than maxDate option, shorten the range to the allowable period.
@@ -1963,7 +1970,7 @@ class DateRangePicker {
       }
 
       //if a new date range was selected, invoke the user callback function
-      if (this.#startDate != this.oldStartDate || this.#endDate != this.oldEndDate)
+      if (!this.#startDate.equals(this.oldStartDate) || !this.#endDate.equals(this.oldEndDate))
          this.callback(this.startDate, this.endDate, this.chosenLabel);
 
       //if picker is attached to a text input, update it
@@ -2582,15 +2589,19 @@ class DateRangePicker {
             if (violations.newDate != null) {
                newDate = violations.newDate.startDate
             } else {
-               return null;
+               return; // revert to old startDate
             }
          }
          this.#startDate = newDate;
          this.#endDate = this.#startDate;
+         if (!this.timePicker) {
+            this.#startDate = this.#startDate.startOf('day');
+            this.#endDate = this.#endDate.endOf('day');
+         }
       } else if (!this.singleDatePicker && dateString.length === 2) {
-         const newDate = [1, 2].map(i => DateTime.fromFormat(dateString[i], format, { locale: DateTime.now().locale }));
+         const newDate = [0, 1].map(i => DateTime.fromFormat(dateString[i], format, { locale: DateTime.now().locale }));
          const oldDate = [this.#startDate, this.#endDate];
-         if (!newDate[0].isValid || !newDate[1].isValid || (oldDate[0].equals(newDate[0]) && oldDate[1].equals(newDate[1]) || newDate[1] > newDate[0]))
+         if (!newDate[0].isValid || !newDate[1].isValid || (oldDate[0].equals(newDate[0]) && oldDate[1].equals(newDate[1]) || newDate[0] > newDate[1]))
             return;
 
          const violations = this.validateInput([newDate[0], newDate[1]], true);
@@ -2599,12 +2610,16 @@ class DateRangePicker {
                newDate[0] = violations.newDate.startDate
                newDate[1] = violations.newDate.endDate
             } else {
-               return;
+               return; // revert to old startDate,endDate
             }
          }
 
          this.#startDate = newDate[0];
          this.#endDate = newDate[1];
+         if (!this.timePicker) {
+            this.#startDate = this.#startDate.startOf('day');
+            this.#endDate = this.#endDate.endOf('day');
+         }
       } else {
          return;
       }

@@ -154,7 +154,7 @@ test('inputChanged range events fire correctly', () => {
    expect(drp.startDate.toISODate()).toBe('2026-05-10');
    expect(altStart.value).toBe(DateTime.fromISO('2026-05-10').toISODate({ format: 'basic' }));
    expect(drp.endDate.toISODate()).toBe('2026-05-20');
-   expect(altEnd.value).toBe(DateTime.fromISO('2026-05-20').toISODate({ format: 'basic' }));
+   expect(altEnd.value).toBe(DateTime.fromISO('2026-05-20').toISODate({ format: 'basic' }));   
    expect(inputChanged).toBe(true);
 
 });
