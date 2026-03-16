@@ -532,6 +532,152 @@ class DateRangePicker {
   set endDate(val) {
     this.#endDate = val;
   }
+  /**
+   * DateRangePicker specific events
+   */
+  #events = {
+    /**
+    * Emitted when the date is changed through `<input>` element or via {@link #DateRangePicker+setStartDate|setStartDate} or 
+    * {@link #DateRangePicker+setRange|setRange} and date is not valid due to 
+    * `minDate`, `maxDate`, `minSpan`, `maxSpan`, `invalidDate` and `invalidTime` constraints.<br>
+    * Event is only triggered when date string is valid and date value is changing<br>
+    * @event
+    * @name "violated.daterangepicker"
+    * @param {DateRangePicker} picker - The daterangepicker object
+    * @param {InputViolation} result - The violation object, see example of `validateInput()`
+    * @param {Object} newDate - Object of {startDate, endDate}
+    * @return {boolean}=undefined - If handler returns `true`, then values from `newDate` object are used
+    * @example
+    * 
+    * $('#picker').daterangepicker({
+    *   startDate: DateTime.now(),
+    *   // allow only dates from current year
+    *   minDate: DateTime.now().startOf('year'),
+    *   manDate: DateTime.now().endOf('year'),
+    *   singleDatePicker: true,
+    *   locale: {
+    *      format: DateTime.DATETIME_SHORT
+    *   }
+    * }).on('violated.daterangepicker', (ev, picker, result, newDate) => {
+    *   newDate.startDate = DateTime.now().minus({ days: 3 }).startOf('day');
+    *   return true;
+    * });
+    *
+    * // Try to set date outside permitted range at <input> elemet
+    * $('#picker').val(DateTime.now().minus({ years: 10 })).toLocaleString(DateTime.DATETIME_SHORT).trigger('keyup');
+    
+    * // Try to set date outside permitted range by code
+    * const drp = $('#picker').data('daterangepicker').setStartDate(DateTime.now().minus({ years: 10 })
+    * 
+    * // -> Calendar selects and shows "today - 3 days"
+    */
+    onViolated: { type: "violated.daterangepicker", param: (...args) => [this, ...args] },
+    /**
+    * Emitted before the calendar time picker is rendered.
+    * @event
+    * @name "beforeRenderCalendar.daterangepicker"
+    * @param {DateRangePicker} this - The daterangepicker object
+    */
+    onBeforeRenderTimePicker: { type: "beforeRenderTimePicker.daterangepicker", param: this },
+    /**
+    * Emitted before the calendar is rendered. Useful to remove any manually added elements.
+    * @event
+    * @name "beforeRenderCalendar.daterangepicker"
+    * @param {DateRangePicker} this - The daterangepicker object
+    */
+    onBeforeRenderCalendar: { type: "beforeRenderCalendar.daterangepicker", param: this },
+    /**
+    * Emitted when the picker is shown 
+    * @event
+    * @name "show.daterangepicker"
+    * @param {DateRangePicker} this - The daterangepicker object
+    */
+    onShow: { type: "show.daterangepicker", param: this },
+    /**
+    * Emitted before the picker will hide. When EventHandler returns `true`, then picker remains visible
+    * @event
+    * @name "beforeHide.daterangepicker"
+    * @param {DateRangePicker} this - The daterangepicker object
+    * @return {boolean} cancel - If `true`, then the picker remains visible
+    */
+    onBeforeHide: { type: "beforeHide.daterangepicker", param: this },
+    /**
+    * Emitted when the picker is hidden
+    * @event
+    * @name "hide.daterangepicker"
+    * @param {DateRangePicker} this - The daterangepicker object
+    */
+    onHide: { type: "hide.daterangepicker", param: this },
+    /**
+    * Emitted when the calendar(s) are shown.
+    * Only useful when {@link #Ranges|Ranges} are used.
+    * @event
+    * @name "showCalendar.daterangepicker"
+    * @param {DateRangePicker} this - The daterangepicker object
+    */
+    onShowCalendar: { type: "showCalendar.daterangepicker", param: this },
+    /**
+    * Emitted when the calendar(s) are hidden. Only used when {@link #Ranges|Ranges} are used.
+    * @event
+    * @name "hideCalendar.daterangepicker"
+    * @param {DateRangePicker} this - The daterangepicker object
+    */
+    onHideCalendar: { type: "hideCalendar.daterangepicker", param: this },
+    /**
+    * Emitted when user clicks outside the picker. Use option `onOutsideClick` to define the default action, then you may not need to handle this event.
+    * @event
+    * @name "outsideClick.daterangepicker"
+    * @param {DateRangePicker} this - The daterangepicker object
+    */
+    onOutsideClick: { type: "outsideClick.daterangepicker", param: this },
+    /**
+    * Emitted when the date changed. Does not trigger when time is changed, use {@link #event_timeChange.daterangepicker|"timeChange.daterangepicker"} to handle it
+    * @event
+    * @name "dateChange.daterangepicker"
+    * @param {DateRangePicker} this - The daterangepicker object
+    * @param {string} side - Either `'start'` or `'end'` indicating whether startDate or endDate was changed. `null` when `singleDatePicker: true`
+    */
+    onDateChange: { type: "dateChange.daterangepicker", param: (side) => [this, side] },
+    /**
+    * Emitted when the time changed. Does not trigger when date is changed
+    * @event
+    * @name "timeChange.daterangepicker"
+    * @param {DateRangePicker} this - The daterangepicker object
+    * @param {string} side - Either `'start'` or `'end'` indicating whether startDate or endDate was changed
+    */
+    onTimeChange: { type: "timeChange.daterangepicker", param: (side) => [this, side] },
+    /**
+    * Emitted when the `Apply` button is clicked, or when a predefined {@link #Ranges|Ranges} is clicked 
+    * @event
+    * @name "apply.daterangepicker"
+    * @param {DateRangePicker} this - The daterangepicker object
+    */
+    onApply: { type: "apply.daterangepicker", param: this },
+    /**
+    * Emitted when the `Cancel` button is clicked
+    * @event
+    * @name "cancel.daterangepicker"
+    * @param {DateRangePicker} this - The daterangepicker object
+    */
+    onCancel: { type: "cancel.daterangepicker", param: this },
+    /**
+    * Emitted when the date is changed through `<input>` element. Event is only triggered when date string is valid and date value has changed
+    * @event
+    * @name "inputChanged.daterangepicker"
+    * @param {DateRangePicker} this - The daterangepicker object
+    */
+    onInputChanged: { type: "inputChanged.daterangepicker", param: this },
+    /**
+    * Emitted after month view changed, for example by click on 'prev' or 'next'
+    * @event
+    * @name "monthViewChanged.daterangepicker"
+    * @param {DateRangePicker} this - The daterangepicker object
+    */
+    onMonthViewChanged: { type: "monthViewChanged.daterangepicker", param: this }
+  };
+  get events() {
+    return this.#events;
+  }
   /* #region Set startDate/endDate */
   /**
   * Sets the date range picker's currently selected start date to the provided date.<br>
@@ -559,6 +705,7 @@ class DateRangePicker {
         return violations;
       }
     }
+    const monthChanged = !this.#startDate.hasSame(newDate, "month");
     this.#startDate = newDate;
     this.#endDate = this.#startDate;
     if (!this.timePicker) {
@@ -567,7 +714,7 @@ class DateRangePicker {
     }
     this.updateElement();
     if (updateView)
-      this.updateView();
+      this.updateView(monthChanged);
     return violations;
   }
   /**
@@ -614,6 +761,7 @@ class DateRangePicker {
         return violations;
       }
     }
+    const monthChanged = !this.#startDate.hasSame(newDate[0], "month") || !this.#endDate.hasSame(newDate[1], "month");
     this.#startDate = newDate[0];
     this.#endDate = newDate[1];
     if (!this.timePicker) {
@@ -622,7 +770,7 @@ class DateRangePicker {
     }
     this.updateElement();
     if (updateView)
-      this.updateView();
+      this.updateView(monthChanged);
     return violations;
   }
   /**
@@ -707,42 +855,6 @@ class DateRangePicker {
       }
     }
   }
-  /**
-  * Emitted when the date is changed through `<input>` element or via {@link #DateRangePicker+setStartDate|setStartDate} or 
-  * {@link #DateRangePicker+setRange|setRange} and date is not valid due to 
-  * `minDate`, `maxDate`, `minSpan`, `maxSpan`, `invalidDate` and `invalidTime` constraints.<br>
-  * Event is only triggered when date string is valid and date value is changing<br>
-  * @event
-  * @name "violated.daterangepicker"
-  * @param {Object} this - The event object
-  * @param {DateRangePicker} picker - The daterangepicker object
-  * @param {InputViolation} result - The violation object, see example of `validateInput()`
-  * @param {Object} newDate - Object of {startDate, endDate}
-  * @return {boolean}=undefined - If handler returns `true`, then values from `newDate` object are used
-  * @example
-  * 
-  * $('#picker').daterangepicker({
-  *   startDate: DateTime.now(),
-  *   // allow only dates from current year
-  *   minDate: DateTime.now().startOf('year'),
-  *   manDate: DateTime.now().endOf('year'),
-  *   singleDatePicker: true,
-  *   locale: {
-  *      format: DateTime.DATETIME_SHORT
-  *   }
-  * }).on('violated.daterangepicker', (ev, picker, result, newDate) => {
-  *   newDate.startDate = DateTime.now().minus({ days: 3 }).startOf('day');
-  *   return true;
-  * });
-  *
-  * // Try to set date outside permitted range at <input> elemet
-  * $('#picker').val(DateTime.now().minus({ years: 10 })).toLocaleString(DateTime.DATETIME_SHORT).trigger('keyup');
-  
-  * // Try to set date outside permitted range by code
-  * const drp = $('#picker').data('daterangepicker').setStartDate(DateTime.now().minus({ years: 10 })
-  * 
-  * // -> Calendar selects and shows "today - 3 days"
-  */
   /**
   * @typedef InputViolation
   * @type {Object}
@@ -843,7 +955,7 @@ class DateRangePicker {
         return null;
       if (dipatch) {
         let newValues = { startDate };
-        const ret = this.element.triggerHandler("violated.daterangepicker", [this, result, newValues]);
+        const ret = this.triggerHandler(this.#events.onViolated, result, newValues);
         if (ret) {
           result.newDate = newValues;
           return result;
@@ -919,7 +1031,7 @@ class DateRangePicker {
       return null;
     if (dipatch) {
       let newValues = { startDate, endDate };
-      const ret = this.element.triggerHandler("violated.daterangepicker", [this, result, newValues]);
+      const ret = this.triggerHandler(this.#events.onViolated, result, newValues);
       if (ret) {
         result.newDate = newValues;
         return result;
@@ -933,11 +1045,12 @@ class DateRangePicker {
   /**
   * Updates the picker when calendar is initiated or any date has been selected. 
   * Could be useful after running {@link #DateRangePicker+setStartDate|setStartDate} or {@link #DateRangePicker+setEndDate|setRange} 
+  * @param {boolean} monthChanged - If `true` then monthView changed
   * @emits "beforeRenderTimePicker.daterangepicker"
   */
-  updateView() {
+  updateView(monthChanged) {
     if (this.timePicker) {
-      this.element.trigger("beforeRenderTimePicker.daterangepicker", this);
+      this.triggerEvent(this.#events.onBeforeRenderTimePicker);
       this.renderTimePicker("start");
       this.renderTimePicker("end");
       if (!this.#endDate) {
@@ -948,7 +1061,7 @@ class DateRangePicker {
     }
     this.updateLabel();
     this.updateMonthsInView();
-    this.updateCalendars();
+    this.updateCalendars(monthChanged);
     this.setApplyBtnState();
   }
   /**
@@ -987,9 +1100,11 @@ class DateRangePicker {
   /**
   * Updates the selected day value from calendar with selected time values
   * @emits "beforeRenderCalendar.daterangepicker"
+  * @emits "monthViewChanged.daterangepicker"
+  * @param {boolean} monthChanged - If `true` then monthView changed
   * @private
   */
-  updateCalendars() {
+  updateCalendars(monthChanged) {
     if (this.timePicker) {
       var hour, minute, second;
       if (this.#endDate) {
@@ -1033,9 +1148,11 @@ class DateRangePicker {
       if (!this.singleMonthView)
         this.rightCalendar.month = this.rightCalendar.month.set({ hour: 0, minute: 0, second: 0 });
     }
-    this.element.trigger("beforeRenderCalendar.daterangepicker", this);
+    this.triggerEvent(this.#events.onBeforeRenderCalendar);
     this.renderCalendar("left");
     this.renderCalendar("right");
+    if (monthChanged)
+      this.triggerEvent(this.#events.onMonthViewChanged);
     this.container.find(".ranges li").removeClass("active");
     if (this.#endDate == null) return;
     this.calculateChosenLabel();
@@ -1478,10 +1595,10 @@ class DateRangePicker {
     }.bind(this));
     this.oldStartDate = this.#startDate;
     this.oldEndDate = this.#endDate;
-    this.updateView();
+    this.updateView(false);
     this.container.show();
     this.move();
-    this.element.trigger("show.daterangepicker", this);
+    this.triggerEvent(this.#events.onShow);
     this.isShowing = true;
   }
   /**
@@ -1498,12 +1615,12 @@ class DateRangePicker {
     if (!this.#startDate.equals(this.oldStartDate) || !this.#endDate.equals(this.oldEndDate))
       this.callback(this.startDate, this.endDate, this.chosenLabel);
     this.updateElement();
-    if (this.element.triggerHandler("beforeHide.daterangepicker", this))
+    if (this.triggerHandler(this.#events.onBeforeHide))
       return;
     $(document).off(".daterangepicker");
     $(window).off(".daterangepicker");
     this.container.hide();
-    this.element.trigger("hide.daterangepicker", this);
+    this.triggerEvent(this.#events.onHide);
     this.isShowing = false;
   }
   /**
@@ -1523,7 +1640,7 @@ class DateRangePicker {
   showCalendars() {
     this.container.addClass("show-calendar");
     this.move();
-    this.element.trigger("showCalendar.daterangepicker", this);
+    this.triggerEvent(this.#events.onShowCalendar);
   }
   /**
   * Hides calendar when user selects a predefined range
@@ -1531,7 +1648,7 @@ class DateRangePicker {
   */
   hideCalendars() {
     this.container.removeClass("show-calendar");
-    this.element.trigger("hideCalendar.daterangepicker", this);
+    this.triggerEvent(this.#events.onHideCalendar);
   }
   /* #endregion */
   /* #region Handle mouse related events */
@@ -1552,7 +1669,7 @@ class DateRangePicker {
       this.#endDate = this.oldEndDate;
     }
     this.hide();
-    this.element.trigger("outsideClick.daterangepicker", this);
+    this.triggerEvent(this.#events.onOutsideClick);
   }
   /**
   * Move calendar to previous month
@@ -1568,7 +1685,7 @@ class DateRangePicker {
     } else {
       this.rightCalendar.month = this.rightCalendar.month.minus({ month: 1 });
     }
-    this.updateCalendars();
+    this.updateCalendars(true);
   }
   /**
   * Move calendar to next month
@@ -1584,7 +1701,7 @@ class DateRangePicker {
       if (this.linkedCalendars)
         this.leftCalendar.month = this.leftCalendar.month.plus({ month: 1 });
     }
-    this.updateCalendars();
+    this.updateCalendars(true);
   }
   /**
   * User hovers over date values
@@ -1689,17 +1806,18 @@ class DateRangePicker {
     if (label == this.locale.customRangeLabel) {
       this.showCalendars();
     } else {
-      var dates = this.ranges[label];
-      this.#startDate = dates[0];
-      this.#endDate = dates[1];
+      var newDate = this.ranges[label];
+      const monthChanged = !this.#startDate.hasSame(newDate[0], "month") || !this.#endDate.hasSame(newDate[1], "month");
+      this.#startDate = newDate[0];
+      this.#endDate = newDate[1];
       if (!this.timePicker) {
         this.#startDate.startOf("day");
         this.#endDate.endOf("day");
       }
       if (!this.alwaysShowCalendars)
         this.hideCalendars();
-      if (this.element.triggerHandler("beforeHide.daterangepicker", this))
-        this.updateView();
+      if (this.triggerHandler(this.#events.onBeforeHide))
+        this.updateView(monthChanged);
       this.clickApply();
     }
   }
@@ -1778,11 +1896,11 @@ class DateRangePicker {
         this.clickApply();
       side = null;
     }
-    this.updateView();
+    this.updateView(false);
     e.stopPropagation();
     if (this.autoUpdateInput)
       this.updateElement();
-    this.element.trigger("dateChange.daterangepicker", [this, side]);
+    this.triggerEvent(this.#events.onDateChange, side);
   }
   /**
   * Hightlight selected predefined range in calendar
@@ -1865,14 +1983,14 @@ class DateRangePicker {
     } else if (this.#endDate) {
       this.#endDate = this.#endDate.set({ hour, minute, second });
     }
-    this.updateCalendars();
+    this.updateCalendars(false);
     this.setApplyBtnState();
-    this.element.trigger("beforeRenderTimePicker.daterangepicker", this);
+    this.triggerEvent(this.#events.onBeforeRenderTimePicker);
     this.renderTimePicker("start");
     this.renderTimePicker("end");
     if (this.autoUpdateInput)
       this.updateElement();
-    this.element.trigger("timeChange.daterangepicker", [this, this.singleDatePicker ? null : side]);
+    this.triggerEvent(this.#events.onTimeChange, this.singleDatePicker ? null : side);
   }
   /**
   * Calender month moved
@@ -1883,6 +2001,7 @@ class DateRangePicker {
     var isLeft = $(e.target).closest(".drp-calendar").hasClass("left"), leftOrRight = isLeft ? "left" : "right", cal = this.container.find(".drp-calendar." + leftOrRight);
     var month = parseInt(cal.find(".monthselect").val(), 10);
     var year = cal.find(".yearselect").val();
+    let monthChanged = false;
     if (!isLeft) {
       if (year < this.#startDate.year || year == this.#startDate.year && month < this.#startDate.month) {
         month = this.#startDate.month;
@@ -1902,15 +2021,17 @@ class DateRangePicker {
       }
     }
     if (isLeft) {
+      monthChanged = !DateTime.fromObject({ year, month }).hasSame(this.leftCalendar.month, "month");
       this.leftCalendar.month = this.leftCalendar.month.set({ year, month });
       if (this.linkedCalendars)
         this.rightCalendar.month = this.leftCalendar.month.plus({ month: 1 });
     } else {
+      monthChanged = !DateTime.fromObject({ year, month }).hasSame(this.leftCalendar.month, "month");
       this.rightCalendar.month = this.rightCalendar.month.set({ year, month });
       if (this.linkedCalendars)
         this.leftCalendar.month = this.rightCalendar.month.minus({ month: 1 });
     }
-    this.updateCalendars();
+    this.updateCalendars(monthChanged);
   }
   /**
   * User clicked `Apply` button
@@ -1919,7 +2040,7 @@ class DateRangePicker {
      */
   clickApply() {
     this.hide();
-    this.element.trigger("apply.daterangepicker", this);
+    this.triggerEvent(this.#events.onApply);
   }
   /**
   * User clicked `Cancel` button
@@ -1930,7 +2051,7 @@ class DateRangePicker {
     this.#startDate = this.oldStartDate;
     this.#endDate = this.oldEndDate;
     this.hide();
-    this.element.trigger("cancel.daterangepicker", this);
+    this.triggerEvent(this.#events.onCancel);
   }
   /* #endregion */
   /**
@@ -1944,6 +2065,7 @@ class DateRangePicker {
     if (!this.element.val().length) return;
     const format = typeof this.locale.format === "string" ? this.locale.format : DateTime.parseFormatForOpts(this.locale.format);
     const dateString = this.element.val().split(this.locale.separator);
+    let monthChanged = false;
     if (this.singleDatePicker) {
       let newDate = DateTime.fromFormat(this.element.val(), format, { locale: DateTime.now().locale });
       const oldDate = this.#startDate;
@@ -1957,6 +2079,7 @@ class DateRangePicker {
           return;
         }
       }
+      monthChanged = !this.#startDate.hasSame(newDate, "month");
       this.#startDate = newDate;
       this.#endDate = this.#startDate;
       if (!this.timePicker) {
@@ -1977,6 +2100,7 @@ class DateRangePicker {
           return;
         }
       }
+      monthChanged = !this.#startDate.hasSame(newDate[0], "month") || !this.#endDate.hasSame(newDate[1], "month");
       this.#startDate = newDate[0];
       this.#endDate = newDate[1];
       if (!this.timePicker) {
@@ -1986,9 +2110,9 @@ class DateRangePicker {
     } else {
       return;
     }
-    this.updateView();
+    this.updateView(monthChanged);
     this.updateElement();
-    this.element.trigger("inputChanged.daterangepicker", this);
+    this.triggerEvent(this.#events.onInputChanged);
   }
   /**
   * Handles key press, IE 11 compatibility
@@ -2067,6 +2191,34 @@ class DateRangePicker {
     this.container.remove();
     this.element.off(".daterangepicker");
     this.element.removeData();
+  }
+  /**
+   * Helper function to trigger events
+   * @param {Event} ev - From this.#events
+   * @param  {...any} args - Argument spread
+   * @private
+   */
+  triggerEvent(ev, ...args) {
+    if (args.length === 0) {
+      this.element.trigger(ev.type, ev.param);
+    } else {
+      const params = ev.param(...args);
+      this.element.trigger(ev.type, params);
+    }
+  }
+  /**
+   * Helper function to trigger events
+   * @param {Event} ev - From this.#events
+   * @param  {...any} args - Argument spread
+   * @private
+   */
+  triggerHandler(ev, ...args) {
+    if (args.length === 0) {
+      return this.element.triggerHandler(ev.type, ev.param);
+    } else {
+      const params = ev.param(...args);
+      return this.element.triggerHandler(ev.type, params);
+    }
   }
 }
 if (!$.fn.daterangepicker) {

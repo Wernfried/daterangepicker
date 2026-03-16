@@ -8,19 +8,17 @@
 ## Events
 
 <dl>
-<dt><a href="#event_violated.daterangepicker">"violated.daterangepicker" (this, picker, result, newDate)</a> ⇒ <code>boolean</code></dt>
+<dt><a href="#event_violated.daterangepicker">"violated.daterangepicker" (picker, result, newDate)</a> ⇒ <code>boolean</code></dt>
 <dd><p>Emitted when the date is changed through <code>&lt;input&gt;</code> element or via <a href="#DateRangePicker+setStartDate">setStartDate</a> or 
 <a href="#DateRangePicker+setRange">setRange</a> and date is not valid due to 
 <code>minDate</code>, <code>maxDate</code>, <code>minSpan</code>, <code>maxSpan</code>, <code>invalidDate</code> and <code>invalidTime</code> constraints.<br>
 Event is only triggered when date string is valid and date value is changing<br></p>
 </dd>
 <dt><a href="#event_beforeRenderCalendar.daterangepicker">"beforeRenderCalendar.daterangepicker" (this)</a></dt>
-<dd><p>Emitted before the calendar is rendered. 
-Useful to remove any manually added elements.</p>
+<dd><p>Emitted before the calendar time picker is rendered.</p>
 </dd>
-<dt><a href="#event_beforeRenderTimePicker.daterangepicker">"beforeRenderTimePicker.daterangepicker" (this)</a></dt>
-<dd><p>Emitted before the TimePicker is rendered.
-Useful to remove any manually added elements.</p>
+<dt><a href="#event_beforeRenderCalendar.daterangepicker">"beforeRenderCalendar.daterangepicker" (this)</a></dt>
+<dd><p>Emitted before the calendar is rendered. Useful to remove any manually added elements.</p>
 </dd>
 <dt><a href="#event_show.daterangepicker">"show.daterangepicker" (this)</a></dt>
 <dd><p>Emitted when the picker is shown</p>
@@ -36,16 +34,13 @@ Useful to remove any manually added elements.</p>
 Only useful when <a href="#Ranges">Ranges</a> are used.</p>
 </dd>
 <dt><a href="#event_hideCalendar.daterangepicker">"hideCalendar.daterangepicker" (this)</a></dt>
-<dd><p>Emitted when the calendar(s) are hidden.
-Only useful when <a href="#Ranges">Ranges</a> are used.</p>
+<dd><p>Emitted when the calendar(s) are hidden. Only used when <a href="#Ranges">Ranges</a> are used.</p>
 </dd>
 <dt><a href="#event_outsideClick.daterangepicker">"outsideClick.daterangepicker" (this)</a></dt>
-<dd><p>Emitted when user clicks outside the picker. 
-Use option <code>onOutsideClick</code> to define the default action, then you may not need to handle this event.</p>
+<dd><p>Emitted when user clicks outside the picker. Use option <code>onOutsideClick</code> to define the default action, then you may not need to handle this event.</p>
 </dd>
 <dt><a href="#event_dateChange.daterangepicker">"dateChange.daterangepicker" (this, side)</a></dt>
-<dd><p>Emitted when the date changed. Does not trigger when time is changed, 
-use <a href="#event_timeChange.daterangepicker">&quot;timeChange.daterangepicker&quot;</a> to handle it</p>
+<dd><p>Emitted when the date changed. Does not trigger when time is changed, use <a href="#event_timeChange.daterangepicker">&quot;timeChange.daterangepicker&quot;</a> to handle it</p>
 </dd>
 <dt><a href="#event_timeChange.daterangepicker">"timeChange.daterangepicker" (this, side)</a></dt>
 <dd><p>Emitted when the time changed. Does not trigger when date is changed</p>
@@ -58,6 +53,13 @@ use <a href="#event_timeChange.daterangepicker">&quot;timeChange.daterangepicker
 </dd>
 <dt><a href="#event_inputChanged.daterangepicker">"inputChanged.daterangepicker" (this)</a></dt>
 <dd><p>Emitted when the date is changed through <code>&lt;input&gt;</code> element. Event is only triggered when date string is valid and date value has changed</p>
+</dd>
+<dt><a href="#event_monthViewChanged.daterangepicker">"monthViewChanged.daterangepicker" (this)</a></dt>
+<dd><p>Emitted after month view changed, for example by click on &#39;prev&#39; or &#39;next&#39;</p>
+</dd>
+<dt><a href="#event_beforeRenderTimePicker.daterangepicker">"beforeRenderTimePicker.daterangepicker" (this)</a></dt>
+<dd><p>Emitted before the TimePicker is rendered.
+Useful to remove any manually added elements.</p>
 </dd>
 </dl>
 
@@ -96,7 +98,7 @@ Ranges are not validated against <code>minDate</code>, <code>maxDate</code>, <co
         * [.parseDate(value)](#DateRangePicker+parseDate) ⇒ [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime)
         * [.formatDate(date, format)](#DateRangePicker+formatDate) ⇒ <code>string</code>
         * [.validateInput(range, dipatch)](#DateRangePicker+validateInput) ⇒ [<code>InputViolation</code>](#InputViolation) \| <code>null</code>
-        * [.updateView()](#DateRangePicker+updateView)
+        * [.updateView(monthChanged)](#DateRangePicker+updateView)
         * [.show()](#DateRangePicker+show)
         * [.hide()](#DateRangePicker+hide)
         * [.toggle()](#DateRangePicker+toggle)
@@ -260,12 +262,17 @@ result => {
 ```
 <a name="DateRangePicker+updateView"></a>
 
-### dateRangePicker.updateView()
+### dateRangePicker.updateView(monthChanged)
 Updates the picker when calendar is initiated or any date has been selected. 
 Could be useful after running [setStartDate](#DateRangePicker+setStartDate) or [setRange](#DateRangePicker+setEndDate)
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
 **Emits**: <code>event:&quot;beforeRenderTimePicker.daterangepicker&quot;</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| monthChanged | <code>boolean</code> | If `true` then monthView changed |
+
 <a name="DateRangePicker+show"></a>
 
 ### dateRangePicker.show()
@@ -334,7 +341,7 @@ Initiate a new DateRangePicker
 
 <a name="event_violated.daterangepicker"></a>
 
-## "violated.daterangepicker" (this, picker, result, newDate) ⇒ <code>boolean</code>
+## "violated.daterangepicker" (picker, result, newDate) ⇒ <code>boolean</code>
 Emitted when the date is changed through `<input>` element or via [setStartDate](#DateRangePicker+setStartDate) or 
 [setRange](#DateRangePicker+setRange) and date is not valid due to 
 `minDate`, `maxDate`, `minSpan`, `maxSpan`, `invalidDate` and `invalidTime` constraints.<br>
@@ -345,7 +352,6 @@ Event is only triggered when date string is valid and date value is changing<br>
 
 | Param | Type | Description |
 | --- | --- | --- |
-| this | <code>Object</code> | The event object |
 | picker | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
 | result | [<code>InputViolation</code>](#InputViolation) | The violation object, see example of `validateInput()` |
 | newDate | <code>Object</code> | Object of {startDate, endDate} |
@@ -376,8 +382,7 @@ const drp = $('#picker').data('daterangepicker').setStartDate(DateTime.now().min
 <a name="event_beforeRenderCalendar.daterangepicker"></a>
 
 ## "beforeRenderCalendar.daterangepicker" (this)
-Emitted before the calendar is rendered. 
-Useful to remove any manually added elements.
+Emitted before the calendar time picker is rendered.
 
 **Kind**: event emitted  
 
@@ -385,11 +390,10 @@ Useful to remove any manually added elements.
 | --- | --- | --- |
 | this | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
 
-<a name="event_beforeRenderTimePicker.daterangepicker"></a>
+<a name="event_beforeRenderCalendar.daterangepicker"></a>
 
-## "beforeRenderTimePicker.daterangepicker" (this)
-Emitted before the TimePicker is rendered.
-Useful to remove any manually added elements.
+## "beforeRenderCalendar.daterangepicker" (this)
+Emitted before the calendar is rendered. Useful to remove any manually added elements.
 
 **Kind**: event emitted  
 
@@ -446,8 +450,7 @@ Only useful when [Ranges](#Ranges) are used.
 <a name="event_hideCalendar.daterangepicker"></a>
 
 ## "hideCalendar.daterangepicker" (this)
-Emitted when the calendar(s) are hidden.
-Only useful when [Ranges](#Ranges) are used.
+Emitted when the calendar(s) are hidden. Only used when [Ranges](#Ranges) are used.
 
 **Kind**: event emitted  
 
@@ -458,8 +461,7 @@ Only useful when [Ranges](#Ranges) are used.
 <a name="event_outsideClick.daterangepicker"></a>
 
 ## "outsideClick.daterangepicker" (this)
-Emitted when user clicks outside the picker. 
-Use option `onOutsideClick` to define the default action, then you may not need to handle this event.
+Emitted when user clicks outside the picker. Use option `onOutsideClick` to define the default action, then you may not need to handle this event.
 
 **Kind**: event emitted  
 
@@ -470,8 +472,7 @@ Use option `onOutsideClick` to define the default action, then you may not need 
 <a name="event_dateChange.daterangepicker"></a>
 
 ## "dateChange.daterangepicker" (this, side)
-Emitted when the date changed. Does not trigger when time is changed, 
-use ["timeChange.daterangepicker"](#event_timeChange.daterangepicker) to handle it
+Emitted when the date changed. Does not trigger when time is changed, use ["timeChange.daterangepicker"](#event_timeChange.daterangepicker) to handle it
 
 **Kind**: event emitted  
 
@@ -518,6 +519,29 @@ Emitted when the `Cancel` button is clicked
 
 ## "inputChanged.daterangepicker" (this)
 Emitted when the date is changed through `<input>` element. Event is only triggered when date string is valid and date value has changed
+
+**Kind**: event emitted  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| this | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
+
+<a name="event_monthViewChanged.daterangepicker"></a>
+
+## "monthViewChanged.daterangepicker" (this)
+Emitted after month view changed, for example by click on 'prev' or 'next'
+
+**Kind**: event emitted  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| this | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
+
+<a name="event_beforeRenderTimePicker.daterangepicker"></a>
+
+## "beforeRenderTimePicker.daterangepicker" (this)
+Emitted before the TimePicker is rendered.
+Useful to remove any manually added elements.
 
 **Kind**: event emitted  
 
