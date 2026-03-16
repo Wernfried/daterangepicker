@@ -574,7 +574,7 @@ class DateRangePicker {
                   console.error(`Value of startDate "${this.#startDate}" violates ${vio.find(x => x.reason.startsWith('isInvalid')).reason}`);
                } else {
                   const newDate = vio.filter(x => x.new != null).at(-1).new;
-                  if (process.env.JEST_WORKER_ID == null)
+                  if (process?.env.JEST_WORKER_ID == null)
                      console.warn(`Correcting startDate from ${this.#startDate} to ${newDate}`)
                   this.#startDate = newDate;
                }
@@ -586,7 +586,7 @@ class DateRangePicker {
                      console.error(`Value of endDate "${this.#endDate}" violates ${vio.find(x => x.reason.startsWith('isInvalid')).reason}`);
                   } else {
                      const newDate = vio.filter(x => x.new != null).at(-1).new;
-                     if (process.env.JEST_WORKER_ID == null)
+                     if (process?.env.JEST_WORKER_ID == null)
                         console.warn(`Correcting endDate from ${this.#endDate} to ${newDate}`)
                      this.#endDate = newDate
                   }
