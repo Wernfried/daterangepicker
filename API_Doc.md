@@ -31,10 +31,6 @@ Useful to remove any manually added elements.</p>
 <dt><a href="#event_hide.daterangepicker">"hide.daterangepicker" (this)</a></dt>
 <dd><p>Emitted when the picker is hidden</p>
 </dd>
-<dt><a href="#event_outsideClick.daterangepicker">"outsideClick.daterangepicker" (this)</a></dt>
-<dd><p>Emitted when user clicks outside the picker. 
-Use option <code>onOutsideClick</code> to define the default action, then you may not need to handle this event.</p>
-</dd>
 <dt><a href="#event_showCalendar.daterangepicker">"showCalendar.daterangepicker" (this)</a></dt>
 <dd><p>Emitted when the calendar(s) are shown.
 Only useful when <a href="#Ranges">Ranges</a> are used.</p>
@@ -43,18 +39,22 @@ Only useful when <a href="#Ranges">Ranges</a> are used.</p>
 <dd><p>Emitted when the calendar(s) are hidden.
 Only useful when <a href="#Ranges">Ranges</a> are used.</p>
 </dd>
+<dt><a href="#event_outsideClick.daterangepicker">"outsideClick.daterangepicker" (this)</a></dt>
+<dd><p>Emitted when user clicks outside the picker. 
+Use option <code>onOutsideClick</code> to define the default action, then you may not need to handle this event.</p>
+</dd>
 <dt><a href="#event_dateChange.daterangepicker">"dateChange.daterangepicker" (this, side)</a></dt>
 <dd><p>Emitted when the date changed. Does not trigger when time is changed, 
 use <a href="#event_timeChange.daterangepicker">&quot;timeChange.daterangepicker&quot;</a> to handle it</p>
+</dd>
+<dt><a href="#event_timeChange.daterangepicker">"timeChange.daterangepicker" (this, side)</a></dt>
+<dd><p>Emitted when the time changed. Does not trigger when date is changed</p>
 </dd>
 <dt><a href="#event_apply.daterangepicker">"apply.daterangepicker" (this)</a></dt>
 <dd><p>Emitted when the <code>Apply</code> button is clicked, or when a predefined <a href="#Ranges">Ranges</a> is clicked</p>
 </dd>
 <dt><a href="#event_cancel.daterangepicker">"cancel.daterangepicker" (this)</a></dt>
 <dd><p>Emitted when the <code>Cancel</code> button is clicked</p>
-</dd>
-<dt><a href="#event_timeChange.daterangepicker">"timeChange.daterangepicker" (this, side)</a></dt>
-<dd><p>Emitted when the time changed. Does not trigger when date is changed</p>
 </dd>
 <dt><a href="#event_inputChanged.daterangepicker">"inputChanged.daterangepicker" (this)</a></dt>
 <dd><p>Emitted when the date is changed through <code>&lt;input&gt;</code> element. Event is only triggered when date string is valid and date value has changed</p>
@@ -431,18 +431,6 @@ Emitted when the picker is hidden
 | --- | --- | --- |
 | this | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
 
-<a name="event_outsideClick.daterangepicker"></a>
-
-## "outsideClick.daterangepicker" (this)
-Emitted when user clicks outside the picker. 
-Use option `onOutsideClick` to define the default action, then you may not need to handle this event.
-
-**Kind**: event emitted  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| this | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
-
 <a name="event_showCalendar.daterangepicker"></a>
 
 ## "showCalendar.daterangepicker" (this)
@@ -467,6 +455,18 @@ Only useful when [Ranges](#Ranges) are used.
 | --- | --- | --- |
 | this | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
 
+<a name="event_outsideClick.daterangepicker"></a>
+
+## "outsideClick.daterangepicker" (this)
+Emitted when user clicks outside the picker. 
+Use option `onOutsideClick` to define the default action, then you may not need to handle this event.
+
+**Kind**: event emitted  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| this | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
+
 <a name="event_dateChange.daterangepicker"></a>
 
 ## "dateChange.daterangepicker" (this, side)
@@ -479,6 +479,18 @@ use ["timeChange.daterangepicker"](#event_timeChange.daterangepicker) to handle 
 | --- | --- | --- |
 | this | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
 | side | <code>string</code> | Either `'start'` or `'end'` indicating whether startDate or endDate was changed. `null` when `singleDatePicker: true` |
+
+<a name="event_timeChange.daterangepicker"></a>
+
+## "timeChange.daterangepicker" (this, side)
+Emitted when the time changed. Does not trigger when date is changed
+
+**Kind**: event emitted  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| this | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
+| side | <code>string</code> | Either `'start'` or `'end'` indicating whether startDate or endDate was changed |
 
 <a name="event_apply.daterangepicker"></a>
 
@@ -501,18 +513,6 @@ Emitted when the `Cancel` button is clicked
 | Param | Type | Description |
 | --- | --- | --- |
 | this | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
-
-<a name="event_timeChange.daterangepicker"></a>
-
-## "timeChange.daterangepicker" (this, side)
-Emitted when the time changed. Does not trigger when date is changed
-
-**Kind**: event emitted  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| this | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
-| side | <code>string</code> | Either `'start'` or `'end'` indicating whether startDate or endDate was changed |
 
 <a name="event_inputChanged.daterangepicker"></a>
 
