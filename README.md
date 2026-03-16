@@ -222,10 +222,10 @@ You can style this daterangepicker with [Bulma CSS Framework](https://bulma.io/)
 
 ## Methods
 
-Available methods are listed below in [API documentation](#DateRangePicker). You will mainly use 
-   * [.daterangepicker(options, callback)](#DateRangePicker.daterangepicker)
-   * [.setStartDate(startDate)](#DateRangePicker+setStartDate)
-   * [.setRange(startDate, endDate)](#DateRangePicker+setRange)
+Available methods are listed in detail at [API Documentation](API_Doc.md). You will mainly use 
+   * [.daterangepicker(options, callback)](API_Doc.md#new-daterangepickerelement-options-cb)
+   * [.setStartDate(startDate)](API_Doc.md#daterangepickersetstartdatestartdate-updateview--inputviolation)
+   * [.setRange(startDate, endDate)](API_Doc.md#daterangepickersetenddateenddate-updateview--inputviolation)
    * `$(...).data('daterangepicker')` to get the daterangepicker object
 
 all other methods are used rarely.
