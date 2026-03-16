@@ -810,6 +810,7 @@ class DateRangePicker {
             return violations;
          }
       }
+      const monthChanged = !this.#startDate.hasSame(newDate, 'month');
       this.#startDate = newDate;
       this.#endDate = this.#startDate;
       if (!this.timePicker) {
@@ -819,7 +820,7 @@ class DateRangePicker {
 
       this.updateElement();
       if (updateView)
-         this.updateView();
+         this.updateView(monthChanged);
       return violations;
    }
 
@@ -871,6 +872,7 @@ class DateRangePicker {
             return violations;
          }
       }
+      const monthChanged = !this.#startDate.hasSame(newDate[0], 'month') || !this.#endDate.hasSame(newDate[1], 'month');
       this.#startDate = newDate[0];
       this.#endDate = newDate[1];
       if (!this.timePicker) {
@@ -880,7 +882,7 @@ class DateRangePicker {
 
       this.updateElement();
       if (updateView)
-         this.updateView();
+         this.updateView(monthChanged);
       return violations;
    }
 
@@ -1229,9 +1231,10 @@ class DateRangePicker {
    /**
    * Updates the picker when calendar is initiated or any date has been selected. 
    * Could be useful after running {@link #DateRangePicker+setStartDate|setStartDate} or {@link #DateRangePicker+setEndDate|setRange} 
+   * @param {boolean} monthChanged - If `true` then monthView changed
    * @emits "beforeRenderTimePicker.daterangepicker"
    */
-   updateView() {
+   updateView(monthChanged) {
       if (this.timePicker) {
          this.element.trigger('beforeRenderTimePicker.daterangepicker', this);
          this.renderTimePicker('start');
@@ -1244,7 +1247,7 @@ class DateRangePicker {
       }
       this.updateLabel();
       this.updateMonthsInView();
-      this.updateCalendars();
+      this.updateCalendars(monthChanged);
       this.setApplyBtnState();
 
    }
@@ -1295,9 +1298,11 @@ class DateRangePicker {
    /**
    * Updates the selected day value from calendar with selected time values
    * @emits "beforeRenderCalendar.daterangepicker"
+   * @emits "monthViewChanged.daterangepicker"
+   * @param {boolean} monthChanged - If `true` then monthView changed
    * @private
    */
-   updateCalendars() {
+   updateCalendars(monthChanged) {
 
       if (this.timePicker) {
          var hour, minute, second;
@@ -1359,6 +1364,15 @@ class DateRangePicker {
       this.renderCalendar('left');
       //if (!this.singleMonthView)
       this.renderCalendar('right');
+
+      /**
+      * Emitted after month view changed, folr example by clicking 'prev' or 'next'
+      * @event
+      * @name "monthViewChanged.daterangepicker"
+      * @param {DateRangePicker} this - The daterangepicker object
+      */
+      if (monthChanged)
+         this.element.trigger('monthViewChanged.daterangepicker', this);
 
       //highlight any predefined range matching the current start and end dates
       this.container.find('.ranges li').removeClass('active');
@@ -1945,7 +1959,7 @@ class DateRangePicker {
       this.oldStartDate = this.#startDate;
       this.oldEndDate = this.#endDate;
 
-      this.updateView();
+      this.updateView(false);
       this.container.show();
       this.move();
       /**
@@ -2096,7 +2110,7 @@ class DateRangePicker {
       } else {
          this.rightCalendar.month = this.rightCalendar.month.minus({ month: 1 });
       }
-      this.updateCalendars();
+      this.updateCalendars(true);
    }
 
    /**
@@ -2113,7 +2127,7 @@ class DateRangePicker {
          if (this.linkedCalendars)
             this.leftCalendar.month = this.leftCalendar.month.plus({ month: 1 });
       }
-      this.updateCalendars();
+      this.updateCalendars(true);
    }
 
    /**
@@ -2242,9 +2256,10 @@ class DateRangePicker {
       if (label == this.locale.customRangeLabel) {
          this.showCalendars();
       } else {
-         var dates = this.ranges[label];
-         this.#startDate = dates[0];
-         this.#endDate = dates[1];
+         var newDate = this.ranges[label];
+         const monthChanged = !this.#startDate.hasSame(newDate[0], 'month') || !this.#endDate.hasSame(newDate[1], 'month');
+         this.#startDate = newDate[0];
+         this.#endDate = newDate[1];
 
          if (!this.timePicker) {
             this.#startDate.startOf('day');
@@ -2255,7 +2270,7 @@ class DateRangePicker {
             this.hideCalendars();
 
          if (this.element.triggerHandler('beforeHide.daterangepicker', this))
-            this.updateView();
+            this.updateView(monthChanged);
          this.clickApply();
       }
    }
@@ -2361,7 +2376,7 @@ class DateRangePicker {
       }
 
       // Need updateView because right calendar depends on left selected value
-      this.updateView();
+      this.updateView(false);
 
       //This is to cancel the blur event handler if the mouse was in one of the inputs
       e.stopPropagation();
@@ -2471,7 +2486,7 @@ class DateRangePicker {
       }
 
       //update the calendars so all clickable dates reflect the new time component
-      this.updateCalendars();
+      this.updateCalendars(false);
 
       //update the form inputs above the calendars with the new time
       this.setApplyBtnState();
@@ -2507,6 +2522,7 @@ class DateRangePicker {
       // Month must be Number for new DateTime versions
       var month = parseInt(cal.find('.monthselect').val(), 10);
       var year = cal.find('.yearselect').val();
+      let monthChanged = false;
 
       if (!isLeft) {
          if (year < this.#startDate.year || (year == this.#startDate.year && month < this.#startDate.month)) {
@@ -2530,15 +2546,17 @@ class DateRangePicker {
       }
 
       if (isLeft) {
+         monthChanged = !DateTime.fromObject({ year: year, month: month }).hasSame(this.leftCalendar.month, 'month');
          this.leftCalendar.month = this.leftCalendar.month.set({ year: year, month: month });
          if (this.linkedCalendars)
             this.rightCalendar.month = this.leftCalendar.month.plus({ month: 1 });
       } else {
+         monthChanged = !DateTime.fromObject({ year: year, month: month }).hasSame(this.leftCalendar.month, 'month');
          this.rightCalendar.month = this.rightCalendar.month.set({ year: year, month: month });
          if (this.linkedCalendars)
             this.leftCalendar.month = this.rightCalendar.month.minus({ month: 1 });
       }
-      this.updateCalendars();
+      this.updateCalendars(monthChanged);
    }
 
    /**
@@ -2589,6 +2607,7 @@ class DateRangePicker {
 
       const format = typeof this.locale.format === 'string' ? this.locale.format : DateTime.parseFormatForOpts(this.locale.format);
       const dateString = this.element.val().split(this.locale.separator);
+      let monthChanged = false;
       if (this.singleDatePicker) {
          let newDate = DateTime.fromFormat(this.element.val(), format, { locale: DateTime.now().locale });
          const oldDate = this.#startDate;
@@ -2603,6 +2622,7 @@ class DateRangePicker {
                return; // revert to old startDate
             }
          }
+         monthChanged = !this.#startDate.hasSame(newDate, 'month');
          this.#startDate = newDate;
          this.#endDate = this.#startDate;
          if (!this.timePicker) {
@@ -2624,7 +2644,7 @@ class DateRangePicker {
                return; // revert to old startDate,endDate
             }
          }
-
+         monthChanged = !this.#startDate.hasSame(newDate[0], 'month') || !this.#endDate.hasSame(newDate[1], 'month');
          this.#startDate = newDate[0];
          this.#endDate = newDate[1];
          if (!this.timePicker) {
@@ -2635,7 +2655,7 @@ class DateRangePicker {
          return;
       }
 
-      this.updateView();
+      this.updateView(monthChanged);
       this.updateElement();
       /**
       * Emitted when the date is changed through `<input>` element. Event is only triggered when date string is valid and date value has changed
