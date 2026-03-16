@@ -74,6 +74,7 @@ test('inputChanged events fire correctly with correction', () => {
    document.body.innerHTML = `<input id="p"> <input id="altStart" hidden>`;
    let inputChanged = false;
    let violated = false;
+   let monthViewChanged = false;
 
    const values = ['2026-03-01', '2000-01-01', '2026-06-25'];
    Settings.defaultLocale = 'en-US';
@@ -96,6 +97,9 @@ test('inputChanged events fire correctly with correction', () => {
       violated = true;
       newDate.startDate = DateTime.fromISO(values[2]);
       return true;
+   }).on('monthViewChanged.daterangepicker', function (ev, picker) {
+      expect(picker).toBe(drp);
+      monthViewChanged = true;
    });
    const drp = $('#p').data('daterangepicker');
    const altStart = document.querySelector('#altStart');
@@ -104,14 +108,16 @@ test('inputChanged events fire correctly with correction', () => {
 
    let month = document.querySelector('.drp-calendar.left .calendar-table .month');
    expect(month.innerHTML).toBe('March 2026');
+   expect(monthViewChanged).toBe(false);
 
    let newValue = values[1]
    input.value = newValue;
    input.dispatchEvent(new Event('keyup', { bubbles: true }));
-   // Invalid value, must revert to old value
+   
    month = document.querySelector('.drp-calendar.left .calendar-table .month');
    let selectedDay = document.querySelector('.drp-calendar.left .calendar-table tbody td.active.available.start-date');
    expect(month.innerHTML).toBe('June 2026');
+   expect(monthViewChanged).toBe(true);
    expect(parseInt(selectedDay.innerHTML)).toBe(DateTime.fromISO(values[2]).day);
    expect(drp.startDate.toISODate()).toBe(values[2]);
    expect(altStart.value).toBe(DateTime.fromISO(values[2]).toISODate({ format: 'basic' }));
@@ -124,6 +130,7 @@ test('inputChanged events fire correctly with correction', () => {
 test('inputChanged range events fire correctly', () => {
    document.body.innerHTML = `<input id="p"> <input id="altStart" hidden> <input id="altEnd" hidden>`;
    let inputChanged = false;
+   let monthViewChanged = false;
 
    Settings.defaultLocale = 'en-US';
    $('#p').daterangepicker(
@@ -142,6 +149,9 @@ test('inputChanged range events fire correctly', () => {
       expect(picker.endDate.toISODate()).toBe('2026-05-20');
       expect(altEnd.value).toBe(DateTime.fromISO('2026-05-20').toISODate({ format: 'basic' }));
       inputChanged = true;
+   }).on('monthViewChanged.daterangepicker', function (ev, picker) {
+      expect(picker).toBe(drp);
+      monthViewChanged = true;
    });
    const drp = $('#p').data('daterangepicker');
    const altStart = document.querySelector('#altStart');
@@ -154,8 +164,9 @@ test('inputChanged range events fire correctly', () => {
    expect(drp.startDate.toISODate()).toBe('2026-05-10');
    expect(altStart.value).toBe(DateTime.fromISO('2026-05-10').toISODate({ format: 'basic' }));
    expect(drp.endDate.toISODate()).toBe('2026-05-20');
-   expect(altEnd.value).toBe(DateTime.fromISO('2026-05-20').toISODate({ format: 'basic' }));   
+   expect(altEnd.value).toBe(DateTime.fromISO('2026-05-20').toISODate({ format: 'basic' }));
    expect(inputChanged).toBe(true);
+   expect(monthViewChanged).toBe(true);
 
 });
 

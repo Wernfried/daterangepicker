@@ -23,7 +23,8 @@ test('list all implemented methods', () => {
       'clickApply', 'clickCancel',
       'elementChanged', 'keydown',
       'updateElement', 'updateAltInput',
-      'remove'
+      'remove', 'triggerEvent',
+      'triggerHandler'
    ];
 
    const methods = getMethods(drp);

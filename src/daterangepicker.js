@@ -781,6 +781,151 @@ class DateRangePicker {
    set startDate(val) { this.#startDate = val }
    set endDate(val) { this.#endDate = val }
 
+   /**
+    * DateRangePicker specific events
+    */
+   #events = {
+      /**
+      * Emitted when the date is changed through `<input>` element or via {@link #DateRangePicker+setStartDate|setStartDate} or 
+      * {@link #DateRangePicker+setRange|setRange} and date is not valid due to 
+      * `minDate`, `maxDate`, `minSpan`, `maxSpan`, `invalidDate` and `invalidTime` constraints.<br>
+      * Event is only triggered when date string is valid and date value is changing<br>
+      * @event
+      * @name "violated.daterangepicker"
+      * @param {DateRangePicker} picker - The daterangepicker object
+      * @param {InputViolation} result - The violation object, see example of `validateInput()`
+      * @param {Object} newDate - Object of {startDate, endDate}
+      * @return {boolean}=undefined - If handler returns `true`, then values from `newDate` object are used
+      * @example
+      * 
+      * $('#picker').daterangepicker({
+      *   startDate: DateTime.now(),
+      *   // allow only dates from current year
+      *   minDate: DateTime.now().startOf('year'),
+      *   manDate: DateTime.now().endOf('year'),
+      *   singleDatePicker: true,
+      *   locale: {
+      *      format: DateTime.DATETIME_SHORT
+      *   }
+      * }).on('violated.daterangepicker', (ev, picker, result, newDate) => {
+      *   newDate.startDate = DateTime.now().minus({ days: 3 }).startOf('day');
+      *   return true;
+      * });
+      *
+      * // Try to set date outside permitted range at <input> elemet
+      * $('#picker').val(DateTime.now().minus({ years: 10 })).toLocaleString(DateTime.DATETIME_SHORT).trigger('keyup');
+      
+      * // Try to set date outside permitted range by code
+      * const drp = $('#picker').data('daterangepicker').setStartDate(DateTime.now().minus({ years: 10 })
+      * 
+      * // -> Calendar selects and shows "today - 3 days"
+      */
+      onViolated: { type: 'violated.daterangepicker', param: (...args) => [this, ...args] },
+      /**
+      * Emitted before the calendar time picker is rendered.
+      * @event
+      * @name "beforeRenderCalendar.daterangepicker"
+      * @param {DateRangePicker} this - The daterangepicker object
+      */
+      onBeforeRenderTimePicker: { type: 'beforeRenderTimePicker.daterangepicker', param: this },
+      /**
+      * Emitted before the calendar is rendered. Useful to remove any manually added elements.
+      * @event
+      * @name "beforeRenderCalendar.daterangepicker"
+      * @param {DateRangePicker} this - The daterangepicker object
+      */
+      onBeforeRenderCalendar: { type: 'beforeRenderCalendar.daterangepicker', param: this },
+      /**
+      * Emitted when the picker is shown 
+      * @event
+      * @name "show.daterangepicker"
+      * @param {DateRangePicker} this - The daterangepicker object
+      */
+      onShow: { type: 'show.daterangepicker', param: this },
+      /**
+      * Emitted before the picker will hide. When EventHandler returns `true`, then picker remains visible
+      * @event
+      * @name "beforeHide.daterangepicker"
+      * @param {DateRangePicker} this - The daterangepicker object
+      * @return {boolean} cancel - If `true`, then the picker remains visible
+      */
+      onBeforeHide: { type: 'beforeHide.daterangepicker', param: this },
+      /**
+      * Emitted when the picker is hidden
+      * @event
+      * @name "hide.daterangepicker"
+      * @param {DateRangePicker} this - The daterangepicker object
+      */
+      onHide: { type: 'hide.daterangepicker', param: this },
+      /**
+      * Emitted when the calendar(s) are shown.
+      * Only useful when {@link #Ranges|Ranges} are used.
+      * @event
+      * @name "showCalendar.daterangepicker"
+      * @param {DateRangePicker} this - The daterangepicker object
+      */
+      onShowCalendar: { type: 'showCalendar.daterangepicker', param: this },
+      /**
+      * Emitted when the calendar(s) are hidden. Only used when {@link #Ranges|Ranges} are used.
+      * @event
+      * @name "hideCalendar.daterangepicker"
+      * @param {DateRangePicker} this - The daterangepicker object
+      */      
+      onHideCalendar: { type: 'hideCalendar.daterangepicker', param: this },
+      /**
+      * Emitted when user clicks outside the picker. Use option `onOutsideClick` to define the default action, then you may not need to handle this event.
+      * @event
+      * @name "outsideClick.daterangepicker"
+      * @param {DateRangePicker} this - The daterangepicker object
+      */
+      onOutsideClick: { type: 'outsideClick.daterangepicker', param: this },
+      /**
+      * Emitted when the date changed. Does not trigger when time is changed, use {@link #event_timeChange.daterangepicker|"timeChange.daterangepicker"} to handle it
+      * @event
+      * @name "dateChange.daterangepicker"
+      * @param {DateRangePicker} this - The daterangepicker object
+      * @param {string} side - Either `'start'` or `'end'` indicating whether startDate or endDate was changed. `null` when `singleDatePicker: true`
+      */
+      onDateChange: { type: 'dateChange.daterangepicker', param: (side) => [this, side] },
+      /**
+      * Emitted when the time changed. Does not trigger when date is changed
+      * @event
+      * @name "timeChange.daterangepicker"
+      * @param {DateRangePicker} this - The daterangepicker object
+      * @param {string} side - Either `'start'` or `'end'` indicating whether startDate or endDate was changed
+      */
+      onTimeChange: { type: 'timeChange.daterangepicker', param: (side) => [this, side]  },
+      /**
+      * Emitted when the `Apply` button is clicked, or when a predefined {@link #Ranges|Ranges} is clicked 
+      * @event
+      * @name "apply.daterangepicker"
+      * @param {DateRangePicker} this - The daterangepicker object
+      */
+      onApply: { type: 'apply.daterangepicker', param: this },
+      /**
+      * Emitted when the `Cancel` button is clicked
+      * @event
+      * @name "cancel.daterangepicker"
+      * @param {DateRangePicker} this - The daterangepicker object
+      */
+      onCancel: { type: 'cancel.daterangepicker', param: this },
+      /**
+      * Emitted when the date is changed through `<input>` element. Event is only triggered when date string is valid and date value has changed
+      * @event
+      * @name "inputChanged.daterangepicker"
+      * @param {DateRangePicker} this - The daterangepicker object
+      */
+      onInputChanged: { type: 'inputChanged.daterangepicker', param: this },
+      /**
+      * Emitted after month view changed, for example by click on 'prev' or 'next'
+      * @event
+      * @name "monthViewChanged.daterangepicker"
+      * @param {DateRangePicker} this - The daterangepicker object
+      */
+      onMonthViewChanged: { type: 'monthViewChanged.daterangepicker', param: this }
+   }
+   get events() { return this.#events };
+
    /* #region Set startDate/endDate */
    /**
    * Sets the date range picker's currently selected start date to the provided date.<br>
@@ -978,44 +1123,6 @@ class DateRangePicker {
    }
 
    /**
-   * Emitted when the date is changed through `<input>` element or via {@link #DateRangePicker+setStartDate|setStartDate} or 
-   * {@link #DateRangePicker+setRange|setRange} and date is not valid due to 
-   * `minDate`, `maxDate`, `minSpan`, `maxSpan`, `invalidDate` and `invalidTime` constraints.<br>
-   * Event is only triggered when date string is valid and date value is changing<br>
-   * @event
-   * @name "violated.daterangepicker"
-   * @param {Object} this - The event object
-   * @param {DateRangePicker} picker - The daterangepicker object
-   * @param {InputViolation} result - The violation object, see example of `validateInput()`
-   * @param {Object} newDate - Object of {startDate, endDate}
-   * @return {boolean}=undefined - If handler returns `true`, then values from `newDate` object are used
-   * @example
-   * 
-   * $('#picker').daterangepicker({
-   *   startDate: DateTime.now(),
-   *   // allow only dates from current year
-   *   minDate: DateTime.now().startOf('year'),
-   *   manDate: DateTime.now().endOf('year'),
-   *   singleDatePicker: true,
-   *   locale: {
-   *      format: DateTime.DATETIME_SHORT
-   *   }
-   * }).on('violated.daterangepicker', (ev, picker, result, newDate) => {
-   *   newDate.startDate = DateTime.now().minus({ days: 3 }).startOf('day');
-   *   return true;
-   * });
-   *
-   * // Try to set date outside permitted range at <input> elemet
-   * $('#picker').val(DateTime.now().minus({ years: 10 })).toLocaleString(DateTime.DATETIME_SHORT).trigger('keyup');
-   
-   * // Try to set date outside permitted range by code
-   * const drp = $('#picker').data('daterangepicker').setStartDate(DateTime.now().minus({ years: 10 })
-   * 
-   * // -> Calendar selects and shows "today - 3 days"
-   */
-
-
-   /**
    * @typedef InputViolation
    * @type {Object}
    * @property {external:DateTime} startDate - Violation of startDate
@@ -1126,7 +1233,7 @@ class DateRangePicker {
             return null;
          if (dipatch) {
             let newValues = { startDate: startDate };
-            const ret = this.element.triggerHandler('violated.daterangepicker', [this, result, newValues]);
+            const ret = this.triggerHandler(this.#events.onViolated, result, newValues);
             if (ret) {
                result.newDate = newValues;
                return result;
@@ -1214,7 +1321,7 @@ class DateRangePicker {
          return null;
       if (dipatch) {
          let newValues = { startDate: startDate, endDate: endDate };
-         const ret = this.element.triggerHandler('violated.daterangepicker', [this, result, newValues]);
+         const ret = this.triggerHandler(this.#events.onViolated, result, newValues);
          if (ret) {
             result.newDate = newValues;
             return result;
@@ -1236,7 +1343,7 @@ class DateRangePicker {
    */
    updateView(monthChanged) {
       if (this.timePicker) {
-         this.element.trigger('beforeRenderTimePicker.daterangepicker', this);
+         this.triggerEvent(this.#events.onBeforeRenderTimePicker);
          this.renderTimePicker('start');
          this.renderTimePicker('end');
          if (!this.#endDate) {
@@ -1353,26 +1460,13 @@ class DateRangePicker {
             this.rightCalendar.month = this.rightCalendar.month.set({ hour: 0, minute: 0, second: 0 });
       }
 
-      /**
-      * Emitted before the calendar is rendered. 
-      * Useful to remove any manually added elements.
-      * @event
-      * @name "beforeRenderCalendar.daterangepicker"
-      * @param {DateRangePicker} this - The daterangepicker object
-      */
-      this.element.trigger('beforeRenderCalendar.daterangepicker', this);
+      this.triggerEvent(this.#events.onBeforeRenderCalendar);
       this.renderCalendar('left');
       //if (!this.singleMonthView)
       this.renderCalendar('right');
 
-      /**
-      * Emitted after month view changed, folr example by clicking 'prev' or 'next'
-      * @event
-      * @name "monthViewChanged.daterangepicker"
-      * @param {DateRangePicker} this - The daterangepicker object
-      */
       if (monthChanged)
-         this.element.trigger('monthViewChanged.daterangepicker', this);
+         this.triggerEvent(this.#events.onMonthViewChanged);
 
       //highlight any predefined range matching the current start and end dates
       this.container.find('.ranges li').removeClass('active');
@@ -1962,13 +2056,7 @@ class DateRangePicker {
       this.updateView(false);
       this.container.show();
       this.move();
-      /**
-      * Emitted when the picker is shown 
-      * @event
-      * @name "show.daterangepicker"
-      * @param {DateRangePicker} this - The daterangepicker object
-      */
-      this.element.trigger('show.daterangepicker', this);
+      this.triggerEvent(this.#events.onShow);
       this.isShowing = true;
    }
 
@@ -1993,25 +2081,12 @@ class DateRangePicker {
       //if picker is attached to a text input, update it
       this.updateElement();
 
-      /**
-      * Emitted before the picker will hide. When EventHandler returns `true`, then picker remains visible
-      * @event
-      * @name "beforeHide.daterangepicker"
-      * @param {DateRangePicker} this - The daterangepicker object
-      * @return {boolean} cancel - If `true`, then the picker remains visible
-      */
-      if (this.element.triggerHandler('beforeHide.daterangepicker', this))
+      if (this.triggerHandler(this.#events.onBeforeHide))
          return;
       $(document).off('.daterangepicker');
       $(window).off('.daterangepicker');
       this.container.hide();
-      /**
-      * Emitted when the picker is hidden
-      * @event
-      * @name "hide.daterangepicker"
-      * @param {DateRangePicker} this - The daterangepicker object
-      */
-      this.element.trigger('hide.daterangepicker', this);
+      this.triggerEvent(this.#events.onHide);
       this.isShowing = false;
    }
 
@@ -2033,14 +2108,7 @@ class DateRangePicker {
    showCalendars() {
       this.container.addClass('show-calendar');
       this.move();
-      /**
-      * Emitted when the calendar(s) are shown.
-      * Only useful when {@link #Ranges|Ranges} are used.
-      * @event
-      * @name "showCalendar.daterangepicker"
-      * @param {DateRangePicker} this - The daterangepicker object
-      */
-      this.element.trigger('showCalendar.daterangepicker', this);
+      this.triggerEvent(this.#events.onShowCalendar);
    }
 
    /**
@@ -2049,14 +2117,7 @@ class DateRangePicker {
    */
    hideCalendars() {
       this.container.removeClass('show-calendar');
-      /**
-      * Emitted when the calendar(s) are hidden.
-      * Only useful when {@link #Ranges|Ranges} are used.
-      * @event
-      * @name "hideCalendar.daterangepicker"
-      * @param {DateRangePicker} this - The daterangepicker object
-      */
-      this.element.trigger('hideCalendar.daterangepicker', this);
+      this.triggerEvent(this.#events.onHideCalendar);
    }
 
    /* #endregion */
@@ -2086,14 +2147,7 @@ class DateRangePicker {
       }
       this.hide();
 
-      /**
-      * Emitted when user clicks outside the picker. 
-      * Use option `onOutsideClick` to define the default action, then you may not need to handle this event.
-      * @event
-      * @name "outsideClick.daterangepicker"
-      * @param {DateRangePicker} this - The daterangepicker object
-      */
-      this.element.trigger('outsideClick.daterangepicker', this);
+      this.triggerEvent(this.#events.onOutsideClick);
    }
 
    /**
@@ -2269,7 +2323,7 @@ class DateRangePicker {
          if (!this.alwaysShowCalendars)
             this.hideCalendars();
 
-         if (this.element.triggerHandler('beforeHide.daterangepicker', this))
+         if (this.triggerHandler(this.#events.onBeforeHide))
             this.updateView(monthChanged);
          this.clickApply();
       }
@@ -2384,15 +2438,7 @@ class DateRangePicker {
       if (this.autoUpdateInput)
          this.updateElement();
 
-      /**
-      * Emitted when the date changed. Does not trigger when time is changed, 
-      * use {@link #event_timeChange.daterangepicker|"timeChange.daterangepicker"} to handle it
-      * @event
-      * @name "dateChange.daterangepicker"
-      * @param {DateRangePicker} this - The daterangepicker object
-      * @param {string} side - Either `'start'` or `'end'` indicating whether startDate or endDate was changed. `null` when `singleDatePicker: true`
-      */
-      this.element.trigger('dateChange.daterangepicker', [this, side]);
+      this.triggerEvent(this.#events.onDateChange, side);
 
    }
 
@@ -2492,21 +2538,14 @@ class DateRangePicker {
       this.setApplyBtnState();
 
       //re-render the time pickers because changing one selection can affect what's enabled in another
-      this.element.trigger('beforeRenderTimePicker.daterangepicker', this);
+      this.triggerEvent(this.#events.onBeforeRenderTimePicker);
       this.renderTimePicker('start');
       this.renderTimePicker('end');
 
       if (this.autoUpdateInput)
          this.updateElement();
 
-      /**
-      * Emitted when the time changed. Does not trigger when date is changed
-      * @event
-      * @name "timeChange.daterangepicker"
-      * @param {DateRangePicker} this - The daterangepicker object
-      * @param {string} side - Either `'start'` or `'end'` indicating whether startDate or endDate was changed
-      */
-      this.element.trigger('timeChange.daterangepicker', [this, this.singleDatePicker ? null : side]);
+      this.triggerEvent(this.#events.onTimeChange, this.singleDatePicker ? null : side);
    }
 
    /**
@@ -2566,13 +2605,7 @@ class DateRangePicker {
    */
    clickApply() {
       this.hide();
-      /**
-      * Emitted when the `Apply` button is clicked, or when a predefined {@link #Ranges|Ranges} is clicked 
-      * @event
-      * @name "apply.daterangepicker"
-      * @param {DateRangePicker} this - The daterangepicker object
-      */
-      this.element.trigger('apply.daterangepicker', this);
+      this.triggerEvent(this.#events.onApply);
    }
 
    /**
@@ -2584,13 +2617,7 @@ class DateRangePicker {
       this.#startDate = this.oldStartDate;
       this.#endDate = this.oldEndDate;
       this.hide();
-      /**
-      * Emitted when the `Cancel` button is clicked
-      * @event
-      * @name "cancel.daterangepicker"
-      * @param {DateRangePicker} this - The daterangepicker object
-      */
-      this.element.trigger('cancel.daterangepicker', this);
+      this.triggerEvent(this.#events.onCancel);
    }
 
    /* #endregion */
@@ -2657,13 +2684,7 @@ class DateRangePicker {
 
       this.updateView(monthChanged);
       this.updateElement();
-      /**
-      * Emitted when the date is changed through `<input>` element. Event is only triggered when date string is valid and date value has changed
-      * @event
-      * @name "inputChanged.daterangepicker"
-      * @param {DateRangePicker} this - The daterangepicker object
-      */
-      this.element.trigger('inputChanged.daterangepicker', this);
+      this.triggerEvent(this.#events.onInputChanged);
    }
 
    /**
@@ -2754,6 +2775,38 @@ class DateRangePicker {
       this.element.off('.daterangepicker');
       this.element.removeData();
    }
+
+
+   /**
+    * Helper function to trigger events
+    * @param {Event} ev - From this.#events
+    * @param  {...any} args - Argument spread
+    * @private
+    */
+   triggerEvent(ev, ...args) {
+      if (args.length === 0) {
+         this.element.trigger(ev.type, ev.param);
+      } else {
+         const params = ev.param(...args);
+         this.element.trigger(ev.type, params);
+      }
+   }
+
+   /**
+    * Helper function to trigger events
+    * @param {Event} ev - From this.#events
+    * @param  {...any} args - Argument spread
+    * @private
+    */
+   triggerHandler(ev, ...args) {
+      if (args.length === 0) {
+         return this.element.triggerHandler(ev.type, ev.param);
+      } else {
+         const params = ev.param(...args);
+         return this.element.triggerHandler(ev.type, params);
+      }
+   }
+
 }
 
 

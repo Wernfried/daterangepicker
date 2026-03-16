@@ -2,7 +2,7 @@
 
 import { $ } from 'jquery';
 import DateRangePicker from '../src/daterangepicker.js';
-import { DateTime } from 'luxon';
+import { DateTime, Settings } from 'luxon';
 
 function isVisible(el) {
     if (!el || el.innerHTML === '')
@@ -11,18 +11,42 @@ function isVisible(el) {
     return style.display !== "none" && style.visibility !== "hidden";
 }
 
-test('daterangepicker is shown', () => {
+test('daterangepicker is shown month, view change', () => {
     document.body.innerHTML = `<input id="p">`;
+    let monthViewChanged = false;
+    Settings.defaultLocale = 'en-CH';
+
     $('#p').daterangepicker({
-        timePicker: true
+        timePicker: true,
+        startDate: '2026-03-10'
+    }).on('monthViewChanged.daterangepicker', function (ev, picker) {
+        expect(picker).toBe(drp);
+        monthViewChanged = true;
     });
     const input = document.querySelector('#p');
+    const drp = $('#p').data('daterangepicker');
     input.click();
     expect(isVisible(document.querySelector('div.daterangepicker .drp-calendar.left .calendar-table'))).toBe(true);
     expect(isVisible(document.querySelector('div.daterangepicker .drp-calendar.left .calendar-table tfoot .calendar-time'))).toBe(true);
     expect(isVisible(document.querySelector('div.daterangepicker .drp-calendar.right .calendar-table'))).toBe(true);
     expect(isVisible(document.querySelector('div.daterangepicker .drp-calendar.right .calendar-table tfoot .calendar-time'))).toBe(true);
     expect(isVisible(document.querySelector('div.daterangepicker .drp-buttons'))).toBe(true);
+    let leftMonth = document.querySelector('div.daterangepicker .drp-calendar.left .calendar-table .month');
+    let rightMonth = document.querySelector('div.daterangepicker .drp-calendar.right .calendar-table .month');
+    const next = document.querySelector('div.daterangepicker .drp-calendar.right .calendar-table .next.available');
+
+    expect(monthViewChanged).toBe(false);
+    expect(leftMonth.innerHTML).toBe('March 2026');
+    expect(rightMonth.innerHTML).toBe('April 2026');
+
+    next.click();
+
+    leftMonth = document.querySelector('div.daterangepicker .drp-calendar.left .calendar-table .month');
+    rightMonth = document.querySelector('div.daterangepicker .drp-calendar.right .calendar-table .month');
+    expect(monthViewChanged).toBe(true);
+    expect(leftMonth.innerHTML).toBe('April 2026');
+    expect(rightMonth.innerHTML).toBe('May 2026');
+
 });
 
 
@@ -131,7 +155,7 @@ test('daterangepicker select range and apply', () => {
 
     expect(drp.startDate.toString()).toBe(yesterday[0].toString());
     expect(drp.endDate.toString()).toBe(yesterday[1].toString());
-    expect(document.querySelector('#altStart').value).toBe(yesterday[0].toISODate({ format: 'basic'}));
+    expect(document.querySelector('#altStart').value).toBe(yesterday[0].toISODate({ format: 'basic' }));
     expect(document.querySelector('#altEnd').value).toBe(yesterday[1].toISODate({ format: 'basic' }));
     expect(isVisible(document.querySelector('div.daterangepicker'))).toBe(false);
 
