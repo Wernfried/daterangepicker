@@ -265,6 +265,7 @@ class DateRangePicker {
          this.singleMonthView = false;
       }
 
+      // #region Template
       if (typeof options.externalStyle === 'string' && ['bulma'].includes(options.externalStyle))
          this.externalStyle = options.externalStyle;
 
@@ -377,7 +378,10 @@ class DateRangePicker {
             this.locale.durationFormat = options.locale.durationFormat;
       }
       this.container.addClass(this.locale.direction);
+      // #endregion
 
+
+      // #region Generic Options
       for (let key of ['timePicker24Hour', 'showWeekNumbers', 'showISOWeekNumbers',
          'showDropdowns', 'linkedCalendars', 'showCustomRangeLabel',
          'alwaysShowCalendars', 'autoApply', 'autoUpdateInput', 'showLabel']) {
@@ -404,7 +408,9 @@ class DateRangePicker {
          else
             this[key] = function () { return false };
       }
+      // #endregion
 
+      // #region Inital Values
       if (!this.singleDatePicker) {
          for (let opt of ['minSpan', 'maxSpan', 'defaultSpan']) {
             if (['string', 'number', 'object'].includes(typeof options[opt])) {
@@ -534,13 +540,6 @@ class DateRangePicker {
          }
       }
 
-      if (!this.timePicker) {
-         if (this.minDate)
-            this.minDate = this.minDate.startOf('day');
-         if (this.maxDate)
-            this.maxDate = this.maxDate.endOf('day');
-      }
-
       if (this.singleDatePicker) {
          // Needed to determine if a range is complete
          // If #endDate and #startDate exist, then click on date must be the startDate
@@ -549,18 +548,11 @@ class DateRangePicker {
       } else if (this.#endDate < this.#startDate) {
          console.error(`Option 'endDate' ${this.#endDate} must not be earlier than 'startDate' ${this.#startDate}`);
       }
-
-      if (['function', 'string'].includes(typeof options.altFormat))
-         this.altFormat = options.altFormat;
-      if (typeof options.altInput === 'string' || Array.isArray(options.altInput)) {
-         if (this.singleDatePicker && typeof options.altInput === 'string') {
-            this.altInput = $(options.altInput).is('input:text') ? options.altInput : null;
-         } else if (!this.singleDatePicker && Array.isArray(options.altInput) && options.altInput.length === 2) {
-            this.altInput = options.altInput.every(x => typeof x === 'string' && $(x).is('input:text')) ? options.altInput : null;
-         } else {
-            const note = `Value of "altInput" must be ` + (this.singleDatePicker ? 'a string' : 'an array of two string elements');
-            console.error(`Option 'altInput' ${JSON.stringify(options.altInput)} is not valid\n`, note);
-         }
+      if (!this.timePicker) {
+         if (this.minDate) this.minDate = this.minDate.startOf('day');
+         if (this.maxDate) this.maxDate = this.maxDate.endOf('day');
+         this.#startDate = this.#startDate.startOf('day');
+         this.#endDate = this.#endDate.endOf('day');
       }
 
       if (options.warnings !== undefined)
@@ -582,8 +574,8 @@ class DateRangePicker {
                   console.error(`Value of startDate "${this.#startDate}" violates ${vio.find(x => x.reason.startsWith('isInvalid')).reason}`);
                } else {
                   const newDate = vio.filter(x => x.new != null).at(-1).new;
-                  //if (process.env.JEST_WORKER_ID == null)
-                  //console.warn(`Correcting startDate from ${this.#startDate} to ${newDate}`)
+                  if (process.env.JEST_WORKER_ID == null)
+                     console.warn(`Correcting startDate from ${this.#startDate} to ${newDate}`)
                   this.#startDate = newDate;
                }
             }
@@ -594,8 +586,8 @@ class DateRangePicker {
                      console.error(`Value of endDate "${this.#endDate}" violates ${vio.find(x => x.reason.startsWith('isInvalid')).reason}`);
                   } else {
                      const newDate = vio.filter(x => x.new != null).at(-1).new;
-                     //if (process.env.JEST_WORKER_ID == null)
-                     //console.warn(`Correcting endDate from ${this.#endDate} to ${newDate}`)
+                     if (process.env.JEST_WORKER_ID == null)
+                        console.warn(`Correcting endDate from ${this.#endDate} to ${newDate}`)
                      this.#endDate = newDate
                   }
                }
@@ -603,6 +595,21 @@ class DateRangePicker {
          }
       }
 
+      if (['function', 'string'].includes(typeof options.altFormat))
+         this.altFormat = options.altFormat;
+      if (typeof options.altInput === 'string' || Array.isArray(options.altInput)) {
+         if (this.singleDatePicker && typeof options.altInput === 'string') {
+            this.altInput = $(options.altInput).is('input:text') ? options.altInput : null;
+         } else if (!this.singleDatePicker && Array.isArray(options.altInput) && options.altInput.length === 2) {
+            this.altInput = options.altInput.every(x => typeof x === 'string' && $(x).is('input:text')) ? options.altInput : null;
+         } else {
+            const note = `Value of "altInput" must be ` + (this.singleDatePicker ? 'a string' : 'an array of two string elements');
+            console.error(`Option 'altInput' ${JSON.stringify(options.altInput)} is not valid\n`, note);
+         }
+      }
+      // #endregion
+
+      // #region - Localisation and Styling
       if (typeof options.opens === 'string') {
          if (['left', 'right', 'center'].includes(options.opens))
             this.opens = options.opens
@@ -691,10 +698,6 @@ class DateRangePicker {
          this.callback = cb;
 
       if (!this.timePicker) {
-         if (this.#startDate)
-            this.#startDate = this.#startDate.startOf('day');
-         if (this.#endDate)
-            this.#endDate = this.#endDate.endOf('day');
          this.container.find('.calendar-time').hide();
       }
 
@@ -727,11 +730,9 @@ class DateRangePicker {
          this.container.find('.cancelBtn').addClass(this.cancelButtonClasses);
       this.container.find('.applyBtn').html(this.locale.applyLabel);
       this.container.find('.cancelBtn').html(this.locale.cancelLabel);
+      // #endregion
 
-      //
-      // event listeners
-      //
-
+      // #region Event Listeners
       this.container.find('.drp-calendar')
          .on('click.daterangepicker', '.prev', this.clickPrev.bind(this))
          .on('click.daterangepicker', '.next', this.clickNext.bind(this))
@@ -761,11 +762,9 @@ class DateRangePicker {
          this.element.on('click.daterangepicker', this.toggle.bind(this));
          this.element.on('keydown.daterangepicker', this.toggle.bind(this));
       }
+      // #endregion
 
-      //
       // if attached to a text input, set the initial value
-      //
-
       this.updateElement();
 
    }
@@ -782,6 +781,7 @@ class DateRangePicker {
    set startDate(val) { this.#startDate = val }
    set endDate(val) { this.#endDate = val }
 
+   /* #region Set startDate/endDate */
    /**
    * Sets the date range picker's currently selected start date to the provided date.<br>
    * `startDate` must be a `luxon.DateTime` or `Date` or `string` according to {@link ISO-8601} or a string matching `locale.format`.<br>
@@ -911,6 +911,7 @@ class DateRangePicker {
       }
    }
 
+   /* #endregion */
    logDate(date) {
       return this.timePicker ? date.toISO({ suppressMilliseconds: true }) : date.toISODate();
    }
@@ -1223,6 +1224,7 @@ class DateRangePicker {
    }
 
 
+   /* #region Rendering */
 
    /**
    * Updates the picker when calendar is initiated or any date has been selected. 
@@ -1815,9 +1817,10 @@ class DateRangePicker {
       } else {
          this.container.find('button.applyBtn').prop('disabled', true);
       }
-
    }
+   /* #endregion */
 
+   /* #region Move/Show/Hide */
    /**
    * Place the picker at the right place in the document
    * @private
@@ -2010,40 +2013,6 @@ class DateRangePicker {
    }
 
    /**
-   * Closes the picker when user clicks outside
-   * @param {external:jQuery} e - The Event target
-   * @emits "outsideClick.daterangepicker"
-   * @private
-   */
-   outsideClick(e) {
-      var target = $(e.target);
-      // if the page is clicked anywhere except within the daterangerpicker/button
-      // itself then call this.hide()
-      if (
-         // ie modal dialog fix
-         e.type === "focusin" ||
-         target.closest(this.element).length ||
-         target.closest(this.container).length ||
-         target.closest('.calendar-table').length
-      ) return;
-
-      if (this.onOutsideClick === 'cancel') {
-         this.#startDate = this.oldStartDate;
-         this.#endDate = this.oldEndDate;
-      }
-      this.hide();
-
-      /**
-      * Emitted when user clicks outside the picker. 
-      * Use option `onOutsideClick` to define the default action, then you may not need to handle this event.
-      * @event
-      * @name "outsideClick.daterangepicker"
-      * @param {DateRangePicker} this - The daterangepicker object
-      */
-      this.element.trigger('outsideClick.daterangepicker', this);
-   }
-
-   /**
    * Shows calendar when user selects "Custom Ranges"
    * @emits "showCalendar.daterangepicker"
    */
@@ -2076,33 +2045,41 @@ class DateRangePicker {
       this.element.trigger('hideCalendar.daterangepicker', this);
    }
 
+   /* #endregion */
+
+   /* #region Handle mouse related events */
    /**
-   * Set date values after user selected a date
+   * Closes the picker when user clicks outside
    * @param {external:jQuery} e - The Event target
+   * @emits "outsideClick.daterangepicker"
    * @private
    */
-   clickRange(e) {
-      var label = e.target.getAttribute('data-range-key');
-      this.chosenLabel = label;
-      if (label == this.locale.customRangeLabel) {
-         this.showCalendars();
-      } else {
-         var dates = this.ranges[label];
-         this.#startDate = dates[0];
-         this.#endDate = dates[1];
+   outsideClick(e) {
+      var target = $(e.target);
+      // if the page is clicked anywhere except within the daterangerpicker/button
+      // itself then call this.hide()
+      if (
+         // ie modal dialog fix
+         e.type === "focusin" ||
+         target.closest(this.element).length ||
+         target.closest(this.container).length ||
+         target.closest('.calendar-table').length
+      ) return;
 
-         if (!this.timePicker) {
-            this.#startDate.startOf('day');
-            this.#endDate.endOf('day');
-         }
-
-         if (!this.alwaysShowCalendars)
-            this.hideCalendars();
-
-         if (this.element.triggerHandler('beforeHide.daterangepicker', this))
-            this.updateView();
-         this.clickApply();
+      if (this.onOutsideClick === 'cancel') {
+         this.#startDate = this.oldStartDate;
+         this.#endDate = this.oldEndDate;
       }
+      this.hide();
+
+      /**
+      * Emitted when user clicks outside the picker. 
+      * Use option `onOutsideClick` to define the default action, then you may not need to handle this event.
+      * @event
+      * @name "outsideClick.daterangepicker"
+      * @param {DateRangePicker} this - The daterangepicker object
+      */
+      this.element.trigger('outsideClick.daterangepicker', this);
    }
 
    /**
@@ -2249,6 +2226,38 @@ class DateRangePicker {
          $(el).removeClass('end-hover');
          $(el).removeClass('range-hover');
       });
+   }
+
+   /* #endregion */
+
+   /* #region Select values by Mouse  */
+   /**
+   * Set date values after user selected a date
+   * @param {external:jQuery} e - The Event target
+   * @private
+   */
+   clickRange(e) {
+      var label = e.target.getAttribute('data-range-key');
+      this.chosenLabel = label;
+      if (label == this.locale.customRangeLabel) {
+         this.showCalendars();
+      } else {
+         var dates = this.ranges[label];
+         this.#startDate = dates[0];
+         this.#endDate = dates[1];
+
+         if (!this.timePicker) {
+            this.#startDate.startOf('day');
+            this.#endDate.endOf('day');
+         }
+
+         if (!this.alwaysShowCalendars)
+            this.hideCalendars();
+
+         if (this.element.triggerHandler('beforeHide.daterangepicker', this))
+            this.updateView();
+         this.clickApply();
+      }
    }
 
    /**
@@ -2408,87 +2417,6 @@ class DateRangePicker {
    }
 
    /**
-   * User clicked `Apply` button
-   * @emits "apply.daterangepicker"
-   * @private
-   */
-   clickApply() {
-      this.hide();
-      /**
-      * Emitted when the `Apply` button is clicked, or when a predefined {@link #Ranges|Ranges} is clicked 
-      * @event
-      * @name "apply.daterangepicker"
-      * @param {DateRangePicker} this - The daterangepicker object
-      */
-      this.element.trigger('apply.daterangepicker', this);
-   }
-
-   /**
-   * User clicked `Cancel` button
-   * @emits "cancel.daterangepicker"
-   * @private
-   */
-   clickCancel() {
-      this.#startDate = this.oldStartDate;
-      this.#endDate = this.oldEndDate;
-      this.hide();
-      /**
-      * Emitted when the `Cancel` button is clicked
-      * @event
-      * @name "cancel.daterangepicker"
-      * @param {DateRangePicker} this - The daterangepicker object
-      */
-      this.element.trigger('cancel.daterangepicker', this);
-   }
-
-   /**
-   * Calender month moved
-   * @param {external:jQuery} e - The Event target
-   * @private
-   */
-   monthOrYearChanged(e) {
-      var isLeft = $(e.target).closest('.drp-calendar').hasClass('left'),
-         leftOrRight = isLeft ? 'left' : 'right',
-         cal = this.container.find('.drp-calendar.' + leftOrRight);
-
-      // Month must be Number for new DateTime versions
-      var month = parseInt(cal.find('.monthselect').val(), 10);
-      var year = cal.find('.yearselect').val();
-
-      if (!isLeft) {
-         if (year < this.#startDate.year || (year == this.#startDate.year && month < this.#startDate.month)) {
-            month = this.#startDate.month;
-            year = this.#startDate.year;
-         }
-      }
-
-      if (this.minDate) {
-         if (year < this.minDate.year || (year == this.minDate.year && month < this.minDate.month)) {
-            month = this.minDate.month;
-            year = this.minDate.year;
-         }
-      }
-
-      if (this.maxDate) {
-         if (year > this.maxDate.year || (year == this.maxDate.year && month > this.maxDate.month)) {
-            month = this.maxDate.month;
-            year = this.maxDate.year;
-         }
-      }
-
-      if (isLeft) {
-         this.leftCalendar.month = this.leftCalendar.month.set({ year: year, month: month });
-         if (this.linkedCalendars)
-            this.rightCalendar.month = this.leftCalendar.month.plus({ month: 1 });
-      } else {
-         this.rightCalendar.month = this.rightCalendar.month.set({ year: year, month: month });
-         if (this.linkedCalendars)
-            this.leftCalendar.month = this.rightCalendar.month.minus({ month: 1 });
-      }
-      this.updateCalendars();
-   }
-
-   /**
    * User clicked a time
    * @param {external:jQuery} e - The Event target
    * @emits "timeChange.daterangepicker"
@@ -2565,6 +2493,89 @@ class DateRangePicker {
       */
       this.element.trigger('timeChange.daterangepicker', [this, this.singleDatePicker ? null : side]);
    }
+
+   /**
+  * Calender month moved
+  * @param {external:jQuery} e - The Event target
+  * @private
+  */
+   monthOrYearChanged(e) {
+      var isLeft = $(e.target).closest('.drp-calendar').hasClass('left'),
+         leftOrRight = isLeft ? 'left' : 'right',
+         cal = this.container.find('.drp-calendar.' + leftOrRight);
+
+      // Month must be Number for new DateTime versions
+      var month = parseInt(cal.find('.monthselect').val(), 10);
+      var year = cal.find('.yearselect').val();
+
+      if (!isLeft) {
+         if (year < this.#startDate.year || (year == this.#startDate.year && month < this.#startDate.month)) {
+            month = this.#startDate.month;
+            year = this.#startDate.year;
+         }
+      }
+
+      if (this.minDate) {
+         if (year < this.minDate.year || (year == this.minDate.year && month < this.minDate.month)) {
+            month = this.minDate.month;
+            year = this.minDate.year;
+         }
+      }
+
+      if (this.maxDate) {
+         if (year > this.maxDate.year || (year == this.maxDate.year && month > this.maxDate.month)) {
+            month = this.maxDate.month;
+            year = this.maxDate.year;
+         }
+      }
+
+      if (isLeft) {
+         this.leftCalendar.month = this.leftCalendar.month.set({ year: year, month: month });
+         if (this.linkedCalendars)
+            this.rightCalendar.month = this.leftCalendar.month.plus({ month: 1 });
+      } else {
+         this.rightCalendar.month = this.rightCalendar.month.set({ year: year, month: month });
+         if (this.linkedCalendars)
+            this.leftCalendar.month = this.rightCalendar.month.minus({ month: 1 });
+      }
+      this.updateCalendars();
+   }
+
+   /**
+* User clicked `Apply` button
+* @emits "apply.daterangepicker"
+* @private
+   */
+   clickApply() {
+      this.hide();
+      /**
+      * Emitted when the `Apply` button is clicked, or when a predefined {@link #Ranges|Ranges} is clicked 
+      * @event
+      * @name "apply.daterangepicker"
+      * @param {DateRangePicker} this - The daterangepicker object
+      */
+      this.element.trigger('apply.daterangepicker', this);
+   }
+
+   /**
+   * User clicked `Cancel` button
+   * @emits "cancel.daterangepicker"
+   * @private
+   */
+   clickCancel() {
+      this.#startDate = this.oldStartDate;
+      this.#endDate = this.oldEndDate;
+      this.hide();
+      /**
+      * Emitted when the `Cancel` button is clicked
+      * @event
+      * @name "cancel.daterangepicker"
+      * @param {DateRangePicker} this - The daterangepicker object
+      */
+      this.element.trigger('cancel.daterangepicker', this);
+   }
+
+   /* #endregion */
 
    /**
    * Update the picker with value from `<input>` element.<br> 
