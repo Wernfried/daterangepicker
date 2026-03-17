@@ -4,4 +4,3 @@ npm-debug.log
 .vscode
 package-lock.json
 src/__daterangepicker.js
-src/daterangepicker-no-jQuery.js
