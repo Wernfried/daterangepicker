@@ -870,7 +870,7 @@ class DateRangePicker {
       * @event
       * @name "hideCalendar.daterangepicker"
       * @param {DateRangePicker} this - The daterangepicker object
-      */      
+      */
       onHideCalendar: { type: 'hideCalendar.daterangepicker', param: this },
       /**
       * Emitted when user clicks outside the picker. Use option `onOutsideClick` to define the default action, then you may not need to handle this event.
@@ -894,7 +894,7 @@ class DateRangePicker {
       * @param {DateRangePicker} this - The daterangepicker object
       * @param {string} side - Either `'start'` or `'end'` indicating whether startDate or endDate was changed
       */
-      onTimeChange: { type: 'timeChange.daterangepicker', param: (side) => [this, side]  },
+      onTimeChange: { type: 'timeChange.daterangepicker', param: (side) => [this, side] },
       /**
       * Emitted when the `Apply` button is clicked, or when a predefined {@link #Ranges|Ranges} is clicked 
       * @event
@@ -921,8 +921,13 @@ class DateRangePicker {
       * @event
       * @name "monthViewChanged.daterangepicker"
       * @param {DateRangePicker} this - The daterangepicker object
+      * @param {external:DateTime} left - For day of left-hand calendar
+      * @param {external:DateTime|null} right - For day of right-hand calendar
       */
-      onMonthViewChanged: { type: 'monthViewChanged.daterangepicker', param: this }
+      onMonthViewChanged: {
+         type: 'monthViewChanged.daterangepicker',
+         param: (left, right) => [this, left.startOf('month'), right.startOf('month')]
+      }
    }
    get events() { return this.#events };
 
@@ -1466,7 +1471,11 @@ class DateRangePicker {
       this.renderCalendar('right');
 
       if (monthChanged)
-         this.triggerEvent(this.#events.onMonthViewChanged);
+         this.triggerEvent(
+            this.#events.onMonthViewChanged,
+            this.leftCalendar.month, 
+            (this.singleMonthView || this.singleDatePicker) ? null : this.rightCalendar.month
+         );
 
       //highlight any predefined range matching the current start and end dates
       this.container.find('.ranges li').removeClass('active');
