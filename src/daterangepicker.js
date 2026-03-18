@@ -9,6 +9,9 @@ import { DateTime, Duration, Info, Settings } from 'luxon';
 class DateRangePicker {
    #startDate = null;
    #endDate = null;
+   #externalStyles = {
+      Bulma: 'bulma'
+   }
 
    constructor(element, options, cb) {
       /**
@@ -117,7 +120,6 @@ class DateRangePicker {
       * Use `null` or empty string if you don't like to highlight weekend day names.
       * @property {string} todayClasses=today - CSS class names that will be used to highlight the current day.<br>
       * Use `null` or empty string if you don't like to highlight the current day.
-      * @property {string} externalStyle=null - External CSS Framework to style the picker. Currently only `'bulma'` is supported.
 
       * @property {string} opens=right - Whether the picker appears aligned to the left, to the right, or centered under the HTML element it's attached to.<br>
       * `'left' \| 'right' \| 'center'`
@@ -278,8 +280,10 @@ class DateRangePicker {
       }
 
       // #region Template
-      if (typeof options.externalStyle === 'string' && ['bulma'].includes(options.externalStyle))
-         this.externalStyle = options.externalStyle;
+      // detect if Bulma stylesheet is loaded
+      const bodyStyle = window.getComputedStyle(document.body);
+      if ([...bodyStyle].some(x => x.startsWith('--bulma-')))
+         this.externalStyle = this.#externalStyles.Bulma;
 
       // html template for the picker UI. Custom template would be possible, but this option is not documented
       if (typeof options.template === 'string' || options.template instanceof HTMLElement) {
@@ -317,7 +321,7 @@ class DateRangePicker {
             '<div class="drp-buttons">',
             '<div class="drp-duration-label"></div>',
             '<div class="drp-selected"></div>']);
-         if (this.externalStyle === 'bulma') {
+         if (this.externalStyle === this.#externalStyles.Bulma) {
             template.push(...[
                '<div class="buttons">',
                '<button class="cancelBtn button is-small" type="button"></button>',
@@ -1573,7 +1577,7 @@ class DateRangePicker {
          const maxYear = (maxDate && maxDate.year) ?? this.maxYear;
          const minYear = (minDate && minDate.year) ?? this.minYear;
 
-         let div = this.externalStyle === 'bulma' ? '<div class="select is-small mr-1">' : '';
+         let div = this.externalStyle === this.#externalStyles.Bulma ? '<div class="select is-small mr-1">' : '';
          var monthHtml = `${div}<select class="monthselect">`;
          for (var m = 1; m <= 12; m++) {
             monthHtml += `<option value="${m}"${m === calendar.firstDay.month ? ' selected' : ''}`;
@@ -1582,15 +1586,15 @@ class DateRangePicker {
             monthHtml += `>${this.locale.monthNames[m - 1]}</option>`;
          }
          monthHtml += "</select>";
-         if (this.externalStyle === 'bulma')
+         if (this.externalStyle === this.#externalStyles.Bulma)
             monthHtml += "</div>";
 
-         div = this.externalStyle === 'bulma' ? '<div class="select is-small ml-1">' : '';
+         div = this.externalStyle === this.#externalStyles.Bulma ? '<div class="select is-small ml-1">' : '';
          var yearHtml = `${div}<select class="yearselect">`;
          for (var y = minYear; y <= maxYear; y++)
             yearHtml += `<option value="${y}"${y === calendar.firstDay.year ? ' selected' : ''}>${y}</option>`;
          yearHtml += '</select>';
-         if (this.externalStyle === 'bulma')
+         if (this.externalStyle === this.#externalStyles.Bulma)
             yearHtml += "</div>";
 
          dateHtml = monthHtml + yearHtml;
@@ -1765,7 +1769,7 @@ class DateRangePicker {
       //
       // hours
       //
-      if (this.externalStyle === 'bulma')
+      if (this.externalStyle === this.#externalStyles.Bulma)
          html += '<div class="select is-small mx-1">';
       html += '<select class="hourselect">';
       const ampm = selected.toFormat('a', { locale: 'en-US' });
@@ -1810,7 +1814,7 @@ class DateRangePicker {
          }
       }
       html += '</select>';
-      if (this.externalStyle === 'bulma')
+      if (this.externalStyle === this.#externalStyles.Bulma)
          html += '</div>';
 
       //
@@ -1819,7 +1823,7 @@ class DateRangePicker {
 
       if (this.timePickerOpts.showMinutes) {
          html += ' : ';
-         if (this.externalStyle === 'bulma')
+         if (this.externalStyle === this.#externalStyles.Bulma)
             html += '<div class="select is-small mx-1">';
          html += '<select class="minuteselect">';
 
@@ -1846,7 +1850,7 @@ class DateRangePicker {
             }
          }
          html += '</select>';
-         if (this.externalStyle === 'bulma')
+         if (this.externalStyle === this.#externalStyles.Bulma)
             html += '</div>';
       }
 
@@ -1856,7 +1860,7 @@ class DateRangePicker {
 
       if (this.timePickerOpts.showSeconds) {
          html += ' : ';
-         if (this.externalStyle === 'bulma')
+         if (this.externalStyle === this.#externalStyles.Bulma)
             html += '<div class="select is-small mx-1">';
          html += '<select class="secondselect">';
 
@@ -1883,7 +1887,7 @@ class DateRangePicker {
             }
          }
          html += '</select>';
-         if (this.externalStyle === 'bulma')
+         if (this.externalStyle === this.#externalStyles.Bulma)
             html += '</div>';
       }
 
@@ -1892,7 +1896,7 @@ class DateRangePicker {
       //
 
       if (!this.timePicker24Hour) {
-         if (this.externalStyle === 'bulma')
+         if (this.externalStyle === this.#externalStyles.Bulma)
             html += '<div class="select is-small mx-1">';
          html += '<select class="ampmselect">';
 
@@ -1928,7 +1932,7 @@ class DateRangePicker {
          html += `>${Info.meridiems()[1]}</option>`;
 
          html += '</select>';
-         if (this.externalStyle === 'bulma')
+         if (this.externalStyle === this.#externalStyles.Bulma)
             html += '</div>';
       }
 

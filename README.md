@@ -74,9 +74,8 @@ Above samples are based on the [original repository](https://github.com/dangross
 
 <script type="text/javascript">
    $(function() {
-      $('#picker').daterangepicker({
-         externalStyle: 'bulma'
-      });
+      // Bulma stylesheet is detected automatically
+      $('#picker').daterangepicker();
    });
 </script>
 ```
@@ -174,7 +173,7 @@ Compared to [inital repository](https://github.com/dangrossman/daterangepicker),
 - Option `autoUpdateInput` defines whether the attached `<input>` element is updated when the user clicks on a date value.<br>
 In original daterangepicker this parameter defines whether the `<input>` is updated when the user clicks on `Apply` button.
 - Added option `locale.durationFormat` to show customized label for selected duration, e.g. `'4 Days, 6 Hours, 30 Minutes'`
-- Added option `externalStyle` to use daterangepicker with external CSS Frameworks. Currently only [Bulma](https://bulma.io/) is supported<br>
+- Support styling with 3rd party CSS Frameworks. Currently only [Bulma](https://bulma.io/) is supported<br>
 but other frameworks may be added in future releases
 - [ESM](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules) Module Import
 - [Jest](https://jestjs.io/) unit testing
@@ -223,10 +222,10 @@ You can style this daterangepicker with [Bulma CSS Framework](https://bulma.io/)
 ## Methods
 
 Available methods are listed in detail at [API Documentation](API_Doc.md). You will mainly use 
-   * [.daterangepicker(options, callback)](API_Doc.md#new-daterangepickerelement-options-cb)
-   * [.setStartDate(startDate)](API_Doc.md#daterangepickersetstartdatestartdate-updateview--inputviolation)
-   * [.setRange(startDate, endDate)](API_Doc.md#daterangepickersetenddateenddate-updateview--inputviolation)
-   * `$(...).data('daterangepicker')` to get the daterangepicker object
+   * [.daterangepicker(options, callback)](API_Doc.md#new_DateRangePicker_new)
+   * [.setStartDate(startDate)](API_Doc.md#DateRangePicker+setStartDate)
+   * [.setRange(startDate, endDate)](API_Doc.md#DateRangePicker+setRange)
+   * [.getDateRangePicker(element)](API_Doc.md#getDateRangePicker+getDateRangePicker)
 
 all other methods are used rarely.
 
