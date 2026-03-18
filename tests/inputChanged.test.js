@@ -2,7 +2,7 @@ import { $ } from 'jquery';
 import DateRangePicker from '../src/daterangepicker.js';
 import { DateTime, Settings, Duration } from 'luxon';
 
-test('inputChanged singleDate events fire correctly', () => {
+test('inputChange singleDate events fire correctly', () => {
    document.body.innerHTML = `<input id="p"> <input id="altStart" hidden>`;
    let inputChanged = false;
    let violated = false;
@@ -18,14 +18,14 @@ test('inputChanged singleDate events fire correctly', () => {
          minDate: '2026-01-01',
          locale: { format: 'yyyy-MM-dd' }
       }
-   ).on('inputChanged.daterangepicker', (ev, picker) => {
+   ).on('inputChange.daterangepicker', (ev, picker) => {
       // Fires only for valid input
       expect(picker).toBe(drp);
       expect(picker.startDate.toISODate()).toBe(values[2]);
       expect(altStart.value).toBe(DateTime.fromISO(values[2]).toISODate({ format: 'basic' }));
       expect(violated).toBe(false);
       inputChanged = true;
-   }).on('violated.daterangepicker', (ev, picker, result, newDate) => {
+   }).on('violate.daterangepicker', (ev, picker, result, newDate) => {
       expect(picker).toBe(drp);
       expect(picker.startDate.toISODate()).toBe(values[0]);
       expect(altStart.value).toBe(DateTime.fromISO(values[0]).toISODate({ format: 'basic' }));
@@ -70,7 +70,7 @@ test('inputChanged singleDate events fire correctly', () => {
 });
 
 
-test('inputChanged events fire correctly with correction', () => {
+test('inputChange events fire correctly with correction', () => {
    document.body.innerHTML = `<input id="p"> <input id="altStart" hidden>`;
    let inputChanged = false;
    let violated = false;
@@ -87,9 +87,9 @@ test('inputChanged events fire correctly with correction', () => {
          minDate: '2026-01-01',
          locale: { format: 'yyyy-MM-dd' }
       }
-   ).on('inputChanged.daterangepicker', (ev, picker) => {
+   ).on('inputChange.daterangepicker', (ev, picker) => {
       inputChanged = true;
-   }).on('violated.daterangepicker', (ev, picker, result, newDate) => {
+   }).on('violate.daterangepicker', (ev, picker, result, newDate) => {
       expect(picker).toBe(drp);
       expect(picker.startDate.toISODate()).toBe(values[0]);
       expect(altStart.value).toBe(DateTime.fromISO(values[0]).toISODate({ format: 'basic' }));
@@ -97,7 +97,7 @@ test('inputChanged events fire correctly with correction', () => {
       violated = true;
       newDate.startDate = DateTime.fromISO(values[2]);
       return true;
-   }).on('monthViewChanged.daterangepicker', function (ev, picker) {
+   }).on('monthViewChange.daterangepicker', function (ev, picker) {
       expect(picker).toBe(drp);
       monthViewChanged = true;
    });
@@ -127,7 +127,7 @@ test('inputChanged events fire correctly with correction', () => {
 });
 
 
-test('inputChanged range events fire correctly', () => {
+test('inputChange range events fire correctly', () => {
    document.body.innerHTML = `<input id="p"> <input id="altStart" hidden> <input id="altEnd" hidden>`;
    let inputChanged = false;
    let monthViewChanged = false;
@@ -141,7 +141,7 @@ test('inputChanged range events fire correctly', () => {
          altInput: ['#altStart', '#altEnd'],
          locale: { format: 'yyyy-MM-dd' }
       }
-   ).on('inputChanged.daterangepicker', (ev, picker) => {
+   ).on('inputChange.daterangepicker', (ev, picker) => {
       // Fires only for valid input
       expect(picker).toBe(drp);
       expect(picker.startDate.toISODate()).toBe('2026-05-10');
@@ -149,7 +149,7 @@ test('inputChanged range events fire correctly', () => {
       expect(picker.endDate.toISODate()).toBe('2026-05-20');
       expect(altEnd.value).toBe(DateTime.fromISO('2026-05-20').toISODate({ format: 'basic' }));
       inputChanged = true;
-   }).on('monthViewChanged.daterangepicker', function (ev, picker) {
+   }).on('monthViewChange.daterangepicker', function (ev, picker) {
       expect(picker).toBe(drp);
       monthViewChanged = true;
    });

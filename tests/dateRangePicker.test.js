@@ -19,7 +19,7 @@ test('daterangepicker is shown month, view change', () => {
     $('#p').daterangepicker({
         timePicker: true,
         startDate: '2026-03-10'
-    }).on('monthViewChanged.daterangepicker', function (ev, picker) {
+    }).on('monthViewChange.daterangepicker', function (ev, picker) {
         expect(picker).toBe(drp);
         monthViewChanged = true;
     });

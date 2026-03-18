@@ -17,7 +17,7 @@ test('setStartDate method violation fires', () => {
          minDate: '2026-01-01',
          locale: { format: 'yyyy-MM-dd' }
       }
-   ).on('violated.daterangepicker', (ev, picker, result, newDate) => {
+   ).on('violate.daterangepicker', (ev, picker, result, newDate) => {
       expect(picker).toBe(drp);
       expect(picker.startDate.toISODate()).toBe(values[0]);
       expect(altStart.value).toBe(DateTime.fromISO(values[0]).toISODate({ format: 'basic' }));
@@ -72,7 +72,7 @@ test('setStartDate method violation fires with correction', () => {
          minDate: '2026-01-01',
          locale: { format: 'yyyy-MM-dd' }
       }
-   ).on('violated.daterangepicker', (ev, picker, result, newDate) => {
+   ).on('violate.daterangepicker', (ev, picker, result, newDate) => {
       expect(picker).toBe(drp);
       expect(picker.startDate.toISODate()).toBe(values[0]);
       expect(altStart.value).toBe(DateTime.fromISO(values[0]).toISODate({ format: 'basic' }));
