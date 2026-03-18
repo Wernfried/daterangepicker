@@ -8,7 +8,7 @@
 ## Events
 
 <dl>
-<dt><a href="#event_violated.daterangepicker">"violated.daterangepicker" (picker, result, newDate)</a> ⇒ <code>boolean</code></dt>
+<dt><a href="#event_violate.daterangepicker">"violate.daterangepicker" (picker, result, newDate)</a> ⇒ <code>boolean</code></dt>
 <dd><p>Emitted when the date is changed through <code>&lt;input&gt;</code> element or via <a href="#DateRangePicker+setStartDate">setStartDate</a> or 
 <a href="#DateRangePicker+setRange">setRange</a> and date is not valid due to 
 <code>minDate</code>, <code>maxDate</code>, <code>minSpan</code>, <code>maxSpan</code>, <code>invalidDate</code> and <code>invalidTime</code> constraints.<br>
@@ -51,10 +51,10 @@ Only useful when <a href="#Ranges">Ranges</a> are used.</p>
 <dt><a href="#event_cancel.daterangepicker">"cancel.daterangepicker" (this)</a></dt>
 <dd><p>Emitted when the <code>Cancel</code> button is clicked</p>
 </dd>
-<dt><a href="#event_inputChanged.daterangepicker">"inputChanged.daterangepicker" (this)</a></dt>
+<dt><a href="#event_inputChange.daterangepicker">"inputChange.daterangepicker" (this)</a></dt>
 <dd><p>Emitted when the date is changed through <code>&lt;input&gt;</code> element. Event is only triggered when date string is valid and date value has changed</p>
 </dd>
-<dt><a href="#event_monthViewChanged.daterangepicker">"monthViewChanged.daterangepicker" (this)</a></dt>
+<dt><a href="#event_monthViewChange.daterangepicker">"monthViewChange.daterangepicker" (this, left, right)</a></dt>
 <dd><p>Emitted after month view changed, for example by click on &#39;prev&#39; or &#39;next&#39;</p>
 </dd>
 <dt><a href="#event_beforeRenderTimePicker.daterangepicker">"beforeRenderTimePicker.daterangepicker" (this)</a></dt>
@@ -92,13 +92,14 @@ Ranges are not validated against <code>minDate</code>, <code>maxDate</code>, <co
     * _instance_
         * [.startDate](#DateRangePicker+startDate) : [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime)
         * [.endDate](#DateRangePicker+endDate) : [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime)
+        * [.events](#DateRangePicker+events)
         * [.setStartDate(startDate, updateView)](#DateRangePicker+setStartDate) ⇒ [<code>InputViolation</code>](#InputViolation)
         * [.setEndDate(endDate, updateView)](#DateRangePicker+setEndDate) ⇒ [<code>InputViolation</code>](#InputViolation)
         * [.setRange(startDate, endDate, updateView)](#DateRangePicker+setRange) ⇒ [<code>InputViolation</code>](#InputViolation)
         * [.parseDate(value)](#DateRangePicker+parseDate) ⇒ [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime)
         * [.formatDate(date, format)](#DateRangePicker+formatDate) ⇒ <code>string</code>
         * [.validateInput(range, dipatch)](#DateRangePicker+validateInput) ⇒ [<code>InputViolation</code>](#InputViolation) \| <code>null</code>
-        * [.updateView(monthChanged)](#DateRangePicker+updateView)
+        * [.updateView(monthChange)](#DateRangePicker+updateView)
         * [.show()](#DateRangePicker+show)
         * [.hide()](#DateRangePicker+hide)
         * [.toggle()](#DateRangePicker+toggle)
@@ -130,6 +131,12 @@ startDate
 
 ### dateRangePicker.endDate : [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime)
 endDate
+
+**Kind**: instance property of [<code>DateRangePicker</code>](#DateRangePicker)  
+<a name="DateRangePicker+events"></a>
+
+### dateRangePicker.events
+Getter for all DateRangePickerEvents
 
 **Kind**: instance property of [<code>DateRangePicker</code>](#DateRangePicker)  
 <a name="DateRangePicker+setStartDate"></a>
@@ -262,7 +269,7 @@ result => {
 ```
 <a name="DateRangePicker+updateView"></a>
 
-### dateRangePicker.updateView(monthChanged)
+### dateRangePicker.updateView(monthChange)
 Updates the picker when calendar is initiated or any date has been selected. 
 Could be useful after running [setStartDate](#DateRangePicker+setStartDate) or [setRange](#DateRangePicker+setEndDate)
 
@@ -271,7 +278,7 @@ Could be useful after running [setStartDate](#DateRangePicker+setStartDate) or [
 
 | Param | Type | Description |
 | --- | --- | --- |
-| monthChanged | <code>boolean</code> | If `true` then monthView changed |
+| monthChange | <code>boolean</code> | If `true` then monthView changed |
 
 <a name="DateRangePicker+show"></a>
 
@@ -339,9 +346,9 @@ Initiate a new DateRangePicker
 | options | [<code>Options</code>](#Options) | Object to configure the DateRangePicker |
 | callback | [<code>callback</code>](#callback) | Callback function executed when date is changed.<br> Callback function is executed if selected date values has changed, before picker is hidden and before the attached `<input>` element is updated.  As alternative listen to the ["apply.daterangepicker"](#event_apply.daterangepicker) event |
 
-<a name="event_violated.daterangepicker"></a>
+<a name="event_violate.daterangepicker"></a>
 
-## "violated.daterangepicker" (picker, result, newDate) ⇒ <code>boolean</code>
+## "violate.daterangepicker" (picker, result, newDate) ⇒ <code>boolean</code>
 Emitted when the date is changed through `<input>` element or via [setStartDate](#DateRangePicker+setStartDate) or 
 [setRange](#DateRangePicker+setRange) and date is not valid due to 
 `minDate`, `maxDate`, `minSpan`, `maxSpan`, `invalidDate` and `invalidTime` constraints.<br>
@@ -367,7 +374,7 @@ $('#picker').daterangepicker({
   locale: {
      format: DateTime.DATETIME_SHORT
   }
-}).on('violated.daterangepicker', (ev, picker, result, newDate) => {
+}).on('violate.daterangepicker', (ev, picker, result, newDate) => {
   newDate.startDate = DateTime.now().minus({ days: 3 }).startOf('day');
   return true;
 });
@@ -515,9 +522,9 @@ Emitted when the `Cancel` button is clicked
 | --- | --- | --- |
 | this | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
 
-<a name="event_inputChanged.daterangepicker"></a>
+<a name="event_inputChange.daterangepicker"></a>
 
-## "inputChanged.daterangepicker" (this)
+## "inputChange.daterangepicker" (this)
 Emitted when the date is changed through `<input>` element. Event is only triggered when date string is valid and date value has changed
 
 **Kind**: event emitted  
@@ -526,9 +533,9 @@ Emitted when the date is changed through `<input>` element. Event is only trigge
 | --- | --- | --- |
 | this | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
 
-<a name="event_monthViewChanged.daterangepicker"></a>
+<a name="event_monthViewChange.daterangepicker"></a>
 
-## "monthViewChanged.daterangepicker" (this)
+## "monthViewChange.daterangepicker" (this, left, right)
 Emitted after month view changed, for example by click on 'prev' or 'next'
 
 **Kind**: event emitted  
@@ -536,6 +543,8 @@ Emitted after month view changed, for example by click on 'prev' or 'next'
 | Param | Type | Description |
 | --- | --- | --- |
 | this | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
+| left | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | For day of left-hand calendar |
+| right | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| <code>null</code> | For day of right-hand calendar |
 
 <a name="event_beforeRenderTimePicker.daterangepicker"></a>
 
