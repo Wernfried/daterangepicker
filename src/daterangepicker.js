@@ -9,9 +9,6 @@ import { DateTime, Duration, Info, Settings } from 'luxon';
 class DateRangePicker {
    #startDate = null;
    #endDate = null;
-   #externalStyles = {
-      Bulma: 'bulma'
-   }
 
    constructor(element, options, cb) {
       /**
@@ -72,10 +69,7 @@ class DateRangePicker {
       * Valid values are 1,2,3,4,5,6,10,12,15,20,30 for `Duration.fromObject({seconds: ...})` and `Duration.fromObject({minutes: ...})` 
       * and 1,2,3,4,6,(8,12) for `Duration.fromObject({hours: ...})`.<br>
       * Duration must be greater than `minSpan` and smaller than `maxSpan`.<br>
-      * For example `timePickerStepSize: 600` will disable time picker seconds and time picker minutes are set to step size of 10 Minutes.<br>
-      * Overwrites `timePickerIncrement` and `timePickerSeconds`, ignored when `timePicker: false`
-      * @property {boolean} timePickerSeconds=boolean - **Deprecated**, use `timePickerStepSize`<br>Show seconds in the timePicker
-      * @property {boolean} timePickerIncrement=1 - **Deprecated**, use `timePickerStepSize`<br>Increment of the minutes selection list for times
+      * For example `timePickerStepSize: 600` will disable time picker seconds and time picker minutes are set to step size of 10 Minutes.
 
       * @property {boolean} autoUpdateInput=true - Indicates whether the date range picker should instantly update the value of the attached `<input>` 
       * element when the selected dates change.<br>The `<input>` element will be always updated on `Apply` and reverted when user clicks on `Cancel`.
@@ -97,7 +91,7 @@ class DateRangePicker {
       * @property {function} isCustomDate=false - A function that is passed each date in the two calendars before they are displayed, 
       * and may return a string or array of CSS class names to apply to that date's calendar cell.<br>
       * Signature: `isCustomDate(date)`
-      * @property {string|Array|external:HTMLElement} altInput=null - A {@link https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector#selectors|Document querySelector}<br>
+      * @property {string|Array|external:HTMLInputElement} altInput=null - A {@link https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector#selectors|Document querySelector}<br>
       * string or `HTMLElement` 
       * for an alternative output (typically hidden) `<input>` element. Uses `altFormat` to format the value.<br>
       * Must be a single string/HTMLElement for `singleDatePicker: true` or an array of two strings or HTMLElement for `singleDatePicker: false`<br>
@@ -107,7 +101,6 @@ class DateRangePicker {
       * Example `yyyyMMdd'T'HHmm` for `timePicker=true` and display of Minutes<br> 
       * If defined, either a string used with {@link https://moment.github.io/luxon/#/formatting?id=table-of-tokens|Format tokens} or a function.<br>
       * Examples: `"yyyy:MM:dd'T'HH:mm"`,<br>`(date) => date.toUnixInteger()`
-      * @property {boolean} ~~warnings~~ - Not used anymore. Listen to event `violated` to react on invalid input data
 
       * @property {string} applyButtonClasses=btn-primary - CSS class names that will be added only to the apply button
       * @property {string} cancelButtonClasses=btn-default - CSS class names that will be added only to the cancel button
@@ -191,6 +184,7 @@ class DateRangePicker {
       //default settings for options
       this.parentEl = 'body';
       this.element = element instanceof HTMLElement ? element : document.querySelector(element);
+      this.isInputText = this.element instanceof HTMLInputElement && this.element.type === 'text';
       this.#startDate = DateTime.now().startOf('day');
       this.#endDate = DateTime.now().plus({ day: 1 }).startOf('day');
       this.minDate = null;
@@ -208,7 +202,7 @@ class DateRangePicker {
       this.showWeekNumbers = false;
       this.showISOWeekNumbers = false;
       this.showCustomRangeLabel = true;
-      this.showLabel = !this.element.matches('input[type="text"]');
+      this.showLabel = !this.isInputText;
       this.timePicker = false;
       const usesMeridiems = new Intl.DateTimeFormat(DateTime.now().locale, { hour: 'numeric' }).resolvedOptions();
       this.timePicker24Hour = !usesMeridiems.hour12;
@@ -259,16 +253,18 @@ class DateRangePicker {
          options = {};
 
       //allow setting options with data-* attributes
-      const data = Array.from(element.attributes)
-         .filter(x => x.name.startsWith('data-'))
-         .map(x => {
-            return {
-               name: x.name.replace(/^data-/, '').replaceAll(/-([a-z])/, function (str) { return str[1].toUpperCase(); }),
-               value: JSON.parse(val)
-            }
-         });
-      //data-api options will be overwritten with custom javascript options
-      options = { ...options, ...data };
+      //do not use simple this.element.dataSet to support object values
+      let dataOptions = {};
+
+      const data = Array.from(this.element.attributes).filter(x => x.name.startsWith('data-'));
+      for (let item of data) {
+         const name = item.name.replace(/^data-/g, '').replace(/-([a-z])/g, function (str) { return str[1].toUpperCase() });
+         let ts = DateTime.fromISO(item.value);
+         const isDate = ['startDate', 'endDate', 'minDate', 'maxDate', 'initalMonth'].includes(name);
+         dataOptions[name] = (ts.isValid && isDate) ? ts : JSON.parse(item.value);
+      }
+      //javascript options take precedence over data-* attributes
+      options = { ...dataOptions, ...options };
 
       if (typeof options.singleDatePicker === 'boolean')
          this.singleDatePicker = options.singleDatePicker;
@@ -281,9 +277,11 @@ class DateRangePicker {
 
       // #region Template
       // detect if Bulma stylesheet is loaded
-      const bodyStyle = window.getComputedStyle(document.body);
-      if ([...bodyStyle].some(x => x.startsWith('--bulma-')))
-         this.externalStyle = this.#externalStyles.Bulma;
+      if (!(options.externalStyle === null)) {
+         const bodyStyle = window.getComputedStyle(document.body);
+         if (bodyStyle && typeof bodyStyle[Symbol.iterator] === 'function' && [...bodyStyle].some(x => x.startsWith('--bulma-')))
+            this.externalStyle = 'bulma';
+      }
 
       // html template for the picker UI. Custom template would be possible, but this option is not documented
       if (typeof options.template === 'string' || options.template instanceof HTMLElement) {
@@ -297,14 +295,11 @@ class DateRangePicker {
             '<thead></thead>',
             '<tbody></tbody>',
             '<tfoot>',
-            '<tr class="calendar-time start-time"></tr>'
-         ];
-         if (this.singleMonthView)
-            template.push('<tr class="calendar-time end-time"></tr>');
-         template.push(...[
+            '<tr class="calendar-time start-time"></tr>',
+            this.singleMonthView ? '<tr class="calendar-time end-time"></tr>' : '',
             '</tfoot>',
             '</table>',
-            '</div>']);
+            '</div>'];
 
          template.push(...[
             '<div class="drp-calendar right">',
@@ -312,7 +307,7 @@ class DateRangePicker {
             '<thead></thead>',
             '<tbody></tbody>',
             '<tfoot>',
-            '<tr class="calendar-time end-time"></tr>',
+            this.singleMonthView ? '' : '<tr class="calendar-time end-time"></tr>',
             '</tfoot>',
             '</table>',
             '</div>']);
@@ -321,7 +316,7 @@ class DateRangePicker {
             '<div class="drp-buttons">',
             '<div class="drp-duration-label"></div>',
             '<div class="drp-selected"></div>']);
-         if (this.externalStyle === this.#externalStyles.Bulma) {
+         if (this.externalStyle === 'bulma') {
             template.push(...[
                '<div class="buttons">',
                '<button class="cancelBtn button is-small" type="button"></button>',
@@ -395,7 +390,7 @@ class DateRangePicker {
          if (['string', 'object', 'function'].includes(typeof options.locale.durationFormat) && options.locale.durationFormat != null)
             this.locale.durationFormat = options.locale.durationFormat;
       }
-      this.container.addClass(this.locale.direction);
+      this.container.classList.add(this.locale.direction);
       // #endregion
 
 
@@ -460,11 +455,6 @@ class DateRangePicker {
       }
 
       if (this.timePicker) {
-         if (typeof options.timePickerSeconds === 'boolean')  // backward compatibility
-            this.timePickerStepSize = Duration.fromObject({ [options.timePickerSeconds ? 'seconds' : 'minutes']: 1 });
-         if (typeof options.timePickerIncrement === 'number')  // backward compatibility
-            this.timePickerStepSize = Duration.fromObject({ minutes: options.timePickerIncrement });
-
          if (['string', 'object', 'number'].includes(typeof options.timePickerStepSize)) {
             let duration;
             if (Duration.isDuration(options.timePickerStepSize) && options.timePickerStepSize.isValid) {
@@ -528,7 +518,7 @@ class DateRangePicker {
          }
       }
 
-      if (this.element.matches('input[type="text"]')) {
+      if (this.isInputText) {
          //if startDate and/or endDate are not set, check if the input element contains initial values
          if (this.element.value != '') {
             const format = typeof this.locale.format === 'string' ? this.locale.format : DateTime.parseFormatForOpts(this.locale.format);
@@ -569,11 +559,8 @@ class DateRangePicker {
          if (this.minDate) this.minDate = this.minDate.startOf('day');
          if (this.maxDate) this.maxDate = this.maxDate.endOf('day');
          this.#startDate = this.#startDate.startOf('day');
-         this.#endDate = this.#endDate.endOf('day'); s
+         this.#endDate = this.#endDate.endOf('day');
       }
-
-      if (options.warnings !== undefined)
-         console.warn(`Option 'warnings' not used anymore. Listen to event 'violated'`);
 
       if (!this.#startDate && this.initalMonth) {
          // No initial date selected
@@ -616,16 +603,19 @@ class DateRangePicker {
       if (this.singleDatePicker) {
          if (typeof options.altInput === 'string') {
             const el = document.querySelector(options.altInput);
-            this.altInput = el && el.matches('input[type="text"]') ? el : null;
+            this.altInput = (el instanceof HTMLInputElement && el.element.type === 'text') ? el : null;
          } else if (options.altInput instanceof HTMLElement) {
-            this.altInput = el && options.altInput.matches('input[type="text"]') ? options.altInput : null;
+            this.altInput = (options.altInput instanceof HTMLInputElement && options.altInput.type === 'text') ? options.altInput : null;
          }
       } else if (!this.singleDatePicker && Array.isArray(options.altInput) && options.altInput.length === 2) {
-         if (options.altInput.every(x => typeof x === 'string' && document.querySelector(x)?.matches('input[type="text"]'))) {
-            this.altInput = options.altInput.map(x => { return document.querySelector(x) });
-         } else if (options.altInput.every(x => x instanceof HTMLElement && x.matches('input[type="text"]'))) {
-            this.altInput = options.altInput;
+         this.altInput = [];
+         for (let item of options.altInput) {
+            const el = typeof x === 'string' ? document.querySelector(item) : item;
+            if (el instanceof HTMLInputElement && el.element.type === 'text')
+               this.altInput.push(el);
          }
+         if (this.altInput.length !== 2)
+            this.altInput = null;
       } else if (options.altInput != null) {
          console.warn(`Option 'altInput' ${JSON.stringify(options.altInput)} is not valid`);
       }
@@ -642,10 +632,10 @@ class DateRangePicker {
       }
 
       if (typeof options.drops === 'string') {
-         if (['drop', 'down', 'auto'].includes(options.drops))
+         if (['up', 'down', 'auto'].includes(options.drops))
             this.drops = options.drops
          else
-            console.error(`Option 'options.drops' must be 'drop', 'down' or 'auto'`);
+            console.error(`Option 'options.drops' must be 'up', 'down' or 'auto'`);
       }
 
       if (Array.isArray(options.buttonClasses)) {
@@ -705,14 +695,13 @@ class DateRangePicker {
             elem.innerHTML = range;
             this.ranges[elem.value] = [start, end];
          }
-
          var list = '<ul>';
          for (let range in this.ranges)
             list += `<li data-range-key="${range}">${range}</li>`;
          if (this.showCustomRangeLabel)
             list += `<li data-range-key="${this.locale.customRangeLabel}">${this.locale.customRangeLabel}</li>`;
          list += '</ul>';
-         this.container.querySelector('.ranges').prepend(list);
+         this.container.querySelector('.ranges').prepend(createElementFromHTML(list));
          this.container.classList.add('show-ranges');
       }
 
@@ -720,7 +709,7 @@ class DateRangePicker {
          this.callback = cb;
 
       if (!this.timePicker)
-         this.container.querySelectorAll(('.calendar-time')).forEach(el => { el.style.display = 'none' });
+         this.container.querySelectorAll('.calendar-time').forEach(el => { el.style.display = 'none' });
 
       //can't be used together for now
       if (this.timePicker && this.autoApply)
@@ -739,12 +728,14 @@ class DateRangePicker {
       }
 
       if ((typeof options.ranges === 'undefined' && !this.singleDatePicker) || this.alwaysShowCalendars)
-         this.container.addClass('show-calendar');
+         this.container.classList.add('show-calendar');
 
-      this.container.addClass(`opens${this.opens}`);
+      this.container.classList.add(`opens${this.opens}`);
 
       //apply CSS classes and labels to buttons
-      this.container.querySelector('.applyBtn, .cancelBtn').classList.add(...this.buttonClasses.split(' '));
+      this.container.querySelectorAll('.applyBtn, .cancelBtn').forEach(el => {
+         el.classList.add(...this.buttonClasses.split(' '))
+      });
       if (this.applyButtonClasses.length)
          this.container.querySelector('.applyBtn').classList.add(...this.applyButtonClasses.split(' '));
       if (this.cancelButtonClasses.length)
@@ -753,33 +744,30 @@ class DateRangePicker {
       this.container.querySelector('.cancelBtn').innerHTML = this.locale.cancelLabel;
       // #endregion
 
+      //addListener(element, eventName, selector, delegate)
       // #region Event Listeners
-      const drpCalendar = this.container.querySelectorAll('.drp-calendar');
-      for (let cal of drpCalendar) {
-         cal.addEventListener('click', function (e) { cal.contains(e.target.closest('.prev')) ? this.clickPrev(e) : null }.bind(this));
-         cal.addEventListener('click', function (e) { cal.contains(e.target.closest('.next')) ? this.clickNext(e) : null }.bind(this));
-         cal.addEventListener('mousedown', function (e) { cal.contains(e.target.closest('td.available')) ? this.clickDate(e) : null }.bind(this));
-         cal.addEventListener('mouseenter', function (e) { cal.contains(e.target.closest('td.available')) ? this.hoverDate(e) : null }.bind(this));
-         cal.addEventListener('change', function (e) { cal.contains(e.target.closest('select.yearselect,select.monthselect')) ? this.monthOrYearChanged(e) : null }.bind(this));
-         cal.addEventListener('change', function (e) { cal.contains(e.target.closest('select.hourselect,select.minuteselect,select.secondselect,select.ampmselect')) ? this.monthOrYearChanged(e) : null }.bind(this));
-      }
+      this.addListener('.drp-calendar', 'click', '.prev', this.clickPrev.bind(this));
+      this.addListener('.drp-calendar', 'click', '.next', this.clickNext.bind(this));
+      this.addListener('.drp-calendar', 'mousedown', 'td.available', this.clickDate.bind(this));
+      this.addListener('.drp-calendar', 'mouseenter', 'td.available', this.hoverDate.bind(this));
+      this.addListener('.drp-calendar', 'change', 'select.yearselect,select.monthselect', this.monthOrYearChanged.bind(this));
+      this.addListener('.drp-calendar', 'change', 'select.hourselect,select.minuteselect,select.secondselect,select.ampmselect', this.timeChanged.bind(this));
 
-      const drpRanges = this.container.querySelector('.ranges');
-      drpRanges.addEventListener('click', function (e) { cal.contains(e.target.closest('li')) ? this.clickRange(e) : null }.bind(this));
-      drpRanges.addEventListener('mouseenter', function (e) { cal.contains(e.target.closest('li')) ? this.hoverRange(e) : null }.bind(this));
-      drpRanges.addEventListener('mouseleave', function (e) { cal.contains(e.target.closest('li')) ? this.leaveRange(e) : null }.bind(this));
+      this.addListener('.ranges', 'click', 'li', this.clickRange.bind(this));
+      this.addListener('.ranges', 'mouseenter', 'li', this.hoverRange.bind(this));
+      this.addListener('.ranges', 'mouseleave', 'li', this.leaveRange.bind(this));
 
-      const drpButtons = this.container.querySelectorAll('.drp-buttons');
-      for (let btn of drpButtons) {
-         btn.addEventListener('click', function (e) { cal.contains(e.target.closest('button.applyBtn')) ? this.clickApply(e) : null }.bind(this));
-         btn.addEventListener('click', function (e) { cal.contains(e.target.closest('button.cancelBtn')) ? this.clickCancel(e) : null }.bind(this));
-      }
+      this.addListener('.drp-buttons', 'click', 'button.applyBtn', this.clickApply.bind(this));
+      this.addListener('.drp-buttons', 'click', 'button.cancelBtn', this.clickCancel.bind(this));
 
-      this.element.addEventListener('click', this.toggle.bind(this))
-      this.element.addEventListener('keydown', this.toggle.bind(this));
       if (this.element.matches('input') || this.element.matches('button')) {
-         this.element.addEventListener('focus.daterangepicker', this.show.bind(this));
-         this.element.addEventListener('keyup.daterangepicker', this.elementChanged.bind(this));
+         this.element.addEventListener('click', this.show.bind(this));
+         this.element.addEventListener('focus', this.show.bind(this));
+         this.element.addEventListener('keyup', this.elementChanged.bind(this));
+         this.element.addEventListener('keydown', this.keydown.bind(this)); //IE 11 compatibility
+      } else {
+         this.element.addEventListener('click', this.toggle.bind(this))
+         this.element.addEventListener('keydown', this.toggle.bind(this));
       }
       // #endregion
 
@@ -810,7 +798,7 @@ class DateRangePicker {
       * `minDate`, `maxDate`, `minSpan`, `maxSpan`, `invalidDate` and `invalidTime` constraints.<br>
       * Event is only triggered when date string is valid and date value is changing<br>
       * @event
-      * @name "violated"
+      * @name "violate"
       * @param {DateRangePicker} picker - The daterangepicker object
       * @param {InputViolation} result - The violation object, see example of `validateInput()`
       * @param {Object} newDate - Object of {startDate, endDate}
@@ -826,7 +814,7 @@ class DateRangePicker {
       *   locale: {
       *      format: DateTime.DATETIME_SHORT
       *   }
-      * }).on('violated', (ev, picker, result, newDate) => {
+      * }).on('violate', (ev, picker, result, newDate) => {
       *   newDate.startDate = DateTime.now().minus({ days: 3 }).startOf('day');
       *   return true;
       * });
@@ -841,7 +829,7 @@ class DateRangePicker {
       * 
       * // -> Calendar selects and shows "today - 3 days"
       */
-      onViolated: { type: 'violated', param: (...args) => [this, ...args] },
+      onViolate: { type: 'violate', param: (...args) => [this, ...args] },
       /**
       * Emitted before the calendar time picker is rendered.
       * @event
@@ -933,18 +921,19 @@ class DateRangePicker {
       /**
       * Emitted when the date is changed through `<input>` element. Event is only triggered when date string is valid and date value has changed
       * @event
-      * @name "inputChanged"
+      * @name "inputChange"
       * @param {DateRangePicker} this - The daterangepicker object
       */
-      onInputChanged: { type: 'inputChanged', param: this },
+      onInputChange: { type: 'inputChange', param: this },
       /**
       * Emitted after month view changed, for example by click on 'prev' or 'next'
       * @event
-      * @name "monthViewChanged"
+      * @name "monthViewChange"
       * @param {DateRangePicker} this - The daterangepicker object
       */
-      onMonthViewChanged: { type: 'monthViewChanged', param: this },
+      onMonthViewChange: { type: 'monthViewChange', param: (left, right) => [this, left.startOf('month'), right ? right.startOf('month') : null] },
    }
+   get events() { return this.#events };
 
    #outsideClickProxy = this.outsideClick.bind(this);
    #onResizeProxy = this.move.bind(this);
@@ -954,13 +943,11 @@ class DateRangePicker {
          this.#outsideClickProxy(e);
    };
 
-   get events() { return this.#events };
-
    /* #region Set startDate/endDate */
    /**
    * Sets the date range picker's currently selected start date to the provided date.<br>
    * `startDate` must be a `luxon.DateTime` or `Date` or `string` according to {@link ISO-8601} or a string matching `locale.format`.<br>
-   * Invalid date values are handled by {@link #DateRangePicker+violated|violated} Event
+   * Invalid date values are handled by {@link #DateRangePicker+violate|violate} Event
    * @param {external:DateTime|external:Date|string} startDate - startDate to be set. In case of ranges, the current `endDate` is used.
    * @param {boolean} updateView=true - If `true`, then calendar UI is updated to new value. Otherwise only internal values are set.
    * @returns {InputViolation} - Object of violations or `null` if no violation have been found
@@ -985,7 +972,7 @@ class DateRangePicker {
             return violations;
          }
       }
-      const monthChanged = !this.#startDate.hasSame(newDate, 'month');
+      const monthChange = !this.#startDate.hasSame(newDate, 'month');
       this.#startDate = newDate;
       this.#endDate = this.#startDate;
       if (!this.timePicker) {
@@ -995,14 +982,14 @@ class DateRangePicker {
 
       this.updateElement();
       if (updateView)
-         this.updateView(monthChanged);
+         this.updateView(monthChange);
       return violations;
    }
 
    /**
    * Sets the date range picker's currently selected start date to the provided date.<br>
    * `endDate` must be a `luxon.DateTime` or `Date` or `string` according to {@link ISO-8601} or a string matching `locale.format`.<br>
-   * Invalid date values are handled by {@link #DateRangePicker+violated|violated} Event
+   * Invalid date values are handled by {@link #DateRangePicker+violate|violate} Event
    * @param {external:DateTime|external:Date|string} endDate - endDate to be set. In case of ranges, the current `startDate` is used.
    * @param {boolean} updateView=true - If `true`, then calendar UI is updated to new value. Otherwise only internal values are set.
    * @returns {InputViolation} - Object of violations or `null` if no violation have been found
@@ -1017,7 +1004,7 @@ class DateRangePicker {
    /**
    * Sets the date range picker's currently selected start date to the provided date.<br>
    * `startDate` and `endDate` must be a `luxon.DateTime` or `Date` or `string` according to {@link ISO-8601} or a string matching `locale.format`.<br>
-   * Invalid date values are handled by {@link #DateRangePicker+violated|violated} Event
+   * Invalid date values are handled by {@link #DateRangePicker+violate|violate} Event
    * @param {external:DateTime|external:Date|string} startDate - startDate to be set
    * @param {external:DateTime|external:Date|string} endDate - endDate to be set
    * @param {boolean} updateView=true - If `true`, then calendar UI is updated to new value. Otherwise only internal values are set.
@@ -1047,7 +1034,7 @@ class DateRangePicker {
             return violations;
          }
       }
-      const monthChanged = !this.#startDate.hasSame(newDate[0], 'month') || !this.#endDate.hasSame(newDate[1], 'month');
+      const monthChange = !this.#startDate.hasSame(newDate[0], 'month') || !this.#endDate.hasSame(newDate[1], 'month');
       this.#startDate = newDate[0];
       this.#endDate = newDate[1];
       if (!this.timePicker) {
@@ -1057,7 +1044,7 @@ class DateRangePicker {
 
       this.updateElement();
       if (updateView)
-         this.updateView(monthChanged);
+         this.updateView(monthChange);
       return violations;
    }
 
@@ -1167,9 +1154,9 @@ class DateRangePicker {
    * Validate `startDate` and `endDate` against `timePickerStepSize`, `minDate`, `maxDate`, 
    * `minSpan`, `maxSpan`, `invalidDate` and `invalidTime`.
    * @param {Array} range - `[startDate, endDate]`<br>Range to be checked, defaults to current `startDate` and `endDate`
-   * @param {boolean} dipatch=false - If `true` then event "violated" is dispated.<br>
+   * @param {boolean} dipatch=false - If `true` then event "violate" is dispated.<br>
    * If eventHandler returns `true`, then `null` is returned, otherwiese the object of violations.
-   * @emits "violated"
+   * @emits "violate"
    * @returns {InputViolation|null} - Object of violations and corrected values or `null` if no violation have been found
    * @example 
    * options => {
@@ -1263,7 +1250,7 @@ class DateRangePicker {
             return null;
          if (dipatch) {
             let newValues = { startDate: startDate };
-            const ret = this.triggerHandler(this.#events.onViolated, result, newValues);
+            const ret = this.triggerHandler(this.#events.onViolate, result, newValues);
             if (ret) {
                result.newDate = newValues;
                return result;
@@ -1351,7 +1338,7 @@ class DateRangePicker {
          return null;
       if (dipatch) {
          let newValues = { startDate: startDate, endDate: endDate };
-         const ret = this.triggerHandler(this.#events.onViolated, result, newValues);
+         const ret = this.triggerHandler(this.#events.onViolate, result, newValues);
          if (ret) {
             result.newDate = newValues;
             return result;
@@ -1368,23 +1355,20 @@ class DateRangePicker {
    /**
    * Updates the picker when calendar is initiated or any date has been selected. 
    * Could be useful after running {@link #DateRangePicker+setStartDate|setStartDate} or {@link #DateRangePicker+setEndDate|setRange} 
-   * @param {boolean} monthChanged - If `true` then monthView changed
+   * @param {boolean} monthChange - If `true` then monthView changed
    * @emits "beforeRenderTimePicker"
    */
-   updateView(monthChanged) {
+   updateView(monthChange) {
       if (this.timePicker) {
          this.triggerEvent(this.#events.onBeforeRenderTimePicker);
          this.renderTimePicker('start');
          this.renderTimePicker('end');
-         if (!this.#endDate) {
-            this.container.querySelector('.calendar-time.end-time select').prop('disabled', true).addClass('disabled');
-         } else {
-            this.container.querySelector('.calendar-time.end-time select').prop('disabled', false).removeClass('disabled');
-         }
+         this.container.querySelector('.calendar-time.end-time select').disabled = !this.#endDate;
+         this.container.querySelector('.calendar-time.end-time select').classList.toggle('disabled', !this.#endDate);
       }
       this.updateLabel();
       this.updateMonthsInView();
-      this.updateCalendars(monthChanged);
+      this.updateCalendars(monthChange);
       this.setApplyBtnState();
 
    }
@@ -1435,11 +1419,11 @@ class DateRangePicker {
    /**
    * Updates the selected day value from calendar with selected time values
    * @emits "beforeRenderCalendar"
-   * @emits "monthViewChanged"
-   * @param {boolean} monthChanged - If `true` then monthView changed
+   * @emits "monthViewChange"
+   * @param {boolean} monthChange - If `true` then monthView changed
    * @private
    */
-   updateCalendars(monthChanged) {
+   updateCalendars(monthChange) {
 
       if (this.timePicker) {
          var hour, minute, second;
@@ -1447,38 +1431,38 @@ class DateRangePicker {
          if (this.#endDate) {
             hour = parseInt(this.container.querySelector('.start-time .hourselect').value, 10);
             if (isNaN(hour))
-               hour = parseInt(this.container.querySelector('.start-time .hourselect option:last').value, 10);
+               hour = parseInt(this.container.querySelector('.start-time .hourselect option:last-child').value, 10);
 
             minute = 0;
             if (this.timePickerOpts.showMinutes) {
                minute = parseInt(this.container.querySelector('.start-time .minuteselect').value, 10);
                if (isNaN(minute))
-                  minute = parseInt(this.container.querySelector('.start-time .minuteselect option:last').value, 10);
+                  minute = parseInt(this.container.querySelector('.start-time .minuteselect option:last-child').value, 10);
             }
 
             second = 0;
             if (this.timePickerOpts.showSeconds) {
                second = parseInt(this.container.querySelector('.start-time .secondselect').value, 10);
                if (isNaN(second))
-                  second = parseInt(this.container.querySelector('.start-time .secondselect option:last').value, 10);
+                  second = parseInt(this.container.querySelector('.start-time .secondselect option:last-child').value, 10);
             }
          } else {
             hour = parseInt(this.container.querySelector('.end-time .hourselect').value, 10);
             if (isNaN(hour))
-               hour = parseInt(this.container.querySelector('.end-time .hourselect option:last').value, 10);
+               hour = parseInt(this.container.querySelector('.end-time .hourselect option:last-child').value, 10);
 
             minute = 0;
             if (this.timePickerOpts.showMinutes) {
                minute = parseInt(this.container.querySelector('.end-time .minuteselect').value, 10);
                if (isNaN(minute))
-                  minute = parseInt(this.container.querySelector('.end-time .minuteselect option:last').value, 10);
+                  minute = parseInt(this.container.querySelector('.end-time .minuteselect option:last-child').value, 10);
             }
 
             second = 0;
             if (this.timePickerOpts.showSeconds) {
                second = parseInt(this.container.querySelector('.end-time .secondselect').value, 10);
                if (isNaN(second))
-                  second = parseInt(this.container.querySelector('.end-time .secondselect option:last').value, 10);
+                  second = parseInt(this.container.querySelector('.end-time .secondselect option:last-child').value, 10);
             }
          }
          this.leftCalendar.month = this.leftCalendar.month.set({ hour: hour, minute: minute, second: second });
@@ -1495,8 +1479,13 @@ class DateRangePicker {
       //if (!this.singleMonthView)
       this.renderCalendar('right');
 
-      if (monthChanged)
-         this.triggerEvent(this.#events.onMonthViewChanged);
+      if (monthChange)
+         this.triggerEvent(
+            this.#events.onMonthViewChange,
+            this.leftCalendar.month,
+            (this.singleMonthView || this.singleDatePicker) ? null : this.rightCalendar.month
+         );
+
 
       //highlight any predefined range matching the current start and end dates
       this.container.querySelectorAll('.ranges li').forEach(el => { el.classList.remove('active') });
@@ -1577,7 +1566,7 @@ class DateRangePicker {
          const maxYear = (maxDate && maxDate.year) ?? this.maxYear;
          const minYear = (minDate && minDate.year) ?? this.minYear;
 
-         let div = this.externalStyle === this.#externalStyles.Bulma ? '<div class="select is-small mr-1">' : '';
+         let div = this.externalStyle === 'bulma' ? '<div class="select is-small mr-1">' : '';
          var monthHtml = `${div}<select class="monthselect">`;
          for (var m = 1; m <= 12; m++) {
             monthHtml += `<option value="${m}"${m === calendar.firstDay.month ? ' selected' : ''}`;
@@ -1586,15 +1575,15 @@ class DateRangePicker {
             monthHtml += `>${this.locale.monthNames[m - 1]}</option>`;
          }
          monthHtml += "</select>";
-         if (this.externalStyle === this.#externalStyles.Bulma)
+         if (this.externalStyle === 'bulma')
             monthHtml += "</div>";
 
-         div = this.externalStyle === this.#externalStyles.Bulma ? '<div class="select is-small ml-1">' : '';
+         div = this.externalStyle === 'bulma' ? '<div class="select is-small ml-1">' : '';
          var yearHtml = `${div}<select class="yearselect">`;
          for (var y = minYear; y <= maxYear; y++)
             yearHtml += `<option value="${y}"${y === calendar.firstDay.year ? ' selected' : ''}>${y}</option>`;
          yearHtml += '</select>';
-         if (this.externalStyle === this.#externalStyles.Bulma)
+         if (this.externalStyle === 'bulma')
             yearHtml += "</div>";
 
          dateHtml = monthHtml + yearHtml;
@@ -1623,7 +1612,7 @@ class DateRangePicker {
       };
 
       html += '</tr>';
-      this.container.querySelector(`.drp-calendar.${side}.calendar-table thead`).innerHTML = html;
+      this.container.querySelector(`.drp-calendar.${side} .calendar-table thead`).innerHTML = html;
 
       // table body
       html = '';
@@ -1707,7 +1696,7 @@ class DateRangePicker {
          html += '</tr>';
       }
 
-      this.container.querySelector(`.drp-calendar.${side}.calendar-table tbody`).innerHTML = html;
+      this.container.querySelector(`.drp-calendar.${side} .calendar-table tbody`).innerHTML = html;
 
    }
 
@@ -1749,7 +1738,7 @@ class DateRangePicker {
          minDate = this.#startDate;
 
          //Preserve the time already selected
-         var timeSelector = this.container.querySelector('.drp-calendar .calendar-time.end-time');
+         let timeSelector = this.container.querySelector('.drp-calendar .calendar-time.end-time');
          if (timeSelector.innerHTML != '') {
             selected = selected.set({
                hour: !isNaN(selected.hour) ? selected.hour : timeSelector.querySelector('.hourselect option:selected').value,
@@ -1769,7 +1758,7 @@ class DateRangePicker {
       //
       // hours
       //
-      if (this.externalStyle === this.#externalStyles.Bulma)
+      if (this.externalStyle === 'bulma')
          html += '<div class="select is-small mx-1">';
       html += '<select class="hourselect">';
       const ampm = selected.toFormat('a', { locale: 'en-US' });
@@ -1814,7 +1803,7 @@ class DateRangePicker {
          }
       }
       html += '</select>';
-      if (this.externalStyle === this.#externalStyles.Bulma)
+      if (this.externalStyle === 'bulma')
          html += '</div>';
 
       //
@@ -1823,7 +1812,7 @@ class DateRangePicker {
 
       if (this.timePickerOpts.showMinutes) {
          html += ' : ';
-         if (this.externalStyle === this.#externalStyles.Bulma)
+         if (this.externalStyle === 'bulma')
             html += '<div class="select is-small mx-1">';
          html += '<select class="minuteselect">';
 
@@ -1850,7 +1839,7 @@ class DateRangePicker {
             }
          }
          html += '</select>';
-         if (this.externalStyle === this.#externalStyles.Bulma)
+         if (this.externalStyle === 'bulma')
             html += '</div>';
       }
 
@@ -1860,7 +1849,7 @@ class DateRangePicker {
 
       if (this.timePickerOpts.showSeconds) {
          html += ' : ';
-         if (this.externalStyle === this.#externalStyles.Bulma)
+         if (this.externalStyle === 'bulma')
             html += '<div class="select is-small mx-1">';
          html += '<select class="secondselect">';
 
@@ -1887,7 +1876,7 @@ class DateRangePicker {
             }
          }
          html += '</select>';
-         if (this.externalStyle === this.#externalStyles.Bulma)
+         if (this.externalStyle === 'bulma')
             html += '</div>';
       }
 
@@ -1896,7 +1885,7 @@ class DateRangePicker {
       //
 
       if (!this.timePicker24Hour) {
-         if (this.externalStyle === this.#externalStyles.Bulma)
+         if (this.externalStyle === 'bulma')
             html += '<div class="select is-small mx-1">';
          html += '<select class="ampmselect">';
 
@@ -1932,7 +1921,7 @@ class DateRangePicker {
          html += `>${Info.meridiems()[1]}</option>`;
 
          html += '</select>';
-         if (this.externalStyle === this.#externalStyles.Bulma)
+         if (this.externalStyle === 'bulma')
             html += '</div>';
       }
 
@@ -1946,11 +1935,8 @@ class DateRangePicker {
    * @private
    */
    setApplyBtnState() {
-      if (this.singleDatePicker || (this.#endDate && this.#startDate <= this.#endDate)) {
-         this.container.querySelector('button.applyBtn').prop('disabled', false);
-      } else {
-         this.container.querySelector('button.applyBtn').prop('disabled', true);
-      }
+      const state = this.singleDatePicker || (this.#endDate && this.#startDate <= this.#endDate)
+      this.container.querySelector('button.applyBtn').disabled = !state;
    }
    /* #endregion */
 
@@ -1962,9 +1948,23 @@ class DateRangePicker {
    move() {
       let parentOffset = { top: 0, left: 0 }
       let containerTop;
+      let containerLeft;
       let drops = this.drops;
 
-      var parentRightEdge = window.innerWidth;
+      const applyCSS = (css) => {
+         for (const [key, value] of Object.entries(css)) {
+            const val = this.container.style[key];
+            if (val == null || typeof val === typeof value) {
+               this.container.style[key] = value;
+            } else if (typeof val === 'string' && typeof value === 'number') {
+               this.container.style[key] = `${value}px`;
+            } else {
+               console.error(`Update of this.container.style.${key} ${val} => ${value} not yet implemented`)
+            }
+         }
+      };
+
+      let parentRightEdge = window.innerWidth;
       if (!this.parentEl.matches('body')) {
          parentOffset = {
             top: offset(this.parentEl).top - this.parentEl.scrollTop(),
@@ -1973,10 +1973,10 @@ class DateRangePicker {
          parentRightEdge = this.parentEl[0].clientWidth + offset(this.parentEl).left;
       }
 
-      switch (drops) {
+      switch (this.drops) {
          case 'auto':
             containerTop = offset(this.element).top + outerHeight(this.element) - parentOffset.top;
-            if (containerTop + outerHeight(this.container) >= this.parentEl[0].scrollHeight) {
+            if (containerTop + outerHeight(this.container) >= this.parentEl.scrollHeight) {
                containerTop = offset(this.element).top - outerHeight(this.container) - parentOffset.top;
                drops = 'up';
             }
@@ -1984,72 +1984,50 @@ class DateRangePicker {
          case 'up':
             containerTop = offset(this.element).top - outerHeight(this.container) - parentOffset.top;
             break;
-         default:
+         case 'down':
             containerTop = offset(this.element).top + outerHeight(this.element) - parentOffset.top;
+            break;
+         default:
+            console.error(`Option drops '${drops}' not defined`)
             break;
       }
 
       // Force the container to it's actual width
-      Object.assign(this.container.style, {
-         top: 0,
-         left: 0,
-         right: 'auto'
-      });
-      let containerWidth = outerWidth(this.container);
+      applyCSS({ top: 0, left: 0, right: 'auto' });
+      const containerWidth = outerWidth(this.container);
 
-      this.container.toggleClass('drop-up', drops === 'up');
+      this.container.classList.toggle('drop-up', drops === 'up');
 
-      if (this.opens === 'left') {
-         var containerRight = parentRightEdge - offset(this.element).left - outerWidth(this.element);
-         if (containerWidth + containerRight > window.innerWidth) {
-            Object.assign(this.container.style, {
-               top: containerTop,
-               right: 'auto',
-               left: 9
-            });
-         } else {
-            Object.assign(this.container.style, {
-               top: containerTop,
-               right: containerRight,
-               left: 'auto'
-            });
-         }
-      } else if (this.opens === 'center') {
-         var containerLeft = offset(this.element).left - parentOffset.left + outerWidth(this.element) / 2 - containerWidth / 2;
-         if (containerLeft < 0) {
-            Object.assign(this.container.style, {
-               top: containerTop,
-               right: 'auto',
-               left: 9
-            });
-         } else if (containerLeft + containerWidth > window.innerWidth) {
-            Object.assign(this.container.style, {
-               top: containerTop,
-               left: 'auto',
-               right: 0
-            });
-         } else {
-            Object.assign(this.container.style, {
-               top: containerTop,
-               left: containerLeft,
-               right: 'auto'
-            });
-         }
-      } else {
-         var containerLeft = offset(this.element).left - parentOffset.left;
-         if (containerLeft + containerWidth > window.innerWidth) {
-            Object.assign(this.container.style, {
-               top: containerTop,
-               left: 'auto',
-               right: 0
-            });
-         } else {
-            Object.assign(this.container.style, {
-               top: containerTop,
-               left: containerLeft,
-               right: 'auto'
-            });
-         }
+      switch (this.opens) {
+         case 'left':
+            const containerRight = parentRightEdge - offset(this.element).left - outerWidth(this.element);
+            if (containerWidth + containerRight > window.innerWidth) {
+               applyCSS({ top: containerTop, right: 'auto', left: 9 });
+            } else {
+               applyCSS({ top: containerTop, right: containerRight, left: 'auto' });
+            }
+            break;
+         case 'center':
+            containerLeft = offset(this.element).left - parentOffset.left + outerWidth(this.element) / 2 - containerWidth / 2;
+            if (containerLeft < 0) {
+               applyCSS({ top: containerTop, right: 'auto', left: 9 });
+            } else if (containerLeft + containerWidth > window.innerWidth) {
+               applyCSS({ top: containerTop, left: 'auto', right: 0 });
+            } else {
+               applyCSS({ top: containerTop, left: containerLeft, right: 'auto' });
+            }
+            break;
+         case 'right':
+            containerLeft = offset(this.element).left - parentOffset.left;
+            if (containerLeft + containerWidth > window.innerWidth) {
+               applyCSS({ top: containerTop, left: 'auto', right: 0 });
+            } else {
+               applyCSS({ top: `${containerTop}px`, left: containerLeft, right: 'auto' });
+            }
+            break;
+         default:
+            console.error(`Option opens '${this.opens}' not defined`);
+            break;
       }
    }
 
@@ -2065,17 +2043,17 @@ class DateRangePicker {
       // also support mobile devices
       document.addEventListener('touchend', this.#outsideClickProxy);
       // also explicitly play nice with Bootstrap dropdowns, which stopPropagation when clicking them
-      document.addEventListener('click.daterangepicker', this.#dropdownClickWrapper);
+      document.addEventListener('click', this.#dropdownClickWrapper);
       // and also close when focus changes to outside the picker (eg. tabbing between controls)
-      document.addEventListener('focusin.daterangepicker', this.#outsideClickProxy);
+      document.addEventListener('focusin', this.#outsideClickProxy);
       // Reposition the picker if the window is resized while it's open
-      window.addEventListener('resize.daterangepicker', this.#onResizeProxy);
+      window.addEventListener('resize', this.#onResizeProxy);
 
       this.oldStartDate = this.#startDate;
       this.oldEndDate = this.#endDate;
 
       this.updateView(false);
-      this.container.show();
+      this.container.style.display = 'block';
       this.move();
       this.triggerEvent(this.#events.onShow);
       this.isShowing = true;
@@ -2110,7 +2088,7 @@ class DateRangePicker {
       document.removeEventListener('click', this.#dropdownClickWrapper);
       window.removeEventListener('resize', this.#onResizeProxy);
 
-      this.container.hide();
+      this.container.style.display = 'none';
       this.triggerEvent(this.#events.onHide);
       this.isShowing = false;
    }
@@ -2131,7 +2109,7 @@ class DateRangePicker {
    * @emits "showCalendar"
    */
    showCalendars() {
-      this.container.addClass('show-calendar');
+      this.container.classList.add('show-calendar');
       this.move();
       this.triggerEvent(this.#events.onShowCalendar);
    }
@@ -2141,7 +2119,7 @@ class DateRangePicker {
    * @emits "hideCalendar"
    */
    hideCalendars() {
-      this.container.removeClass('show-calendar');
+      this.container.classList.remove('show-calendar');
       this.triggerEvent(this.#events.onHideCalendar);
    }
 
@@ -2161,16 +2139,16 @@ class DateRangePicker {
       if (
          // ie modal dialog fix
          e.type === "focusin" ||
-         target.closest(this.element).length ||
-         target.closest(this.container).length ||
-         target.closest('.calendar-table').length
+         closest(target, this.element) ||
+         closest(target, this.container) ||
+         closest(target, '.calendar-table')
       ) return;
 
       if (this.onOutsideClick === 'cancel') {
          this.#startDate = this.oldStartDate;
          this.#endDate = this.oldEndDate;
       }
-      this.style.display = 'none';
+      this.hide();
 
       this.triggerEvent(this.#events.onOutsideClick);
    }
@@ -2181,8 +2159,8 @@ class DateRangePicker {
    * @private
    */
    clickPrev(e) {
-      let cal = ancestors(e.target, '.drp-calendar');
-      if (cal.some(x => x.classList.contains('left'))) {
+      let cal = closest(e.target, '.drp-calendar');
+      if (cal.classList.contains('left')) {
          this.leftCalendar.month = this.leftCalendar.month.minus({ month: 1 });
          if (this.linkedCalendars && !this.singleMonthView)
             this.rightCalendar.month = this.rightCalendar.month.minus({ month: 1 });
@@ -2198,8 +2176,8 @@ class DateRangePicker {
    * @private
    */
    clickNext(e) {
-      let cal = ancestors(e.target, '.drp-calendar');
-      if (cal.some(x => x.classList.contains('left'))) {
+      let cal = closest(e.target, '.drp-calendar');
+      if (cal.classList.contains('left')) {
          this.leftCalendar.month = this.leftCalendar.month.plus({ month: 1 });
       } else {
          this.rightCalendar.month = this.rightCalendar.month.plus({ month: 1 });
@@ -2222,8 +2200,8 @@ class DateRangePicker {
       let title = e.target.dataset.title;
       const row = title.substring(1, 2);
       const col = title.substring(3, 4);
-      const cal = ancestors(e.target, '.drp-calendar');
-      var date = cal.some(x => x.classList.contains('left')) ? this.leftCalendar.calendar[row][col] : this.rightCalendar.calendar[row][col];
+      const cal = closest(e.target, '.drp-calendar');
+      var date = cal.classList.contains('left') ? this.leftCalendar.calendar[row][col] : this.rightCalendar.calendar[row][col];
 
       //highlight the dates between the start date and the date being hovered as a potential end date
       const leftCalendar = this.leftCalendar;
@@ -2231,7 +2209,7 @@ class DateRangePicker {
       const startDate = this.#startDate;
       const initalMonth = this.initalMonth;
       if (!this.#endDate) {
-         this.container.querySelectorAll('.drp-calendar tbody td').forEach(function (index, el) {
+         this.container.querySelectorAll('.drp-calendar tbody td').forEach(el => {
 
             //skip week numbers, only look at dates
             if (el.classList.contains('week')) return;
@@ -2239,17 +2217,13 @@ class DateRangePicker {
             const title = el.dataset.title;
             const row = title.substring(1, 2);
             const col = title.substring(3, 4);
-            const cal = ancestors(el, '.drp-calendar');
-            const dt = cal.some(x => x.classList.contains('left')) ? leftCalendar.calendar[row][col] : rightCalendar.calendar[row][col];
+            const cal = closest(el, '.drp-calendar');
+            const dt = cal.classList.contains('left') ? leftCalendar.calendar[row][col] : rightCalendar.calendar[row][col];
 
             if (!startDate && initalMonth) {
                el.classList.remove('in-range');
             } else {
-               if ((dt > startDate) && dt < date || dt.hasSame(date, 'day')) {
-                  el.classList.add('in-range');
-               } else {
-                  el.classList.remove('in-range');
-               }
+               el.classList.toggle('in-range', (dt > startDate) && dt < date || dt.hasSame(date, 'day'));
             }
          });
       }
@@ -2268,40 +2242,22 @@ class DateRangePicker {
       const leftCalendar = this.leftCalendar;
       const rightCalendar = this.rightCalendar;
 
-      this.container.querySelectorAll('.drp-calendar tbody td').forEach(function (index, el) {
+      this.container.querySelectorAll('.drp-calendar tbody td').forEach(el => {
          //skip week numbers, only look at dates
          if (el.classList.contains('week')) return;
 
          const title = el.dataset.ttitle;
          const row = title.substring(1, 2);
          const col = title.substring(3, 4);
-         const cal = ancestors(el, '.drp-calendar');
-         const dt = cal.some(x => x.classList.contains('left')) ? leftCalendar.calendar[row][col] : rightCalendar.calendar[row][col];
+         const cal = closest(el, '.drp-calendar');
+         const dt = cal.classList.contains('left') ? leftCalendar.calendar[row][col] : rightCalendar.calendar[row][col];
 
-         let classAdded = false;
-         if (dt.hasSame(dates[0], 'day'))
-            classAdded = el.classList.add('start-hover').length > 0;
-         if (dt.hasSame(previousDates[0], 'day'))
-            classAdded = el.classList.add('start-date').length > 0;
-
-         if (dt.hasSame(dates[1], 'day'))
-            classAdded = el.classList.add('end-hover').length > 0;
-         if (previousDates[1] != null && dt.hasSame(previousDates[1], 'day'))
-            classAdded = el.classList.add('end-date').length > 0;
-
-         if (dt.startOf('day') >= dates[0].startOf('day') && dt.startOf('day') <= dates[1].startOf('day'))
-            classAdded = el.classList.add('range-hover').length > 0;
-         if (dt.startOf('day') >= previousDates[0].startOf('day') && previousDates[1] != null && dt.startOf('day') <= previousDates[1].startOf('day'))
-            classAdded = el.classList.add('in-range').length > 0;
-
-         if (!classAdded) {
-            el.classList.remove('start-hover');
-            el.classList.remove('end-hover');
-            el.classList.remove('start-date');
-            el.classList.remove('end-date');
-            el.classList.remove('in-range');
-            el.classList.remove('range-hover');
-         }
+         el.classList.toggle('start-hover', dt.hasSame(dates[0], 'day'));
+         el.classList.toggle('start-date', dt.hasSame(previousDates[0], 'day'));
+         el.classList.toggle('end-hover', dt.hasSame(dates[1], 'day'));
+         el.classList.toggle('end-date', previousDates[1] != null && dt.hasSame(previousDates[1], 'day'));
+         el.classList.toggle('range-hover', dt.startOf('day') >= dates[0].startOf('day') && dt.startOf('day') <= dates[1].startOf('day'));
+         el.classList.toggle('in-range', dt.startOf('day') >= previousDates[0].startOf('day') && previousDates[1] != null && dt.startOf('day') <= previousDates[1].startOf('day'));
       });
    }
 
@@ -2310,7 +2266,7 @@ class DateRangePicker {
    * @private
    */
    leaveRange() {
-      this.container.querySelectorAll('.drp-calendar tbody td').forEach(function (index, el) {
+      this.container.querySelectorAll('.drp-calendar tbody td').forEach(el => {
          //skip week numbers, only look at dates
          if (el.classList.contains('week')) return;
          el.classList.remove('start-hover');
@@ -2335,7 +2291,7 @@ class DateRangePicker {
          this.showCalendars();
       } else {
          let newDate = this.ranges[label];
-         const monthChanged = !this.#startDate.hasSame(newDate[0], 'month') || !this.#endDate.hasSame(newDate[1], 'month');
+         const monthChange = !this.#startDate.hasSame(newDate[0], 'month') || !this.#endDate.hasSame(newDate[1], 'month');
          this.#startDate = newDate[0];
          this.#endDate = newDate[1];
 
@@ -2348,7 +2304,7 @@ class DateRangePicker {
             this.hideCalendars();
 
          if (this.triggerHandler(this.#events.onBeforeHide))
-            this.updateView(monthChanged);
+            this.updateView(monthChange);
          this.clickApply();
       }
    }
@@ -2365,8 +2321,8 @@ class DateRangePicker {
       let title = e.target.dataset.title;
       let row = title.substring(1, 2);
       let col = title.substring(3, 4);
-      let cal = ancestors(e.target, '.drp-calendar');
-      let date = cal.some(x => x.classList.contains('left')) ? this.leftCalendar.calendar[row][col] : this.rightCalendar.calendar[row][col];
+      let cal = closest(e.target, '.drp-calendar');
+      let date = cal.classList.contains('left') ? this.leftCalendar.calendar[row][col] : this.rightCalendar.calendar[row][col];
       let side;
 
       //
@@ -2385,20 +2341,20 @@ class DateRangePicker {
          if (this.timePicker) {
             let hour = parseInt(this.container.querySelector('.start-time .hourselect').value, 10);
             if (isNaN(hour))
-               hour = parseInt(this.container.querySelector('.start-time .hourselect option:last').value, 10);
+               hour = parseInt(this.container.querySelector('.start-time .hourselect option:last-child').value, 10);
 
             let minute = 0;
             if (this.timePickerOpts.showMinutes) {
                minute = parseInt(this.container.querySelector('.start-time .minuteselect').value, 10);
                if (isNaN(minute))
-                  minute = parseInt(this.container.querySelector('.start-time .minuteselect option:last').value, 10);
+                  minute = parseInt(this.container.querySelector('.start-time .minuteselect option:last-child').value, 10);
             }
 
             let second = 0;
             if (this.timePickerOpts.showSeconds) {
                second = parseInt(this.container.querySelector('.start-time .secondselect').value, 10);
                if (isNaN(second))
-                  second = parseInt(this.container.querySelector('.start-time .secondselect option:last').value, 10);
+                  second = parseInt(this.container.querySelector('.start-time .secondselect option:last-child').value, 10);
             }
 
             date = date.set({ hour: hour, minute: minute, second: second });
@@ -2418,20 +2374,20 @@ class DateRangePicker {
          if (this.timePicker) {
             let hour = parseInt(this.container.querySelector('.end-time .hourselect').value, 10);
             if (isNaN(hour))
-               hour = parseInt(this.container.querySelector('.end-time .hourselect option:last').value, 10);
+               hour = parseInt(this.container.querySelector('.end-time .hourselect option:last-child').value, 10);
 
             let minute = 0;
             if (this.timePickerOpts.showMinutes) {
                minute = parseInt(this.container.querySelector('.end-time .minuteselect').value, 10);
                if (isNaN(minute))
-                  minute = parseInt(this.container.querySelector('.end-time .minuteselect option:last').value, 10);
+                  minute = parseInt(this.container.querySelector('.end-time .minuteselect option:last-child').value, 10);
             }
 
             let second = 0;
             if (this.timePickerOpts.showSeconds) {
                second = parseInt(this.container.querySelector('.end-time .secondselect').value, 10);
                if (isNaN(second))
-                  second = parseInt(this.container.querySelector('.end-time .secondselect option:last').value, 10);
+                  second = parseInt(this.container.querySelector('.end-time .secondselect option:last-child').value, 10);
             }
 
             date = date.set({ hour: hour, minute: minute, second: second });
@@ -2471,6 +2427,8 @@ class DateRangePicker {
    * @private
    */
    calculateChosenLabel() {
+      if (Object.keys(this.ranges).length === 0)
+         return;
 
       // If selected range from calendar matches any custom range, then highlight it
       var customRange = true;
@@ -2486,14 +2444,18 @@ class DateRangePicker {
          }
          if (this.#startDate.startOf(unit).equals(this.ranges[range][0].startOf(unit)) && this.#endDate.startOf(unit).equals(this.ranges[range][1].startOf(unit))) {
             customRange = false;
-            this.chosenLabel = this.container.querySelectorAll(`.ranges li:eq(${i})`).forEach(el => { el.classList.add('active').dataset.rangeKey });
+            const range = this.container.querySelector(`.ranges li:eq(${i})`);
+            this.chosenLabel = range.dataset.rangeKey;
+            range.classList.add('active');
             break;
          }
          i++;
       }
       if (customRange) {
          if (this.showCustomRangeLabel) {
-            this.chosenLabel = this.container.querySelectorAll('.ranges li:last').forEach(el => { el.classList.add('active').dataset.rangeKey });
+            const range = this.container.querySelector('.ranges li:last-child');
+            this.chosenLabel = range.dataset.rangeKey;
+            range.classList.add('active');
          } else {
             this.chosenLabel = null;
          }
@@ -2513,15 +2475,15 @@ class DateRangePicker {
 
       var hour = parseInt(time.querySelector('.hourselect').value, 10);
       if (isNaN(hour))
-         hour = parseInt(time.querySelector('.hourselect option:last').value, 10);
+         hour = parseInt(time.querySelector('.hourselect option:last-child').value, 10);
 
       if (!this.timePicker24Hour) {
          const ampm = time.querySelector('.ampmselect').value;
          if (ampm == null)
-            time.querySelector('.ampmselect option:last').value;
+            time.querySelector('.ampmselect option:last-child').value;
          if (ampm != DateTime.fromFormat(`${hour}`, 'H').toFormat('a', { locale: 'en-US' })) {
-            time.querySelectorAll('.hourselect > option').forEach(function () {
-               this.hidden = this.classList.contains('hidden') || false;
+            time.querySelectorAll('.hourselect > option').forEach(el => {
+               el.hidden = !el.hidden;
             });
             const h = DateTime.fromFormat(`${hour}`, 'H').toFormat('h')
             hour = DateTime.fromFormat(`${h}${ampm}`, 'ha', { locale: 'en-US' }).hour;
@@ -2532,14 +2494,14 @@ class DateRangePicker {
       if (this.timePickerOpts.showMinutes) {
          minute = parseInt(time.querySelector('.minuteselect').value, 10);
          if (isNaN(minute))
-            minute = parseInt(time.querySelector('.minuteselect option:last').value, 10);
+            minute = parseInt(time.querySelector('.minuteselect option:last-child').value, 10);
       }
 
       var second = 0;
       if (this.timePickerOpts.showSeconds) {
          second = parseInt(time.querySelector('.secondselect').value, 10);
          if (isNaN(second))
-            second = parseInt(time.querySelector('.secondselect option:last').value, 10);
+            second = parseInt(time.querySelector('.secondselect option:last-child').value, 10);
       }
 
       if (side === 'start') {
@@ -2584,7 +2546,7 @@ class DateRangePicker {
       // Month must be Number for new DateTime versions
       let month = parseInt(cal.querySelector('.monthselect').value, 10);
       let year = cal.querySelector('.yearselect').value;
-      let monthChanged = false;
+      let monthChange = false;
 
       if (!isLeft) {
          if (year < this.#startDate.year || (year == this.#startDate.year && month < this.#startDate.month)) {
@@ -2608,17 +2570,17 @@ class DateRangePicker {
       }
 
       if (isLeft) {
-         monthChanged = !DateTime.fromObject({ year: year, month: month }).hasSame(this.leftCalendar.month, 'month');
+         monthChange = !DateTime.fromObject({ year: year, month: month }).hasSame(this.leftCalendar.month, 'month');
          this.leftCalendar.month = this.leftCalendar.month.set({ year: year, month: month });
          if (this.linkedCalendars)
             this.rightCalendar.month = this.leftCalendar.month.plus({ month: 1 });
       } else {
-         monthChanged = !DateTime.fromObject({ year: year, month: month }).hasSame(this.leftCalendar.month, 'month');
+         monthChange = !DateTime.fromObject({ year: year, month: month }).hasSame(this.leftCalendar.month, 'month');
          this.rightCalendar.month = this.rightCalendar.month.set({ year: year, month: month });
          if (this.linkedCalendars)
             this.leftCalendar.month = this.rightCalendar.month.minus({ month: 1 });
       }
-      this.updateCalendars(monthChanged);
+      this.updateCalendars(monthChange);
    }
 
    /**
@@ -2647,17 +2609,17 @@ class DateRangePicker {
 
    /**
    * Update the picker with value from `<input>` element.<br> 
-   * Input values must be given in format of `locale.format`. Invalid values are handles by `violated` Event
-   * @emits "inputChanged"
+   * Input values must be given in format of `locale.format`. Invalid values are handles by `violate` Event
+   * @emits "inputChange"
    * @private
    */
    elementChanged() {
-      if (!this.element.is('input:text')) return;
+      if (!this.isInputText) return;
       if (!this.element.value.length) return;
 
       const format = typeof this.locale.format === 'string' ? this.locale.format : DateTime.parseFormatForOpts(this.locale.format);
       const dateString = this.element.value.split(this.locale.separator);
-      let monthChanged = false;
+      let monthChange = false;
       if (this.singleDatePicker) {
          let newDate = DateTime.fromFormat(this.element.value, format, { locale: DateTime.now().locale });
          const oldDate = this.#startDate;
@@ -2672,7 +2634,7 @@ class DateRangePicker {
                return; // revert to old startDate
             }
          }
-         monthChanged = !this.#startDate.hasSame(newDate, 'month');
+         monthChange = !this.#startDate.hasSame(newDate, 'month');
          this.#startDate = newDate;
          this.#endDate = this.#startDate;
          if (!this.timePicker) {
@@ -2694,7 +2656,7 @@ class DateRangePicker {
                return; // revert to old startDate,endDate
             }
          }
-         monthChanged = !this.#startDate.hasSame(newDate[0], 'month') || !this.#endDate.hasSame(newDate[1], 'month');
+         monthChange = !this.#startDate.hasSame(newDate[0], 'month') || !this.#endDate.hasSame(newDate[1], 'month');
          this.#startDate = newDate[0];
          this.#endDate = newDate[1];
          if (!this.timePicker) {
@@ -2705,9 +2667,9 @@ class DateRangePicker {
          return;
       }
 
-      this.updateView(monthChanged);
+      this.updateView(monthChange);
       this.updateElement();
-      this.triggerEvent(this.#events.onInputChanged);
+      this.triggerEvent(this.#events.onInputChange);
    }
 
    /**
@@ -2717,9 +2679,8 @@ class DateRangePicker {
    */
    keydown(e) {
       //hide on tab or enter
-      if ((e.keyCode === 9) || (e.keyCode === 13)) {
+      if ([9, 11].includes(e.keyCode))
          this.hide();
-      }
 
       //hide on esc and prevent propagation
       if (e.keyCode === 27) {
@@ -2738,7 +2699,7 @@ class DateRangePicker {
       if (this.#startDate == null && this.initalMonth)
          return;
 
-      if (this.element.is('input:text')) {
+      if (this.isInputText) {
          let newValue = this.formatDate(this.#startDate);
          if (!this.singleDatePicker) {
             newValue += this.locale.separator;
@@ -2748,7 +2709,7 @@ class DateRangePicker {
          this.updateAltInput();
          if (newValue !== this.element.value) {
             this.element.value = newValue
-            this.element.dispatchEvent(new Event('change'))
+            this.element.dispatchEvent(new Event('change', { bubbles: true }))
          }
       } else {
          this.updateAltInput()
@@ -2810,7 +2771,7 @@ class DateRangePicker {
     */
    triggerEvent(ev, ...args) {
       if (args.length === 0) {
-         this.element.trigger(ev.type, ev.param);
+         this.element.dispatchEvent(new DateRangePickerEvent(this, ev.type));
       } else {
          const params = ev.param(...args);
          this.element.dispatchEvent(new DateRangePickerEvent(this, ev.type, params));
@@ -2825,12 +2786,30 @@ class DateRangePicker {
     */
    triggerHandler(ev, ...args) {
       if (args.length === 0) {
-         return this.element.triggerHandler(ev.type, ev.param);
+         return this.element.dispatchEvent(new DateRangePickerEvent(this, ev.type));
       } else {
          const params = ev.param(...args);
          return this.element.dispatchEvent(new DateRangePickerEvent(this, ev.type, params));
       }
    }
+
+   /**
+    * Helper function to add eventListener similar to jQuery .on( events [, selector ] [, data ] )
+    * @param {string} element - Query selector of element where listener is added
+    * @param {string} eventName - Name of the event
+    * @param {string} selector - Query selector string to filter the descendants of the element
+    * @param {any} delegate - Handler data
+    */
+   addListener(element, eventName, selector, delegate) {
+      this.container.querySelectorAll(element).forEach(el => {
+         el.addEventListener(eventName, function (event) {
+            const target = event.target.closest(selector);
+            if (target && el.contains(target))
+               delegate.call(target, event);
+         });
+      });
+   }
+
 
 }
 
@@ -2869,14 +2848,26 @@ class DateRangePickerEvent extends Event {
 function ancestors(el, selector) {
    const ancestors = [];
    let parent = el.parentElement;
-
    while (parent) {
-      if (selector === undefined || parent.matches(selector))
+      if (selector === undefined || parent == selector || (typeof selector === 'string' && parent.matches(selector)))
          ancestors.push(parent);
       parent = parent.parentElement;
    }
    return ancestors;
 }
+
+// implements jQuery closest()
+function closest(el, selector) {
+   let parent = el.parentElement;
+   while (parent) {
+      if (selector === undefined || parent == selector || (typeof selector === 'string' && parent.matches(selector)))
+         return parent;
+      parent = parent.parentElement;
+   }
+   return null;
+}
+
+
 
 // implements jQuery offset()
 function offset(el) {
