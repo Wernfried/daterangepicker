@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>daterangepicker</title>
+  <link rel="icon" href="data:,">
+  <script type="importmap">
+    {
+      "imports": {
+        "jquery": "/node_modules/jquery/dist-module/jquery.module.min.js",
+        "luxon": "/node_modules/luxon/build/es6/luxon.mjs",
+        "daterangepicker": "/dist/esm/daterangepicker.js"
+      }
+    }
+  </script>
+  <link rel="stylesheet" type="text/css" href="css/daterangepicker.css" />
+
+  <script type="module">
+    import * as jq from 'jquery';
+    window.jQuery = jq.default || jq;
+    window.$ = window.jQuery;
+
+    import { DateTime } from 'luxon';
+    import { daterangepicker } from 'daterangepicker';
+
+    $('#picker').daterangepicker({
+      startDate: DateTime.now(),
+      timePicker: true
+    });
+    $('#picker').trigger('click');
+
+  </script>
+</head>
+
+<body>
+  <div>
+    <input type="text" id="picker" size="30" />
+  </div>
+</body>
+
+</html>

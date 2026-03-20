@@ -7,17 +7,17 @@
   <link rel="icon" href="data:,">
   <script type="importmap">
     {
-        "imports": {
-          "luxon": "/node_modules/luxon/build/es6/luxon.mjs",
-          "daterangepicker": "/src/daterangepicker.js"
-        }
+      "imports": {
+        "luxon": "/node_modules/luxon/build/es6/luxon.mjs",
+        "daterangepicker": "/dist/esm/daterangepicker.js"
       }
-    </script>
+    }
+  </script>
   <link rel="stylesheet" type="text/css" href="css/daterangepicker.css" />
 
   <script type="module">
-    import {DateTime, Duration, Info, Settings } from 'luxon';
-    import {daterangepicker, getDateRangePicker} from 'daterangepicker';
+    import { DateTime } from 'luxon';
+    import { daterangepicker } from 'daterangepicker';
 
     const input = daterangepicker('#picker', {
       startDate: DateTime.now(),

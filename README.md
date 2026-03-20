@@ -18,10 +18,105 @@ Above samples are based on the [original repository](https://github.com/dangross
 
 #### Global import with `<script>` tags
 ```html
-<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@4.18.0/dist/global/daterangepicker.min.js"></script>
 <link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@4.18.0/css/daterangepicker.min.css" rel="stylesheet" />
+
+<input type="text" id="picker" />
+
+<script type="text/javascript">
+   const DateTime = luxon.DateTime;
+   DateRangePicker.daterangepicker('#picker', {
+      startDate: DateTime.now().plus({day: 1})
+   });
+</script>
+```
+
+#### ESM Imports
+```html
+<script type="importmap">
+{
+   "imports": {
+      "luxon": "https://cdn.jsdelivr.net/npm/luxon@3.7.2/+esm",
+      "daterangepicker": "https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@4.18.0/+esm"
+   }
+}
+</script>
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@4.18.0/css/daterangepicker.min.css" rel="stylesheet" />
+
+<input type="text" id="picker" />
+
+<script type="module">
+   import { DateTime } from 'luxon';
+   import { daterangepicker } from 'daterangepicker';
+
+   daterangepicker('#picker', {
+      startDate: DateTime.now().plus({day: 1})
+   });
+</script>
+```
+
+#### Style with Bulma
+```html
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@4.18.0/dist/global/daterangepicker.min.js"></script>
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css" rel="stylesheet" />
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@4.18.0/css/daterangepicker.bulma.min.css" rel="stylesheet" />
+
+<input type="text" id="picker" />
+
+<script type="text/javascript">
+   const DateTime = luxon.DateTime;
+   DateRangePicker.daterangepicker('#picker', {
+      startDate: DateTime.now().plus({day: 1})
+   });
+</script>
+```
+
+#### Use of `data-*` attributes
+```html
+<script ...></script>
+<input type="text" id="picker" data-start-date="2026-02-01" data-end-date="2026-02-20" data-show-week-numbers="true" />
+
+<script type="text/javascript">
+   const options = {timePicker: true};
+   DateRangePicker.daterangepicker('#picker', options);
+</script>
+```
+See [HTML5 data-* Attributes](https://api.jquery.com/data/#data-html5)<br/>
+Values in `options` of `daterangepicker(el, options)` take precedence over `data-*` attributes.
+
+#### Access the DateRangePicker Instance
+```html
+<input type="text" id="picker" />
+
+<script type="module">
+   import {daterangepicker, getDateRangePicker} from 'daterangepicker'; // or global import with <script> tag
+   
+   const input = daterangepicker('#picker', {}); // returns the mutated <input> HTMLElement
+   // or daterangepicker(document.querySelector('#picker'), {})
+
+   const drp = getDateRangePicker('#picker');
+   // or DateRangePicker.getDateRangePicker('#picker'); if imported globally with <script> tag
+
+   console.log( drp.startDate.toString()) // prints the selected startDate
+   console.log( drp === input._daterangepicker) // prints 'true'
+   console.log( drp.element === input) // prints 'true'
+   console.log( document.querySelector('#picker') === input) // prints 'true'
+</script>
+```
+
+#### Upgrade from daterangepicker 4.x -> 5.x tree/5.x-no-jQuery
+
+In version 5.x jQuery dependency has been removed. Version 4.x is available at branch [daterangepicker 4.x jQuery](tree/4.x-jQuery). 
+New features are not added to this branch. Unlesss you work with Events, you should not face any difference between version 4.x and 5.x.
+Initialisation with jQuery is also supported in version 5.x
+
+```html
+<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@4.19.0/dist/global/daterangepicker.min.js"></script>
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@4.19.0/css/daterangepicker.min.css" rel="stylesheet" />
 
 <input type="text" id="picker" />
 
@@ -36,68 +131,50 @@ Above samples are based on the [original repository](https://github.com/dangross
 </script>
 ```
 
-#### ESM Imports
-```html
-<script type="importmap">
-{
-   "imports": {
-      "jquery": "https://cdn.jsdelivr.net/npm/jquery@4.0.0/+esm",
-      "luxon": "https://cdn.jsdelivr.net/npm/luxon@3.7.2/+esm",
-      "daterangepicker": "https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@4.18.0/+esm"
-   }
-}
-</script>
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@4.18.0/css/daterangepicker.min.css" rel="stylesheet" />
-
-<input type="text" id="picker" />
-
-<script type="module">
-   import { $ } from 'jquery';
-   import { DateTime } from 'luxon';
-   import DateRangePicker from 'daterangepicker';
-
-   $(function() {
-      $('#picker').daterangepicker({
-         startDate: DateTime.now().plus({day: 1})
-      });
+In case you work with Events there are a minor changes:
+```js
+   // version 4.x - jQuery
+   $('#picker').daterangepicker({
+      startDate: DateTime.now(),
+      // allow only dates from current year
+      minDate: DateTime.now().startOf('year'),
+      manDate: DateTime.now().endOf('year'),
+      singleDatePicker: true
+   }).on('violate.daterangepicker', (ev, picker, result, newDate) => {
+      newDate.startDate = DateTime.now().minus({ days: 3 }).startOf('day');
+      return true;
+   }).on('show.daterangepicker', (ev, picker) => {
+      console.log('Show the picker')
+   }).on('beforeHide.daterangepicker', (ev, picker) => {
+      console.log(picker.startDate.toString());
+      return true; // -> do not hide the picker
    });
-</script>
-```
 
-#### Style with Bulma
-```html
-<script ...></script>
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css" rel="stylesheet" />
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@4.18.0/css/daterangepicker.bulma.min.css" rel="stylesheet" />
-
-<input type="text" id="picker" />
-
-<script type="text/javascript">
-   $(function() {
-      // Bulma stylesheet is detected automatically
-      $('#picker').daterangepicker();
+   // version 5.x
+   const input = daterangepicker('#picker', { // or DateRangePicker.daterangepicker('#picker', ...
+      startDate: DateTime.now(),
+      // allow only dates from current year
+      minDate: DateTime.now().startOf('year'),
+      manDate: DateTime.now().endOf('year'),
+      singleDatePicker: true
    });
-</script>
-```
 
-#### Use of `data-*` attributes
-```html
-<script ...></script>
-<input type="text" id="picker" data-start-date="2026-02-01" data-end-date="2026-02-20" data-show-week-numbers="true" />
-
-<script type="text/javascript">
-   $(function() {
-      $('#picker').daterangepicker();
+   input.addEventListener('violate', (ev) => {
+      ev.newDate.startDate = DateTime.now().minus({ days: 3 }).startOf('day');
+      ev.preventDefault();
+   input.addEventListener('show', (ev) => {
+      console.log('Show the picker')
+   input.addEventListener('beforeHide', (ev) => {
+      console.log(ev.picker.startDate.toString());
+      ev.preventDefault(); // -> do not hide the picker
    });
-</script>
+
 ```
-See [HTML5 data-* Attributes](https://api.jquery.com/data/#data-html5)<br/>
-Options in `daterangepicker({...})` take precedence over `data-*` attributes.
 
 
 
 ## Examples
-### `ranges`
+### Option `ranges`
 <a name="options-ranges"></a>
 ```js
 range: {
@@ -111,14 +188,14 @@ range: {
 alwaysShowCalendars: true
 ```
 
-### `isInvalidDate`
+### Option `isInvalidDate`
 ```js
 isInvalidDate: function(date) {
    return date.isWeekend;
 }
 ```
 
-### `isInvalidTime`
+### Option `isInvalidTime`
 ```js
 isInvalidTime: (time, side, unit) => {   
    if (unit == 'hour') {
@@ -129,7 +206,7 @@ isInvalidTime: (time, side, unit) => {
 }
 ```
 
-### `isCustomDate`
+### Option `isCustomDate`
 ```js
 .daterangepicker-bank-day {
   color: red;
@@ -182,32 +259,26 @@ but other frameworks may be added in future releases
 ### Localization
 All date values are based on [luxon](https://moment.github.io/luxon/index.html#/intl) which provides great support for localization. Instead of providing date format, weekday and month names manually as strings, it is usually easier to set the default locale like this:
 ```js
-$(function () {
-   const Settings = luxon.Settings;
-   Settings.defaultLocale = 'fr-CA'
+const Settings = luxon.Settings;
+Settings.defaultLocale = 'fr-CA'
 
-   $('#picker').daterangepicker({
-      timePicker: true,
-      singleDatePicker: false
-   };
-});
-
+daterangepicker('#picker', {
+   timePicker: true,
+   singleDatePicker: false
+};
 ```
 instead of 
 ```js
-$(function () {
-   $('#picker').daterangepicker({
-      timePicker: true,
-      singleDatePicker: false,
-      locale: {
-         format: 'yyyyy-M-d H h m',
-         daysOfWeek: [ 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.', 'dim.' ],
-         monthNames: [ "janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre" ],
-         firstDay: 7
-      }
-   };
-});
-
+daterangepicker('#picker', {
+   timePicker: true,
+   singleDatePicker: false,
+   locale: {
+      format: 'yyyyy-M-d H h m',
+      daysOfWeek: [ 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.', 'dim.' ],
+      monthNames: [ "janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre" ],
+      firstDay: 7
+   }
+};
 ```
 
 ### Style and themes
@@ -222,7 +293,7 @@ You can style this daterangepicker with [Bulma CSS Framework](https://bulma.io/)
 ## Methods
 
 Available methods are listed in detail at [API Documentation](API_Doc.md). You will mainly use 
-   * [.daterangepicker(options, callback)](API_Doc.md#new_DateRangePicker_new)
+   * [daterangepicker(element, options, callback)](API_Doc.md#new_DateRangePicker_new)
    * [.setStartDate(startDate)](API_Doc.md#DateRangePicker+setStartDate)
    * [.setRange(startDate, endDate)](API_Doc.md#DateRangePicker+setRange)
    * [.getDateRangePicker(element)](API_Doc.md#getDateRangePicker+getDateRangePicker)
