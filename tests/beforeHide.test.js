@@ -1,21 +1,16 @@
-import { $ } from 'jquery';
-import DateRangePicker from '../src/daterangepicker.js';
+import * as Picker  from '../src/daterangepicker.js';
 import { DateTime } from 'luxon';
 
-test('befroreHide event prevents closing', () => {
+test('beforeHide event prevents closing', () => {
     let called = false;
     document.body.innerHTML = `<input id="p">`;
 
-    const values = [, '2026-03-19'];
-    $('#p').daterangepicker({
+    Picker.daterangepicker('#p', {
         startDate: '2026-03-02'
-    }).on('beforeHide.daterangepicker', (ev, picker) => {
+    }).addEventListener('beforeHide', (ev) => {
         called = true;
-        expect(picker).toBe(drp);
-        return true;
-        //ev.preventDefault()
+        ev.preventDefault()
     });
-    const drp = $('#p').data('daterangepicker');
     const input = document.querySelector('#p');
     const applyBtn = document.querySelector('.applyBtn');
     input.click();
