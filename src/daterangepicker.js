@@ -2763,9 +2763,6 @@ class DateRangePicker {
       if (this.altInput == null)
          return;
 
-      if (this.singleDatePicker)
-         this.altInput[1].value = null;
-
       if (this.altFormat == null) {
          let precision = 'day';
          if (this.timePicker) {

@@ -9,7 +9,7 @@ test('beforeHide event prevents closing', () => {
         startDate: '2026-03-02'
     }).addEventListener('beforeHide', (ev) => {
         called = true;
-        ev.preventDefault()
+        ev.preventDefault();
     });
     const input = document.querySelector('#p');
     const applyBtn = document.querySelector('.applyBtn');
