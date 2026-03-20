@@ -765,7 +765,7 @@ class DateRangePicker {
       if (this.element.matches('input') || this.element.matches('button')) {
          this.element.addEventListener('click', this.#showProxy);
          this.element.addEventListener('focus', this.#showProxy);
-         this.element.addEventListener('keyup', this.#elementChangedProxy );
+         this.element.addEventListener('keyup', this.#elementChangedProxy);
          this.element.addEventListener('keydown', this.#keydownProxy); //IE 11 compatibility
       } else {
          this.element.addEventListener('click', this.#toggleProxy)
@@ -907,7 +907,7 @@ class DateRangePicker {
       * @property {DateRangePicker} event.picker - The daterangepicker object
       * @property {string} side - Either `'start'` or `'end'` indicating whether `startDate` or `endDate` was changed. `null` for singleDatePicker
       */
-      onDateChange: { type: 'dateChange', param: (side) => { return { side: side } } },
+      onDateChange: { type: 'dateChange', param: (side) => { return side } },
       /**
       * Emitted when the time changed. Does not trigger when date is changed
       * @event
@@ -916,7 +916,7 @@ class DateRangePicker {
       * @property {DateRangePicker} event.picker - The daterangepicker object
       * @property {string} side - Either `'start'` or `'end'` indicating whether `startDate` or `endDate` was changed. `null` for singleDatePicker
       */
-      onTimeChange: { type: 'timeChange', param: (side) => { return { side: side } } },
+      onTimeChange: { type: 'timeChange', param: (side) => { return side } },
       /**
       * Emitted when the `Apply` button is clicked, or when a predefined {@link #Ranges|Ranges} is clicked 
       * @event
@@ -2458,7 +2458,7 @@ class DateRangePicker {
       if (this.autoUpdateInput)
          this.updateElement();
 
-      this.triggerEvent(this.#events.onDateChange, side);
+      this.triggerEvent(this.#events.onDateChange, { side: side });
 
    }
 
@@ -2570,7 +2570,7 @@ class DateRangePicker {
       if (this.autoUpdateInput)
          this.updateElement();
 
-      this.triggerEvent(this.#events.onTimeChange, this.singleDatePicker ? null : side);
+      this.triggerEvent(this.#events.onTimeChange, { side: this.singleDatePicker ? null : side });
    }
 
    /**
