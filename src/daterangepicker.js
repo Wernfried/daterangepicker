@@ -606,15 +606,15 @@ class DateRangePicker {
       if (this.singleDatePicker) {
          if (typeof options.altInput === 'string') {
             const el = document.querySelector(options.altInput);
-            this.altInput = (el instanceof HTMLInputElement && el.element.type === 'text') ? el : null;
+            this.altInput = (el instanceof HTMLInputElement && el.type === 'text') ? el : null;
          } else if (options.altInput instanceof HTMLElement) {
             this.altInput = (options.altInput instanceof HTMLInputElement && options.altInput.type === 'text') ? options.altInput : null;
          }
       } else if (!this.singleDatePicker && Array.isArray(options.altInput) && options.altInput.length === 2) {
          this.altInput = [];
          for (let item of options.altInput) {
-            const el = typeof x === 'string' ? document.querySelector(item) : item;
-            if (el instanceof HTMLInputElement && el.element.type === 'text')
+            const el = typeof item === 'string' ? document.querySelector(item) : item;
+            if (el instanceof HTMLInputElement && el.type === 'text')
                this.altInput.push(el);
          }
          if (this.altInput.length !== 2)

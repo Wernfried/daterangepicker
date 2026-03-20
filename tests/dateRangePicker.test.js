@@ -1,7 +1,4 @@
-
-
-import { $ } from 'jquery';
-import DateRangePicker from '../src/daterangepicker.js';
+import { daterangepicker, getDateRangePicker } from '../src/daterangepicker.js';
 import { DateTime, Settings } from 'luxon';
 
 function isVisible(el) {
@@ -12,19 +9,24 @@ function isVisible(el) {
 }
 
 test('daterangepicker is shown month, view change', () => {
-    document.body.innerHTML = `<input id="p">`;
+    document.body.innerHTML = `<input id="p" >`;
     let monthViewChanged = false;
     Settings.defaultLocale = 'en-CH';
 
-    $('#p').daterangepicker({
+    daterangepicker('#p', {
         timePicker: true,
         startDate: '2026-03-10'
-    }).on('monthViewChanged.daterangepicker', function (ev, picker) {
-        expect(picker).toBe(drp);
+    }).addEventListener('monthViewChange', (ev) => {
+        expect(ev.picker).toBe(drp);
+        expect(ev.left.toISO()).toBe(DateTime.fromISO('2026-04-01').toISO());
+        expect(ev.right.toISO()).toBe(DateTime.fromISO('2026-05-01').toISO());
         monthViewChanged = true;
     });
+    const drp = getDateRangePicker('#p');
+    const drp_el = getDateRangePicker(document.querySelector('#p'));
     const input = document.querySelector('#p');
-    const drp = $('#p').data('daterangepicker');
+    expect(drp).toBe(drp_el);
+
     input.click();
     expect(isVisible(document.querySelector('div.daterangepicker .drp-calendar.left .calendar-table'))).toBe(true);
     expect(isVisible(document.querySelector('div.daterangepicker .drp-calendar.left .calendar-table tfoot .calendar-time'))).toBe(true);
@@ -52,13 +54,14 @@ test('daterangepicker is shown month, view change', () => {
 
 test('daterangepicker process input and apply', () => {
     document.body.innerHTML = `<input id="p" /> <input id="altStart" hidden /> <input id="altEnd" hidden />`;
-    $('#p').daterangepicker({
+    Settings.defaultLocale = 'en-CH';
+    daterangepicker(document.querySelector('#p'), {
         startDate: '2026-03-02',
         endDate: DateTime.fromISO('2026-03-06'),
         timePicker: true,
         altInput: ['#altStart', '#altEnd']
     });
-    const drp = $('#p').data('daterangepicker');
+    const drp = getDateRangePicker(document.querySelector('#p'));
     const input = document.querySelector('#p');
     input.click();
     const applyBtn = document.querySelector('.applyBtn');
@@ -97,13 +100,13 @@ test('daterangepicker process input and apply', () => {
 
 test('daterangepicker process input and cancel', () => {
     document.body.innerHTML = `<input id="p"> <input id="altStart" hidden> <input id="altEnd" hidden>`;
-    $('#p').daterangepicker({
+    daterangepicker('#p', {
         startDate: '2026-03-02',
         endDate: DateTime.fromISO('2026-03-06'),
         timePicker: true,
         altInput: ['#altStart', '#altEnd']
     });
-    const drp = $('#p').data('daterangepicker');
+    const drp = getDateRangePicker('#p');
     const input = document.querySelector('#p');
     input.click();
 
@@ -136,7 +139,7 @@ test('daterangepicker process input and cancel', () => {
 test('daterangepicker select range and apply', () => {
     document.body.innerHTML = `<input id="p"> <input id="altStart" hidden> <input id="altEnd" hidden>`;
     const yesterday = [DateTime.now().startOf('day').minus({ day: 1 }), DateTime.now().endOf('day').minus({ day: 1 })];
-    $('#p').daterangepicker({
+    daterangepicker('#p', {
         altInput: ['#altStart', '#altEnd'],
         ranges: {
             'Today': [DateTime.now().startOf('day'), DateTime.now().endOf('day')],
@@ -146,7 +149,7 @@ test('daterangepicker select range and apply', () => {
         },
         alwaysShowCalendars: true
     });
-    const drp = $('#p').data('daterangepicker');
+    const drp = getDateRangePicker('#p');
     const input = document.querySelector('#p');
     input.click();
 
@@ -158,5 +161,21 @@ test('daterangepicker select range and apply', () => {
     expect(document.querySelector('#altStart').value).toBe(yesterday[0].toISODate({ format: 'basic' }));
     expect(document.querySelector('#altEnd').value).toBe(yesterday[1].toISODate({ format: 'basic' }));
     expect(isVisible(document.querySelector('div.daterangepicker'))).toBe(false);
+
+});
+
+test('daterangepicker data-set options', () => {
+    document.body.innerHTML = `<input id="p" data-start-date="2026-02-01" data-end-date="2026-02-15" data-show-week-numbers="true">`;
+    daterangepicker('#p', {
+        endDate: DateTime.fromISO('2026-02-20').endOf('day'),
+        timePicker: false
+    });
+    const drp = getDateRangePicker('#p');
+    const input = document.querySelector('#p');
+    input.click();
+
+    expect(drp.startDate.toString()).toBe(DateTime.fromISO('2026-02-01').toString());
+    expect(drp.endDate.toString()).toBe(DateTime.fromISO('2026-02-20').endOf('day').toString());
+    expect(drp.showWeekNumbers).toBe(true);
 
 });
