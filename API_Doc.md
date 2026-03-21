@@ -104,6 +104,7 @@ Ranges are not validated against <code>minDate</code>, <code>maxDate</code>, <co
     * [new DateRangePicker(element, options, cb)](#new_DateRangePicker_new)
     * [.startDate](#DateRangePicker+startDate) : [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime)
     * [.endDate](#DateRangePicker+endDate) : [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime)
+    * [.events](#DateRangePicker+events)
     * [.setStartDate(startDate, updateView)](#DateRangePicker+setStartDate) ⇒ <code>InputViolation</code>
     * [.setEndDate(endDate, updateView)](#DateRangePicker+setEndDate) ⇒ <code>InputViolation</code>
     * [.setRange(startDate, endDate, updateView)](#DateRangePicker+setRange) ⇒ <code>InputViolation</code>
