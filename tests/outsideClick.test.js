@@ -1,5 +1,4 @@
-import { $ } from 'jquery';
-import DateRangePicker from '../src/daterangepicker.js';
+import { daterangepicker, getDateRangePicker } from '../src/daterangepicker.js';
 import { DateTime } from 'luxon';
 
 test('outsideClick event fires and apply', () => {
@@ -7,17 +6,16 @@ test('outsideClick event fires and apply', () => {
     document.body.innerHTML = `<input id="p"> <div id="outside"> <input id="altStart" hidden>`;
 
     const values = ['2026-03-02', '2026-03-19'];
-    $('#p').daterangepicker({
+    daterangepicker('#p', {
         startDate: values[0],
         onOutsideClick: 'apply',
         timePicker: false,
         singleDatePicker: true,
         altInput: '#altStart'
-    }).on('outsideClick.daterangepicker', (ev, picker) => {
+    }).addEventListener('outsideClick', (ev) => {
         called = true;
-        expect(picker).toBe(drp);
     });
-    const drp = $('#p').data('daterangepicker');
+    const drp = getDateRangePicker('#p');
     const outside = document.querySelector('#outside');
     const input = document.querySelector('#p');
     const altStart = document.querySelector('#altStart');
@@ -25,7 +23,6 @@ test('outsideClick event fires and apply', () => {
 
     const startDay = document.querySelector('.drp-calendar.left .calendar-table tbody td[data-title="r3c3"]'); // -> 2026-03-19
     startDay.dispatchEvent(new Event('mousedown', { bubbles: true }));
-
     outside.dispatchEvent(new Event('mousedown', { bubbles: true }));
 
     expect(drp.startDate.toISODate()).toBe(DateTime.fromISO(values[1]).toISODate());
@@ -40,18 +37,17 @@ test('outsideClick event fires and revert', () => {
     document.body.innerHTML = `<input id="p"> <div id="outside"> <input id="altStart" hidden>`;
 
     const values = ['2026-03-02', '2026-03-19'];
-    $('#p').daterangepicker({
+    daterangepicker('#p', {
         startDate: values[0],
         onOutsideClick: 'cancel',
         timePicker: false,
         singleDatePicker: true,
         altInput: '#altStart'
     }
-    ).on('outsideClick.daterangepicker', (ev, picker) => {
+    ).addEventListener('outsideClick', (ev) => {
         called = true;
-        expect(picker).toBe(drp);
     });
-    const drp = $('#p').data('daterangepicker');
+    const drp = getDateRangePicker('#p');
     const outside = document.querySelector('#outside');
     const input = document.querySelector('#p');
     const altStart = document.querySelector('#altStart');
@@ -59,7 +55,6 @@ test('outsideClick event fires and revert', () => {
 
     const startDay = document.querySelector('.drp-calendar.left .calendar-table tbody td[data-title="r3c3"]'); // -> 2026-03-19
     startDay.dispatchEvent(new Event('mousedown', { bubbles: true }));
-
     outside.dispatchEvent(new Event('mousedown', { bubbles: true }));
 
     expect(drp.startDate.toISODate()).toBe(DateTime.fromISO(values[0]).toISODate());
