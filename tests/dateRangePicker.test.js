@@ -26,6 +26,7 @@ test('daterangepicker is shown month, view change', () => {
     const drp_el = getDateRangePicker(document.querySelector('#p'));
     const input = document.querySelector('#p');
     expect(drp).toBe(drp_el);
+    expect(document.querySelector('#p')._daterangepicker).toBe(drp);
 
     input.click();
     expect(isVisible(document.querySelector('div.daterangepicker .drp-calendar.left .calendar-table'))).toBe(true);
