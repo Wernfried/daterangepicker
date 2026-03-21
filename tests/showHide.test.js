@@ -1,5 +1,4 @@
-import { $ } from 'jquery';
-import DateRangePicker from '../src/daterangepicker.js';
+import { daterangepicker, getDateRangePicker } from '../src/daterangepicker.js';
 import { DateTime } from 'luxon';
 
 test('show and hide events fire correctly', () => {
@@ -7,14 +6,13 @@ test('show and hide events fire correctly', () => {
     let hidden = false;
 
     document.body.innerHTML = `<input id="p">`;
-    $('#p').daterangepicker(
-        {}
-    ).on('show.daterangepicker', () => {
+    const input = daterangepicker('#p', {});
+    input.addEventListener('show', () => {
         shown = true;
-    }).on('hide.daterangepicker', () => {
+    });
+    input.addEventListener('hide', () => {
         hidden = true;
     });
-    const input = document.querySelector('#p');
     input.click();
 
     const applyBtn = document.querySelector('.applyBtn');
