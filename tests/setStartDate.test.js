@@ -1,5 +1,4 @@
-import { $ } from 'jquery';
-import DateRangePicker from '../src/daterangepicker.js';
+import { daterangepicker, getDateRangePicker } from '../src/daterangepicker.js';
 import { DateTime, Settings, Duration } from 'luxon';
 
 test('setStartDate method violation fires', () => {
@@ -8,7 +7,7 @@ test('setStartDate method violation fires', () => {
 
    const values = ['2026-03-01', '2000-01-01', '2026-05-15'];
    Settings.defaultLocale = 'en-US';
-   $('#p').daterangepicker(
+   daterangepicker('#p', 
       {
          timePicker: false,
          startDate: values[0],
@@ -17,13 +16,12 @@ test('setStartDate method violation fires', () => {
          minDate: '2026-01-01',
          locale: { format: 'yyyy-MM-dd' }
       }
-   ).on('violated.daterangepicker', (ev, picker, result, newDate) => {
-      expect(picker).toBe(drp);
-      expect(picker.startDate.toISODate()).toBe(values[0]);
+   ).addEventListener('violate', (ev) => {
+      expect(ev.picker.startDate.toISODate()).toBe(values[0]);
       expect(altStart.value).toBe(DateTime.fromISO(values[0]).toISODate({ format: 'basic' }));
       violated = true;
    });
-   const drp = $('#p').data('daterangepicker');
+   const drp = getDateRangePicker('#p');
    const altStart = document.querySelector('#altStart');
    const input = document.querySelector('#p');
    input.click();
@@ -63,7 +61,7 @@ test('setStartDate method violation fires with correction', () => {
 
    const values = ['2026-03-01', '2000-01-01', '2026-06-25'];
    Settings.defaultLocale = 'en-US';
-   $('#p').daterangepicker(
+   daterangepicker('#p', 
       {
          timePicker: false,
          startDate: values[0],
@@ -72,15 +70,14 @@ test('setStartDate method violation fires with correction', () => {
          minDate: '2026-01-01',
          locale: { format: 'yyyy-MM-dd' }
       }
-   ).on('violated.daterangepicker', (ev, picker, result, newDate) => {
-      expect(picker).toBe(drp);
-      expect(picker.startDate.toISODate()).toBe(values[0]);
+   ).addEventListener('violate', (ev) => {
+      expect(ev.picker.startDate.toISODate()).toBe(values[0]);
       expect(altStart.value).toBe(DateTime.fromISO(values[0]).toISODate({ format: 'basic' }));
       violated = true;
-      newDate.startDate = DateTime.fromISO(values[2]);
-      return true;
+      ev.newDate.startDate = DateTime.fromISO(values[2]);
+      ev.preventDefault();
    });
-   const drp = $('#p').data('daterangepicker');
+   const drp = getDateRangePicker('#p');
    const altStart = document.querySelector('#altStart');
    const input = document.querySelector('#p');
    input.click();
