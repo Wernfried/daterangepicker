@@ -108,8 +108,8 @@ Values in `options` of `daterangepicker(el, options)` take precedence over `data
 
 #### Upgrade from daterangepicker 4.x -> 5.x tree/5.x-no-jQuery
 
-In version 5.x jQuery dependency has been removed. Version 4.x is available at branch [daterangepicker 4.x jQuery](tree/4.x-jQuery). 
-New features are not added to this branch. Unlesss you work with Events, you should not face any difference between version 4.x and 5.x.
+In version 5.x jQuery dependency has been removed. Version 4.x is available at branch [daterangepicker 4.x jQuery](tree/4.x-jQuery) but new features will not added anymore to this branch.<br> 
+Unlesss you work with Events, you should not face any difference between version 4.x and 5.x.
 Initialisation with jQuery is also supported in version 5.x
 
 ```html
@@ -127,6 +127,9 @@ Initialisation with jQuery is also supported in version 5.x
       $('#picker').daterangepicker({
          startDate: DateTime.now().plus({day: 1})
       });
+   }).on('beforeHide', (ev) => {
+      console.log(ev.originalEvent.picker.startDate.toString());
+      ev.preventDefault(); // -> do not hide the picker
    });
 </script>
 ```
@@ -162,8 +165,10 @@ In case you work with Events there are a minor changes:
    input.addEventListener('violate', (ev) => {
       ev.newDate.startDate = DateTime.now().minus({ days: 3 }).startOf('day');
       ev.preventDefault();
+   });
    input.addEventListener('show', (ev) => {
       console.log('Show the picker')
+   });
    input.addEventListener('beforeHide', (ev) => {
       console.log(ev.picker.startDate.toString());
       ev.preventDefault(); // -> do not hide the picker
