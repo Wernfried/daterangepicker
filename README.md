@@ -19,8 +19,8 @@ Above samples are based on the [original repository](https://github.com/dangross
 #### Global import with `<script>` tags
 ```html
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@4.18.0/dist/global/daterangepicker.min.js"></script>
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@4.18.0/css/daterangepicker.min.css" rel="stylesheet" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.0.0-beta/dist/global/daterangepicker.min.js"></script>
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.0.0-beta/css/daterangepicker.min.css" rel="stylesheet" />
 
 <input type="text" id="picker" />
 
@@ -38,11 +38,11 @@ Above samples are based on the [original repository](https://github.com/dangross
 {
    "imports": {
       "luxon": "https://cdn.jsdelivr.net/npm/luxon@3.7.2/+esm",
-      "daterangepicker": "https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@4.18.0/+esm"
+      "daterangepicker": "https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.0.0-beta/+esm"
    }
 }
 </script>
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@4.18.0/css/daterangepicker.min.css" rel="stylesheet" />
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.0.0-beta/css/daterangepicker.min.css" rel="stylesheet" />
 
 <input type="text" id="picker" />
 
@@ -59,9 +59,9 @@ Above samples are based on the [original repository](https://github.com/dangross
 #### Style with Bulma
 ```html
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@4.18.0/dist/global/daterangepicker.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.0.0-beta/dist/global/daterangepicker.min.js"></script>
 <link type="text/css" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css" rel="stylesheet" />
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@4.18.0/css/daterangepicker.bulma.min.css" rel="stylesheet" />
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.0.0-beta/css/daterangepicker.bulma.min.css" rel="stylesheet" />
 
 <input type="text" id="picker" />
 
@@ -106,23 +106,24 @@ Values in `options` of `daterangepicker(el, options)` take precedence over `data
 </script>
 ```
 
-#### Upgrade from daterangepicker 4.x -> 5.x tree/5.x-no-jQuery
+#### Upgrade from daterangepicker version 4.x -> 5.x
 
-In version 5.x jQuery dependency has been removed. Version 4.x is available at branch [daterangepicker 4.x jQuery](tree/4.x-jQuery) but new features will not added anymore to this branch.<br> 
+In version 5.x jQuery dependency has been removed. Version 4.x is available at branch [4.x-jQuery](tree/4.x-jQuery) but new features will not added anymore to this branch.<br> 
 Unlesss you work with Events, you should not face any difference between version 4.x and 5.x.
-Initialisation with jQuery is also supported in version 5.x
+Initialisation with jQuery is supported in version 5.x
 
 ```html
 <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@4.19.0/dist/global/daterangepicker.min.js"></script>
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@4.19.0/css/daterangepicker.min.css" rel="stylesheet" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.0.0-beta/dist/global/daterangepicker.min.js"></script>
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.0.0-beta/css/daterangepicker.min.css" rel="stylesheet" />
 
 <input type="text" id="picker" />
 
 <script type="text/javascript">
    const DateTime = luxon.DateTime;
-
+   
+   // if you like to work with jQuery in version 5.x
    $(function() {
       $('#picker').daterangepicker({
          startDate: DateTime.now().plus({day: 1})
@@ -134,46 +135,45 @@ Initialisation with jQuery is also supported in version 5.x
 </script>
 ```
 
-In case you work with Events there are a minor changes:
+In case you work with Events there are a few minor changes:
 ```js
-   // version 4.x - jQuery
-   $('#picker').daterangepicker({
-      startDate: DateTime.now(),
-      // allow only dates from current year
-      minDate: DateTime.now().startOf('year'),
-      manDate: DateTime.now().endOf('year'),
-      singleDatePicker: true
-   }).on('violate.daterangepicker', (ev, picker, result, newDate) => {
-      newDate.startDate = DateTime.now().minus({ days: 3 }).startOf('day');
-      return true;
-   }).on('show.daterangepicker', (ev, picker) => {
-      console.log('Show the picker')
-   }).on('beforeHide.daterangepicker', (ev, picker) => {
-      console.log(picker.startDate.toString());
-      return true; // -> do not hide the picker
-   });
+// version 4.x - with jQuery
+$('#picker').daterangepicker({
+   startDate: DateTime.now(),
+   // allow only dates from current year
+   minDate: DateTime.now().startOf('year'),
+   manDate: DateTime.now().endOf('year'),
+   singleDatePicker: true
+}).on('violate.daterangepicker', (ev, picker, result, newDate) => {
+   newDate.startDate = DateTime.now().minus({ days: 3 }).startOf('day');
+   return true;
+}).on('show.daterangepicker', (ev, picker) => {
+   console.log('Show the picker')
+}).on('beforeHide.daterangepicker', (ev, picker) => {
+   console.log(picker.startDate.toString());
+   return true; // -> do not hide the picker
+});
 
-   // version 5.x
-   const input = daterangepicker('#picker', { // or DateRangePicker.daterangepicker('#picker', ...
-      startDate: DateTime.now(),
-      // allow only dates from current year
-      minDate: DateTime.now().startOf('year'),
-      manDate: DateTime.now().endOf('year'),
-      singleDatePicker: true
-   });
+// version 5.x - without jQuery
+const input = daterangepicker('#picker', { // or DateRangePicker.daterangepicker('#picker', ...
+   startDate: DateTime.now(),
+   // allow only dates from current year
+   minDate: DateTime.now().startOf('year'),
+   manDate: DateTime.now().endOf('year'),
+   singleDatePicker: true
+});
 
-   input.addEventListener('violate', (ev) => {
-      ev.newDate.startDate = DateTime.now().minus({ days: 3 }).startOf('day');
-      ev.preventDefault();
-   });
-   input.addEventListener('show', (ev) => {
-      console.log('Show the picker')
-   });
-   input.addEventListener('beforeHide', (ev) => {
-      console.log(ev.picker.startDate.toString());
-      ev.preventDefault(); // -> do not hide the picker
-   });
-
+input.addEventListener('violate', (ev) => {
+   ev.newDate.startDate = DateTime.now().minus({ days: 3 }).startOf('day');
+   ev.preventDefault();
+});
+input.addEventListener('show', (ev) => {
+   console.log('Show the picker')
+});
+input.addEventListener('beforeHide', (ev) => {
+   console.log(ev.picker.startDate.toString());
+   ev.preventDefault(); // -> do not hide the picker
+});
 ```
 
 
@@ -196,7 +196,7 @@ alwaysShowCalendars: true
 ### Option `isInvalidDate`
 ```js
 isInvalidDate: function(date) {
-   return date.isWeekend;
+   return date.isWeekend; // see https://moment.github.io/luxon/api-docs/index.html#datetimeisweekend
 }
 ```
 
@@ -259,6 +259,7 @@ In original daterangepicker this parameter defines whether the `<input>` is upda
 but other frameworks may be added in future releases
 - [ESM](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules) Module Import
 - [Jest](https://jestjs.io/) unit testing
+- Removed dependency from [jQuery](https://jquery.com/)
 - ... and maybe some new bugs 😉 
 
 ### Localization
@@ -358,74 +359,3 @@ Options for DateRangePicker
 | locale.cancelLabel | <code>string</code> | <code>&quot;Cancel&quot;</code> | Label of `Cancel` Button |
 | locale.customRangeLabel | <code>string</code> | <code>&quot;Custom&quot;</code> | Range - Title for custom ranges |
 | locale.durationFormat | <code>object</code> \| <code>string</code> \| <code>function</code> | <code>{}</code> | Format a custom label for selected duration, for example `'5 Days, 12 Hours'`.<br> Define the format either as string, see [Duration.toFormat - Format Tokens](https://moment.github.io/luxon/api-docs/index.html#durationtoformat) or  an object according to [Intl.NumberFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#options),  see [Duration.toHuamn](https://moment.github.io/luxon/api-docs/index.html#durationtohuman).<br> Or custom function as `(startDate, endDate) => {}` |
-
-<a name="Ranges"></a>
-
-## Ranges : <code>Object</code>
-A set of predefined ranges.<br>
-Ranges are not validated against `minDate`, `maxDate`, `minSpan`, `maxSpan` or `timePickerStepSize ` constraints.
-
-**Kind**: global typedef  
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| name | <code>string</code> | The name of the range |
-| range | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> | Array of 2 elements with `startDate` and `endDate` |
-
-**Example**  
-```js
-{
- 'Today': [DateTime.now().startOf('day'), DateTime.now().endOf('day')],
- 'Yesterday': [DateTime.now().startOf('day').minus({days: 1}), DateTime.now().minus({days: 1}).endOf('day')],
- 'Last 7 Days': [DateTime.now().startOf('day').minus({days: 6}), DateTime.now()],
- 'Last 30 Days': [DateTime.now().startOf('day').minus({days: 29}), DateTime.now()],
- 'This Month': [DateTime.now().startOf('day').startOf('month'), DateTime.now().endOf('month')],
- 'Last Month': [DateTime.now().startOf('day').minus({months: 1}).startOf('month'), DateTime.now().minus({months: 1}).endOf('month')]
-}
-```
-<a name="Range"></a>
-
-## Range : <code>Object</code>
-A single predefined range
-
-**Kind**: global typedef  
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| name | <code>string</code> | The name of the range |
-| range | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> | Array of 2 elements with startDate and endDate |
-
-**Example**  
-```js
-{ Today: [DateTime.now().startOf('day'), DateTime.now().endOf('day')] }        
-```
-<a name="NewDate"></a>
-
-## NewDate : <code>Object</code>
-**Kind**: global typedef  
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| reason | <code>string</code> | The type/reason of violation |
-| old | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | Old value startDate/endDate |
-| new? | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | Corrected value of startDate/endDate if existing |
-| newDate.startDate- | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | Object with corrected values |
-| newDate.endDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | Object with corrected values |
-| startDate | <code>Array.&lt;Violation&gt;</code> | The constraints which violates the input |
-| endDate | <code>Array.&lt;Violation&gt;</code> | The constraints which violates the input or `null` for singleDatePicker |
-| newDate | [<code>NewDate</code>](#NewDate) | Object with corrected values |
-
-<a name="callback"></a>
-
-## callback : <code>function</code>
-**Kind**: global typedef  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| startDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | Selected startDate |
-| endDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | Selected endDate |
-| range | <code>string</code> |  |
-
