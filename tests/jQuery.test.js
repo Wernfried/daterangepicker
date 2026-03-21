@@ -17,8 +17,10 @@ test('daterangepicker is shown month, view change', () => {
 
     $('#p').daterangepicker({
         timePicker: true
-    }).on('show', function (ev) {
+    }).on('beforeHide', function (ev) {
         expect(ev.originalEvent.picker).toBe(drp);
+        if (!shown)
+            ev.preventDefault();
         shown = true;
     });
     const input = document.querySelector('#p');
@@ -28,7 +30,12 @@ test('daterangepicker is shown month, view change', () => {
     expect(isVisible(document.querySelector('div.daterangepicker .drp-calendar.left .calendar-table'))).toBe(true);
     expect(isVisible(document.querySelector('div.daterangepicker .drp-calendar.right .calendar-table'))).toBe(true);
     expect(isVisible(document.querySelector('div.daterangepicker .drp-buttons'))).toBe(true);
+
+    drp.hide();
     expect(shown).toBe(true);
+    expect(isVisible(document.querySelector('div.daterangepicker'))).toBe(true);
+    drp.hide();
+    expect(isVisible(document.querySelector('div.daterangepicker'))).toBe(false);
 
 });
 
