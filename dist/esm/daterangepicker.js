@@ -1,11 +1,13 @@
 import { DateTime, Duration, Info, Settings } from "luxon";
-import { $ } from "jquery";
 class DateRangePicker {
   #startDate = null;
   #endDate = null;
   constructor(element, options, cb) {
+    if (typeof element === "string" && document.querySelectorAll(element).length > 1)
+      throw new RangeError(`Option 'element' must match to one element only`);
     this.parentEl = "body";
-    this.element = $(element);
+    this.element = element instanceof HTMLElement ? element : document.querySelector(element);
+    this.isInputText = this.element instanceof HTMLInputElement && this.element.type === "text";
     this.#startDate = DateTime.now().startOf("day");
     this.#endDate = DateTime.now().plus({ day: 1 }).startOf("day");
     this.minDate = null;
@@ -23,7 +25,7 @@ class DateRangePicker {
     this.showWeekNumbers = false;
     this.showISOWeekNumbers = false;
     this.showCustomRangeLabel = true;
-    this.showLabel = !$(this.element).is("input:text");
+    this.showLabel = !this.isInputText;
     this.timePicker = false;
     const usesMeridiems = new Intl.DateTimeFormat(DateTime.now().locale, { hour: "numeric" }).resolvedOptions();
     this.timePicker24Hour = !usesMeridiems.hour12;
@@ -35,8 +37,8 @@ class DateRangePicker {
     this.isInvalidTime = null;
     this.isCustomDate = null;
     this.onOutsideClick = "apply";
-    this.opens = this.element.hasClass("pull-right") ? "left" : "right";
-    this.drops = this.element.hasClass("dropup") ? "up" : "down";
+    this.opens = this.element?.classList.contains("pull-right") ? "left" : "right";
+    this.drops = this.element?.classList.contains("dropup") ? "up" : "down";
     this.buttonClasses = "btn btn-sm";
     this.applyButtonClasses = "btn-primary";
     this.cancelButtonClasses = "btn-default";
@@ -61,6 +63,8 @@ class DateRangePicker {
       firstDay: Info.getStartOfWeek(),
       durationFormat: null
     };
+    if (this.element == null)
+      return;
     this.callback = function() {
     };
     this.isShowing = false;
@@ -68,7 +72,17 @@ class DateRangePicker {
     this.rightCalendar = {};
     if (typeof options !== "object" || options === null)
       options = {};
-    options = $.extend(this.element.data(), options);
+    let dataOptions = {};
+    const data = Array.from(this.element.attributes).filter((x) => x.name.startsWith("data-"));
+    for (let item of data) {
+      const name = item.name.replace(/^data-/g, "").replace(/-([a-z])/g, function(str) {
+        return str[1].toUpperCase();
+      });
+      let ts = DateTime.fromISO(item.value);
+      const isDate = ["startDate", "endDate", "minDate", "maxDate", "initalMonth"].includes(name);
+      dataOptions[name] = ts.isValid && isDate ? ts : JSON.parse(item.value);
+    }
+    options = { ...dataOptions, ...options };
     if (typeof options.singleDatePicker === "boolean")
       this.singleDatePicker = options.singleDatePicker;
     if (!this.singleDatePicker && typeof options.singleMonthView === "boolean") {
@@ -76,9 +90,14 @@ class DateRangePicker {
     } else {
       this.singleMonthView = false;
     }
-    if (typeof options.externalStyle === "string" && ["bulma"].includes(options.externalStyle))
-      this.externalStyle = options.externalStyle;
-    if (typeof options.template !== "string" && !(options.template instanceof $)) {
+    if (!(options.externalStyle === null)) {
+      const bodyStyle = window.getComputedStyle(document.body);
+      if (bodyStyle && typeof bodyStyle[Symbol.iterator] === "function" && [...bodyStyle].some((x) => x.startsWith("--bulma-")))
+        this.externalStyle = "bulma";
+    }
+    if (typeof options.template === "string" || options.template instanceof HTMLElement) {
+      this.container = typeof options.template === "string" ? createElementFromHTML(options.template) : options.template;
+    } else {
       let template = [
         '<div class="daterangepicker">',
         '<div class="ranges"></div>',
@@ -87,22 +106,19 @@ class DateRangePicker {
         "<thead></thead>",
         "<tbody></tbody>",
         "<tfoot>",
-        '<tr class="calendar-time start-time"></tr>'
-      ];
-      if (this.singleMonthView)
-        template.push('<tr class="calendar-time end-time"></tr>');
-      template.push(...[
+        '<tr class="calendar-time start-time"></tr>',
+        this.singleMonthView ? '<tr class="calendar-time end-time"></tr>' : "",
         "</tfoot>",
         "</table>",
         "</div>"
-      ]);
+      ];
       template.push(...[
         '<div class="drp-calendar right">',
         '<table class="calendar-table">',
         "<thead></thead>",
         "<tbody></tbody>",
         "<tfoot>",
-        '<tr class="calendar-time end-time"></tr>',
+        this.singleMonthView ? "" : '<tr class="calendar-time end-time"></tr>',
         "</tfoot>",
         "</table>",
         "</div>"
@@ -129,9 +145,10 @@ class DateRangePicker {
       }
       template.push("</div></div>");
       options.template = template.join("");
+      this.container = createElementFromHTML(options.template);
     }
-    this.parentEl = options.parentEl && $(options.parentEl).length ? $(options.parentEl) : $(this.parentEl);
-    this.container = $(options.template).appendTo(this.parentEl);
+    this.parentEl = document.querySelector(typeof options.parentEl === "string" ? options.parentEl : this.parentEl);
+    this.parentEl.appendChild(this.container);
     if (typeof options.timePicker === "boolean")
       this.timePicker = options.timePicker;
     if (this.timePicker)
@@ -172,7 +189,7 @@ class DateRangePicker {
       if (["string", "object", "function"].includes(typeof options.locale.durationFormat) && options.locale.durationFormat != null)
         this.locale.durationFormat = options.locale.durationFormat;
     }
-    this.container.addClass(this.locale.direction);
+    this.container.classList.add(this.locale.direction);
     for (let key2 of [
       "timePicker24Hour",
       "showWeekNumbers",
@@ -238,10 +255,6 @@ class DateRangePicker {
       }
     }
     if (this.timePicker) {
-      if (typeof options.timePickerSeconds === "boolean")
-        this.timePickerStepSize = Duration.fromObject({ [options.timePickerSeconds ? "seconds" : "minutes"]: 1 });
-      if (typeof options.timePickerIncrement === "number")
-        this.timePickerStepSize = Duration.fromObject({ minutes: options.timePickerIncrement });
       if (["string", "object", "number"].includes(typeof options.timePickerStepSize)) {
         let duration;
         if (Duration.isDuration(options.timePickerStepSize) && options.timePickerStepSize.isValid) {
@@ -308,19 +321,18 @@ class DateRangePicker {
         }
       }
     }
-    if ($(this.element).is("input:text")) {
-      const val = $(this.element).val();
-      if (val != "") {
+    if (this.isInputText) {
+      if (this.element.value != "") {
         const format = typeof this.locale.format === "string" ? this.locale.format : DateTime.parseFormatForOpts(this.locale.format);
         if (this.singleDatePicker && typeof options.startDate === "undefined") {
-          const start = DateTime.fromFormat(val, format, { locale: DateTime.now().locale });
+          const start = DateTime.fromFormat(this.element.value, format, { locale: DateTime.now().locale });
           if (start.isValid) {
             this.#startDate = start;
           } else {
-            console.error(`Value "${val}" in <input> is not a valid string: ${start.invalidExplanation}`);
+            console.error(`Value "${this.element.value}" in <input> is not a valid string: ${start.invalidExplanation}`);
           }
         } else if (!this.singleDatePicker && typeof options.startDate === "undefined" && typeof options.endDate === "undefined") {
-          const split = val.split(this.locale.separator);
+          const split = this.element.value.split(this.locale.separator);
           if (split.length === 2) {
             const start = DateTime.fromFormat(split[0], format, { locale: DateTime.now().locale });
             const end = DateTime.fromFormat(split[1], format, { locale: DateTime.now().locale });
@@ -331,7 +343,7 @@ class DateRangePicker {
               console.error(`Value in <input> is not a valid string: ${start.invalidExplanation} - ${end.invalidExplanation}`);
             }
           } else {
-            console.error(`Value "${val}" in <input> is not a valid string`);
+            console.error(`Value "${this.element.value}" in <input> is not a valid string`);
           }
         }
       }
@@ -347,8 +359,6 @@ class DateRangePicker {
       this.#startDate = this.#startDate.startOf("day");
       this.#endDate = this.#endDate.endOf("day");
     }
-    if (options.warnings !== void 0)
-      console.warn(`Option 'warnings' not used anymore. Listen to event 'violated.daterangepicker'`);
     if (!this.#startDate && this.initalMonth) {
       this.#endDate = null;
       if (this.timePicker)
@@ -356,7 +366,7 @@ class DateRangePicker {
     } else {
       const violations = this.validateInput(null, false);
       if (violations != null) {
-        let vio = violations.startDate.violations;
+        let vio = violations.startDate;
         if (vio.length > 0) {
           if (vio.some((x) => x.reason.startsWith("isInvalid"))) {
             console.error(`Value of startDate "${this.#startDate}" violates ${vio.find((x) => x.reason.startsWith("isInvalid")).reason}`);
@@ -368,7 +378,7 @@ class DateRangePicker {
           }
         }
         if (!this.singleDatePicker) {
-          vio = violations.endDate.violations.filter((x) => x.new != null);
+          vio = violations.endDate.filter((x) => x.new != null);
           if (vio.length > 0) {
             if (vio.some((x) => x.reason.startsWith("isInvalid"))) {
               console.error(`Value of endDate "${this.#endDate}" violates ${vio.find((x) => x.reason.startsWith("isInvalid")).reason}`);
@@ -382,19 +392,27 @@ class DateRangePicker {
         }
       }
     }
-    if (["function", "string"].includes(typeof options.altFormat))
-      this.altFormat = options.altFormat;
-    if (typeof options.altInput === "string" || Array.isArray(options.altInput)) {
-      if (this.singleDatePicker && typeof options.altInput === "string") {
-        this.altInput = $(options.altInput).is("input:text") ? options.altInput : null;
-      } else if (!this.singleDatePicker && Array.isArray(options.altInput) && options.altInput.length === 2) {
-        this.altInput = options.altInput.every((x) => typeof x === "string" && $(x).is("input:text")) ? options.altInput : null;
-      } else {
-        const note = `Value of "altInput" must be ` + (this.singleDatePicker ? "a string" : "an array of two string elements");
-        console.error(`Option 'altInput' ${JSON.stringify(options.altInput)} is not valid
-`, note);
+    if (this.singleDatePicker) {
+      if (typeof options.altInput === "string") {
+        const el = document.querySelector(options.altInput);
+        this.altInput = el instanceof HTMLInputElement && el.type === "text" ? el : null;
+      } else if (options.altInput instanceof HTMLElement) {
+        this.altInput = options.altInput instanceof HTMLInputElement && options.altInput.type === "text" ? options.altInput : null;
       }
+    } else if (!this.singleDatePicker && Array.isArray(options.altInput) && options.altInput.length === 2) {
+      this.altInput = [];
+      for (let item of options.altInput) {
+        const el = typeof item === "string" ? document.querySelector(item) : item;
+        if (el instanceof HTMLInputElement && el.type === "text")
+          this.altInput.push(el);
+      }
+      if (this.altInput.length !== 2)
+        this.altInput = null;
+    } else if (options.altInput != null) {
+      console.warn(`Option 'altInput' ${JSON.stringify(options.altInput)} is not valid`);
     }
+    if (options.altInput && ["function", "string"].includes(typeof options.altFormat))
+      this.altFormat = options.altFormat;
     if (typeof options.opens === "string") {
       if (["left", "right", "center"].includes(options.opens))
         this.opens = options.opens;
@@ -402,10 +420,10 @@ class DateRangePicker {
         console.error(`Option 'options.opens' must be 'left', 'right' or 'center'`);
     }
     if (typeof options.drops === "string") {
-      if (["drop", "down", "auto"].includes(options.drops))
+      if (["up", "down", "auto"].includes(options.drops))
         this.drops = options.drops;
       else
-        console.error(`Option 'options.drops' must be 'drop', 'down' or 'auto'`);
+        console.error(`Option 'options.drops' must be 'up', 'down' or 'auto'`);
     }
     if (Array.isArray(options.buttonClasses)) {
       this.buttonClasses = options.buttonClasses.join(" ");
@@ -452,63 +470,68 @@ class DateRangePicker {
         }
         if (start == null || end == null)
           continue;
-        options.ranges[range] = [start, end];
         var elem = document.createElement("textarea");
         elem.innerHTML = range;
         this.ranges[elem.value] = [start, end];
       }
       var list = "<ul>";
-      for (let range in this.ranges) {
-        list += '<li data-range-key="' + range + '">' + range + "</li>";
-      }
-      if (this.showCustomRangeLabel) {
-        list += '<li data-range-key="' + this.locale.customRangeLabel + '">' + this.locale.customRangeLabel + "</li>";
-      }
+      for (let range in this.ranges)
+        list += `<li data-range-key="${range}">${range}</li>`;
+      if (this.showCustomRangeLabel)
+        list += `<li data-range-key="${this.locale.customRangeLabel}">${this.locale.customRangeLabel}</li>`;
       list += "</ul>";
-      this.container.find(".ranges").prepend(list);
-      this.container.addClass("show-ranges");
+      this.container.querySelector(".ranges").prepend(createElementFromHTML(list));
+      this.container.classList.add("show-ranges");
     }
     if (typeof cb === "function")
       this.callback = cb;
-    if (!this.timePicker) {
-      this.container.find(".calendar-time").hide();
-    }
+    if (!this.timePicker)
+      this.container.querySelectorAll(".calendar-time").forEach((el) => {
+        el.style.display = "none";
+      });
     if (this.timePicker && this.autoApply)
       this.autoApply = false;
     if (this.autoApply)
-      this.container.addClass("auto-apply");
+      this.container.classList.add("auto-apply");
     if (this.singleDatePicker || this.singleMonthView) {
-      this.container.addClass("single");
-      this.container.find(".drp-calendar.left").addClass("single");
-      this.container.find(".drp-calendar.left").show();
-      this.container.find(".drp-calendar.right").hide();
+      this.container.classList.add("single");
+      this.container.querySelector(".drp-calendar.left").classList.add("single");
+      this.container.querySelector(".drp-calendar.left").style.display = "";
+      this.container.querySelector(".drp-calendar.right").style.display = "none";
       if (!this.timePicker && this.autoApply)
-        this.container.addClass("auto-apply");
+        this.container.classList.add("auto-apply");
     }
-    if (typeof options.ranges === "undefined" && !this.singleDatePicker || this.alwaysShowCalendars)
-      this.container.addClass("show-calendar");
-    this.container.addClass("opens" + this.opens);
-    this.container.find(".applyBtn, .cancelBtn").addClass(this.buttonClasses);
+    if (this.singleDatePicker || !Object.keys(this.ranges).length || this.alwaysShowCalendars)
+      this.container.classList.add("show-calendar");
+    this.container.classList.add(`opens${this.opens}`);
+    this.container.querySelectorAll(".applyBtn, .cancelBtn").forEach((el) => {
+      el.classList.add(...this.buttonClasses.split(" "));
+    });
     if (this.applyButtonClasses.length)
-      this.container.find(".applyBtn").addClass(this.applyButtonClasses);
+      this.container.querySelector(".applyBtn").classList.add(...this.applyButtonClasses.split(" "));
     if (this.cancelButtonClasses.length)
-      this.container.find(".cancelBtn").addClass(this.cancelButtonClasses);
-    this.container.find(".applyBtn").html(this.locale.applyLabel);
-    this.container.find(".cancelBtn").html(this.locale.cancelLabel);
-    this.container.find(".drp-calendar").on("click.daterangepicker", ".prev", this.clickPrev.bind(this)).on("click.daterangepicker", ".next", this.clickNext.bind(this)).on("mousedown.daterangepicker", "td.available", this.clickDate.bind(this)).on("mouseenter.daterangepicker", "td.available", this.hoverDate.bind(this)).on("change.daterangepicker", "select.yearselect", this.monthOrYearChanged.bind(this)).on("change.daterangepicker", "select.monthselect", this.monthOrYearChanged.bind(this)).on("change.daterangepicker", "select.hourselect,select.minuteselect,select.secondselect,select.ampmselect", this.timeChanged.bind(this));
-    this.container.find(".ranges").on("click.daterangepicker", "li", this.clickRange.bind(this)).on("mouseenter.daterangepicker", "li", this.hoverRange.bind(this)).on("mouseleave.daterangepicker", "li", this.leaveRange.bind(this));
-    this.container.find(".drp-buttons").on("click.daterangepicker", "button.applyBtn", this.clickApply.bind(this)).on("click.daterangepicker", "button.cancelBtn", this.clickCancel.bind(this));
-    if (this.element.is("input") || this.element.is("button")) {
-      this.element.on({
-        "click.daterangepicker": this.show.bind(this),
-        "focus.daterangepicker": this.show.bind(this),
-        "keyup.daterangepicker": this.elementChanged.bind(this),
-        "keydown.daterangepicker": this.keydown.bind(this)
-        //IE 11 compatibility
-      });
+      this.container.querySelector(".cancelBtn").classList.add(...this.cancelButtonClasses.split(" "));
+    this.container.querySelector(".applyBtn").innerHTML = this.locale.applyLabel;
+    this.container.querySelector(".cancelBtn").innerHTML = this.locale.cancelLabel;
+    this.addListener(".drp-calendar", "click", ".prev", this.clickPrev.bind(this));
+    this.addListener(".drp-calendar", "click", ".next", this.clickNext.bind(this));
+    this.addListener(".drp-calendar", "mousedown", "td.available", this.clickDate.bind(this));
+    this.addListener(".drp-calendar", "mouseenter", "td.available", this.hoverDate.bind(this));
+    this.addListener(".drp-calendar", "change", "select.yearselect,select.monthselect", this.monthOrYearChanged.bind(this));
+    this.addListener(".drp-calendar", "change", "select.hourselect,select.minuteselect,select.secondselect,select.ampmselect", this.timeChanged.bind(this));
+    this.addListener(".ranges", "click", "li", this.clickRange.bind(this));
+    this.addListener(".ranges", "mouseenter", "li", this.hoverRange.bind(this));
+    this.addListener(".ranges", "mouseleave", "li", this.leaveRange.bind(this));
+    this.addListener(".drp-buttons", "click", "button.applyBtn", this.clickApply.bind(this));
+    this.addListener(".drp-buttons", "click", "button.cancelBtn", this.clickCancel.bind(this));
+    if (this.element.matches("input") || this.element.matches("button")) {
+      this.element.addEventListener("click", this.#showProxy);
+      this.element.addEventListener("focus", this.#showProxy);
+      this.element.addEventListener("keyup", this.#elementChangedProxy);
+      this.element.addEventListener("keydown", this.#keydownProxy);
     } else {
-      this.element.on("click.daterangepicker", this.toggle.bind(this));
-      this.element.on("keydown.daterangepicker", this.toggle.bind(this));
+      this.element.addEventListener("click", this.#toggleProxy);
+      this.element.addEventListener("keydown", this.#toggleProxy);
     }
     this.updateElement();
   }
@@ -542,14 +565,14 @@ class DateRangePicker {
     * `minDate`, `maxDate`, `minSpan`, `maxSpan`, `invalidDate` and `invalidTime` constraints.<br>
     * Event is only triggered when date string is valid and date value is changing<br>
     * @event
-    * @name "violated.daterangepicker"
-    * @param {DateRangePicker} picker - The daterangepicker object
-    * @param {InputViolation} result - The violation object, see example of `validateInput()`
-    * @param {Object} newDate - Object of {startDate, endDate}
-    * @return {boolean}=undefined - If handler returns `true`, then values from `newDate` object are used
+    * @name "violate"
+    * @property {DateRangePickerEvent} event - The Event object
+    * @property {DateRangePicker} event.picker - The daterangepicker object
+    * @property {InputViolation} event.violation - The daterangepicker object
+    * @property {NewDate} event.newDate - Object of corrected date values
+    * @property {boolean} event.cancelable=true - By calling `event.preventDefault()` the `newDate` values will apply
     * @example
-    * 
-    * $('#picker').daterangepicker({
+    * daterangepicker('#picker', {
     *   startDate: DateTime.now(),
     *   // allow only dates from current year
     *   minDate: DateTime.now().startOf('year'),
@@ -558,136 +581,180 @@ class DateRangePicker {
     *   locale: {
     *      format: DateTime.DATETIME_SHORT
     *   }
-    * }).on('violated.daterangepicker', (ev, picker, result, newDate) => {
-    *   newDate.startDate = DateTime.now().minus({ days: 3 }).startOf('day');
-    *   return true;
+    * }).addEventListener('violate', (ev) => {
+    *   ev.newDate.startDate = DateTime.now().minus({ days: 3 }).startOf('day');
+    *   ev.preventDefault();
     * });
     *
     * // Try to set date outside permitted range at <input> elemet
-    * $('#picker').val(DateTime.now().minus({ years: 10 })).toLocaleString(DateTime.DATETIME_SHORT).trigger('keyup');
+    * const input = document.querySelector('#picker');
+    * input.value = DateTime.now().minus({ years: 10 })).toLocaleString(DateTime.DATETIME_SHORT)
+    * input.dispatchEvent(new Event('keyup'));
     
     * // Try to set date outside permitted range by code
-    * const drp = $('#picker').data('daterangepicker').setStartDate(DateTime.now().minus({ years: 10 })
+    * const drp = getDateRangePicker('#picker');
+    * drp.setStartDate(DateTime.now().minus({ years: 10 });
     * 
     * // -> Calendar selects and shows "today - 3 days"
     */
-    onViolated: { type: "violated.daterangepicker", param: (...args) => [this, ...args] },
+    onViolate: { type: "violate", param: (violation, newDate) => {
+      return { ...violation, ...{ cancelable: true } };
+    } },
     /**
     * Emitted before the calendar time picker is rendered.
     * @event
-    * @name "beforeRenderCalendar.daterangepicker"
-    * @param {DateRangePicker} this - The daterangepicker object
+    * @name "beforeRenderCalendar"
+    * @property {DateRangePickerEvent} event - The Event object
+    * @property {DateRangePicker} event.picker - The daterangepicker object
     */
-    onBeforeRenderTimePicker: { type: "beforeRenderTimePicker.daterangepicker", param: this },
+    onBeforeRenderTimePicker: { type: "beforeRenderTimePicker" },
     /**
     * Emitted before the calendar is rendered. Useful to remove any manually added elements.
     * @event
-    * @name "beforeRenderCalendar.daterangepicker"
-    * @param {DateRangePicker} this - The daterangepicker object
+    * @name "beforeRenderCalendar"
+    * @property {DateRangePickerEvent} event - The Event object
+    * @property {DateRangePicker} event.picker - The daterangepicker object
     */
-    onBeforeRenderCalendar: { type: "beforeRenderCalendar.daterangepicker", param: this },
+    onBeforeRenderCalendar: { type: "beforeRenderCalendar" },
     /**
     * Emitted when the picker is shown 
     * @event
-    * @name "show.daterangepicker"
-    * @param {DateRangePicker} this - The daterangepicker object
+    * @name "show"
+    * @property {DateRangePickerEvent} event - The Event object
+    * @property {DateRangePicker} event.picker - The daterangepicker object
     */
-    onShow: { type: "show.daterangepicker", param: this },
+    onShow: { type: "show" },
     /**
-    * Emitted before the picker will hide. When EventHandler returns `true`, then picker remains visible
+    * Emitted before the picker will hide.
     * @event
-    * @name "beforeHide.daterangepicker"
-    * @param {DateRangePicker} this - The daterangepicker object
-    * @return {boolean} cancel - If `true`, then the picker remains visible
+    * @name "beforeHide"
+    * @property {DateRangePickerEvent} event - The Event object
+    * @property {DateRangePicker} event.picker - The daterangepicker object
+    * @property {boolean} event.cancelable=true - Hide is canceled  by calling `event.preventDefault()`
     */
-    onBeforeHide: { type: "beforeHide.daterangepicker", param: this },
+    onBeforeHide: { type: "beforeHide", param: { cancelable: true } },
     /**
     * Emitted when the picker is hidden
     * @event
-    * @name "hide.daterangepicker"
-    * @param {DateRangePicker} this - The daterangepicker object
+    * @name "hide"
+    * @property {DateRangePickerEvent} event - The Event object
+    * @property {DateRangePicker} event.picker - The daterangepicker object
     */
-    onHide: { type: "hide.daterangepicker", param: this },
+    onHide: { type: "hide" },
     /**
     * Emitted when the calendar(s) are shown.
     * Only useful when {@link #Ranges|Ranges} are used.
     * @event
-    * @name "showCalendar.daterangepicker"
-    * @param {DateRangePicker} this - The daterangepicker object
+    * @name "showCalendar"
+    * @property {DateRangePickerEvent} event - The Event object
+    * @property {DateRangePicker} event.picker - The daterangepicker object
     */
-    onShowCalendar: { type: "showCalendar.daterangepicker", param: this },
+    onShowCalendar: { type: "showCalendar" },
     /**
     * Emitted when the calendar(s) are hidden. Only used when {@link #Ranges|Ranges} are used.
     * @event
-    * @name "hideCalendar.daterangepicker"
-    * @param {DateRangePicker} this - The daterangepicker object
+    * @name "hideCalendar"
+    * @property {DateRangePickerEvent} event - The Event object
+    * @property {DateRangePicker} event.picker - The daterangepicker object
     */
-    onHideCalendar: { type: "hideCalendar.daterangepicker", param: this },
+    onHideCalendar: { type: "hideCalendar" },
     /**
     * Emitted when user clicks outside the picker. Use option `onOutsideClick` to define the default action, then you may not need to handle this event.
     * @event
-    * @name "outsideClick.daterangepicker"
-    * @param {DateRangePicker} this - The daterangepicker object
+    * @name "outsideClick"
+    * @property {DateRangePickerEvent} event - The Event object
+    * @property {DateRangePicker} event.picker - The daterangepicker object
     */
-    onOutsideClick: { type: "outsideClick.daterangepicker", param: this },
+    onOutsideClick: { type: "outsideClick" },
     /**
-    * Emitted when the date changed. Does not trigger when time is changed, use {@link #event_timeChange.daterangepicker|"timeChange.daterangepicker"} to handle it
+    * Emitted when the date changed. Does not trigger when time is changed, use {@link #event_timeChange|"timeChange"} to handle it
     * @event
-    * @name "dateChange.daterangepicker"
-    * @param {DateRangePicker} this - The daterangepicker object
-    * @param {string} side - Either `'start'` or `'end'` indicating whether startDate or endDate was changed. `null` when `singleDatePicker: true`
+    * @name "dateChange"
+    * @property {DateRangePickerEvent} event - The Event object
+    * @property {DateRangePicker} event.picker - The daterangepicker object
+    * @property {string} side - Either `'start'` or `'end'` indicating whether `startDate` or `endDate` was changed. `null` for singleDatePicker
     */
-    onDateChange: { type: "dateChange.daterangepicker", param: (side) => [this, side] },
+    onDateChange: { type: "dateChange", param: (side) => {
+      return side;
+    } },
     /**
     * Emitted when the time changed. Does not trigger when date is changed
     * @event
-    * @name "timeChange.daterangepicker"
-    * @param {DateRangePicker} this - The daterangepicker object
-    * @param {string} side - Either `'start'` or `'end'` indicating whether startDate or endDate was changed
+    * @name "timeChange"
+    * @property {DateRangePickerEvent} event - The Event object
+    * @property {DateRangePicker} event.picker - The daterangepicker object
+    * @property {string} side - Either `'start'` or `'end'` indicating whether `startDate` or `endDate` was changed. `null` for singleDatePicker
     */
-    onTimeChange: { type: "timeChange.daterangepicker", param: (side) => [this, side] },
+    onTimeChange: { type: "timeChange", param: (side) => {
+      return side;
+    } },
     /**
     * Emitted when the `Apply` button is clicked, or when a predefined {@link #Ranges|Ranges} is clicked 
     * @event
-    * @name "apply.daterangepicker"
-    * @param {DateRangePicker} this - The daterangepicker object
+    * @name "apply"
+    * @property {DateRangePickerEvent} event - The Event object
+    * @property {DateRangePicker} event.picker - The daterangepicker object
     */
-    onApply: { type: "apply.daterangepicker", param: this },
+    onApply: { type: "apply" },
     /**
     * Emitted when the `Cancel` button is clicked
     * @event
-    * @name "cancel.daterangepicker"
-    * @param {DateRangePicker} this - The daterangepicker object
+    * @name "cancel"
+    * @property {DateRangePickerEvent} event - The Event object
+    * @property {DateRangePicker} event.picker - The daterangepicker object
     */
-    onCancel: { type: "cancel.daterangepicker", param: this },
+    onCancel: { type: "cancel" },
     /**
     * Emitted when the date is changed through `<input>` element. Event is only triggered when date string is valid and date value has changed
     * @event
-    * @name "inputChanged.daterangepicker"
-    * @param {DateRangePicker} this - The daterangepicker object
+    * @name "inputChange"
+    * @property {DateRangePickerEvent} event - The Event object
+    * @property {DateRangePicker} event.picker - The daterangepicker object
     */
-    onInputChanged: { type: "inputChanged.daterangepicker", param: this },
+    onInputChange: { type: "inputChange" },
     /**
     * Emitted after month view changed, for example by click on 'prev' or 'next'
     * @event
-    * @name "monthViewChanged.daterangepicker"
-    * @param {DateRangePicker} this - The daterangepicker object
+    * @name "monthViewChange"
+    * @property {DateRangePickerEvent} event - The Event object
+    * @property {DateRangePicker} event.picker - The daterangepicker object
+    * @property {external:DateTime} left - The first day of month in left-hand calendar
+    * @property {external:DateTime} right - The first day of month in left-hand calendar or `null` for singleDatePicker
     */
-    onMonthViewChanged: { type: "monthViewChanged.daterangepicker", param: this }
+    onMonthViewChange: {
+      type: "monthViewChange",
+      param: (left, right) => {
+        return {
+          left: this.leftCalendar.month.startOf("month"),
+          right: this.singleMonthView || this.singleDatePicker ? null : this.rightCalendar.month.startOf("month")
+        };
+      }
+    }
   };
   get events() {
     return this.#events;
   }
+  #outsideClickProxy = this.outsideClick.bind(this);
+  #onResizeProxy = this.move.bind(this);
+  #dropdownClickWrapper = (e) => {
+    const match = e.target.closest('[data-toggle="dropdown"]');
+    if (match && document.contains(match))
+      this.#outsideClickProxy(e);
+  };
+  #showProxy = this.show.bind(this);
+  #elementChangedProxy = this.elementChanged.bind(this);
+  #keydownProxy = this.keydown.bind(this);
+  #toggleProxy = this.toggle.bind(this);
   /* #region Set startDate/endDate */
   /**
   * Sets the date range picker's currently selected start date to the provided date.<br>
   * `startDate` must be a `luxon.DateTime` or `Date` or `string` according to {@link ISO-8601} or a string matching `locale.format`.<br>
-  * Invalid date values are handled by {@link #DateRangePicker+violated|violated} Event
+  * Invalid date values are handled by {@link #DateRangePicker+violate|violate} Event
   * @param {external:DateTime|external:Date|string} startDate - startDate to be set. In case of ranges, the current `endDate` is used.
   * @param {boolean} updateView=true - If `true`, then calendar UI is updated to new value. Otherwise only internal values are set.
   * @returns {InputViolation} - Object of violations or `null` if no violation have been found
   * @example 
-  * const drp = $('#picker').data('daterangepicker');
+  * const drp = getDateRangePicker('#picker');
   * drp.setStartDate(DateTime.now().startOf('hour'));
   */
   setStartDate(startDate, updateView = true) {
@@ -705,7 +772,7 @@ class DateRangePicker {
         return violations;
       }
     }
-    const monthChanged = !this.#startDate.hasSame(newDate, "month");
+    const monthChange = !this.#startDate.hasSame(newDate, "month");
     this.#startDate = newDate;
     this.#endDate = this.#startDate;
     if (!this.timePicker) {
@@ -714,18 +781,18 @@ class DateRangePicker {
     }
     this.updateElement();
     if (updateView)
-      this.updateView(monthChanged);
+      this.updateView(monthChange);
     return violations;
   }
   /**
   * Sets the date range picker's currently selected start date to the provided date.<br>
   * `endDate` must be a `luxon.DateTime` or `Date` or `string` according to {@link ISO-8601} or a string matching `locale.format`.<br>
-  * Invalid date values are handled by {@link #DateRangePicker+violated|violated} Event
+  * Invalid date values are handled by {@link #DateRangePicker+violate|violate} Event
   * @param {external:DateTime|external:Date|string} endDate - endDate to be set. In case of ranges, the current `startDate` is used.
   * @param {boolean} updateView=true - If `true`, then calendar UI is updated to new value. Otherwise only internal values are set.
   * @returns {InputViolation} - Object of violations or `null` if no violation have been found
   * @example 
-  * const drp = $('#picker').data('daterangepicker');
+  * const drp = getDateRangePicker('#picker');
   * drp.setEndDate(DateTime.now().startOf('hour'));
   */
   setEndDate(endDate, updateView = true) {
@@ -734,13 +801,13 @@ class DateRangePicker {
   /**
   * Sets the date range picker's currently selected start date to the provided date.<br>
   * `startDate` and `endDate` must be a `luxon.DateTime` or `Date` or `string` according to {@link ISO-8601} or a string matching `locale.format`.<br>
-  * Invalid date values are handled by {@link #DateRangePicker+violated|violated} Event
+  * Invalid date values are handled by {@link #DateRangePicker+violate|violate} Event
   * @param {external:DateTime|external:Date|string} startDate - startDate to be set
   * @param {external:DateTime|external:Date|string} endDate - endDate to be set
   * @param {boolean} updateView=true - If `true`, then calendar UI is updated to new value. Otherwise only internal values are set.
   * @returns {InputViolation} - Object of violations or `null` if no violation have been found
   * @example 
-  * const drp = $('#picker').data('daterangepicker');
+  * const drp = getDateRangePicker('#picker');
   * drp.setRange(DateTime.now().startOf('hour'), DateTime.now().endOf('day'));
   */
   setRange(startDate, endDate, updateView = true) {
@@ -761,7 +828,7 @@ class DateRangePicker {
         return violations;
       }
     }
-    const monthChanged = !this.#startDate.hasSame(newDate[0], "month") || !this.#endDate.hasSame(newDate[1], "month");
+    const monthChange = !this.#startDate.hasSame(newDate[0], "month") || !this.#endDate.hasSame(newDate[1], "month");
     this.#startDate = newDate[0];
     this.#endDate = newDate[1];
     if (!this.timePicker) {
@@ -770,7 +837,7 @@ class DateRangePicker {
     }
     this.updateElement();
     if (updateView)
-      this.updateView(monthChanged);
+      this.updateView(monthChange);
     return violations;
   }
   /**
@@ -833,45 +900,49 @@ class DateRangePicker {
         if (this.#endDate)
           text += this.formatDate(this.#endDate);
       }
-      this.container.find(".drp-selected").html(text);
+      this.container.querySelector(".drp-selected").innerHTML = text;
     }
     if (this.singleDatePicker || this.locale.durationFormat == null)
       return;
     if (!this.#endDate) {
-      this.container.find(".drp-duration-label").html("");
+      this.container.querySelector(".drp-duration-label").innerHTML = "";
       return;
     }
     if (typeof this.locale.durationFormat === "function") {
-      this.container.find(".drp-duration-label").html(this.locale.durationFormat(this.#startDate, this.#endDate));
+      this.container.querySelector(".drp-duration-label").innerHTML = this.locale.durationFormat(this.#startDate, this.#endDate);
     } else {
       let duration = this.#endDate.plus({ milliseconds: 1 }).diff(this.#startDate).rescale().set({ milliseconds: 0 });
       if (!this.timePicker)
         duration = duration.set({ seconds: 0, minutes: 0, hours: 0 });
       duration = duration.removeZeros();
       if (typeof this.locale.durationFormat === "object") {
-        this.container.find(".drp-duration-label").html(duration.toHuman(this.locale.durationFormat));
+        this.container.querySelector(".drp-duration-label").innerHTML = duration.toHuman(this.locale.durationFormat);
       } else {
-        this.container.find(".drp-duration-label").html(duration.toFormat(this.locale.durationFormat));
+        this.container.querySelector(".drp-duration-label").innerHTML = duration.toFormat(this.locale.durationFormat);
       }
     }
   }
   /**
   * @typedef InputViolation
   * @type {Object}
-  * @property {external:DateTime} startDate - Violation of startDate
-  * @property {external:DateTime|undefined} endDate? - Violation of endDate, if existing
-  * @property {Array} violations - The constraints which violates the input
-  * @property {Array} reason - The type/reson of violation
+  * @typedef {object} Violation
+  * @property {string} reason - The type/reason of violation
   * @property {external:DateTime} old - Old value startDate/endDate
   * @property {external:DateTime} new? - Corrected value of startDate/endDate if existing
+  * @typedef {object} NewDate
+  * @property {external:DateTime} newDate.startDate- Object with corrected values
+  * @property {external:DateTime} newDate.endDate - Object with corrected values
+  * @property {Violation[]} startDate - The constraints which violates the input
+  * @property {Violation[]?} endDate - The constraints which violates the input or `null` for singleDatePicker
+  * @property {NewDate} newDate - Object with corrected values
   */
   /**
   * Validate `startDate` and `endDate` against `timePickerStepSize`, `minDate`, `maxDate`, 
   * `minSpan`, `maxSpan`, `invalidDate` and `invalidTime`.
   * @param {Array} range - `[startDate, endDate]`<br>Range to be checked, defaults to current `startDate` and `endDate`
-  * @param {boolean} dipatch=false - If `true` then event "violated.daterangepicker" is dispated.<br>
+  * @param {boolean} dipatch=false - If `true` then event "violate" is dispated.<br>
   * If eventHandler returns `true`, then `null` is returned, otherwiese the object of violations.
-  * @emits "violated.daterangepicker"
+  * @emits "violate"
   * @returns {InputViolation|null} - Object of violations and corrected values or `null` if no violation have been found
   * @example 
   * options => {
@@ -884,18 +955,18 @@ class DateRangePicker {
   * const result = validateInput(DateTime.now(), DateTime.now().plus({day: 3}));
   * 
   * result => {
-  *   startDate: {
-  *     violations: [
-  *       { old: "2026-03-13T10:35:52", reason: "timePickerStepSize", new: "2026-03-13T11:00:00" },
-  *       { old: "2026-03-13T11:00:00", reason: "maxDate", new: "2026-03-10T00:00:00" }
-  *     ]
-  * },
+  *   startDate: [
+  *     { old: "2026-03-13T10:35:52", reason: "timePickerStepSize", new: "2026-03-13T11:00:00" },
+  *     { old: "2026-03-13T11:00:00", reason: "maxDate", new: "2026-03-10T00:00:00" }
+  *   ],
   *   endDate: {
-  *     violations: [
-  *       { old: "2026-03-16T10:35:52", reason: "stepSize", new: "2026-03-16T11:00:00" },
-  *       { old: "2026-03-16T11:00:00", reason: "maxDate", new: "2026-03-10T00:00:00" },
-  *       { old: "2026-03-10T00:00:00", reason: "minSpan", new: "2026-03-17T00:00:00" }
-  *     ]
+  *     { old: "2026-03-16T10:35:52", reason: "stepSize", new: "2026-03-16T11:00:00" },
+  *     { old: "2026-03-16T11:00:00", reason: "maxDate", new: "2026-03-10T00:00:00" },
+  *     { old: "2026-03-10T00:00:00", reason: "minSpan", new: "2026-03-17T00:00:00" }
+  *   ],
+  *   newDate: { 
+  *     startDate: "2026-03-10T00:00:00", 
+  *     endDate: "2026-03-17T00:00:00"
   *   }
   * }
   */
@@ -904,14 +975,14 @@ class DateRangePicker {
     let endDate = range == null ? this.#endDate : range[1];
     if (startDate == null)
       return null;
-    let result = { startDate: { violations: [] } };
+    let result = { startDate: [] };
     let violation = { old: startDate, reason: this.timePicker ? "timePickerStepSize" : "timePicker" };
     if (this.timePicker) {
       const secs = this.timePickerStepSize.as("seconds");
       startDate = DateTime.fromSeconds(secs * Math.round(startDate.toSeconds() / secs));
       violation.new = startDate;
       if (!violation.new.equals(violation.old))
-        result.startDate.violations.push(violation);
+        result.startDate.push(violation);
     } else {
       startDate = startDate.startOf("day");
     }
@@ -923,7 +994,7 @@ class DateRangePicker {
         startDate = startDate.plus(this.timePicker ? this.timePickerStepSize : { days: 1 });
       violation.new = startDate;
       if (!violation.new.equals(violation.old))
-        result.startDate.violations.push(violation);
+        result.startDate.push(violation);
     } else if (this.maxDate && startDate > this.maxDate) {
       violation = { old: startDate, reason: "maxDate" };
       startDate = startDate.minus({ seconds: Math.trunc(startDate.diff(this.maxDate).as("seconds") / shiftStep) * shiftStep });
@@ -931,7 +1002,7 @@ class DateRangePicker {
         startDate = startDate.minus(this.timePicker ? this.timePickerStepSize : { days: 1 });
       violation.new = startDate;
       if (!violation.new.equals(violation.old))
-        result.startDate.violations.push(violation);
+        result.startDate.push(violation);
     }
     let units = ["hour"];
     if (this.timePicker) {
@@ -943,21 +1014,21 @@ class DateRangePicker {
         units.push("ampm");
     }
     if (this.isInvalidDate(startDate))
-      result.startDate.violations.push({ old: startDate, reason: "isInvalidDate" });
+      result.startDate.push({ old: startDate, reason: "isInvalidDate" });
     if (this.timePicker) {
       for (let unit of units) {
         if (this.isInvalidTime(startDate, unit, "start"))
-          result.startDate.violations.push({ old: startDate, reason: "isInvalidTime", unit });
+          result.startDate.push({ old: startDate, reason: "isInvalidTime", unit });
       }
     }
     if (this.singleDatePicker) {
-      if (result.startDate.violations.length == 0)
+      if (result.startDate.length == 0)
         return null;
       if (dipatch) {
         let newValues = { startDate };
-        const ret = this.triggerHandler(this.#events.onViolated, result, newValues);
-        if (ret) {
-          result.newDate = newValues;
+        const event = this.triggerEvent(this.#events.onViolate, { violation: result, newDate: newValues });
+        if (event.defaultPrevented) {
+          result.newDate = event.newDate;
           return result;
         }
         return result;
@@ -967,14 +1038,14 @@ class DateRangePicker {
     }
     if (endDate == null)
       return null;
-    result.endDate = { violations: [] };
+    result.endDate = [];
     violation = { old: endDate, reason: this.timePicker ? "stepSize" : "timePicker" };
     if (this.timePicker) {
       const secs = this.timePickerStepSize.as("seconds");
       endDate = DateTime.fromSeconds(secs * Math.round(endDate.toSeconds() / secs));
       violation.new = endDate;
       if (!violation.new.equals(violation.old))
-        result.endDate.violations.push(violation);
+        result.endDate.push(violation);
     } else {
       endDate = endDate.endOf("day");
     }
@@ -985,7 +1056,7 @@ class DateRangePicker {
         endDate = endDate.minus(this.timePicker ? this.timePickerStepSize : { days: 1 });
       violation.new = endDate;
       if (!violation.new.equals(violation.old))
-        result.endDate.violations.push(violation);
+        result.endDate.push(violation);
     } else if (this.minDate && endDate < this.minDate) {
       violation = { old: endDate, reason: "minDate" };
       endDate = endDate.plus({ seconds: Math.trunc(this.minDate.diff(endDate).as("seconds") / shiftStep) * shiftStep });
@@ -993,7 +1064,7 @@ class DateRangePicker {
         endDate = endDate.plus(this.timePicker ? this.timePickerStepSize : { days: 1 });
       violation.new = endDate;
       if (!violation.new.equals(violation.old))
-        result.endDate.violations.push(violation);
+        result.endDate.push(violation);
     }
     if (this.maxSpan) {
       const maxDate = startDate.plus(this.maxSpan);
@@ -1004,7 +1075,7 @@ class DateRangePicker {
           endDate = endDate.minus(this.timePicker ? this.timePickerStepSize : { days: 1 });
         violation.new = endDate;
         if (!violation.new.equals(violation.old))
-          result.endDate.violations.push(violation);
+          result.endDate.push(violation);
       }
     }
     if (this.minSpan) {
@@ -1016,24 +1087,24 @@ class DateRangePicker {
           endDate = endDate.plus(this.timePicker ? this.timePickerStepSize : { days: 1 });
         violation.new = endDate;
         if (!violation.new.equals(violation.old))
-          result.endDate.violations.push(violation);
+          result.endDate.push(violation);
       }
     }
     if (this.isInvalidDate(endDate))
-      result.endDate.violations.push({ old: endDate, reason: "isInvalidDate" });
+      result.endDate.push({ old: endDate, reason: "isInvalidDate" });
     if (this.timePicker) {
       for (let unit of units) {
         if (this.isInvalidTime(endDate, unit, "end"))
-          result.endDate.violations.push({ old: endDate, reason: "isInvalidTime", unit });
+          result.endDate.push({ old: endDate, reason: "isInvalidTime", unit });
       }
     }
-    if (result.startDate.violations.length == 0 && result.endDate.violations.length == 0)
+    if (result.startDate.length == 0 && result.endDate.length == 0)
       return null;
     if (dipatch) {
       let newValues = { startDate, endDate };
-      const ret = this.triggerHandler(this.#events.onViolated, result, newValues);
-      if (ret) {
-        result.newDate = newValues;
+      const event = this.triggerEvent(this.#events.onViolate, { violation: result, newDate: newValues });
+      if (event.defaultPrevented) {
+        result.newDate = event.newDate;
         return result;
       }
       return result;
@@ -1045,23 +1116,20 @@ class DateRangePicker {
   /**
   * Updates the picker when calendar is initiated or any date has been selected. 
   * Could be useful after running {@link #DateRangePicker+setStartDate|setStartDate} or {@link #DateRangePicker+setEndDate|setRange} 
-  * @param {boolean} monthChanged - If `true` then monthView changed
-  * @emits "beforeRenderTimePicker.daterangepicker"
+  * @param {boolean} monthChange - If `true` then monthView changed
+  * @emits "beforeRenderTimePicker"
   */
-  updateView(monthChanged) {
+  updateView(monthChange) {
     if (this.timePicker) {
       this.triggerEvent(this.#events.onBeforeRenderTimePicker);
       this.renderTimePicker("start");
       this.renderTimePicker("end");
-      if (!this.#endDate) {
-        this.container.find(".calendar-time.end-time select").prop("disabled", true).addClass("disabled");
-      } else {
-        this.container.find(".calendar-time.end-time select").prop("disabled", false).removeClass("disabled");
-      }
+      this.container.querySelector(".calendar-time.end-time select").disabled = !this.#endDate;
+      this.container.querySelector(".calendar-time.end-time select").classList.toggle("disabled", !this.#endDate);
     }
     this.updateLabel();
     this.updateMonthsInView();
-    this.updateCalendars(monthChanged);
+    this.updateCalendars(monthChange);
     this.setApplyBtnState();
   }
   /**
@@ -1099,45 +1167,45 @@ class DateRangePicker {
   }
   /**
   * Updates the selected day value from calendar with selected time values
-  * @emits "beforeRenderCalendar.daterangepicker"
-  * @emits "monthViewChanged.daterangepicker"
-  * @param {boolean} monthChanged - If `true` then monthView changed
+  * @emits "beforeRenderCalendar"
+  * @emits "monthViewChange"
+  * @param {boolean} monthChange - If `true` then monthView changed
   * @private
   */
-  updateCalendars(monthChanged) {
+  updateCalendars(monthChange) {
     if (this.timePicker) {
       var hour, minute, second;
       if (this.#endDate) {
-        hour = parseInt(this.container.find(".start-time .hourselect").val(), 10);
+        hour = parseInt(this.container.querySelector(".start-time .hourselect").value, 10);
         if (isNaN(hour))
-          hour = parseInt(this.container.find(".start-time .hourselect option:last").val(), 10);
+          hour = parseInt(this.container.querySelector(".start-time .hourselect option:last-child").value, 10);
         minute = 0;
         if (this.timePickerOpts.showMinutes) {
-          minute = parseInt(this.container.find(".start-time .minuteselect").val(), 10);
+          minute = parseInt(this.container.querySelector(".start-time .minuteselect").value, 10);
           if (isNaN(minute))
-            minute = parseInt(this.container.find(".start-time .minuteselect option:last").val(), 10);
+            minute = parseInt(this.container.querySelector(".start-time .minuteselect option:last-child").value, 10);
         }
         second = 0;
         if (this.timePickerOpts.showSeconds) {
-          second = parseInt(this.container.find(".start-time .secondselect").val(), 10);
+          second = parseInt(this.container.querySelector(".start-time .secondselect").value, 10);
           if (isNaN(second))
-            second = parseInt(this.container.find(".start-time .secondselect option:last").val(), 10);
+            second = parseInt(this.container.querySelector(".start-time .secondselect option:last-child").value, 10);
         }
       } else {
-        hour = parseInt(this.container.find(".end-time .hourselect").val(), 10);
+        hour = parseInt(this.container.querySelector(".end-time .hourselect").value, 10);
         if (isNaN(hour))
-          hour = parseInt(this.container.find(".end-time .hourselect option:last").val(), 10);
+          hour = parseInt(this.container.querySelector(".end-time .hourselect option:last-child").value, 10);
         minute = 0;
         if (this.timePickerOpts.showMinutes) {
-          minute = parseInt(this.container.find(".end-time .minuteselect").val(), 10);
+          minute = parseInt(this.container.querySelector(".end-time .minuteselect").value, 10);
           if (isNaN(minute))
-            minute = parseInt(this.container.find(".end-time .minuteselect option:last").val(), 10);
+            minute = parseInt(this.container.querySelector(".end-time .minuteselect option:last-child").value, 10);
         }
         second = 0;
         if (this.timePickerOpts.showSeconds) {
-          second = parseInt(this.container.find(".end-time .secondselect").val(), 10);
+          second = parseInt(this.container.querySelector(".end-time .secondselect").value, 10);
           if (isNaN(second))
-            second = parseInt(this.container.find(".end-time .secondselect option:last").val(), 10);
+            second = parseInt(this.container.querySelector(".end-time .secondselect option:last-child").value, 10);
         }
       }
       this.leftCalendar.month = this.leftCalendar.month.set({ hour, minute, second });
@@ -1151,9 +1219,11 @@ class DateRangePicker {
     this.triggerEvent(this.#events.onBeforeRenderCalendar);
     this.renderCalendar("left");
     this.renderCalendar("right");
-    if (monthChanged)
-      this.triggerEvent(this.#events.onMonthViewChanged);
-    this.container.find(".ranges li").removeClass("active");
+    if (monthChange)
+      this.triggerEvent(this.#events.onMonthViewChange);
+    this.container.querySelectorAll(".ranges li").forEach((el) => {
+      el.classList.remove("active");
+    });
     if (this.#endDate == null) return;
     this.calculateChosenLabel();
   }
@@ -1240,7 +1310,7 @@ class DateRangePicker {
     }
     ;
     html += "</tr>";
-    this.container.find(".drp-calendar." + side + " .calendar-table thead").html(html);
+    this.container.querySelector(`.drp-calendar.${side} .calendar-table thead`).innerHTML = html;
     html = "";
     if (this.#endDate == null && this.maxSpan) {
       var maxLimit = this.#startDate.plus(this.maxSpan).endOf("day");
@@ -1254,9 +1324,9 @@ class DateRangePicker {
     for (let row = 0; row < 6; row++) {
       html += "<tr>";
       if (this.showISOWeekNumbers)
-        html += '<td class="week">' + calendar[row][0].weekNumber + "</td>";
+        html += `<td class="week">${calendar[row][0].weekNumber}</td>`;
       else if (this.showWeekNumbers)
-        html += '<td class="week">' + calendar[row][0].localWeekNumber + "</td>";
+        html += `<td class="week">${calendar[row][0].localWeekNumber}</td>`;
       for (let col = 0; col < 7; col++) {
         var classes = [];
         if (this.todayClasses && this.todayClasses.length && calendar[row][col].hasSame(DateTime.now(), "day"))
@@ -1280,31 +1350,27 @@ class DateRangePicker {
         if (this.#endDate != null && calendar[row][col] > this.#startDate && calendar[row][col] < this.#endDate)
           classes.push("in-range");
         var isCustom = this.isCustomDate(calendar[row][col]);
-        if (isCustom !== false) {
-          if (typeof isCustom === "string")
-            classes.push(isCustom);
-          else
-            Array.prototype.push.apply(classes, isCustom);
-        }
+        if (isCustom !== false)
+          typeof isCustom === "string" ? classes.push(isCustom) : classes.push(...isCustom);
         if (!classes.includes("disabled"))
           classes.push("available");
         html += `<td class="${classes.join(" ")}" data-title="r${row}c${col}">${calendar[row][col].day}</td>`;
       }
       html += "</tr>";
     }
-    this.container.find(".drp-calendar." + side + " .calendar-table tbody").html(html);
+    this.container.querySelector(`.drp-calendar.${side} .calendar-table tbody`).innerHTML = html;
   }
   /**
   * Emitted before the TimePicker is rendered.
   * Useful to remove any manually added elements.
   * @event
-  * @name "beforeRenderTimePicker.daterangepicker"
+  * @name "beforeRenderTimePicker"
   * @param {DateRangePicker} this - The daterangepicker object
   */
   /**
   * Renders the time pickers
   * @private
-  * @emits "beforeRenderTimePicker.daterangepicker"
+  * @emits "beforeRenderTimePicker"
   */
   renderTimePicker(side) {
     if (side === "end" && !this.#endDate) return;
@@ -1322,12 +1388,12 @@ class DateRangePicker {
     } else if (side === "end") {
       selected = this.#endDate;
       minDate = this.#startDate;
-      var timeSelector = this.container.find(".drp-calendar .calendar-time.end-time");
-      if (timeSelector.html() != "") {
+      let timeSelector = this.container.querySelector(".drp-calendar .calendar-time.end-time");
+      if (timeSelector.innerHTML != "") {
         selected = selected.set({
-          hour: !isNaN(selected.hour) ? selected.hour : timeSelector.find(".hourselect option:selected").val(),
-          minute: !isNaN(selected.minute) ? selected.minute : timeSelector.find(".minuteselect option:selected").val(),
-          second: !isNaN(selected.second) ? selected.second : timeSelector.find(".secondselect option:selected").val()
+          hour: !isNaN(selected.hour) ? selected.hour : timeSelector.querySelector(".hourselect option:selected").value,
+          minute: !isNaN(selected.minute) ? selected.minute : timeSelector.querySelector(".minuteselect option:selected").value,
+          second: !isNaN(selected.second) ? selected.second : timeSelector.querySelector(".secondselect option:selected").value
         });
       }
       if (selected < this.#startDate)
@@ -1476,18 +1542,15 @@ class DateRangePicker {
         html += "</div>";
     }
     html += "</div></th>";
-    this.container.find(`.drp-calendar .calendar-time.${side}-time`).html(html);
+    this.container.querySelector(`.drp-calendar .calendar-time.${side}-time`).innerHTML = html;
   }
   /**
   * Disable the `Apply` button if no date value is selected
   * @private
   */
   setApplyBtnState() {
-    if (this.singleDatePicker || this.#endDate && this.#startDate <= this.#endDate) {
-      this.container.find("button.applyBtn").prop("disabled", false);
-    } else {
-      this.container.find("button.applyBtn").prop("disabled", true);
-    }
+    const state = this.singleDatePicker || this.#endDate && this.#startDate <= this.#endDate;
+    this.container.querySelector("button.applyBtn").disabled = !state;
   }
   /* #endregion */
   /* #region Move/Show/Hide */
@@ -1496,115 +1559,102 @@ class DateRangePicker {
   * @private
   */
   move() {
-    var parentOffset = { top: 0, left: 0 }, containerTop, drops = this.drops;
-    var parentRightEdge = $(window).width();
-    if (!this.parentEl.is("body")) {
+    let parentOffset = { top: 0, left: 0 };
+    let containerTop;
+    let containerLeft;
+    let drops = this.drops;
+    let parentRightEdge = window.innerWidth;
+    if (!this.parentEl.matches("body")) {
       parentOffset = {
-        top: this.parentEl.offset().top - this.parentEl.scrollTop(),
-        left: this.parentEl.offset().left - this.parentEl.scrollLeft()
+        top: offset(this.parentEl).top - this.parentEl.scrollTop(),
+        left: offset(this.parentEl).left - this.parentEl.scrollLeft()
       };
-      parentRightEdge = this.parentEl[0].clientWidth + this.parentEl.offset().left;
+      parentRightEdge = this.parentEl[0].clientWidth + offset(this.parentEl).left;
     }
-    switch (drops) {
+    switch (this.drops) {
       case "auto":
-        containerTop = this.element.offset().top + this.element.outerHeight() - parentOffset.top;
-        if (containerTop + this.container.outerHeight() >= this.parentEl[0].scrollHeight) {
-          containerTop = this.element.offset().top - this.container.outerHeight() - parentOffset.top;
+        containerTop = offset(this.element).top + outerHeight(this.element) - parentOffset.top;
+        if (containerTop + outerHeight(this.container) >= this.parentEl.scrollHeight) {
+          containerTop = offset(this.element).top - outerHeight(this.container) - parentOffset.top;
           drops = "up";
         }
         break;
       case "up":
-        containerTop = this.element.offset().top - this.container.outerHeight() - parentOffset.top;
+        containerTop = offset(this.element).top - outerHeight(this.container) - parentOffset.top;
+        break;
+      case "down":
+        containerTop = offset(this.element).top + outerHeight(this.element) - parentOffset.top;
         break;
       default:
-        containerTop = this.element.offset().top + this.element.outerHeight() - parentOffset.top;
+        console.error(`Option drops '${drops}' not defined`);
         break;
     }
-    this.container.css({
-      top: 0,
-      left: 0,
-      right: "auto"
-    });
-    var containerWidth = this.container.outerWidth();
-    this.container.toggleClass("drop-up", drops === "up");
-    if (this.opens === "left") {
-      var containerRight = parentRightEdge - this.element.offset().left - this.element.outerWidth();
-      if (containerWidth + containerRight > $(window).width()) {
-        this.container.css({
-          top: containerTop,
-          right: "auto",
-          left: 9
-        });
-      } else {
-        this.container.css({
-          top: containerTop,
-          right: containerRight,
-          left: "auto"
-        });
-      }
-    } else if (this.opens === "center") {
-      var containerLeft = this.element.offset().left - parentOffset.left + this.element.outerWidth() / 2 - containerWidth / 2;
-      if (containerLeft < 0) {
-        this.container.css({
-          top: containerTop,
-          right: "auto",
-          left: 9
-        });
-      } else if (containerLeft + containerWidth > $(window).width()) {
-        this.container.css({
-          top: containerTop,
-          left: "auto",
-          right: 0
-        });
-      } else {
-        this.container.css({
-          top: containerTop,
-          left: containerLeft,
-          right: "auto"
-        });
-      }
-    } else {
-      var containerLeft = this.element.offset().left - parentOffset.left;
-      if (containerLeft + containerWidth > $(window).width()) {
-        this.container.css({
-          top: containerTop,
-          left: "auto",
-          right: 0
-        });
-      } else {
-        this.container.css({
-          top: containerTop,
-          left: containerLeft,
-          right: "auto"
-        });
-      }
+    for (const [key2, value] of Object.entries({ top: 0, left: 0, right: "auto" }))
+      this.container.style[key2] = typeof value === "number" && value > 0 ? `${value}px` : value;
+    const containerWidth = outerWidth(this.container);
+    this.container.classList.toggle("drop-up", drops === "up");
+    switch (this.opens) {
+      case "left":
+        const containerRight = parentRightEdge - offset(this.element).left - outerWidth(this.element);
+        if (containerWidth + containerRight > window.innerWidth) {
+          for (const [key2, value] of Object.entries({ top: containerTop, right: "auto", left: 9 }))
+            this.container.style[key2] = typeof value === "number" && value > 0 ? `${value}px` : value;
+        } else {
+          for (const [key2, value] of Object.entries({ top: containerTop, right: containerRight, left: "auto" }))
+            this.container.style[key2] = typeof value === "number" && value > 0 ? `${value}px` : value;
+        }
+        break;
+      case "center":
+        containerLeft = offset(this.element).left - parentOffset.left + outerWidth(this.element) / 2 - containerWidth / 2;
+        if (containerLeft < 0) {
+          for (const [key2, value] of Object.entries({ top: containerTop, right: "auto", left: 9 }))
+            this.container.style[key2] = typeof value === "number" && value > 0 ? `${value}px` : value;
+        } else if (containerLeft + containerWidth > window.innerWidth) {
+          for (const [key2, value] of Object.entries({ top: containerTop, left: "auto", right: 0 }))
+            this.container.style[key2] = typeof value === "number" && value > 0 ? `${value}px` : value;
+        } else {
+          for (const [key2, value] of Object.entries({ top: containerTop, left: containerLeft, right: "auto" }))
+            this.container.style[key2] = typeof value === "number" && value > 0 ? `${value}px` : value;
+        }
+        break;
+      case "right":
+        containerLeft = offset(this.element).left - parentOffset.left;
+        if (containerLeft + containerWidth > window.innerWidth) {
+          for (const [key2, value] of Object.entries({ top: containerTop, left: "auto", right: 0 }))
+            this.container.style[key2] = typeof value === "number" && value > 0 ? `${value}px` : value;
+        } else {
+          for (const [key2, value] of Object.entries({ top: `${containerTop}px`, left: containerLeft, right: "auto" }))
+            this.container.style[key2] = typeof value === "number" && value > 0 ? `${value}px` : value;
+        }
+        break;
+      default:
+        console.error(`Option opens '${this.opens}' not defined`);
+        break;
     }
   }
   /**
   * Shows the picker
-  * @emits "show.daterangepicker"
+  * @emits "show"
   */
   show() {
     if (this.isShowing) return;
-    this._outsideClickProxy = function(e) {
-      this.outsideClick(e);
-    }.bind(this);
-    $(document).on("mousedown.daterangepicker", this._outsideClickProxy).on("touchend.daterangepicker", this._outsideClickProxy).on("click.daterangepicker", "[data-toggle=dropdown]", this._outsideClickProxy).on("focusin.daterangepicker", this._outsideClickProxy);
-    $(window).on("resize.daterangepicker", function(e) {
-      this.move(e);
-    }.bind(this));
+    document.addEventListener("mousedown", this.#outsideClickProxy);
+    document.addEventListener("touchend", this.#outsideClickProxy);
+    document.addEventListener("click", this.#dropdownClickWrapper);
+    document.addEventListener("focusin", this.#outsideClickProxy);
+    window.addEventListener("resize", this.#onResizeProxy);
     this.oldStartDate = this.#startDate;
     this.oldEndDate = this.#endDate;
     this.updateView(false);
-    this.container.show();
+    this.container.style.display = "block";
     this.move();
     this.triggerEvent(this.#events.onShow);
     this.isShowing = true;
   }
   /**
   * Hides the picker
-  * @emits "beforeHide.daterangepicker"
-  * @emits "hide.daterangepicker"
+  * @emits "beforeHide"
+  * @emits "hide"
   */
   hide() {
     if (!this.isShowing) return;
@@ -1615,11 +1665,15 @@ class DateRangePicker {
     if (!this.#startDate.equals(this.oldStartDate) || !this.#endDate.equals(this.oldEndDate))
       this.callback(this.startDate, this.endDate, this.chosenLabel);
     this.updateElement();
-    if (this.triggerHandler(this.#events.onBeforeHide))
+    const event = this.triggerEvent(this.#events.onBeforeHide);
+    if (event.defaultPrevented)
       return;
-    $(document).off(".daterangepicker");
-    $(window).off(".daterangepicker");
-    this.container.hide();
+    document.removeEventListener("mousedown", this.#outsideClickProxy);
+    document.removeEventListener("touchend", this.#outsideClickProxy);
+    document.removeEventListener("focusin", this.#outsideClickProxy);
+    document.removeEventListener("click", this.#dropdownClickWrapper);
+    window.removeEventListener("resize", this.#onResizeProxy);
+    this.container.style.display = "none";
     this.triggerEvent(this.#events.onHide);
     this.isShowing = false;
   }
@@ -1635,34 +1689,43 @@ class DateRangePicker {
   }
   /**
   * Shows calendar when user selects "Custom Ranges"
-  * @emits "showCalendar.daterangepicker"
+  * @emits "showCalendar"
   */
   showCalendars() {
-    this.container.addClass("show-calendar");
+    this.container.classList.add("show-calendar");
     this.move();
     this.triggerEvent(this.#events.onShowCalendar);
   }
   /**
   * Hides calendar when user selects a predefined range
-  * @emits "hideCalendar.daterangepicker"
+  * @emits "hideCalendar"
   */
   hideCalendars() {
-    this.container.removeClass("show-calendar");
+    this.container.classList.remove("show-calendar");
     this.triggerEvent(this.#events.onHideCalendar);
   }
   /* #endregion */
   /* #region Handle mouse related events */
   /**
   * Closes the picker when user clicks outside
-  * @param {external:jQuery} e - The Event target
-  * @emits "outsideClick.daterangepicker"
+  * @param {external:Event} e - The Event target
+  * @emits "outsideClick"
   * @private
   */
   outsideClick(e) {
-    var target = $(e.target);
+    const target = e.target;
+    function closest2(el, selector) {
+      let parent = el.parentElement;
+      while (parent) {
+        if (parent == selector)
+          return parent;
+        parent = parent.parentElement;
+      }
+      return null;
+    }
     if (
       // ie modal dialog fix
-      e.type === "focusin" || target.closest(this.element).length || target.closest(this.container).length || target.closest(".calendar-table").length
+      e.type === "focusin" || closest2(target, this.element) || closest2(target, this.container) || target.closest(".calendar-table")
     ) return;
     if (this.onOutsideClick === "cancel") {
       this.#startDate = this.oldStartDate;
@@ -1673,12 +1736,12 @@ class DateRangePicker {
   }
   /**
   * Move calendar to previous month
-  * @param {external:jQuery} e - The Event target
+  * @param {external:Event} e - The Event target
   * @private
   */
   clickPrev(e) {
-    var cal = $(e.target).parents(".drp-calendar");
-    if (cal.hasClass("left")) {
+    let cal = e.target.closest(".drp-calendar");
+    if (cal.classList.contains("left")) {
       this.leftCalendar.month = this.leftCalendar.month.minus({ month: 1 });
       if (this.linkedCalendars && !this.singleMonthView)
         this.rightCalendar.month = this.rightCalendar.month.minus({ month: 1 });
@@ -1689,12 +1752,12 @@ class DateRangePicker {
   }
   /**
   * Move calendar to next month
-  * @param {external:jQuery} e - The Event target
+  * @param {external:Event} e - The Event target
   * @private
   */
   clickNext(e) {
-    var cal = $(e.target).parents(".drp-calendar");
-    if (cal.hasClass("left")) {
+    let cal = e.target.closest(".drp-calendar");
+    if (cal.classList.contains("left")) {
       this.leftCalendar.month = this.leftCalendar.month.plus({ month: 1 });
     } else {
       this.rightCalendar.month = this.rightCalendar.month.plus({ month: 1 });
@@ -1705,109 +1768,89 @@ class DateRangePicker {
   }
   /**
   * User hovers over date values
-  * @param {external:jQuery} e - The Event target
+  * @param {external:Event} e - The Event target
   * @private
   */
   hoverDate(e) {
-    if (!$(e.target).hasClass("available")) return;
-    let title = $(e.target).attr("data-title");
+    if (!e.target.classList.contains("available")) return;
+    let title = e.target.dataset.title;
     const row = title.substring(1, 2);
     const col = title.substring(3, 4);
-    const cal = $(e.target).parents(".drp-calendar");
-    var date = cal.hasClass("left") ? this.leftCalendar.calendar[row][col] : this.rightCalendar.calendar[row][col];
+    const cal = e.target(closest, ".drp-calendar");
+    var date = cal.classList.contains("left") ? this.leftCalendar.calendar[row][col] : this.rightCalendar.calendar[row][col];
     const leftCalendar = this.leftCalendar;
     const rightCalendar = this.rightCalendar;
     const startDate = this.#startDate;
     const initalMonth = this.initalMonth;
     if (!this.#endDate) {
-      this.container.find(".drp-calendar tbody td").each(function(index, el) {
-        if ($(el).hasClass("week")) return;
-        const title2 = $(el).attr("data-title");
+      this.container.querySelectorAll(".drp-calendar tbody td").forEach((el) => {
+        if (el.classList.contains("week")) return;
+        const title2 = el.dataset.title;
         const row2 = title2.substring(1, 2);
         const col2 = title2.substring(3, 4);
-        const cal2 = $(el).parents(".drp-calendar");
-        const dt = cal2.hasClass("left") ? leftCalendar.calendar[row2][col2] : rightCalendar.calendar[row2][col2];
+        const cal2 = el.closest(".drp-calendar");
+        const dt = cal2.classList.contains("left") ? leftCalendar.calendar[row2][col2] : rightCalendar.calendar[row2][col2];
         if (!startDate && initalMonth) {
-          $(el).removeClass("in-range");
+          el.classList.remove("in-range");
         } else {
-          if (dt > startDate && dt < date || dt.hasSame(date, "day")) {
-            $(el).addClass("in-range");
-          } else {
-            $(el).removeClass("in-range");
-          }
+          el.classList.toggle("in-range", dt > startDate && dt < date || dt.hasSame(date, "day"));
         }
       });
     }
   }
   /**
   * User hovers over ranges
-  * @param {external:jQuery} e - The Event target
+  * @param {external:Event} e - The Event target
   * @private
   */
   hoverRange(e) {
-    const label = e.target.getAttribute("data-range-key");
+    const label = e.target.dataset.rangeKey;
     const previousDates = [this.#startDate, this.#endDate];
     const dates = this.ranges[label] ?? [this.#startDate, this.#endDate];
     const leftCalendar = this.leftCalendar;
     const rightCalendar = this.rightCalendar;
-    this.container.find(".drp-calendar tbody td").each(function(index, el) {
-      if ($(el).hasClass("week")) return;
-      const title = $(el).attr("data-title");
+    this.container.querySelectorAll(".drp-calendar tbody td").forEach((el) => {
+      if (el.classList.contains("week")) return;
+      const title = el.dataset.ttitle;
       const row = title.substring(1, 2);
       const col = title.substring(3, 4);
-      const cal = $(el).parents(".drp-calendar");
-      const dt = cal.hasClass("left") ? leftCalendar.calendar[row][col] : rightCalendar.calendar[row][col];
-      let classAdded = false;
-      if (dt.hasSame(dates[0], "day"))
-        classAdded = $(el).addClass("start-hover").length > 0;
-      if (dt.hasSame(previousDates[0], "day"))
-        classAdded = $(el).addClass("start-date").length > 0;
-      if (dt.hasSame(dates[1], "day"))
-        classAdded = $(el).addClass("end-hover").length > 0;
-      if (previousDates[1] != null && dt.hasSame(previousDates[1], "day"))
-        classAdded = $(el).addClass("end-date").length > 0;
-      if (dt.startOf("day") >= dates[0].startOf("day") && dt.startOf("day") <= dates[1].startOf("day"))
-        classAdded = $(el).addClass("range-hover").length > 0;
-      if (dt.startOf("day") >= previousDates[0].startOf("day") && previousDates[1] != null && dt.startOf("day") <= previousDates[1].startOf("day"))
-        classAdded = $(el).addClass("in-range").length > 0;
-      if (!classAdded) {
-        $(el).removeClass("start-hover");
-        $(el).removeClass("end-hover");
-        $(el).removeClass("start-date");
-        $(el).removeClass("end-date");
-        $(el).removeClass("in-range");
-        $(el).removeClass("range-hover");
-      }
+      const cal = el.closest(".drp-calendar");
+      const dt = cal.classList.contains("left") ? leftCalendar.calendar[row][col] : rightCalendar.calendar[row][col];
+      el.classList.toggle("start-hover", dt.hasSame(dates[0], "day"));
+      el.classList.toggle("start-date", dt.hasSame(previousDates[0], "day"));
+      el.classList.toggle("end-hover", dt.hasSame(dates[1], "day"));
+      el.classList.toggle("end-date", previousDates[1] != null && dt.hasSame(previousDates[1], "day"));
+      el.classList.toggle("range-hover", dt.startOf("day") >= dates[0].startOf("day") && dt.startOf("day") <= dates[1].startOf("day"));
+      el.classList.toggle("in-range", dt.startOf("day") >= previousDates[0].startOf("day") && previousDates[1] != null && dt.startOf("day") <= previousDates[1].startOf("day"));
     });
   }
   /**
   * User leave ranges, remove hightlight from dates
-  * @param {external:jQuery} e - The Event target
   * @private
   */
-  leaveRange(e) {
-    this.container.find(".drp-calendar tbody td").each(function(index, el) {
-      if ($(el).hasClass("week")) return;
-      $(el).removeClass("start-hover");
-      $(el).removeClass("end-hover");
-      $(el).removeClass("range-hover");
+  leaveRange() {
+    this.container.querySelectorAll(".drp-calendar tbody td").forEach((el) => {
+      if (el.classList.contains("week")) return;
+      el.classList.remove("start-hover");
+      el.classList.remove("end-hover");
+      el.classList.remove("range-hover");
     });
   }
   /* #endregion */
   /* #region Select values by Mouse  */
   /**
   * Set date values after user selected a date
-  * @param {external:jQuery} e - The Event target
+  * @param {external:Event} e - The Event target
   * @private
   */
   clickRange(e) {
-    var label = e.target.getAttribute("data-range-key");
+    let label = e.target.getAttribute("data-range-key");
     this.chosenLabel = label;
     if (label == this.locale.customRangeLabel) {
       this.showCalendars();
     } else {
-      var newDate = this.ranges[label];
-      const monthChanged = !this.#startDate.hasSame(newDate[0], "month") || !this.#endDate.hasSame(newDate[1], "month");
+      let newDate = this.ranges[label];
+      const monthChange = !this.#startDate.hasSame(newDate[0], "month") || !this.#endDate.hasSame(newDate[1], "month");
       this.#startDate = newDate[0];
       this.#endDate = newDate[1];
       if (!this.timePicker) {
@@ -1816,41 +1859,42 @@ class DateRangePicker {
       }
       if (!this.alwaysShowCalendars)
         this.hideCalendars();
-      if (this.triggerHandler(this.#events.onBeforeHide))
-        this.updateView(monthChanged);
+      const event = this.triggerEvent(this.#events.onBeforeHide);
+      if (event.defaultPrevented)
+        this.updateView(monthChange);
       this.clickApply();
     }
   }
   /**
   * User clicked a date
-  * @param {external:jQuery} e - The Event target
-  * @emits "dateChange.daterangepicker"
+  * @param {external:Event} e - The Event target
+  * @emits "dateChange"
   * @private
   */
   clickDate(e) {
-    if (!$(e.target).hasClass("available")) return;
-    var title = $(e.target).attr("data-title");
-    var row = title.substring(1, 2);
-    var col = title.substring(3, 4);
-    var cal = $(e.target).parents(".drp-calendar");
-    var date = cal.hasClass("left") ? this.leftCalendar.calendar[row][col] : this.rightCalendar.calendar[row][col];
+    if (!e.target.classList.contains("available")) return;
+    let title = e.target.dataset.title;
+    let row = title.substring(1, 2);
+    let col = title.substring(3, 4);
+    let cal = e.target.closest(".drp-calendar");
+    let date = cal.classList.contains("left") ? this.leftCalendar.calendar[row][col] : this.rightCalendar.calendar[row][col];
     let side;
     if (this.#endDate || !this.#startDate || date < this.#startDate.startOf("day")) {
       if (this.timePicker) {
-        let hour = parseInt(this.container.find(".start-time .hourselect").val(), 10);
+        let hour = parseInt(this.container.querySelector(".start-time .hourselect").value, 10);
         if (isNaN(hour))
-          hour = parseInt(this.container.find(".start-time .hourselect option:last").val(), 10);
+          hour = parseInt(this.container.querySelector(".start-time .hourselect option:last-child").value, 10);
         let minute = 0;
         if (this.timePickerOpts.showMinutes) {
-          minute = parseInt(this.container.find(".start-time .minuteselect").val(), 10);
+          minute = parseInt(this.container.querySelector(".start-time .minuteselect").value, 10);
           if (isNaN(minute))
-            minute = parseInt(this.container.find(".start-time .minuteselect option:last").val(), 10);
+            minute = parseInt(this.container.querySelector(".start-time .minuteselect option:last-child").value, 10);
         }
         let second = 0;
         if (this.timePickerOpts.showSeconds) {
-          second = parseInt(this.container.find(".start-time .secondselect").val(), 10);
+          second = parseInt(this.container.querySelector(".start-time .secondselect").value, 10);
           if (isNaN(second))
-            second = parseInt(this.container.find(".start-time .secondselect option:last").val(), 10);
+            second = parseInt(this.container.querySelector(".start-time .secondselect option:last-child").value, 10);
         }
         date = date.set({ hour, minute, second });
       } else {
@@ -1864,20 +1908,20 @@ class DateRangePicker {
       side = "end";
     } else {
       if (this.timePicker) {
-        let hour = parseInt(this.container.find(".end-time .hourselect").val(), 10);
+        let hour = parseInt(this.container.querySelector(".end-time .hourselect").value, 10);
         if (isNaN(hour))
-          hour = parseInt(this.container.find(".end-time .hourselect option:last").val(), 10);
+          hour = parseInt(this.container.querySelector(".end-time .hourselect option:last-child").value, 10);
         let minute = 0;
         if (this.timePickerOpts.showMinutes) {
-          minute = parseInt(this.container.find(".end-time .minuteselect").val(), 10);
+          minute = parseInt(this.container.querySelector(".end-time .minuteselect").value, 10);
           if (isNaN(minute))
-            minute = parseInt(this.container.find(".end-time .minuteselect option:last").val(), 10);
+            minute = parseInt(this.container.querySelector(".end-time .minuteselect option:last-child").value, 10);
         }
         let second = 0;
         if (this.timePickerOpts.showSeconds) {
-          second = parseInt(this.container.find(".end-time .secondselect").val(), 10);
+          second = parseInt(this.container.querySelector(".end-time .secondselect").value, 10);
           if (isNaN(second))
-            second = parseInt(this.container.find(".end-time .secondselect option:last").val(), 10);
+            second = parseInt(this.container.querySelector(".end-time .secondselect option:last-child").value, 10);
         }
         date = date.set({ hour, minute, second });
       } else {
@@ -1900,13 +1944,15 @@ class DateRangePicker {
     e.stopPropagation();
     if (this.autoUpdateInput)
       this.updateElement();
-    this.triggerEvent(this.#events.onDateChange, side);
+    this.triggerEvent(this.#events.onDateChange, { side });
   }
   /**
   * Hightlight selected predefined range in calendar
   * @private
   */
   calculateChosenLabel() {
+    if (Object.keys(this.ranges).length === 0)
+      return;
     var customRange = true;
     var i = 0;
     for (var range in this.ranges) {
@@ -1920,14 +1966,18 @@ class DateRangePicker {
       }
       if (this.#startDate.startOf(unit).equals(this.ranges[range][0].startOf(unit)) && this.#endDate.startOf(unit).equals(this.ranges[range][1].startOf(unit))) {
         customRange = false;
-        this.chosenLabel = this.container.find(".ranges li:eq(" + i + ")").addClass("active").attr("data-range-key");
+        const range2 = this.container.querySelector(`.ranges li:eq(${i})`);
+        this.chosenLabel = range2.dataset.rangeKey;
+        range2.classList.add("active");
         break;
       }
       i++;
     }
     if (customRange) {
       if (this.showCustomRangeLabel) {
-        this.chosenLabel = this.container.find(".ranges li:last").addClass("active").attr("data-range-key");
+        const range2 = this.container.querySelector(".ranges li:last-child");
+        this.chosenLabel = range2.dataset.rangeKey;
+        range2.classList.add("active");
       } else {
         this.chosenLabel = null;
       }
@@ -1936,25 +1986,23 @@ class DateRangePicker {
   }
   /**
   * User clicked a time
-  * @param {external:jQuery} e - The Event target
-  * @emits "timeChange.daterangepicker"
+  * @param {external:Event} e - The Event target
+  * @emits "timeChange"
   * @private
   */
   timeChanged(e) {
-    const time = $(e.target).closest(".calendar-time");
-    ;
-    const side = time.hasClass("start-time") ? "start" : "end";
-    var hour = parseInt(time.find(".hourselect").val(), 10);
+    const time = e.target.closest(".calendar-time");
+    const side = time.classList.contains("start-time") ? "start" : "end";
+    var hour = parseInt(time.querySelector(".hourselect").value, 10);
     if (isNaN(hour))
-      hour = parseInt(time.find(".hourselect option:last").val(), 10);
+      hour = parseInt(time.querySelector(".hourselect option:last-child").value, 10);
     if (!this.timePicker24Hour) {
-      const ampm = time.find(".ampmselect").val();
+      const ampm = time.querySelector(".ampmselect").value;
       if (ampm == null)
-        time.find(".ampmselect option:last").val();
+        time.querySelector(".ampmselect option:last-child").value;
       if (ampm != DateTime.fromFormat(`${hour}`, "H").toFormat("a", { locale: "en-US" })) {
-        time.find(".hourselect > option").each(function() {
-          const hidden = $(this).attr("hidden") || false;
-          $(this).attr("hidden", hidden);
+        time.querySelectorAll(".hourselect > option").forEach((el) => {
+          el.hidden = !el.hidden;
         });
         const h = DateTime.fromFormat(`${hour}`, "H").toFormat("h");
         hour = DateTime.fromFormat(`${h}${ampm}`, "ha", { locale: "en-US" }).hour;
@@ -1962,15 +2010,15 @@ class DateRangePicker {
     }
     var minute = 0;
     if (this.timePickerOpts.showMinutes) {
-      minute = parseInt(time.find(".minuteselect").val(), 10);
+      minute = parseInt(time.querySelector(".minuteselect").value, 10);
       if (isNaN(minute))
-        minute = parseInt(time.find(".minuteselect option:last").val(), 10);
+        minute = parseInt(time.querySelector(".minuteselect option:last-child").value, 10);
     }
     var second = 0;
     if (this.timePickerOpts.showSeconds) {
-      second = parseInt(time.find(".secondselect").val(), 10);
+      second = parseInt(time.querySelector(".secondselect").value, 10);
       if (isNaN(second))
-        second = parseInt(time.find(".secondselect option:last").val(), 10);
+        second = parseInt(time.querySelector(".secondselect option:last-child").value, 10);
     }
     if (side === "start") {
       if (this.#startDate)
@@ -1990,18 +2038,20 @@ class DateRangePicker {
     this.renderTimePicker("end");
     if (this.autoUpdateInput)
       this.updateElement();
-    this.triggerEvent(this.#events.onTimeChange, this.singleDatePicker ? null : side);
+    this.triggerEvent(this.#events.onTimeChange, { side: this.singleDatePicker ? null : side });
   }
   /**
   * Calender month moved
-  * @param {external:jQuery} e - The Event target
+  * @param {external:Event} e - The Event target
   * @private
   */
   monthOrYearChanged(e) {
-    var isLeft = $(e.target).closest(".drp-calendar").hasClass("left"), leftOrRight = isLeft ? "left" : "right", cal = this.container.find(".drp-calendar." + leftOrRight);
-    var month = parseInt(cal.find(".monthselect").val(), 10);
-    var year = cal.find(".yearselect").val();
-    let monthChanged = false;
+    const isLeft = e.target.closest(".drp-calendar").classList.contains("left");
+    const leftOrRight = isLeft ? "left" : "right";
+    const cal = this.container.querySelector(`.drp-calendar.${leftOrRight}`);
+    let month = parseInt(cal.querySelector(".monthselect").value, 10);
+    let year = cal.querySelector(".yearselect").value;
+    let monthChange = false;
     if (!isLeft) {
       if (year < this.#startDate.year || year == this.#startDate.year && month < this.#startDate.month) {
         month = this.#startDate.month;
@@ -2021,21 +2071,21 @@ class DateRangePicker {
       }
     }
     if (isLeft) {
-      monthChanged = !DateTime.fromObject({ year, month }).hasSame(this.leftCalendar.month, "month");
+      monthChange = !DateTime.fromObject({ year, month }).hasSame(this.leftCalendar.month, "month");
       this.leftCalendar.month = this.leftCalendar.month.set({ year, month });
       if (this.linkedCalendars)
         this.rightCalendar.month = this.leftCalendar.month.plus({ month: 1 });
     } else {
-      monthChanged = !DateTime.fromObject({ year, month }).hasSame(this.leftCalendar.month, "month");
+      monthChange = !DateTime.fromObject({ year, month }).hasSame(this.leftCalendar.month, "month");
       this.rightCalendar.month = this.rightCalendar.month.set({ year, month });
       if (this.linkedCalendars)
         this.leftCalendar.month = this.rightCalendar.month.minus({ month: 1 });
     }
-    this.updateCalendars(monthChanged);
+    this.updateCalendars(monthChange);
   }
   /**
   * User clicked `Apply` button
-  * @emits "apply.daterangepicker"
+  * @emits "apply"
   * @private
      */
   clickApply() {
@@ -2044,7 +2094,7 @@ class DateRangePicker {
   }
   /**
   * User clicked `Cancel` button
-  * @emits "cancel.daterangepicker"
+  * @emits "cancel"
   * @private
   */
   clickCancel() {
@@ -2056,18 +2106,18 @@ class DateRangePicker {
   /* #endregion */
   /**
   * Update the picker with value from `<input>` element.<br> 
-  * Input values must be given in format of `locale.format`. Invalid values are handles by `violated.daterangepicker` Event
-  * @emits "inputChanged.daterangepicker"
+  * Input values must be given in format of `locale.format`. Invalid values are handles by `violate` Event
+  * @emits "inputChange"
   * @private
   */
   elementChanged() {
-    if (!this.element.is("input:text")) return;
-    if (!this.element.val().length) return;
+    if (!this.isInputText) return;
+    if (!this.element.value.length) return;
     const format = typeof this.locale.format === "string" ? this.locale.format : DateTime.parseFormatForOpts(this.locale.format);
-    const dateString = this.element.val().split(this.locale.separator);
-    let monthChanged = false;
+    const dateString = this.element.value.split(this.locale.separator);
+    let monthChange = false;
     if (this.singleDatePicker) {
-      let newDate = DateTime.fromFormat(this.element.val(), format, { locale: DateTime.now().locale });
+      let newDate = DateTime.fromFormat(this.element.value, format, { locale: DateTime.now().locale });
       const oldDate = this.#startDate;
       if (!newDate.isValid || oldDate.equals(newDate))
         return;
@@ -2079,7 +2129,7 @@ class DateRangePicker {
           return;
         }
       }
-      monthChanged = !this.#startDate.hasSame(newDate, "month");
+      monthChange = !this.#startDate.hasSame(newDate, "month");
       this.#startDate = newDate;
       this.#endDate = this.#startDate;
       if (!this.timePicker) {
@@ -2100,7 +2150,7 @@ class DateRangePicker {
           return;
         }
       }
-      monthChanged = !this.#startDate.hasSame(newDate[0], "month") || !this.#endDate.hasSame(newDate[1], "month");
+      monthChange = !this.#startDate.hasSame(newDate[0], "month") || !this.#endDate.hasSame(newDate[1], "month");
       this.#startDate = newDate[0];
       this.#endDate = newDate[1];
       if (!this.timePicker) {
@@ -2110,19 +2160,18 @@ class DateRangePicker {
     } else {
       return;
     }
-    this.updateView(monthChanged);
+    this.updateView(monthChange);
     this.updateElement();
-    this.triggerEvent(this.#events.onInputChanged);
+    this.triggerEvent(this.#events.onInputChange);
   }
   /**
   * Handles key press, IE 11 compatibility
-  * @param {external:jQuery} e - The Event target
+  * @param {external:Event} e - The Event target
   * @private
   */
   keydown(e) {
-    if (e.keyCode === 9 || e.keyCode === 13) {
+    if ([9, 11].includes(e.keyCode))
       this.hide();
-    }
     if (e.keyCode === 27) {
       e.preventDefault();
       e.stopPropagation();
@@ -2136,7 +2185,7 @@ class DateRangePicker {
   updateElement() {
     if (this.#startDate == null && this.initalMonth)
       return;
-    if (this.element.is("input:text")) {
+    if (this.isInputText) {
       let newValue = this.formatDate(this.#startDate);
       if (!this.singleDatePicker) {
         newValue += this.locale.separator;
@@ -2144,8 +2193,10 @@ class DateRangePicker {
           newValue += this.formatDate(this.#endDate);
       }
       this.updateAltInput();
-      if (newValue !== this.element.val())
-        this.element.val(newValue).trigger("change");
+      if (newValue !== this.element.value) {
+        this.element.value = newValue;
+        this.element.dispatchEvent(new Event("change", { bubbles: true }));
+      }
     } else {
       this.updateAltInput();
     }
@@ -2156,8 +2207,6 @@ class DateRangePicker {
   updateAltInput() {
     if (this.altInput == null)
       return;
-    if (this.singleDatePicker)
-      $(this.altInput[1]).val(null);
     if (this.altFormat == null) {
       let precision = "day";
       if (this.timePicker) {
@@ -2170,17 +2219,17 @@ class DateRangePicker {
         }
       }
       const startDate = this.#startDate.toISO({ format: "basic", precision, includeOffset: false });
-      $(this.singleDatePicker ? this.altInput : this.altInput[0]).val(startDate);
+      (this.singleDatePicker ? this.altInput : this.altInput[0]).value = startDate;
       if (!this.singleDatePicker && this.#endDate) {
         const endDate = this.#endDate.toISO({ format: "basic", precision, includeOffset: false });
-        $(this.altInput[1]).val(endDate);
+        this.altInput[1].value = endDate;
       }
     } else {
       const startDate = typeof this.altFormat === "function" ? this.altFormat(this.#startDate) : this.formatDate(this.#startDate, this.altFormat);
-      $(this.singleDatePicker ? this.altInput : this.altInput[0]).val(startDate);
+      (this.singleDatePicker ? this.altInput : this.altInput[0]).value = startDate;
       if (!this.singleDatePicker && this.#endDate) {
         const endDate = typeof this.altFormat === "function" ? this.altFormat(this.#endDate) : this.formatDate(this.#endDate, this.altFormat);
-        $(this.altInput[1]).val(endDate);
+        this.altInput[1].value = endDate;
       }
     }
   }
@@ -2188,52 +2237,140 @@ class DateRangePicker {
   * Removes the picker from document
   */
   remove() {
+    this.element.removeEventListener("click", this.#showProxy);
+    this.element.removeEventListener("focus", this.#showProxy);
+    this.element.removeEventListener("keyup", this.#elementChangedProxy);
+    this.element.removeEventListener("keydown", this.#keydownProxy);
+    this.element.removeEventListener("click", this.#toggleProxy);
+    this.element.removeEventListener("keydown", this.#toggleProxy);
     this.container.remove();
-    this.element.off(".daterangepicker");
-    this.element.removeData();
   }
   /**
-   * Helper function to trigger events
+   * Helper function to dispatch events
    * @param {Event} ev - From this.#events
-   * @param  {...any} args - Argument spread
+   * @param  {...any?} args - Additional parameters if needed
    * @private
    */
   triggerEvent(ev, ...args) {
     if (args.length === 0) {
-      this.element.trigger(ev.type, ev.param);
+      const event = new DateRangePickerEvent(this, ev);
+      this.element.dispatchEvent(event);
+      return event;
     } else {
-      const params = ev.param(...args);
-      this.element.trigger(ev.type, params);
+      const event = new DateRangePickerEvent(this, ev, ...args);
+      this.element.dispatchEvent(event);
+      return event;
     }
   }
   /**
-   * Helper function to trigger events
-   * @param {Event} ev - From this.#events
-   * @param  {...any} args - Argument spread
-   * @private
+   * Helper function to add eventListener similar to jQuery .on( events [, selector ] [, data ] )
+   * @param {string} element - Query selector of element where listener is added
+   * @param {string} eventName - Name of the event
+   * @param {string} selector - Query selector string to filter the descendants of the element
+   * @param {any} delegate - Handler data
    */
-  triggerHandler(ev, ...args) {
-    if (args.length === 0) {
-      return this.element.triggerHandler(ev.type, ev.param);
-    } else {
-      const params = ev.param(...args);
-      return this.element.triggerHandler(ev.type, params);
-    }
+  addListener(element, eventName, selector, delegate) {
+    this.container.querySelectorAll(element).forEach((el) => {
+      el.addEventListener(eventName, function(event) {
+        const target = event.target.closest(selector);
+        if (target && el.contains(target))
+          delegate.call(target, event);
+      });
+    });
   }
 }
-if (!$.fn.daterangepicker) {
-  $.fn.daterangepicker = function(options, callback) {
-    const implementOptions = $.extend(true, {}, $.fn.daterangepicker.defaultOptions, options);
-    this.each(function() {
-      const el = $(this);
-      if (el.data("daterangepicker"))
-        el.data("daterangepicker").remove();
-      el.data("daterangepicker", new DateRangePicker(el, implementOptions, callback));
-    });
-    return this;
+function createElementFromHTML(html) {
+  const template = document.createElement("template");
+  template.innerHTML = html.trim();
+  return template.content.firstElementChild;
+}
+class DateRangePickerEvent extends Event {
+  #picker;
+  constructor(drp, ev, args = {}) {
+    let param = {};
+    if (ev.param)
+      param = typeof ev.param === "function" ? ev.param() : ev.param;
+    param = { ...param, ...args };
+    super(ev.type, param);
+    this.#picker = drp;
+    for (const [key2, value] of Object.entries(param)) {
+      if (Object.getOwnPropertyNames(Event.prototype).includes(key2)) continue;
+      this[key2] = value;
+    }
+  }
+  get picker() {
+    return this.#picker;
+  }
+}
+function offset(el) {
+  const rect = el.getBoundingClientRect();
+  return {
+    top: rect.top + window.scrollY,
+    left: rect.left + window.scrollX
   };
 }
-var daterangepicker_default = DateRangePicker;
+function outerWidth(el, withMargin = false) {
+  if (!withMargin)
+    return el.offsetWidth;
+  const style = getComputedStyle(el);
+  return el.offsetWidth + parseFloat(style.marginLeft) + parseFloat(style.marginRight);
+}
+function outerHeight(el, withMargin = false) {
+  if (!withMargin)
+    return el.offsetHeight;
+  const style = getComputedStyle(el);
+  return el.offsetHeight + parseFloat(style.marginTop) + parseFloat(style.marginBottom);
+}
+function daterangepicker(elements, options, callback) {
+  if (typeof elements === "string")
+    return daterangepicker(document.querySelectorAll(elements), options, callback);
+  if (elements instanceof HTMLElement)
+    elements = [elements];
+  if (elements instanceof NodeList || elements instanceof HTMLCollection)
+    elements = Array.from(elements);
+  if (elements == null)
+    return new DateRangePicker(null, options || {}, callback);
+  elements.forEach((el) => {
+    if (el._daterangepicker && typeof el._daterangepicker.remove === "function")
+      el._daterangepicker.remove();
+    el._daterangepicker = new DateRangePicker(el, options || {}, callback);
+  });
+  return elements.length === 1 ? elements[0] : elements;
+}
+function getDateRangePicker(target) {
+  if (typeof target === "string")
+    target = document.querySelector(target);
+  return target instanceof HTMLElement ? target._daterangepicker : void 0;
+}
+if (window.jQuery?.fn) {
+  jQuery.fn.daterangepicker = function(options, callback) {
+    return this.each(function() {
+      daterangepicker(this, options, callback);
+    });
+  };
+}
+function registerJqueryPlugin(jq) {
+  if (!jq?.fn) return;
+  jq.fn.daterangepicker = function(options, callback) {
+    return this.each(function() {
+      daterangepicker(this, options, callback);
+    });
+  };
+}
+Object.defineProperty(window, "jQuery", {
+  configurable: true,
+  set(value) {
+    this._jQuery = value;
+    registerJqueryPlugin(value);
+  },
+  get() {
+    return this._jQuery;
+  }
+});
+var daterangepicker_default = daterangepicker;
 export {
-  daterangepicker_default as default
+  DateRangePicker,
+  daterangepicker,
+  daterangepicker_default as default,
+  getDateRangePicker
 };
