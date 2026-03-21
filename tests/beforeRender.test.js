@@ -1,16 +1,12 @@
-import { $ } from 'jquery';
-import DateRangePicker from '../src/daterangepicker.js';
+import { daterangepicker, getDateRangePicker } from '../src/daterangepicker.js';
 import { DateTime } from 'luxon';
-
-// Event beforeRenderTimePicker to be removed - don's see any use case
-// Event beforeRenderCalendar rename to renderRanges
 
 test('beforeRender events fire correctly', () => {
    let timePicker = false;
    let calendar = false;
 
    document.body.innerHTML = `<input id="p">`;
-   $('#p').daterangepicker(
+   const input = daterangepicker('#p', 
       {
          timePicker: true,
          ranges: {
@@ -19,16 +15,16 @@ test('beforeRender events fire correctly', () => {
             'Last 30 Days': [new Date(new Date - 1000 * 60 * 60 * 24 * 30), new Date()],
          }
       }
-   ).on('beforeRenderTimePicker.daterangepicker', () => {
+   );
+   input.addEventListener('beforeRenderTimePicker', () => {
       timePicker = true;
-   }).on('beforeRenderCalendar.daterangepicker', () => {
+   });
+   input.addEventListener('beforeRenderCalendar', () => {
       calendar = true;
    });
-   const input = document.querySelector('#p');
    input.click();
 
    expect(timePicker).toBe(true);
    expect(calendar).toBe(true);
 
 });
-

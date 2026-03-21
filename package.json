@@ -1,6 +1,6 @@
 {
   "name": "@wernfried/daterangepicker",
-  "version": "4.19.0",
+  "version": "5.0.0",
   "description": "Date range picker with time component and pre-defined ranges",
   "main": "dist/global/daterangepicker.js",
   "module": "dist/esm/daterangepicker.js",
@@ -12,7 +12,7 @@
   "type": "module",
   "scripts": {
     "postversion": "sed -bi -e 's/daterangepicker@[[:digit:]]\\.[[:digit:]]\\+\\.[[:digit:]]\\+/daterangepicker@%npm_package_version%/' README.md",
-    "prebuild": "cat src/global.js > src/__daterangepicker.js && sed -b -E \"s/^(im|ex)port .*//\" src/daterangepicker.js >> src/__daterangepicker.js",
+    "prebuild": "cat src/global.js > src/__daterangepicker.js && sed -b -E \"s/^import .*//\" src/daterangepicker.js >> src/__daterangepicker.js",
     "build": "npm run build_esm && npm run build_global",
     "postbuild": "npm run minify_esm && npm run minify_global && npm run minify_css",
     "build_esm": "esbuild src/daterangepicker.js --outfile=dist/esm/daterangepicker.js --format=esm",
@@ -22,7 +22,7 @@
     "minify_css": "minify css/daterangepicker.css > css/daterangepicker.min.css && minify css/daterangepicker.bulma.css > css/daterangepicker.bulma.min.css",
     "unix2dos": "unix2dos dist/esm/*.js dist/global/*.js css/*.min.css",
     "prepack": "sed -bi '/API_Doc\\.md/q' README.md && npm run build && npm run unix2dos",
-    "prepare": "jsdoc2md --EOL win32 --example-lang js src/daterangepicker.js > API_Doc.md && sed -n '/## Options$/,$p' API_Doc.md >> README.md",
+    "prepare": "jsdoc2md --EOL win32 --example-lang js src/daterangepicker.js > API_Doc.md && sed -n '/## Options$/,$p' API_Doc.md | sed -n '/END_OF_OPTIONS/q;p' >> README.md",
     "postpack": "git commit -a -m \"Updated README.md\"",
     "test": "node --experimental-vm-modules --no-warnings ./node_modules/jest/bin/jest.js --runInBand"
   },

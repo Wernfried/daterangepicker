@@ -1,13 +1,10 @@
-
-
-import { $ } from 'jquery';
-import DateRangePicker from '../src/daterangepicker.js';
+import { daterangepicker, getDateRangePicker } from '../src/daterangepicker.js';
 import { DateTime } from 'luxon';
 
 test('daterangepicker callback invoked after click', () => {
     let called = false;
     document.body.innerHTML = `<input id="p">`;
-    $('#p').daterangepicker(
+    daterangepicker('#p',
         {
             startDate: '2026-03-19',
             endDate: '2026-03-21',
@@ -37,7 +34,7 @@ test('daterangepicker callback invoked after click', () => {
 test('daterangepicker callback invoked after input', () => {
     let called = false;
     document.body.innerHTML = `<input id="p">`;
-    $('#p').daterangepicker(
+    daterangepicker('#p',
         {
             startDate: '2026-03-19',
             endDate: '2026-03-21',

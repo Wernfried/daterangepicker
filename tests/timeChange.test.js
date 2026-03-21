@@ -1,23 +1,19 @@
-import { $ } from 'jquery';
-import DateRangePicker from '../src/daterangepicker.js';
+import { daterangepicker, getDateRangePicker } from '../src/daterangepicker.js';
 import { DateTime } from 'luxon';
 
 test('timeChange event fires correctly', () => {
     let called = false;
     document.body.innerHTML = `<input id="p">`;
-    $('#p').daterangepicker({
+    daterangepicker('#p', {
         timePicker: true,
         startDate: DateTime.now().set({ hour: 0 }),
         endDate: DateTime.now().plus({ days: 1 }).set({ hour: 0 })
-    }).on('timeChange.daterangepicker', (ev, picker, side) => {
+    }).addEventListener('timeChange', (ev) => {
         called = true;
-        expect(picker).toBe(drp);
-        expect(side).toBe(left ? 'start' : 'end');
-        const hour = picker[left ? 'startDate' : 'endDate'].hour;
+        expect(ev.side).toBe(left ? 'start' : 'end');
+        const hour = ev.picker[left ? 'startDate' : 'endDate'].hour;
         expect(hour).toBe(left ? 12 : 14);
     });
-
-    const drp = $('#p').data('daterangepicker');
     const input = document.querySelector('#p');
     input.click();
 
