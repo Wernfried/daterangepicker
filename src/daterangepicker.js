@@ -150,7 +150,6 @@ class DateRangePicker {
       * an object according to [Intl.NumberFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#options), 
       * see [Duration.toHuamn](https://moment.github.io/luxon/api-docs/index.html#durationtohuman).<br>
       * Or custom function as `(startDate, endDate) => {}`
-      * @property {} END_OF_OPTIONS
       */
 
       /**
