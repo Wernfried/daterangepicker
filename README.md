@@ -20,7 +20,7 @@ Above samples are based on the [original repository](https://github.com/dangross
 ```html
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.1.1-beta/dist/global/daterangepicker.min.js"></script>
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.1.1-beta/css/daterangepicker.min.css" rel="stylesheet" />
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@{{process.env.version}}/css/daterangepicker.min.css" rel="stylesheet" />
 
 <input type="text" id="picker" />
 
