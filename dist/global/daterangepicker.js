@@ -1,33 +1,6 @@
-var DateRangePicker = (() => {
-  var __defProp = Object.defineProperty;
-  var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
-  var __getOwnPropNames = Object.getOwnPropertyNames;
-  var __hasOwnProp = Object.prototype.hasOwnProperty;
-  var __export = (target, all) => {
-    for (var name in all)
-      __defProp(target, name, { get: all[name], enumerable: true });
-  };
-  var __copyProps = (to, from, except, desc) => {
-    if (from && typeof from === "object" || typeof from === "function") {
-      for (let key2 of __getOwnPropNames(from))
-        if (!__hasOwnProp.call(to, key2) && key2 !== except)
-          __defProp(to, key2, { get: () => from[key2], enumerable: !(desc = __getOwnPropDesc(from, key2)) || desc.enumerable });
-    }
-    return to;
-  };
-  var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
-  var daterangepicker_exports = {};
-  __export(daterangepicker_exports, {
-    DateRangePicker: () => DateRangePicker,
-    daterangepicker: () => daterangepicker,
-    default: () => daterangepicker_default,
-    getDateRangePicker: () => getDateRangePicker
-  });
-  const DateTime = luxon.DateTime;
-  const Duration = luxon.Duration;
-  const Info = luxon.Info;
-  const Settings = luxon.Settings;
-  class DateRangePicker {
+var DateRangePicker = (function(exports, luxon2) {
+  "use strict";
+  class DateRangePicker2 {
     #startDate = null;
     #endDate = null;
     constructor(element, options, cb) {
@@ -36,28 +9,28 @@ var DateRangePicker = (() => {
       this.parentEl = "body";
       this.element = element instanceof HTMLElement ? element : document.querySelector(element);
       this.isInputText = this.element instanceof HTMLInputElement && this.element.type === "text";
-      this.#startDate = DateTime.now().startOf("day");
-      this.#endDate = DateTime.now().plus({ day: 1 }).startOf("day");
+      this.#startDate = luxon2.DateTime.now().startOf("day");
+      this.#endDate = luxon2.DateTime.now().plus({ day: 1 }).startOf("day");
       this.minDate = null;
       this.maxDate = null;
       this.maxSpan = null;
       this.minSpan = null;
       this.defaultSpan = null;
-      this.initalMonth = DateTime.now().startOf("month");
+      this.initalMonth = luxon2.DateTime.now().startOf("month");
       this.autoApply = false;
       this.singleDatePicker = false;
       this.singleMonthView = false;
       this.showDropdowns = false;
-      this.minYear = DateTime.now().minus({ year: 100 }).year;
-      this.maxYear = DateTime.now().plus({ year: 100 }).year;
+      this.minYear = luxon2.DateTime.now().minus({ year: 100 }).year;
+      this.maxYear = luxon2.DateTime.now().plus({ year: 100 }).year;
       this.showWeekNumbers = false;
       this.showISOWeekNumbers = false;
       this.showCustomRangeLabel = true;
       this.showLabel = !this.isInputText;
       this.timePicker = false;
-      const usesMeridiems = new Intl.DateTimeFormat(DateTime.now().locale, { hour: "numeric" }).resolvedOptions();
+      const usesMeridiems = new Intl.DateTimeFormat(luxon2.DateTime.now().locale, { hour: "numeric" }).resolvedOptions();
       this.timePicker24Hour = !usesMeridiems.hour12;
-      this.timePickerStepSize = Duration.fromObject({ minutes: 1 });
+      this.timePickerStepSize = luxon2.Duration.fromObject({ minutes: 1 });
       this.linkedCalendars = true;
       this.autoUpdateInput = true;
       this.alwaysShowCalendars = false;
@@ -79,16 +52,16 @@ var DateRangePicker = (() => {
       this.ranges = {};
       this.locale = {
         direction: "ltr",
-        format: DateTime.DATE_SHORT,
+        format: luxon2.DateTime.DATE_SHORT,
         // or DateTime.DATETIME_SHORT when timePicker: true
         separator: " - ",
         applyLabel: "Apply",
         cancelLabel: "Cancel",
         weekLabel: "W",
         customRangeLabel: "Custom Range",
-        daysOfWeek: Info.weekdays("short"),
-        monthNames: Info.months("long"),
-        firstDay: Info.getStartOfWeek(),
+        daysOfWeek: luxon2.Info.weekdays("short"),
+        monthNames: luxon2.Info.months("long"),
+        firstDay: luxon2.Info.getStartOfWeek(),
         durationFormat: null
       };
       if (this.element == null)
@@ -106,7 +79,7 @@ var DateRangePicker = (() => {
         const name = item.name.replace(/^data-/g, "").replace(/-([a-z])/g, function(str) {
           return str[1].toUpperCase();
         });
-        let ts = DateTime.fromISO(item.value);
+        let ts = luxon2.DateTime.fromISO(item.value);
         const isDate = ["startDate", "endDate", "minDate", "maxDate", "initalMonth"].includes(name);
         dataOptions[name] = ts.isValid && isDate ? ts : JSON.parse(item.value);
       }
@@ -180,7 +153,7 @@ var DateRangePicker = (() => {
       if (typeof options.timePicker === "boolean")
         this.timePicker = options.timePicker;
       if (this.timePicker)
-        this.locale.format = DateTime.DATETIME_SHORT;
+        this.locale.format = luxon2.DateTime.DATETIME_SHORT;
       if (typeof options.locale === "object") {
         for (let key2 of ["separator", "applyLabel", "cancelLabel", "weekLabel"]) {
           if (typeof options.locale[key2] === "string")
@@ -255,18 +228,17 @@ var DateRangePicker = (() => {
       if (!this.singleDatePicker) {
         for (let opt of ["minSpan", "maxSpan", "defaultSpan"]) {
           if (["string", "number", "object"].includes(typeof options[opt])) {
-            if (Duration.isDuration(options[opt]) && options[opt].isValid) {
+            if (luxon2.Duration.isDuration(options[opt]) && options[opt].isValid) {
               this[opt] = options[opt];
-            } else if (Duration.fromISO(options[opt]).isValid) {
-              this[opt] = Duration.fromISO(options[opt]);
-            } else if (typeof options[opt] === "number" && Duration.fromObject({ seconds: options[opt] }).isValid) {
-              this[opt] = Duration.fromObject({ seconds: options[opt] });
+            } else if (luxon2.Duration.fromISO(options[opt]).isValid) {
+              this[opt] = luxon2.Duration.fromISO(options[opt]);
+            } else if (typeof options[opt] === "number" && luxon2.Duration.fromObject({ seconds: options[opt] }).isValid) {
+              this[opt] = luxon2.Duration.fromObject({ seconds: options[opt] });
             } else if (options[opt] === null) {
               this[opt] = null;
             } else {
               console.error(`Option '${key}' is not valid`);
             }
-            ;
           }
         }
         if (this.minSpan && this.maxSpan && this.minSpan > this.maxSpan) {
@@ -285,28 +257,27 @@ var DateRangePicker = (() => {
       if (this.timePicker) {
         if (["string", "object", "number"].includes(typeof options.timePickerStepSize)) {
           let duration;
-          if (Duration.isDuration(options.timePickerStepSize) && options.timePickerStepSize.isValid) {
+          if (luxon2.Duration.isDuration(options.timePickerStepSize) && options.timePickerStepSize.isValid) {
             duration = options.timePickerStepSize;
-          } else if (Duration.fromISO(options.timePickerStepSize).isValid) {
-            duration = Duration.fromISO(options.timePickerStepSize);
-          } else if (typeof options.timePickerStepSize === "number" && Duration.fromObject({ seconds: options.timePickerStepSize }).isValid) {
-            duration = Duration.fromObject({ seconds: options.timePickerStepSize });
+          } else if (luxon2.Duration.fromISO(options.timePickerStepSize).isValid) {
+            duration = luxon2.Duration.fromISO(options.timePickerStepSize);
+          } else if (typeof options.timePickerStepSize === "number" && luxon2.Duration.fromObject({ seconds: options.timePickerStepSize }).isValid) {
+            duration = luxon2.Duration.fromObject({ seconds: options.timePickerStepSize });
           } else {
             console.error(`Option 'timePickerStepSize' is not valid`);
             duration = this.timePickerStepSize;
           }
-          ;
           var valid = [];
           for (let unit of ["minutes", "seconds"])
             valid.push(...[1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30].map((x) => {
-              return Duration.fromObject({ [unit]: x });
+              return luxon2.Duration.fromObject({ [unit]: x });
             }));
           valid.push(...[1, 2, 3, 4, 6].map((x) => {
-            return Duration.fromObject({ hours: x });
+            return luxon2.Duration.fromObject({ hours: x });
           }));
           if (this.timePicker24Hour)
             valid.push(...[8, 12].map((x) => {
-              return Duration.fromObject({ hours: x });
+              return luxon2.Duration.fromObject({ hours: x });
             }));
           if (valid.some((x) => duration.rescale().equals(x))) {
             this.timePickerStepSize = duration.rescale();
@@ -317,10 +288,10 @@ var DateRangePicker = (() => {
         if (this.maxSpan && this.timePickerStepSize > this.maxSpan)
           console.error(`Option 'timePickerStepSize' ${JSON.stringify(this.timePickerStepSize.toObject())} must be smaller than 'maxSpan'`);
         this.timePickerOpts = {
-          showMinutes: this.timePickerStepSize < Duration.fromObject({ hours: 1 }),
-          showSeconds: this.timePickerStepSize < Duration.fromObject({ minutes: 1 }),
-          hourStep: this.timePickerStepSize >= Duration.fromObject({ hours: 1 }) ? this.timePickerStepSize.hours : 1,
-          minuteStep: this.timePickerStepSize >= Duration.fromObject({ minutes: 1 }) ? this.timePickerStepSize.minutes : 1,
+          showMinutes: this.timePickerStepSize < luxon2.Duration.fromObject({ hours: 1 }),
+          showSeconds: this.timePickerStepSize < luxon2.Duration.fromObject({ minutes: 1 }),
+          hourStep: this.timePickerStepSize >= luxon2.Duration.fromObject({ hours: 1 }) ? this.timePickerStepSize.hours : 1,
+          minuteStep: this.timePickerStepSize >= luxon2.Duration.fromObject({ minutes: 1 }) ? this.timePickerStepSize.minutes : 1,
           secondStep: this.timePickerStepSize.seconds
         };
       }
@@ -328,32 +299,32 @@ var DateRangePicker = (() => {
         if (opt === "endDate" && this.singleDatePicker)
           continue;
         if (typeof options[opt] === "object") {
-          if (DateTime.isDateTime(options[opt]) && options[opt].isValid) {
+          if (luxon2.DateTime.isDateTime(options[opt]) && options[opt].isValid) {
             this[opt] = options[opt];
           } else if (options[opt] instanceof Date) {
-            this[opt] = DateTime.fromJSDate(options[opt]);
+            this[opt] = luxon2.DateTime.fromJSDate(options[opt]);
           } else if (options[opt] === null) {
             this[opt] = null;
           } else {
             console.error(`Option '${opt}' must be a luxon.DateTime or Date or string`);
           }
         } else if (typeof options[opt] === "string") {
-          const format = typeof this.locale.format === "string" ? this.locale.format : DateTime.parseFormatForOpts(this.locale.format);
-          if (DateTime.fromISO(options[opt]).isValid) {
-            this[opt] = DateTime.fromISO(options[opt]);
-          } else if (DateTime.fromFormat(options[opt], format, { locale: DateTime.now().locale }).isValid) {
-            this[opt] = DateTime.fromFormat(options[opt], format, { locale: DateTime.now().locale });
+          const format = typeof this.locale.format === "string" ? this.locale.format : luxon2.DateTime.parseFormatForOpts(this.locale.format);
+          if (luxon2.DateTime.fromISO(options[opt]).isValid) {
+            this[opt] = luxon2.DateTime.fromISO(options[opt]);
+          } else if (luxon2.DateTime.fromFormat(options[opt], format, { locale: luxon2.DateTime.now().locale }).isValid) {
+            this[opt] = luxon2.DateTime.fromFormat(options[opt], format, { locale: luxon2.DateTime.now().locale });
           } else {
-            const invalid = DateTime.fromFormat(options[opt], format, { locale: DateTime.now().locale }).invalidExplanation;
+            const invalid = luxon2.DateTime.fromFormat(options[opt], format, { locale: luxon2.DateTime.now().locale }).invalidExplanation;
             console.error(`Option '${opt}' is not a valid string: ${invalid}`);
           }
         }
       }
       if (this.isInputText) {
         if (this.element.value != "") {
-          const format = typeof this.locale.format === "string" ? this.locale.format : DateTime.parseFormatForOpts(this.locale.format);
+          const format = typeof this.locale.format === "string" ? this.locale.format : luxon2.DateTime.parseFormatForOpts(this.locale.format);
           if (this.singleDatePicker && typeof options.startDate === "undefined") {
-            const start = DateTime.fromFormat(this.element.value, format, { locale: DateTime.now().locale });
+            const start = luxon2.DateTime.fromFormat(this.element.value, format, { locale: luxon2.DateTime.now().locale });
             if (start.isValid) {
               this.#startDate = start;
             } else {
@@ -362,8 +333,8 @@ var DateRangePicker = (() => {
           } else if (!this.singleDatePicker && typeof options.startDate === "undefined" && typeof options.endDate === "undefined") {
             const split = this.element.value.split(this.locale.separator);
             if (split.length === 2) {
-              const start = DateTime.fromFormat(split[0], format, { locale: DateTime.now().locale });
-              const end = DateTime.fromFormat(split[1], format, { locale: DateTime.now().locale });
+              const start = luxon2.DateTime.fromFormat(split[0], format, { locale: luxon2.DateTime.now().locale });
+              const end = luxon2.DateTime.fromFormat(split[1], format, { locale: luxon2.DateTime.now().locale });
               if (start.isValid && end.isValid) {
                 this.#startDate = start;
                 this.#endDate = end;
@@ -475,23 +446,23 @@ var DateRangePicker = (() => {
         for (let range in options.ranges) {
           let start, end;
           if (["string", "object"].includes(typeof options.ranges[range][0])) {
-            if (DateTime.isDateTime(options.ranges[range][0]) && options.ranges[range][0].isValid) {
+            if (luxon2.DateTime.isDateTime(options.ranges[range][0]) && options.ranges[range][0].isValid) {
               start = options.ranges[range][0];
             } else if (options.ranges[range][0] instanceof Date) {
-              start = DateTime.fromJSDate(options.ranges[range][0]);
-            } else if (typeof options.ranges[range][0] === "string" && DateTime.fromISO(options.ranges[range][0]).isValid) {
-              start = DateTime.fromISO(options.ranges[range][0]);
+              start = luxon2.DateTime.fromJSDate(options.ranges[range][0]);
+            } else if (typeof options.ranges[range][0] === "string" && luxon2.DateTime.fromISO(options.ranges[range][0]).isValid) {
+              start = luxon2.DateTime.fromISO(options.ranges[range][0]);
             } else {
               console.error(`Option ranges['${range}'] is not am array of valid ISO-8601 string or luxon.DateTime or Date`);
             }
           }
           if (["string", "object"].includes(typeof options.ranges[range][1])) {
-            if (DateTime.isDateTime(options.ranges[range][1]) && options.ranges[range][1].isValid) {
+            if (luxon2.DateTime.isDateTime(options.ranges[range][1]) && options.ranges[range][1].isValid) {
               end = options.ranges[range][1];
             } else if (options.ranges[range][1] instanceof Date) {
-              end = DateTime.fromJSDate(options.ranges[range][1]);
-            } else if (typeof options.ranges[range][1] === "string" && DateTime.fromISO(options.ranges[range][1]).isValid) {
-              end = DateTime.fromISO(options.ranges[range][1]);
+              end = luxon2.DateTime.fromJSDate(options.ranges[range][1]);
+            } else if (typeof options.ranges[range][1] === "string" && luxon2.DateTime.fromISO(options.ranges[range][1]).isValid) {
+              end = luxon2.DateTime.fromISO(options.ranges[range][1]);
             } else {
               console.error(`Option ranges['${range}'] is not a valid ISO-8601 string or luxon.DateTime or Date`);
             }
@@ -878,21 +849,21 @@ var DateRangePicker = (() => {
      */
     parseDate(value) {
       if (typeof value === "object") {
-        if (DateTime.isDateTime(value) && value.isValid) {
+        if (luxon2.DateTime.isDateTime(value) && value.isValid) {
           return value;
         } else if (value instanceof Date) {
-          return DateTime.fromJSDate(value);
+          return luxon2.DateTime.fromJSDate(value);
         } else {
           throw RangeError(`Value must be a luxon.DateTime or Date or string`);
         }
       } else if (typeof value === "string") {
-        const format = typeof this.locale.format === "string" ? this.locale.format : DateTime.parseFormatForOpts(this.locale.format);
-        if (DateTime.fromISO(value).isValid) {
-          return DateTime.fromISO(value);
-        } else if (DateTime.fromFormat(value, format, { locale: DateTime.now().locale }).isValid) {
-          return DateTime.fromFormat(value, format, { locale: DateTime.now().locale });
+        const format = typeof this.locale.format === "string" ? this.locale.format : luxon2.DateTime.parseFormatForOpts(this.locale.format);
+        if (luxon2.DateTime.fromISO(value).isValid) {
+          return luxon2.DateTime.fromISO(value);
+        } else if (luxon2.DateTime.fromFormat(value, format, { locale: luxon2.DateTime.now().locale }).isValid) {
+          return luxon2.DateTime.fromFormat(value, format, { locale: luxon2.DateTime.now().locale });
         } else {
-          const invalid = DateTime.fromFormat(value, format, { locale: DateTime.now().locale }).invalidExplanation;
+          const invalid = luxon2.DateTime.fromFormat(value, format, { locale: luxon2.DateTime.now().locale }).invalidExplanation;
           throw RangeError(`Value is not a valid string: ${invalid}`);
         }
       }
@@ -911,8 +882,8 @@ var DateRangePicker = (() => {
       if (typeof format === "object") {
         return date.toLocaleString(format);
       } else {
-        if (Settings.defaultLocale === null) {
-          const locale = DateTime.now().locale;
+        if (luxon2.Settings.defaultLocale === null) {
+          const locale = luxon2.DateTime.now().locale;
           return date.toFormat(format, { locale });
         } else {
           return date.toFormat(format);
@@ -1010,14 +981,14 @@ var DateRangePicker = (() => {
       let violation = { old: startDate, reason: this.timePicker ? "timePickerStepSize" : "timePicker" };
       if (this.timePicker) {
         const secs = this.timePickerStepSize.as("seconds");
-        startDate = DateTime.fromSeconds(secs * Math.round(startDate.toSeconds() / secs));
+        startDate = luxon2.DateTime.fromSeconds(secs * Math.round(startDate.toSeconds() / secs));
         violation.new = startDate;
         if (!violation.new.equals(violation.old))
           result.startDate.push(violation);
       } else {
         startDate = startDate.startOf("day");
       }
-      const shiftStep = this.timePicker ? this.timePickerStepSize.as("seconds") : Duration.fromObject({ days: 1 }).as("seconds");
+      const shiftStep = this.timePicker ? this.timePickerStepSize.as("seconds") : luxon2.Duration.fromObject({ days: 1 }).as("seconds");
       if (this.minDate && startDate < this.minDate) {
         violation = { old: startDate, reason: "minDate" };
         startDate = startDate.plus({ seconds: Math.trunc(this.minDate.diff(startDate).as("seconds") / shiftStep) * shiftStep });
@@ -1073,7 +1044,7 @@ var DateRangePicker = (() => {
       violation = { old: endDate, reason: this.timePicker ? "stepSize" : "timePicker" };
       if (this.timePicker) {
         const secs = this.timePickerStepSize.as("seconds");
-        endDate = DateTime.fromSeconds(secs * Math.round(endDate.toSeconds() / secs));
+        endDate = luxon2.DateTime.fromSeconds(secs * Math.round(endDate.toSeconds() / secs));
         violation.new = endDate;
         if (!violation.new.equals(violation.old))
           result.endDate.push(violation);
@@ -1335,11 +1306,10 @@ var DateRangePicker = (() => {
         html += `<th class="week">${this.locale.weekLabel}</th>`;
       for (let [index, dayOfWeek] of this.locale.daysOfWeek.entries()) {
         html += "<th";
-        if (this.weekendDayClasses && this.weekendDayClasses.length && Info.getWeekendWeekdays().includes(index + 1))
+        if (this.weekendDayClasses && this.weekendDayClasses.length && luxon2.Info.getWeekendWeekdays().includes(index + 1))
           html += ` class="${this.weekendDayClasses}"`;
         html += `>${dayOfWeek}</th>`;
       }
-      ;
       html += "</tr>";
       this.container.querySelector(`.drp-calendar.${side} .calendar-table thead`).innerHTML = html;
       html = "";
@@ -1360,9 +1330,9 @@ var DateRangePicker = (() => {
           html += `<td class="week">${calendar[row][0].localWeekNumber}</td>`;
         for (let col = 0; col < 7; col++) {
           var classes = [];
-          if (this.todayClasses && this.todayClasses.length && calendar[row][col].hasSame(DateTime.now(), "day"))
+          if (this.todayClasses && this.todayClasses.length && calendar[row][col].hasSame(luxon2.DateTime.now(), "day"))
             classes.push(this.todayClasses);
-          if (this.weekendClasses && this.weekendClasses.length && Info.getWeekendWeekdays().includes(calendar[row][col].weekday))
+          if (this.weekendClasses && this.weekendClasses.length && luxon2.Info.getWeekendWeekdays().includes(calendar[row][col].weekday))
             classes.push(this.weekendClasses);
           if (calendar[row][col].month != calendar[1][1].month)
             classes.push("off", "ends");
@@ -1460,8 +1430,8 @@ var DateRangePicker = (() => {
             html += `<option value="${i}">${i}</option>`;
           }
         } else {
-          const i_12 = DateTime.fromFormat(`${i % 24}`, "H").toFormat("h");
-          const i_ampm = DateTime.fromFormat(`${i % 24}`, "H").toFormat("a", { locale: "en-US" });
+          const i_12 = luxon2.DateTime.fromFormat(`${i % 24}`, "H").toFormat("h");
+          const i_ampm = luxon2.DateTime.fromFormat(`${i % 24}`, "H").toFormat("a", { locale: "en-US" });
           if (ampm == i_ampm) {
             if (!disabled && i == selected.hour) {
               html += `<option ampm="${i_ampm}" value="${i % 24}" selected>${i_12}</option>`;
@@ -1564,10 +1534,10 @@ var DateRangePicker = (() => {
         html += `<option value="AM"${am_html}`;
         if (selected.toFormat("a", { locale: "en-US" }) === "AM")
           html += " selected";
-        html += `>${Info.meridiems()[0]}</option><option value="PM"${pm_html}`;
+        html += `>${luxon2.Info.meridiems()[0]}</option><option value="PM"${pm_html}`;
         if (selected.toFormat("a", { locale: "en-US" }) === "PM")
           html += " selected";
-        html += `>${Info.meridiems()[1]}</option>`;
+        html += `>${luxon2.Info.meridiems()[1]}</option>`;
         html += "</select>";
         if (this.externalStyle === "bulma")
           html += "</div>";
@@ -2031,12 +2001,12 @@ var DateRangePicker = (() => {
         const ampm = time.querySelector(".ampmselect").value;
         if (ampm == null)
           time.querySelector(".ampmselect option:last-child").value;
-        if (ampm != DateTime.fromFormat(`${hour}`, "H").toFormat("a", { locale: "en-US" })) {
+        if (ampm != luxon2.DateTime.fromFormat(`${hour}`, "H").toFormat("a", { locale: "en-US" })) {
           time.querySelectorAll(".hourselect > option").forEach((el) => {
             el.hidden = !el.hidden;
           });
-          const h = DateTime.fromFormat(`${hour}`, "H").toFormat("h");
-          hour = DateTime.fromFormat(`${h}${ampm}`, "ha", { locale: "en-US" }).hour;
+          const h = luxon2.DateTime.fromFormat(`${hour}`, "H").toFormat("h");
+          hour = luxon2.DateTime.fromFormat(`${h}${ampm}`, "ha", { locale: "en-US" }).hour;
         }
       }
       var minute = 0;
@@ -2102,12 +2072,12 @@ var DateRangePicker = (() => {
         }
       }
       if (isLeft) {
-        monthChange = !DateTime.fromObject({ year, month }).hasSame(this.leftCalendar.month, "month");
+        monthChange = !luxon2.DateTime.fromObject({ year, month }).hasSame(this.leftCalendar.month, "month");
         this.leftCalendar.month = this.leftCalendar.month.set({ year, month });
         if (this.linkedCalendars)
           this.rightCalendar.month = this.leftCalendar.month.plus({ month: 1 });
       } else {
-        monthChange = !DateTime.fromObject({ year, month }).hasSame(this.leftCalendar.month, "month");
+        monthChange = !luxon2.DateTime.fromObject({ year, month }).hasSame(this.leftCalendar.month, "month");
         this.rightCalendar.month = this.rightCalendar.month.set({ year, month });
         if (this.linkedCalendars)
           this.leftCalendar.month = this.rightCalendar.month.minus({ month: 1 });
@@ -2144,11 +2114,11 @@ var DateRangePicker = (() => {
     elementChanged() {
       if (!this.isInputText) return;
       if (!this.element.value.length) return;
-      const format = typeof this.locale.format === "string" ? this.locale.format : DateTime.parseFormatForOpts(this.locale.format);
+      const format = typeof this.locale.format === "string" ? this.locale.format : luxon2.DateTime.parseFormatForOpts(this.locale.format);
       const dateString = this.element.value.split(this.locale.separator);
       let monthChange = false;
       if (this.singleDatePicker) {
-        let newDate = DateTime.fromFormat(this.element.value, format, { locale: DateTime.now().locale });
+        let newDate = luxon2.DateTime.fromFormat(this.element.value, format, { locale: luxon2.DateTime.now().locale });
         const oldDate = this.#startDate;
         if (!newDate.isValid || oldDate.equals(newDate))
           return;
@@ -2168,7 +2138,7 @@ var DateRangePicker = (() => {
           this.#endDate = this.#endDate.endOf("day");
         }
       } else if (!this.singleDatePicker && dateString.length === 2) {
-        const newDate = [0, 1].map((i) => DateTime.fromFormat(dateString[i], format, { locale: DateTime.now().locale }));
+        const newDate = [0, 1].map((i) => luxon2.DateTime.fromFormat(dateString[i], format, { locale: luxon2.DateTime.now().locale }));
         const oldDate = [this.#startDate, this.#endDate];
         if (!newDate[0].isValid || !newDate[1].isValid || (oldDate[0].equals(newDate[0]) && oldDate[1].equals(newDate[1]) || newDate[0] > newDate[1]))
           return;
@@ -2360,11 +2330,11 @@ var DateRangePicker = (() => {
     if (elements instanceof NodeList || elements instanceof HTMLCollection)
       elements = Array.from(elements);
     if (elements == null)
-      return new DateRangePicker(null, options || {}, callback);
+      return new DateRangePicker2(null, options || {}, callback);
     elements.forEach((el) => {
       if (el._daterangepicker && typeof el._daterangepicker.remove === "function")
         el._daterangepicker.remove();
-      el._daterangepicker = new DateRangePicker(el, options || {}, callback);
+      el._daterangepicker = new DateRangePicker2(el, options || {}, callback);
     });
     return elements.length === 1 ? elements[0] : elements;
   }
@@ -2398,6 +2368,9 @@ var DateRangePicker = (() => {
       return this._jQuery;
     }
   });
-  var daterangepicker_default = daterangepicker;
-  return __toCommonJS(daterangepicker_exports);
-})();
+  exports.DateRangePicker = DateRangePicker2;
+  exports.daterangepicker = daterangepicker;
+  exports.getDateRangePicker = getDateRangePicker;
+  return exports;
+})({}, luxon);
+//# sourceMappingURL=daterangepicker.js.map

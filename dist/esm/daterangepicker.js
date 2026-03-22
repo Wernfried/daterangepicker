@@ -238,7 +238,6 @@ class DateRangePicker {
           } else {
             console.error(`Option '${key}' is not valid`);
           }
-          ;
         }
       }
       if (this.minSpan && this.maxSpan && this.minSpan > this.maxSpan) {
@@ -267,7 +266,6 @@ class DateRangePicker {
           console.error(`Option 'timePickerStepSize' is not valid`);
           duration = this.timePickerStepSize;
         }
-        ;
         var valid = [];
         for (let unit of ["minutes", "seconds"])
           valid.push(...[1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30].map((x) => {
@@ -1311,7 +1309,6 @@ class DateRangePicker {
         html += ` class="${this.weekendDayClasses}"`;
       html += `>${dayOfWeek}</th>`;
     }
-    ;
     html += "</tr>";
     this.container.querySelector(`.drp-calendar.${side} .calendar-table thead`).innerHTML = html;
     html = "";
@@ -2370,10 +2367,5 @@ Object.defineProperty(window, "jQuery", {
     return this._jQuery;
   }
 });
-var daterangepicker_default = daterangepicker;
-export {
-  DateRangePicker,
-  daterangepicker,
-  daterangepicker_default as default,
-  getDateRangePicker
-};
+export { DateRangePicker, daterangepicker, getDateRangePicker };
+//# sourceMappingURL=daterangepicker.js.map

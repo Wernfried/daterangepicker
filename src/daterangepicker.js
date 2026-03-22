@@ -2987,9 +2987,6 @@ Object.defineProperty(window, "jQuery", {
    }
 });
 
-
-
-
 export { daterangepicker, getDateRangePicker, DateRangePicker };
 
 

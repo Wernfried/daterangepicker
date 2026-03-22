@@ -12,15 +12,9 @@
   "type": "module",
   "scripts": {
     "postversion": "sed -bi -e 's/daterangepicker@[[:digit:]]\\.[[:digit:]]\\+\\.[[:digit:]]\\+/daterangepicker@%npm_package_version%/' README.md",
-    "prebuild": "cat src/global.js > src/__daterangepicker.js && sed -b -E \"s/^import .*//\" src/daterangepicker.js >> src/__daterangepicker.js",
-    "build": "npm run build_esm && npm run build_global",
-    "postbuild": "npm run minify_esm && npm run minify_global && npm run minify_css",
-    "build_esm": "esbuild src/daterangepicker.js --outfile=dist/esm/daterangepicker.js --format=esm",
-    "build_global": "esbuild src/__daterangepicker.js --outfile=dist/global/daterangepicker.js --format=iife --global-name=DateRangePicker",
-    "minify_esm": "esbuild src/daterangepicker.js --outfile=dist/esm/daterangepicker.min.js --minify --format=esm",
-    "minify_global": "esbuild src/__daterangepicker.js --outfile=dist/global/daterangepicker.min.js --minify --format=iife --global-name=DateRangePicker",
-    "minify_css": "minify css/daterangepicker.css > css/daterangepicker.min.css && minify css/daterangepicker.bulma.css > css/daterangepicker.bulma.min.css",
-    "unix2dos": "unix2dos dist/esm/*.js dist/global/*.js css/*.min.css",
+    "build": "rollup -c",
+    "postbuild": "minify css/daterangepicker.css > css/daterangepicker.min.css && minify css/daterangepicker.bulma.css > css/daterangepicker.bulma.min.css",
+    "unix2dos": "unix2dos.exe dist/*/daterangepicker.js css/*.min.css",
     "prepack": "sed -bi '/API_Doc\\.md/q' README.md && npm run build && npm run unix2dos",
     "prepare": "jsdoc2md --EOL win32 --example-lang js src/daterangepicker.js > API_Doc.md && sed -n '/## Options$/,$p' API_Doc.md | sed -n '/name=\"Ranges\"/q;p' >> README.md",
     "postpack": "git commit -a -m \"Updated README.md\"",
@@ -35,7 +29,6 @@
     "url": "git+https://github.com/wernfried/daterangepicker.git"
   },
   "devDependencies": {
-    "esbuild": "^0.27.3",
     "jest": "^30.3.0",
     "jest-environment-jsdom": "^30.3.0",
     "jsdoc-to-markdown": "^9.1.3",
