@@ -19,8 +19,8 @@ Above samples are based on the [original repository](https://github.com/dangross
 #### Global import with `<script>` tags
 ```html
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.1.2/dist/global/daterangepicker.min.js"></script>
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.1.2/css/daterangepicker.min.css" rel="stylesheet" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.1.3/dist/global/daterangepicker.min.js"></script>
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.1.3/css/daterangepicker.min.css" rel="stylesheet" />
 
 <input type="text" id="picker" />
 
@@ -40,11 +40,11 @@ Above samples are based on the [original repository](https://github.com/dangross
 {
    "imports": {
       "luxon": "https://cdn.jsdelivr.net/npm/luxon@3.7.2/+esm",
-      "daterangepicker": "https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.1.2/+esm"
+      "daterangepicker": "https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.1.3/+esm"
    }
 }
 </script>
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.1.2/css/daterangepicker.min.css" rel="stylesheet" />
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.1.3/css/daterangepicker.min.css" rel="stylesheet" />
 
 <input type="text" id="picker" />
 
@@ -63,9 +63,9 @@ Above samples are based on the [original repository](https://github.com/dangross
 #### Style with Bulma
 ```html
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.1.2/dist/global/daterangepicker.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.1.3/dist/global/daterangepicker.min.js"></script>
 <link type="text/css" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css" rel="stylesheet" />
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.1.2/css/daterangepicker.bulma.min.css" rel="stylesheet" />
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.1.3/css/daterangepicker.bulma.min.css" rel="stylesheet" />
 
 <input type="text" id="picker" />
 
@@ -121,8 +121,8 @@ Initialisation with jQuery is supported in version 5.x
 ```html
 <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.1.2/dist/global/daterangepicker.min.js"></script>
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.1.2/css/daterangepicker.min.css" rel="stylesheet" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.1.3/dist/global/daterangepicker.min.js"></script>
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.1.3/css/daterangepicker.min.css" rel="stylesheet" />
 
 <input type="text" id="picker" />
 
@@ -305,44 +305,6 @@ You can style this daterangepicker with [Bulma CSS Framework](https://bulma.io/)
 ## Methods
 
 Available methods are listed in detail at [API Documentation](API_Doc.md). You will mainly use
-
-   * [daterangepicker(element, options, callback)](API_Doc.md#new_DateRangePicker_new)
-   * [.setStartDate(startDate)](API_Doc.md#DateRangePicker+setStartDate)
-   * [.setRange(startDate, endDate)](API_Doc.md#DateRangePicker+setRange)
-   * [.getDateRangePicker(element)](API_Doc.md#getDateRangePicker+getDateRangePicker)
-
-all other methods are used rarely.
-
-### Differences between `moment` and `luxon` library
-This table lists a few important differences between datarangepicker using moment and luxon. Check them carefully when you migrate from older daterangepicker.
-
-| Parameter               | moment                                              | luxon             |
-| ----------------------- | --------------------------------------------------- | ----------------- |
-| `locale.daysOfWeek`     | [ "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" ] | [ "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" ] | 
-| `locale.firstDay`       | 0-6 (Sunday to Saturday)                            | 1 for Monday through 7 for Sunday | 
-| to ISO-8601 String      | `toISOString()`                                     | `toISO()`         | 
-| to [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) Object | `toDate()` | `toJSDate()`         | 
-| from ISO-8601 String    | `moment(...)`                                       | `DateIme.fromISO(...)`         | 
-| from [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) Object | `moment(...)` | `DateIme.fromJSDate(...)`         | 
-| current day             | `moment()`                                          | `DateTime.now()`  |
-| format to string        | `format(...)`                                       | `toFormat(...)`   |
-| format tokens           | `'YYYY-MM-DD'`                                      | `'yyyy-MM-dd'`    |
-
-
-## License
-
-The MIT License (MIT)
-
-Copyright (c) 2012-2019 Dan Grossman<br/>
-Copyright (c) 2025 Wernfried Domscheit
-
-Licensed under the [MIT license](LICENSE).
-
-## API Documentation
-[API Documentation](API_Doc.md)
-
-
-
 ## Options
 Options for DateRangePicker
 
