@@ -342,7 +342,6 @@ Licensed under the [MIT license](LICENSE).
 [API Documentation](API_Doc.md)
 
 
-
 ## Options
 Options for DateRangePicker
 
