@@ -305,6 +305,44 @@ You can style this daterangepicker with [Bulma CSS Framework](https://bulma.io/)
 ## Methods
 
 Available methods are listed in detail at [API Documentation](API_Doc.md). You will mainly use
+
+   * [daterangepicker(element, options, callback)](API_Doc.md#new_DateRangePicker_new)
+   * [.setStartDate(startDate)](API_Doc.md#DateRangePicker+setStartDate)
+   * [.setRange(startDate, endDate)](API_Doc.md#DateRangePicker+setRange)
+   * [.getDateRangePicker(element)](API_Doc.md#getDateRangePicker+getDateRangePicker)
+
+all other methods are used rarely.
+
+### Differences between `moment` and `luxon` library
+This table lists a few important differences between datarangepicker using moment and luxon. Check them carefully when you migrate from older daterangepicker.
+
+| Parameter               | moment                                              | luxon             |
+| ----------------------- | --------------------------------------------------- | ----------------- |
+| `locale.daysOfWeek`     | [ "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" ] | [ "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" ] | 
+| `locale.firstDay`       | 0-6 (Sunday to Saturday)                            | 1 for Monday through 7 for Sunday | 
+| to ISO-8601 String      | `toISOString()`                                     | `toISO()`         | 
+| to [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) Object | `toDate()` | `toJSDate()`         | 
+| from ISO-8601 String    | `moment(...)`                                       | `DateIme.fromISO(...)`         | 
+| from [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) Object | `moment(...)` | `DateIme.fromJSDate(...)`         | 
+| current day             | `moment()`                                          | `DateTime.now()`  |
+| format to string        | `format(...)`                                       | `toFormat(...)`   |
+| format tokens           | `'YYYY-MM-DD'`                                      | `'yyyy-MM-dd'`    |
+
+
+## License
+
+The MIT License (MIT)
+
+Copyright (c) 2012-2019 Dan Grossman<br/>
+Copyright (c) 2025 Wernfried Domscheit
+
+Licensed under the [MIT license](LICENSE).
+
+## API Documentation
+[API Documentation](API_Doc.md)
+
+
+
 ## Options
 Options for DateRangePicker
 
