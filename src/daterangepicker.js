@@ -2991,8 +2991,6 @@ Object.defineProperty(window, "jQuery", {
 
 
 export { daterangepicker, getDateRangePicker, DateRangePicker };
-export default daterangepicker;
-
 
 
 /** @external HTMLElement
