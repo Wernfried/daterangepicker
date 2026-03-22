@@ -670,7 +670,7 @@ class DateRangePicker {
     * @name "dateChange"
     * @property {DateRangePickerEvent} event - The Event object
     * @property {DateRangePicker} event.picker - The daterangepicker object
-    * @property {string} side - Either `'start'` or `'end'` indicating whether `startDate` or `endDate` was changed. `null` for singleDatePicker
+    * @property {string} event.side - Either `'start'` or `'end'` indicating whether `startDate` or `endDate` was changed. `null` for singleDatePicker
     */
     onDateChange: { type: "dateChange", param: (side) => {
       return side;
@@ -681,7 +681,7 @@ class DateRangePicker {
     * @name "timeChange"
     * @property {DateRangePickerEvent} event - The Event object
     * @property {DateRangePicker} event.picker - The daterangepicker object
-    * @property {string} side - Either `'start'` or `'end'` indicating whether `startDate` or `endDate` was changed. `null` for singleDatePicker
+    * @property {string} event.side - Either `'start'` or `'end'` indicating whether `startDate` or `endDate` was changed. `null` for singleDatePicker
     */
     onTimeChange: { type: "timeChange", param: (side) => {
       return side;
@@ -716,8 +716,8 @@ class DateRangePicker {
     * @name "monthViewChange"
     * @property {DateRangePickerEvent} event - The Event object
     * @property {DateRangePicker} event.picker - The daterangepicker object
-    * @property {external:DateTime} left - The first day of month in left-hand calendar
-    * @property {external:DateTime} right - The first day of month in left-hand calendar or `null` for singleDatePicker
+    * @property {external:DateTime} event.left - The first day of month in left-hand calendar
+    * @property {external:DateTime} event.right - The first day of month in left-hand calendar or `null` for singleDatePicker
     */
     onMonthViewChange: {
       type: "monthViewChange",

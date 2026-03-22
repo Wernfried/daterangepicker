@@ -552,7 +552,7 @@ Emitted when the date changed. Does not trigger when time is changed, use ["time
 | --- | --- | --- |
 | event | [<code>DateRangePickerEvent</code>](#DateRangePickerEvent) | The Event object |
 | event.picker | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
-| side | <code>string</code> | Either `'start'` or `'end'` indicating whether `startDate` or `endDate` was changed. `null` for singleDatePicker |
+| event.side | <code>string</code> | Either `'start'` or `'end'` indicating whether `startDate` or `endDate` was changed. `null` for singleDatePicker |
 
 <a name="event_timeChange"></a>
 
@@ -566,7 +566,7 @@ Emitted when the time changed. Does not trigger when date is changed
 | --- | --- | --- |
 | event | [<code>DateRangePickerEvent</code>](#DateRangePickerEvent) | The Event object |
 | event.picker | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
-| side | <code>string</code> | Either `'start'` or `'end'` indicating whether `startDate` or `endDate` was changed. `null` for singleDatePicker |
+| event.side | <code>string</code> | Either `'start'` or `'end'` indicating whether `startDate` or `endDate` was changed. `null` for singleDatePicker |
 
 <a name="event_apply"></a>
 
@@ -619,8 +619,8 @@ Emitted after month view changed, for example by click on 'prev' or 'next'
 | --- | --- | --- |
 | event | [<code>DateRangePickerEvent</code>](#DateRangePickerEvent) | The Event object |
 | event.picker | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
-| left | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | The first day of month in left-hand calendar |
-| right | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | The first day of month in left-hand calendar or `null` for singleDatePicker |
+| event.left | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | The first day of month in left-hand calendar |
+| event.right | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | The first day of month in left-hand calendar or `null` for singleDatePicker |
 
 <a name="event_beforeRenderTimePicker"></a>
 
