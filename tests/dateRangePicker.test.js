@@ -140,15 +140,18 @@ test('daterangepicker process input and cancel', () => {
 test('daterangepicker select range and apply', () => {
     document.body.innerHTML = `<input id="p"> <input id="altStart" hidden> <input id="altEnd" hidden>`;
     const yesterday = [DateTime.now().startOf('day').minus({ day: 1 }), DateTime.now().endOf('day').minus({ day: 1 })];
+    const today = [DateTime.now().startOf('day'), DateTime.now().endOf('day')];
     daterangepicker('#p', {
         altInput: ['#altStart', '#altEnd'],
         ranges: {
-            'Today': [DateTime.now().startOf('day'), DateTime.now().endOf('day')],
+            'Today': today,
             'Yesterday': yesterday,
             'Last 7 Days': [DateTime.now().startOf('day').minus({ day: 7 }).toISODate(), DateTime.now().startOf('day').toISODate()],
             'Last 30 Days': [new Date(new Date - 1000 * 60 * 60 * 24 * 30), new Date()],
         },
         alwaysShowCalendars: true
+    }).addEventListener('beforeHide', (ev) => {
+        ev.preventDefault();
     });
     const drp = getDateRangePicker('#p');
     const input = document.querySelector('#p');
@@ -156,12 +159,14 @@ test('daterangepicker select range and apply', () => {
 
     const range = document.querySelector('.ranges li[data-range-key="Yesterday"]');
     range.click();
+    let active = document.querySelector('.ranges li[data-range-key="Yesterday"]').classList.contains('active');
+    expect(active).toBe(true);
 
     expect(drp.startDate.toString()).toBe(yesterday[0].toString());
     expect(drp.endDate.toString()).toBe(yesterday[1].toString());
     expect(document.querySelector('#altStart').value).toBe(yesterday[0].toISODate({ format: 'basic' }));
     expect(document.querySelector('#altEnd').value).toBe(yesterday[1].toISODate({ format: 'basic' }));
-    expect(isVisible(document.querySelector('div.daterangepicker'))).toBe(false);
+    expect(isVisible(document.querySelector('div.daterangepicker'))).toBe(true);
 
 });
 

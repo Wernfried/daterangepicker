@@ -16,13 +16,21 @@
   <link rel="stylesheet" type="text/css" href="css/daterangepicker.css" />
 
   <script type="module">
-    import {DateTime, Duration, Info, Settings } from 'luxon';
-    import {daterangepicker, getDateRangePicker} from 'daterangepicker';
+    import { DateTime, Duration, Info, Settings } from 'luxon';
+    import { daterangepicker, getDateRangePicker } from 'daterangepicker';
 
     const input = daterangepicker('#picker', {
       startDate: DateTime.now(),
-      timePicker: true,
-      singleDatePicker: true,
+      timePicker: false,
+      ranges: {
+        'Today': [DateTime.now().startOf('day'), DateTime.now().endOf('day')],
+        'Yesterday': [DateTime.now().startOf('day').minus({ day: 1 }), DateTime.now().endOf('day').minus({ day: 1 })],
+        'Last 7 Days': ['2025-03-01', '2025-03-07'],
+        'Last 30 Days': [new Date(new Date - 1000 * 60 * 60 * 24 * 30), new Date()],
+        'This Month': [DateTime.now().startOf('month'), DateTime.now().endOf('month')],
+        'Last Month': [DateTime.now().minus({ month: 1 }).startOf('month'), DateTime.now().minus({ month: 1 }).endOf('month')]
+      },
+      alwaysShowCalendars: true
     });
     input.click();
 

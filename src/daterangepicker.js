@@ -2474,25 +2474,23 @@ class DateRangePicker {
          return;
 
       // If selected range from calendar matches any custom range, then highlight it
-      var customRange = true;
-      var i = 0;
-      for (var range in this.ranges) {
-         var unit = this.timePicker ? 'hour' : 'day';
-         if (this.timePicker) {
-            if (this.timePickerOpts.showMinutes) {
-               unit = 'minute';
-            } else if (this.timePickerOpts.showSeconds) {
-               unit = 'second';
-            }
+      let customRange = true;
+      let unit = this.timePicker ? 'hour' : 'day';
+      if (this.timePicker) {
+         if (this.timePickerOpts.showMinutes) {
+            unit = 'minute';
+         } else if (this.timePickerOpts.showSeconds) {
+            unit = 'second';
          }
-         if (this.#startDate.startOf(unit).equals(this.ranges[range][0].startOf(unit)) && this.#endDate.startOf(unit).equals(this.ranges[range][1].startOf(unit))) {
+      }
+      for (const [key, [start, end]] of Object.entries(this.ranges)) {
+         if (this.#startDate.startOf(unit).equals(start.startOf(unit)) && this.#endDate.startOf(unit).equals(end.startOf(unit))) {
             customRange = false;
-            const range = this.container.querySelector(`.ranges li:eq(${i})`);
-            this.chosenLabel = range.dataset.rangeKey;
+            const range = this.container.querySelector(`.ranges li[data-range-key="${key}"]`);
+            this.chosenLabel = key;
             range.classList.add('active');
             break;
          }
-         i++;
       }
       if (customRange) {
          if (this.showCustomRangeLabel) {

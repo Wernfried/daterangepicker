@@ -188,7 +188,7 @@ input.addEventListener('beforeHide', (ev) => {
 ### Option `ranges`
 <a name="options-ranges"></a>
 ```js
-range: {
+ranges: {
    'Today': [DateTime.now().startOf('day'), DateTime.now().endOf('day')],
    'Yesterday': [DateTime.now().startOf('day').minus({day: 1}), DateTime.now().endOf('day').minus({day: 1})],
    'Last 7 Days': ['2025-03-01', '2025-03-07'],
