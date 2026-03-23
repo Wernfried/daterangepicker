@@ -1954,31 +1954,29 @@ var DateRangePicker = (function(exports, luxon2) {
     calculateChosenLabel() {
       if (Object.keys(this.ranges).length === 0)
         return;
-      var customRange = true;
-      var i = 0;
-      for (var range in this.ranges) {
-        var unit = this.timePicker ? "hour" : "day";
-        if (this.timePicker) {
-          if (this.timePickerOpts.showMinutes) {
-            unit = "minute";
-          } else if (this.timePickerOpts.showSeconds) {
-            unit = "second";
-          }
+      let customRange = true;
+      let unit = this.timePicker ? "hour" : "day";
+      if (this.timePicker) {
+        if (this.timePickerOpts.showMinutes) {
+          unit = "minute";
+        } else if (this.timePickerOpts.showSeconds) {
+          unit = "second";
         }
-        if (this.#startDate.startOf(unit).equals(this.ranges[range][0].startOf(unit)) && this.#endDate.startOf(unit).equals(this.ranges[range][1].startOf(unit))) {
+      }
+      for (const [key2, [start, end]] of Object.entries(this.ranges)) {
+        if (this.#startDate.startOf(unit).equals(start.startOf(unit)) && this.#endDate.startOf(unit).equals(end.startOf(unit))) {
           customRange = false;
-          const range2 = this.container.querySelector(`.ranges li:eq(${i})`);
-          this.chosenLabel = range2.dataset.rangeKey;
-          range2.classList.add("active");
+          const range = this.container.querySelector(`.ranges li[data-range-key="${key2}"]`);
+          this.chosenLabel = key2;
+          range.classList.add("active");
           break;
         }
-        i++;
       }
       if (customRange) {
         if (this.showCustomRangeLabel) {
-          const range2 = this.container.querySelector(".ranges li:last-child");
-          this.chosenLabel = range2.dataset.rangeKey;
-          range2.classList.add("active");
+          const range = this.container.querySelector(".ranges li:last-child");
+          this.chosenLabel = range.dataset.rangeKey;
+          range.classList.add("active");
         } else {
           this.chosenLabel = null;
         }
