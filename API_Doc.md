@@ -27,11 +27,11 @@
 <code>minDate</code>, <code>maxDate</code>, <code>minSpan</code>, <code>maxSpan</code>, <code>invalidDate</code> and <code>invalidTime</code> constraints.<br>
 Event is only triggered when date string is valid and date value is changing<br></p>
 </dd>
-<dt><a href="#event_beforeRenderCalendar">"beforeRenderCalendar"</a></dt>
+<dt><a href="#event_beforeRenderTimePicker">"beforeRenderTimePicker"</a></dt>
 <dd><p>Emitted before the calendar time picker is rendered.</p>
 </dd>
 <dt><a href="#event_beforeRenderCalendar">"beforeRenderCalendar"</a></dt>
-<dd><p>Emitted before the calendar is rendered. Useful to remove any manually added elements.</p>
+<dd><p>Emitted before the calendar is rendered.</p>
 </dd>
 <dt><a href="#event_show">"show"</a></dt>
 <dd><p>Emitted when the picker is shown</p>
@@ -69,10 +69,6 @@ Only useful when <a href="#Ranges">Ranges</a> are used.</p>
 </dd>
 <dt><a href="#event_monthViewChange">"monthViewChange"</a></dt>
 <dd><p>Emitted after month view changed, for example by click on &#39;prev&#39; or &#39;next&#39;</p>
-</dd>
-<dt><a href="#event_beforeRenderTimePicker">"beforeRenderTimePicker" (this)</a></dt>
-<dd><p>Emitted before the TimePicker is rendered.
-Useful to remove any manually added elements.</p>
 </dd>
 </dl>
 
@@ -112,6 +108,7 @@ Ranges are not validated against <code>minDate</code>, <code>maxDate</code>, <co
     * [.formatDate(date, format)](#DateRangePicker+formatDate) ⇒ <code>string</code>
     * [.validateInput(range, dipatch)](#DateRangePicker+validateInput) ⇒ <code>InputViolation</code> \| <code>null</code>
     * [.updateView(monthChange)](#DateRangePicker+updateView)
+    * [.move()](#DateRangePicker+move)
     * [.show()](#DateRangePicker+show)
     * [.hide()](#DateRangePicker+hide)
     * [.toggle()](#DateRangePicker+toggle)
@@ -120,7 +117,7 @@ Ranges are not validated against <code>minDate</code>, <code>maxDate</code>, <co
     * [.updateElement()](#DateRangePicker+updateElement)
     * [.updateAltInput()](#DateRangePicker+updateAltInput)
     * [.remove()](#DateRangePicker+remove)
-    * [.addListener(element, eventName, selector, delegate)](#DateRangePicker+addListener)
+    * [.triggerEvent(ev, ...args)](#DateRangePicker+triggerEvent)
 
 <a name="new_DateRangePicker_new"></a>
 
@@ -291,6 +288,12 @@ Could be useful after running [setStartDate](#DateRangePicker+setStartDate) or [
 | --- | --- | --- |
 | monthChange | <code>boolean</code> | If `true` then monthView changed |
 
+<a name="DateRangePicker+move"></a>
+
+### dateRangePicker.move()
+Place the picker at the right place in the document
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
 <a name="DateRangePicker+show"></a>
 
 ### dateRangePicker.show()
@@ -344,19 +347,17 @@ Update altInput `<input>` element with selected value
 Removes the picker from document
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
-<a name="DateRangePicker+addListener"></a>
+<a name="DateRangePicker+triggerEvent"></a>
 
-### dateRangePicker.addListener(element, eventName, selector, delegate)
-Helper function to add eventListener similar to jQuery .on( events [, selector ] [, data ] )
+### dateRangePicker.triggerEvent(ev, ...args)
+Helper function to dispatch events
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| element | <code>string</code> | Query selector of element where listener is added |
-| eventName | <code>string</code> | Name of the event |
-| selector | <code>string</code> | Query selector string to filter the descendants of the element |
-| delegate | <code>any</code> | Handler data |
+| ev | <code>Event</code> | From this.#events |
+| ...args | <code>any</code> | Additional parameters if needed |
 
 <a name="DateRangePickerEvent"></a>
 
@@ -434,9 +435,9 @@ drp.setStartDate(DateTime.now().minus({ years: 10 });
 
 // -> Calendar selects and shows "today - 3 days"
 ```
-<a name="event_beforeRenderCalendar"></a>
+<a name="event_beforeRenderTimePicker"></a>
 
-## "beforeRenderCalendar"
+## "beforeRenderTimePicker"
 Emitted before the calendar time picker is rendered.
 
 **Kind**: event emitted  
@@ -450,7 +451,7 @@ Emitted before the calendar time picker is rendered.
 <a name="event_beforeRenderCalendar"></a>
 
 ## "beforeRenderCalendar"
-Emitted before the calendar is rendered. Useful to remove any manually added elements.
+Emitted before the calendar is rendered.
 
 **Kind**: event emitted  
 **Properties**
@@ -621,18 +622,6 @@ Emitted after month view changed, for example by click on 'prev' or 'next'
 | event.picker | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
 | event.left | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | The first day of month in left-hand calendar |
 | event.right | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | The first day of month in left-hand calendar or `null` for singleDatePicker |
-
-<a name="event_beforeRenderTimePicker"></a>
-
-## "beforeRenderTimePicker" (this)
-Emitted before the TimePicker is rendered.
-Useful to remove any manually added elements.
-
-**Kind**: event emitted  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| this | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
 
 <a name="Options"></a>
 

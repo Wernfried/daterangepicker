@@ -601,13 +601,13 @@ class DateRangePicker {
     /**
     * Emitted before the calendar time picker is rendered.
     * @event
-    * @name "beforeRenderCalendar"
+    * @name "beforeRenderTimePicker"
     * @property {DateRangePickerEvent} event - The Event object
     * @property {DateRangePicker} event.picker - The daterangepicker object
     */
     onBeforeRenderTimePicker: { type: "beforeRenderTimePicker" },
     /**
-    * Emitted before the calendar is rendered. Useful to remove any manually added elements.
+    * Emitted before the calendar is rendered.
     * @event
     * @name "beforeRenderCalendar"
     * @property {DateRangePickerEvent} event - The Event object
@@ -868,9 +868,6 @@ class DateRangePicker {
     }
   }
   /* #endregion */
-  logDate(date) {
-    return this.timePicker ? date.toISO({ suppressMilliseconds: true }) : date.toISODate();
-  }
   /**
    * Format a DateTime object
    * @param {external:DateTime} date - The DateTime to format
@@ -1361,13 +1358,6 @@ class DateRangePicker {
     this.container.querySelector(`.drp-calendar.${side} .calendar-table tbody`).innerHTML = html;
   }
   /**
-  * Emitted before the TimePicker is rendered.
-  * Useful to remove any manually added elements.
-  * @event
-  * @name "beforeRenderTimePicker"
-  * @param {DateRangePicker} this - The daterangepicker object
-  */
-  /**
   * Renders the time pickers
   * @private
   * @emits "beforeRenderTimePicker"
@@ -1556,7 +1546,6 @@ class DateRangePicker {
   /* #region Move/Show/Hide */
   /**
   * Place the picker at the right place in the document
-  * @private
   */
   move() {
     let parentOffset = { top: 0, left: 0 };
@@ -2247,7 +2236,6 @@ class DateRangePicker {
    * Helper function to dispatch events
    * @param {Event} ev - From this.#events
    * @param  {...any?} args - Additional parameters if needed
-   * @private
    */
   triggerEvent(ev, ...args) {
     if (args.length === 0) {
@@ -2266,6 +2254,7 @@ class DateRangePicker {
    * @param {string} eventName - Name of the event
    * @param {string} selector - Query selector string to filter the descendants of the element
    * @param {any} delegate - Handler data
+   * @private
    */
   addListener(element, eventName, selector, delegate) {
     this.container.querySelectorAll(element).forEach((el) => {
