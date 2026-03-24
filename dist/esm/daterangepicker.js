@@ -78,6 +78,8 @@ class DateRangePicker {
       const name = item.name.replace(/^data-/g, "").replace(/-([a-z])/g, function(str) {
         return str[1].toUpperCase();
       });
+      if (!Object.keys(this).includes(name) || Object.keys(options).includes(name))
+        continue;
       let ts = DateTime.fromISO(item.value);
       const isDate = ["startDate", "endDate", "minDate", "maxDate", "initalMonth"].includes(name);
       dataOptions[name] = ts.isValid && isDate ? ts : JSON.parse(item.value);
