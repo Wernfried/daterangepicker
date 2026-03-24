@@ -61,7 +61,6 @@
   },
   "homepage": "https://github.com/wernfried/daterangepicker",
   "dependencies": {
-    "jquery": ">=4.0",
     "luxon": "^3.7.2"
   }
 }
