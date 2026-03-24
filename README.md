@@ -182,8 +182,6 @@ input.addEventListener('beforeHide', (ev) => {
 });
 ```
 
-
-
 ## Examples
 ### Option `ranges`
 <a name="options-ranges"></a>
