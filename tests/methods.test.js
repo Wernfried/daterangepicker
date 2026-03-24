@@ -1,4 +1,4 @@
-import DateRangePicker from '../src/daterangepicker.js';
+import { DateRangePicker } from '../src/daterangepicker.js';
 
 test('list all implemented methods', () => {
    const drp = new DateRangePicker();
@@ -23,7 +23,7 @@ test('list all implemented methods', () => {
       'clickApply', 'clickCancel',
       'elementChanged', 'keydown',
       'updateElement', 'updateAltInput',
-      'remove', 'triggerEvent', 
+      'remove', 'triggerEvent',
       'addListener'
    ];
 
