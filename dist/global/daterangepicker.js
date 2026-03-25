@@ -665,8 +665,10 @@ var DateRangePicker = (function(exports, luxon2) {
       * @name "outsideClick"
       * @property {DateRangePickerEvent} event - The Event object
       * @property {DateRangePicker} event.picker - The daterangepicker object
+      * @property {boolean} event.cancelable=true - Call `event.preventDefault()` to prevent default behaviour.<br>
+      * Useful to define custome areas where click shall not hide the picker
       */
-      onOutsideClick: { type: "outsideClick" },
+      onOutsideClick: { type: "outsideClick", param: { cancelable: true } },
       /**
       * Emitted when the date changed. Does not trigger when time is changed, use {@link #event_timeChange|"timeChange"} to handle it
       * @event
@@ -1719,12 +1721,14 @@ var DateRangePicker = (function(exports, luxon2) {
         // ie modal dialog fix
         e.type === "focusin" || closest2(target, this.element) || closest2(target, this.container) || target.closest(".calendar-table")
       ) return;
+      const event = this.triggerEvent(this.#events.onOutsideClick);
+      if (event.defaultPrevented)
+        return;
       if (this.onOutsideClick === "cancel") {
         this.#startDate = this.oldStartDate;
         this.#endDate = this.oldEndDate;
       }
       this.hide();
-      this.triggerEvent(this.#events.onOutsideClick);
     }
     /**
     * Move calendar to previous month

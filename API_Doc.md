@@ -536,10 +536,11 @@ Emitted when user clicks outside the picker. Use option `onOutsideClick` to defi
 **Kind**: event emitted  
 **Properties**
 
-| Name | Type | Description |
-| --- | --- | --- |
-| event | [<code>DateRangePickerEvent</code>](#DateRangePickerEvent) | The Event object |
-| event.picker | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| event | [<code>DateRangePickerEvent</code>](#DateRangePickerEvent) |  | The Event object |
+| event.picker | [<code>DateRangePicker</code>](#DateRangePicker) |  | The daterangepicker object |
+| event.cancelable | <code>boolean</code> | <code>true</code> | Call `event.preventDefault()` to prevent default behaviour.<br> Useful to define custome areas where click shall not hide the picker |
 
 <a name="event_dateChange"></a>
 

@@ -19,8 +19,8 @@ Above samples are based on the [original repository](https://github.com/dangross
 #### Global import with `<script>` tags
 ```html
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.1.9/dist/global/daterangepicker.min.js"></script>
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.1.9/css/daterangepicker.min.css" rel="stylesheet" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.2.0/dist/global/daterangepicker.min.js"></script>
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.2.0/css/daterangepicker.min.css" rel="stylesheet" />
 
 <input type="text" id="picker" />
 
@@ -40,11 +40,11 @@ Above samples are based on the [original repository](https://github.com/dangross
 {
    "imports": {
       "luxon": "https://cdn.jsdelivr.net/npm/luxon@3.7.2/+esm",
-      "daterangepicker": "https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.1.9/+esm"
+      "daterangepicker": "https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.2.0/+esm"
    }
 }
 </script>
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.1.9/css/daterangepicker.min.css" rel="stylesheet" />
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.2.0/css/daterangepicker.min.css" rel="stylesheet" />
 
 <input type="text" id="picker" />
 
@@ -63,9 +63,9 @@ Above samples are based on the [original repository](https://github.com/dangross
 #### Style with Bulma
 ```html
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.1.9/dist/global/daterangepicker.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.2.0/dist/global/daterangepicker.min.js"></script>
 <link type="text/css" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css" rel="stylesheet" />
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.1.9/css/daterangepicker.bulma.min.css" rel="stylesheet" />
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.2.0/css/daterangepicker.bulma.min.css" rel="stylesheet" />
 
 <input type="text" id="picker" />
 
@@ -121,8 +121,8 @@ Initialisation with jQuery is supported in version 5.x
 ```html
 <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.1.9/dist/global/daterangepicker.min.js"></script>
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.1.9/css/daterangepicker.min.css" rel="stylesheet" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.2.0/dist/global/daterangepicker.min.js"></script>
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.2.0/css/daterangepicker.min.css" rel="stylesheet" />
 
 <input type="text" id="picker" />
 
