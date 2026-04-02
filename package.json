@@ -2,8 +2,13 @@
   "name": "@wernfried/daterangepicker",
   "version": "5.2.0",
   "description": "Date range picker with time component and pre-defined ranges",
-  "main": "dist/global/daterangepicker.js",
   "module": "dist/esm/daterangepicker.js",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/daterangepicker.js",
+      "require": "./dist/cjs/daterangepicker.cjs"
+    }
+  },
   "browser": "dist/global/daterangepicker.min.js",
   "jsdelivr": "dist/global/daterangepicker.min.js",
   "unpkg": "dist/global/daterangepicker.min.js",
