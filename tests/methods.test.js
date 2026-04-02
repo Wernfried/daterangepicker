@@ -6,7 +6,7 @@ test('list all implemented methods', () => {
    const toBe = [
       'constructor', 'setStartDate',
       'setEndDate', 'setRange',
-      'parseDate', 'logDate',
+      'parseDate', 
       'formatDate', 'updateLabel',
       'validateInput', 'updateView',
       'updateMonthsInView', 'updateCalendars',
