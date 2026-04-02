@@ -356,8 +356,8 @@ class DateRangePicker {
     if (!this.timePicker) {
       if (this.minDate) this.minDate = this.minDate.startOf("day");
       if (this.maxDate) this.maxDate = this.maxDate.endOf("day");
-      this.#startDate = this.#startDate.startOf("day");
-      this.#endDate = this.#endDate.endOf("day");
+      if (this.#startDate) this.#startDate = this.#startDate.startOf("day");
+      if (this.#endDate) this.#endDate = this.#endDate.endOf("day");
     }
     if (!this.#startDate && this.initalMonth) {
       this.#endDate = null;
@@ -540,14 +540,14 @@ class DateRangePicker {
    * @type {external:DateTime}
    */
   get startDate() {
-    return this.timePicker ? this.#startDate : this.#startDate.startOf("day");
+    return this.timePicker ? this.#startDate : this.#startDate?.startOf("day") ?? null;
   }
   /**
    * endDate
    * @type {external:DateTime}
    */
   get endDate() {
-    return this.singleDatePicker ? null : this.timePicker ? this.#endDate : this.#endDate.endOf("day");
+    return this.singleDatePicker ? null : (this.timePicker ? this.#endDate : this.#endDate?.endOf("day")) ?? null;
   }
   set startDate(val) {
     this.#startDate = val;
@@ -1655,7 +1655,7 @@ class DateRangePicker {
       this.#startDate = this.oldStartDate;
       this.#endDate = this.oldEndDate;
     }
-    if (!this.#startDate.equals(this.oldStartDate) || !this.#endDate.equals(this.oldEndDate))
+    if (!this.#startDate.equals(this.oldStartDate ?? DateTime) || !this.#endDate.equals(this.oldEndDate ?? DateTime))
       this.callback(this.startDate, this.endDate, this.chosenLabel);
     this.updateElement();
     const event = this.triggerEvent(this.#events.onBeforeHide);
