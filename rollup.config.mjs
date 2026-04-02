@@ -12,7 +12,7 @@ const meta = [
 for (let fmt of meta) {
    for (let compact of [true, false]) {
       let out = {
-         file: `dist/${fmt.out ?? fmt.format}/daterangepicker${compact ? '.min' : ''}.${fmt.extentsion ?? 'js'}`,
+         file: `dist/${fmt.out ?? fmt.format}/daterangepicker${compact ? '.min' : ''}.${fmt.extension ?? 'js'}`,
          format: fmt.format,
          sourcemap: true,
          plugins: [minify({ minify: compact })]

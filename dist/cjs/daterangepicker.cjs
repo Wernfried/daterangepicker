@@ -2364,4 +2364,4 @@ Object.defineProperty(window, "jQuery", {
 exports.DateRangePicker = DateRangePicker;
 exports.daterangepicker = daterangepicker;
 exports.getDateRangePicker = getDateRangePicker;
-//# sourceMappingURL=daterangepicker.js.map
+//# sourceMappingURL=daterangepicker.cjs.map
