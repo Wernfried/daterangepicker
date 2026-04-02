@@ -78,7 +78,7 @@ class DateRangePicker {
       const name = item.name.replace(/^data-/g, "").replace(/-([a-z])/g, function(str) {
         return str[1].toUpperCase();
       });
-      if (!Object.keys(this).includes(name) || Object.keys(options).includes(name))
+      if (!Object.keys(this).concat(["startDate", "endDate"]).includes(name) || Object.keys(options).includes(name))
         continue;
       let ts = DateTime.fromISO(item.value);
       const isDate = ["startDate", "endDate", "minDate", "maxDate", "initalMonth"].includes(name);
@@ -2240,8 +2240,8 @@ class DateRangePicker {
   }
   /**
    * Helper function to dispatch events
-   * @param {Event} ev - From this.#events
-   * @param  {...any?} args - Additional parameters if needed
+   * @param {object} ev - Event template from this.#events
+   * @param  {...object} args - Additional parameters if needed
    */
   triggerEvent(ev, ...args) {
     if (args.length === 0) {
@@ -2259,7 +2259,7 @@ class DateRangePicker {
    * @param {string} element - Query selector of element where listener is added
    * @param {string} eventName - Name of the event
    * @param {string} selector - Query selector string to filter the descendants of the element
-   * @param {any} delegate - Handler data
+   * @param {function} delegate - Handler data
    * @private
    */
   addListener(element, eventName, selector, delegate) {

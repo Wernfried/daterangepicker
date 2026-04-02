@@ -356,8 +356,8 @@ Helper function to dispatch events
 
 | Param | Type | Description |
 | --- | --- | --- |
-| ev | <code>Event</code> | From this.#events |
-| ...args | <code>any</code> | Additional parameters if needed |
+| ev | <code>object</code> | Event template from this.#events |
+| ...args | <code>object</code> | Additional parameters if needed |
 
 <a name="DateRangePickerEvent"></a>
 
