@@ -7,7 +7,8 @@
     ".": {
       "import": "./dist/esm/daterangepicker.js",
       "require": "./dist/cjs/daterangepicker.cjs"
-    }
+    },
+    "./css/*": "./css/*"
   },
   "browser": "dist/global/daterangepicker.min.js",
   "jsdelivr": "dist/global/daterangepicker.min.js",
