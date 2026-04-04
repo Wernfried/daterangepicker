@@ -244,7 +244,7 @@ class DateRangePicker {
       if (this.element == null)
          return;
 
-      this.callback = function () { };
+      this.callback = null;
 
       //some state information
       this.isShowing = false;
@@ -1122,6 +1122,8 @@ class DateRangePicker {
     * @returns {string} - Formatted date string
     */
    formatDate(date, format = this.locale.format) {
+      if (date === null)
+         return null;
       if (typeof format === 'object') {
          return date.toLocaleString(format);
       } else {
@@ -2094,9 +2096,14 @@ class DateRangePicker {
          this.#endDate = this.oldEndDate;
       }
 
-      //if a new date range was selected, invoke the user callback function
-      if (!this.#startDate.equals(this.oldStartDate ?? DateTime) || !this.#endDate.equals(this.oldEndDate ?? DateTime))
-         this.callback(this.startDate, this.endDate, this.chosenLabel);
+      if (typeof this.callback === 'function') {
+         //if a new date range was selected, invoke the user callback function
+         if (
+            (this.#startDate && !this.#startDate.equals(this.oldStartDate ?? DateTime)) ||
+            (this.#endDate && !this.singleDatePicker && !this.#endDate.equals(this.oldEndDate ?? DateTime))
+         )
+            this.callback(this.startDate, this.endDate, this.chosenLabel);
+      }
 
       //if picker is attached to a text input, update it
       this.updateElement();
