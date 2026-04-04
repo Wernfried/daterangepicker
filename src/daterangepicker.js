@@ -996,7 +996,7 @@ class DateRangePicker {
    */
    setStartDate(startDate, updateView = true) {
       if (!this.singleDatePicker)
-         return setRange(startDate, this.#endDate, updateView);
+         return this.setRange(startDate, this.#endDate, updateView);
 
       const oldDate = this.#startDate;
       let newDate = this.parseDate(startDate);
@@ -1037,7 +1037,7 @@ class DateRangePicker {
    * drp.setEndDate(DateTime.now().startOf('hour'));
    */
    setEndDate(endDate, updateView = true) {
-      return this.singleDatePicker ? null : setRange(this.#startDate, endDate, updateView);
+      return this.singleDatePicker ? null : this.setRange(this.#startDate, endDate, updateView);
    }
 
    /**
