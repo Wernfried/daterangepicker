@@ -66,8 +66,7 @@ var DateRangePicker = (function(exports, luxon2) {
       };
       if (this.element == null)
         return;
-      this.callback = function() {
-      };
+      this.callback = null;
       this.isShowing = false;
       this.leftCalendar = {};
       this.rightCalendar = {};
@@ -880,6 +879,8 @@ var DateRangePicker = (function(exports, luxon2) {
      * @returns {string} - Formatted date string
      */
     formatDate(date, format = this.locale.format) {
+      if (date === null)
+        return null;
       if (typeof format === "object") {
         return date.toLocaleString(format);
       } else {
@@ -1656,8 +1657,10 @@ var DateRangePicker = (function(exports, luxon2) {
         this.#startDate = this.oldStartDate;
         this.#endDate = this.oldEndDate;
       }
-      if (!this.#startDate.equals(this.oldStartDate ?? luxon2.DateTime) || !this.#endDate.equals(this.oldEndDate ?? luxon2.DateTime))
-        this.callback(this.startDate, this.endDate, this.chosenLabel);
+      if (typeof this.callback === "function") {
+        if (this.#startDate && !this.#startDate.equals(this.oldStartDate ?? luxon2.DateTime) || this.#endDate && !this.singleDatePicker && !this.#endDate.equals(this.oldEndDate ?? luxon2.DateTime))
+          this.callback(this.startDate, this.endDate, this.chosenLabel);
+      }
       this.updateElement();
       const event = this.triggerEvent(this.#events.onBeforeHide);
       if (event.defaultPrevented)
