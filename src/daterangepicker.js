@@ -22,7 +22,7 @@ class DateRangePicker {
       * Date value is rounded to match option `timePickerStepSize`<br>
       * Option `isInvalidDate` and `isInvalidTime` are not evaluated, you may set date/time which is not selectable in calendar.<br>
       * If the date does not fall into `minDate` and `maxDate` then date is shifted and a warning is written to console.<br>
-      * Use `startDate: null` to show calendar without an inital selected date.
+      * Use `startDate: null` to show calendar without an initial selected date.
       * @property {external:DateTime|external:Date|string} endDate - Defautl: `DateTime.now().endOf('day')`<br>The end date of the initially selected date range.<br>
       * Must be a `luxon.DateTime` or `Date` or `string` according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} or a string matching `locale.format`.<br>
       * Date value is rounded to match option `timePickerStepSize`<br>
@@ -42,10 +42,10 @@ class DateRangePicker {
       * @property {external:Duration|string|number|null} defaultSpan - The span which is used when endDate is automatically updated due to wrong user input<br>
       * Must be a `luxon.Duration` or number of seconds or a string according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} duration.<br>
       * Ignored when `singleDatePicker: true`. Not relevant if `minSpan: null`
-      * @property {external:DateTime|external:Date|string|null} initalMonth - Default: `DateTime.now().startOf('month')`<br>
-      * The inital month shown when `startDate: null`. Be aware, the attached `<input>` element must be also empty.<br>
+      * @property {external:DateTime|external:Date|string|null} initialMonth - Default: `DateTime.now().startOf('month')`<br>
+      * The inital month to be shown. Only relevant for `startDate: null`. Be aware, the attached `<input>` element must also be empty.<br>
       * Must be a `luxon.DateTime` or `Date` or `string` according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} or a string matching `locale.format`.<br>
-      * When `initalMonth` is used, then `endDate` is ignored and it works only with `timePicker: false`
+      * Works only with `timePicker: false`
 
       * @property {boolean} autoApply=false - Hide the `Apply` and `Cancel` buttons, and automatically apply a new date range as soon as two dates are clicked.<br>
       * Only useful when `timePicker: false`
@@ -192,7 +192,7 @@ class DateRangePicker {
       this.maxSpan = null;
       this.minSpan = null;
       this.defaultSpan = null;
-      this.initalMonth = DateTime.now().startOf('month');
+      this.initialMonth = DateTime.now().startOf('month');
       this.autoApply = false;
       this.singleDatePicker = false;
       this.singleMonthView = false;
@@ -266,7 +266,7 @@ class DateRangePicker {
             continue; // do not try to parse any attributes which are not needed
 
          let ts = DateTime.fromISO(item.value);
-         const isDate = ['startDate', 'endDate', 'minDate', 'maxDate', 'initalMonth'].includes(name);
+         const isDate = ['startDate', 'endDate', 'minDate', 'maxDate', 'initialMonth'].includes(name);
          dataOptions[name] = (ts.isValid && isDate) ? ts : JSON.parse(item.value);
       }
       //javascript options take precedence over data-* attributes
@@ -429,7 +429,7 @@ class DateRangePicker {
       }
       // #endregion
 
-      // #region Inital Values
+      // #region initial Values
       if (!this.singleDatePicker) {
          for (let opt of ['minSpan', 'maxSpan', 'defaultSpan']) {
             if (['string', 'number', 'object'].includes(typeof options[opt])) {
@@ -498,7 +498,7 @@ class DateRangePicker {
          };
       }
 
-      for (let opt of ['startDate', 'endDate', 'minDate', 'maxDate', 'initalMonth']) {
+      for (let opt of ['startDate', 'endDate', 'minDate', 'maxDate', 'initialMonth']) {
          if (opt === 'endDate' && this.singleDatePicker)
             continue;
          if (typeof options[opt] === 'object') {
@@ -568,11 +568,11 @@ class DateRangePicker {
          if (this.#endDate) this.#endDate = this.#endDate.endOf('day');
       }
 
-      if (!this.#startDate && this.initalMonth) {
+      if (!this.#startDate && this.initialMonth) {
          // No initial date selected
          this.#endDate = null;
          if (this.timePicker)
-            console.error(`Option 'initalMonth' works only with 'timePicker: false'`);
+            console.error(`Option 'initialMonth' works only with 'timePicker: false'`);
       } else {
          // Do some sanity checks on startDate and endDate for minDate, maxDate, minSpan, maxSpan, etc.
          // Otherwise you may initialize a calendar were nothing can be selected
@@ -1436,11 +1436,11 @@ class DateRangePicker {
             }
          }
       } else {
-         if (!this.#startDate && this.initalMonth) {
-            // Inital view without date
-            this.leftCalendar.month = this.initalMonth;
+         if (!this.#startDate && this.initialMonth) {
+            // initial view without date
+            this.leftCalendar.month = this.initialMonth;
             if (!this.singleMonthView)
-               this.rightCalendar.month = this.initalMonth.plus({ month: 1 });
+               this.rightCalendar.month = this.initialMonth.plus({ month: 1 });
          } else {
             if (!this.leftCalendar.month.hasSame(this.#startDate, 'month') && !this.rightCalendar.month.hasSame(this.#startDate, 'month')) {
                this.leftCalendar.month = this.#startDate.startOf('month');
@@ -1543,8 +1543,8 @@ class DateRangePicker {
       // Build the matrix of dates that will populate the calendar
       //
       var calendar = side === 'left' ? this.leftCalendar : this.rightCalendar;
-      if (calendar.month == null && !this.#startDate && this.initalMonth)
-         calendar.month = this.initalMonth.startOf('month');
+      if (calendar.month == null && !this.#startDate && this.initialMonth)
+         calendar.month = this.initialMonth.startOf('month');
 
       const firstDay = calendar.month.startOf('month');
       const lastDay = calendar.month.endOf('month').startOf('day');
@@ -2252,7 +2252,7 @@ class DateRangePicker {
       const leftCalendar = this.leftCalendar;
       const rightCalendar = this.rightCalendar;
       const startDate = this.#startDate;
-      const initalMonth = this.initalMonth;
+      const initialMonth = this.initialMonth;
       if (!this.#endDate) {
          this.container.querySelectorAll('.drp-calendar tbody td').forEach(el => {
 
@@ -2265,7 +2265,7 @@ class DateRangePicker {
             const cal = el.closest('.drp-calendar');
             const dt = cal.classList.contains('left') ? leftCalendar.calendar[row][col] : rightCalendar.calendar[row][col];
 
-            if (!startDate && initalMonth) {
+            if (!startDate && initialMonth) {
                el.classList.remove('in-range');
             } else {
                el.classList.toggle('in-range', (dt > startDate) && dt < date || dt.hasSame(date, 'day'));
@@ -2382,7 +2382,7 @@ class DateRangePicker {
 
       if (this.#endDate || !this.#startDate || date < this.#startDate.startOf('day')) { //picking start
          // #endDate          -> Must be the start of a new range
-         // !#startDate       -> Click on empty calendar (without any inital date)
+         // !#startDate       -> Click on empty calendar (without any initial date)
          // date < #startDate -> startDate was selected, but user likes to set an earlier day
          if (this.timePicker) {
             let hour = parseInt(this.container.querySelector('.start-time .hourselect').value, 10);
@@ -2740,7 +2740,7 @@ class DateRangePicker {
    * @emits external:change
    */
    updateElement() {
-      if (this.#startDate == null && this.initalMonth)
+      if (this.#startDate == null && this.initialMonth)
          return;
 
       if (this.isInputText) {
