@@ -16,7 +16,7 @@ var DateRangePicker = (function(exports, luxon2) {
       this.maxSpan = null;
       this.minSpan = null;
       this.defaultSpan = null;
-      this.initalMonth = luxon2.DateTime.now().startOf("month");
+      this.initialMonth = luxon2.DateTime.now().startOf("month");
       this.autoApply = false;
       this.singleDatePicker = false;
       this.singleMonthView = false;
@@ -81,7 +81,7 @@ var DateRangePicker = (function(exports, luxon2) {
         if (!Object.keys(this).concat(["startDate", "endDate"]).includes(name) || Object.keys(options).includes(name))
           continue;
         let ts = luxon2.DateTime.fromISO(item.value);
-        const isDate = ["startDate", "endDate", "minDate", "maxDate", "initalMonth"].includes(name);
+        const isDate = ["startDate", "endDate", "minDate", "maxDate", "initialMonth"].includes(name);
         dataOptions[name] = ts.isValid && isDate ? ts : JSON.parse(item.value);
       }
       options = { ...dataOptions, ...options };
@@ -296,7 +296,7 @@ var DateRangePicker = (function(exports, luxon2) {
           secondStep: this.timePickerStepSize.seconds
         };
       }
-      for (let opt of ["startDate", "endDate", "minDate", "maxDate", "initalMonth"]) {
+      for (let opt of ["startDate", "endDate", "minDate", "maxDate", "initialMonth"]) {
         if (opt === "endDate" && this.singleDatePicker)
           continue;
         if (typeof options[opt] === "object") {
@@ -359,10 +359,10 @@ var DateRangePicker = (function(exports, luxon2) {
         if (this.#startDate) this.#startDate = this.#startDate.startOf("day");
         if (this.#endDate) this.#endDate = this.#endDate.endOf("day");
       }
-      if (!this.#startDate && this.initalMonth) {
+      if (!this.#startDate && this.initialMonth) {
         this.#endDate = null;
         if (this.timePicker)
-          console.error(`Option 'initalMonth' works only with 'timePicker: false'`);
+          console.error(`Option 'initialMonth' works only with 'timePicker: false'`);
       } else {
         const violations = this.validateInput(null, false);
         if (violations != null) {
@@ -1153,10 +1153,10 @@ var DateRangePicker = (function(exports, luxon2) {
           }
         }
       } else {
-        if (!this.#startDate && this.initalMonth) {
-          this.leftCalendar.month = this.initalMonth;
+        if (!this.#startDate && this.initialMonth) {
+          this.leftCalendar.month = this.initialMonth;
           if (!this.singleMonthView)
-            this.rightCalendar.month = this.initalMonth.plus({ month: 1 });
+            this.rightCalendar.month = this.initialMonth.plus({ month: 1 });
         } else {
           if (!this.leftCalendar.month.hasSame(this.#startDate, "month") && !this.rightCalendar.month.hasSame(this.#startDate, "month")) {
             this.leftCalendar.month = this.#startDate.startOf("month");
@@ -1239,8 +1239,8 @@ var DateRangePicker = (function(exports, luxon2) {
       if (side === "right" && this.singleMonthView)
         return;
       var calendar = side === "left" ? this.leftCalendar : this.rightCalendar;
-      if (calendar.month == null && !this.#startDate && this.initalMonth)
-        calendar.month = this.initalMonth.startOf("month");
+      if (calendar.month == null && !this.#startDate && this.initialMonth)
+        calendar.month = this.initialMonth.startOf("month");
       const firstDay = calendar.month.startOf("month");
       const lastDay = calendar.month.endOf("month").startOf("day");
       var theDate = calendar.month.startOf("month").minus({ day: 1 });
@@ -1780,7 +1780,7 @@ var DateRangePicker = (function(exports, luxon2) {
       const leftCalendar = this.leftCalendar;
       const rightCalendar = this.rightCalendar;
       const startDate = this.#startDate;
-      const initalMonth = this.initalMonth;
+      const initialMonth = this.initialMonth;
       if (!this.#endDate) {
         this.container.querySelectorAll(".drp-calendar tbody td").forEach((el) => {
           if (el.classList.contains("week")) return;
@@ -1789,7 +1789,7 @@ var DateRangePicker = (function(exports, luxon2) {
           const col2 = title2.substring(3, 4);
           const cal2 = el.closest(".drp-calendar");
           const dt = cal2.classList.contains("left") ? leftCalendar.calendar[row2][col2] : rightCalendar.calendar[row2][col2];
-          if (!startDate && initalMonth) {
+          if (!startDate && initialMonth) {
             el.classList.remove("in-range");
           } else {
             el.classList.toggle("in-range", dt > startDate && dt < date || dt.hasSame(date, "day"));
@@ -2180,7 +2180,7 @@ var DateRangePicker = (function(exports, luxon2) {
     * @emits external:change
     */
     updateElement() {
-      if (this.#startDate == null && this.initalMonth)
+      if (this.#startDate == null && this.initialMonth)
         return;
       if (this.isInputText) {
         let newValue = this.formatDate(this.#startDate);
