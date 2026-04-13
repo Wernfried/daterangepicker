@@ -451,12 +451,14 @@ class DateRangePicker {
             this.maxSpan = null;
             console.warn(`Ignore option 'minSpan' and 'maxSpan', because 'minSpan' must be smaller than 'maxSpan'`);
          }
-         if (this.defaultSpan && this.minSpan && this.minSpan > this.defaultSpan) {
-            this.defaultSpan = null;
-            console.warn(`Ignore option 'defaultSpan', because 'defaultSpan' must be greater than 'minSpan'`);
-         } else if (this.defaultSpan && this.maxSpan && this.maxSpan < this.defaultSpan) {
-            this.defaultSpan = null;
-            console.warn(`Ignore option 'defaultSpan', because 'defaultSpan' must be smaller than 'maxSpan'`);
+         if (this.defaultSpan) {
+            if (this.minSpan && this.minSpan > this.defaultSpan) {
+               this.defaultSpan = null;
+               console.warn(`Ignore option 'defaultSpan', because 'defaultSpan' must be greater than 'minSpan'`);
+            } else if (this.maxSpan && this.maxSpan < this.defaultSpan) {
+               this.defaultSpan = null;
+               console.warn(`Ignore option 'defaultSpan', because 'defaultSpan' must be smaller than 'maxSpan'`);
+            }
          }
       }
 
@@ -1353,10 +1355,14 @@ class DateRangePicker {
 
       if (this.minSpan) {
          // If the endDate falls below those allowed by the minSpan option, expand the range to the allowable period.
-         const minDate = startDate.plus(this.defaultSpan ?? this.minSpan);
+         const minDate = startDate.plus(this.minSpan);
          if (endDate < minDate) {
             violation = { old: endDate, reason: 'minSpan' };
-            endDate = endDate.plus({ seconds: Math.trunc(minDate.diff(endDate).as('seconds') / shiftStep) * shiftStep });
+            if (this.defaultSpan) {
+               endDate = endDate.plus({ seconds: Math.trunc(startDate.plus(this.defaultSpan).diff(endDate).as('seconds') / shiftStep) * shiftStep });
+            } else {
+               endDate = endDate.plus({ seconds: Math.trunc(minDate.diff(endDate).as('seconds') / shiftStep) * shiftStep });
+            }
             if (endDate < minDate)
                endDate = endDate.plus(this.timePicker ? this.timePickerStepSize : { days: 1 });
             violation.new = endDate;
@@ -1756,7 +1762,7 @@ class DateRangePicker {
          maxDate = this.#startDate.plus(this.maxSpan);
 
       if (this.minSpan && side === 'end')
-         minLimit = this.#startDate.plus(this.defaultSpan ?? this.minSpan);
+         minLimit = this.#startDate.plus(this.minSpan);
 
       if (side === 'start') {
          selected = this.#startDate;
