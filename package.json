@@ -1,6 +1,6 @@
 {
   "name": "@wernfried/daterangepicker",
-  "version": "5.2.13",
+  "version": "5.2.14",
   "description": "Date range picker with time component and pre-defined ranges",
   "module": "dist/esm/daterangepicker.js",
   "exports": {
