@@ -1396,7 +1396,8 @@ class DateRangePicker {
       if (maxDate && selected > maxDate)
         selected = maxDate;
     }
-    let disabled = { hour: false, minute: false, second: false, ampm: false };
+    let disabledHours = [];
+    let disabledMinutes = [];
     html += `<th colspan="7">`;
     if (this.externalStyle === "bulma")
       html += '<div class="select is-small mx-1">';
@@ -1407,18 +1408,19 @@ class DateRangePicker {
       start = ampm === "AM" ? 1 : 13;
     for (var i = start; i <= start + 23; i += this.timePickerOpts.hourStep) {
       let time = selected.set({ hour: i % 24 });
+      let disabled = false;
       if (minDate && time.set({ minute: 59 }) < minDate)
-        disabled.hour = true;
+        disabled = true;
       if (maxDate && time.set({ minute: 0 }) > maxDate)
-        disabled.hour = true;
+        disabled = true;
       if (minLimit && time.endOf("hour") < minLimit)
-        disabled.hour = true;
-      if (!disabled.hour && this.isInvalidTime(time, this.singleDatePicker ? null : side, "hour"))
-        disabled.hour = true;
+        disabled = true;
+      if (!disabled && this.isInvalidTime(time, this.singleDatePicker ? null : side, "hour"))
+        disabled = true;
       if (this.timePicker24Hour) {
-        if (!disabled.hour && i == selected.hour) {
+        if (!disabled && i == selected.hour) {
           html += `<option value="${i}" selected>${i}</option>`;
-        } else if (disabled.hour) {
+        } else if (disabled) {
           html += `<option value="${i}" disabled class="disabled">${i}</option>`;
         } else {
           html += `<option value="${i}">${i}</option>`;
@@ -1427,9 +1429,9 @@ class DateRangePicker {
         const i_12 = DateTime.fromFormat(`${i % 24}`, "H").toFormat("h");
         const i_ampm = DateTime.fromFormat(`${i % 24}`, "H").toFormat("a", { locale: "en-US" });
         if (ampm == i_ampm) {
-          if (!disabled.hour && i == selected.hour) {
+          if (!disabled && i == selected.hour) {
             html += `<option ampm="${i_ampm}" value="${i % 24}" selected>${i_12}</option>`;
-          } else if (disabled.hour) {
+          } else if (disabled) {
             html += `<option  ampm="${i_ampm}" value="${i % 24}" disabled class="disabled">${i_12}</option>`;
           } else {
             html += `<option ampm="${i_ampm}" value="${i % 24}">${i_12}</option>`;
@@ -1438,6 +1440,7 @@ class DateRangePicker {
           html += `<option ampm="${i_ampm}" hidden="hidden" value="${i % 24}">${i_12}</option>`;
         }
       }
+      disabledHours.push(disabled);
     }
     html += "</select>";
     if (this.externalStyle === "bulma")
@@ -1450,23 +1453,25 @@ class DateRangePicker {
       for (var i = 0; i < 60; i += this.timePickerOpts.minuteStep) {
         var padded = i < 10 ? "0" + i : i;
         let time = selected.set({ minute: i });
-        if (disabled.hour)
-          disabled.minute = true;
+        let disabled = false;
+        if (disabledHours.every((x) => x))
+          disabled = true;
         if (minDate && time.set({ second: 59 }) < minDate)
-          disabled.minute = true;
+          disabled = true;
         if (maxDate && time.set({ second: 0 }) > maxDate)
-          disabled.minute = true;
+          disabled = true;
         if (minLimit && time.endOf("minute") < minLimit)
-          disabled.minute = true;
-        if (!disabled.minute && this.isInvalidTime(time, this.singleDatePicker ? null : side, "minute"))
-          disabled.minute = true;
-        if (selected.minute == i && !disabled.minute) {
+          disabled = true;
+        if (!disabled && this.isInvalidTime(time, this.singleDatePicker ? null : side, "minute"))
+          disabled = true;
+        if (selected.minute == i && !disabled) {
           html += `<option value="${i}" selected>${padded}</option>`;
-        } else if (disabled.minute) {
+        } else if (disabled) {
           html += `<option value="${i}" disabled class="disabled">${padded}</option>`;
         } else {
           html += `<option value="${i}">${padded}</option>`;
         }
+        disabledMinutes.push(disabled);
       }
       html += "</select>";
       if (this.externalStyle === "bulma")
@@ -1480,19 +1485,20 @@ class DateRangePicker {
       for (var i = 0; i < 60; i += this.timePickerOpts.secondStep) {
         var padded = i < 10 ? "0" + i : i;
         let time = selected.set({ second: i });
-        if (disabled.minute)
-          disabled.second = true;
+        let disabled = false;
+        if (disabledMinutes.every((x) => x))
+          disabled = true;
         if (minDate && time < minDate)
-          disabled.second = true;
+          disabled = true;
         if (maxDate && time > maxDate)
-          disabled.second = true;
+          disabled = true;
         if (minLimit && time < minLimit)
-          disabled.second = true;
-        if (!disabled.second && this.isInvalidTime(time, this.singleDatePicker ? null : side, "second"))
-          disabled.second = true;
-        if (selected.second == i && !disabled.second) {
+          disabled = true;
+        if (!disabled && this.isInvalidTime(time, this.singleDatePicker ? null : side, "second"))
+          disabled = true;
+        if (selected.second == i && !disabled) {
           html += `<option value="${i}" selected>${padded}</option>`;
-        } else if (disabled.second) {
+        } else if (disabled) {
           html += `<option value="${i}" disabled class="disabled">${padded}</option>`;
         } else {
           html += `<option value="${i}">${padded}</option>`;
@@ -1508,15 +1514,16 @@ class DateRangePicker {
       html += '<select class="ampmselect">';
       var am_html = "";
       var pm_html = "";
-      if (disabled.hour)
-        disabled.ampm = true;
+      let disabled = false;
+      if (disabledHours.every((x) => x))
+        disabled = true;
       if (minDate && selected.startOf("day") < minDate)
-        disabled.ampm = true;
+        disabled = true;
       if (maxDate && selected.endOf("day") > maxDate)
-        disabled.ampm = true;
+        disabled = true;
       if (minLimit && selected.startOf("day") < minLimit)
-        disabled.ampm = true;
-      if (disabled.ampm) {
+        disabled = true;
+      if (disabled) {
         am_html = ' disabled class="disabled "';
         pm_html = ' disabled class="disabled"';
       } else {
