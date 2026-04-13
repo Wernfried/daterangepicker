@@ -15,7 +15,7 @@ class DateRangePicker {
     this.maxSpan = null;
     this.minSpan = null;
     this.defaultSpan = null;
-    this.initalMonth = DateTime.now().startOf("month");
+    this.initialMonth = DateTime.now().startOf("month");
     this.autoApply = false;
     this.singleDatePicker = false;
     this.singleMonthView = false;
@@ -65,8 +65,7 @@ class DateRangePicker {
     };
     if (this.element == null)
       return;
-    this.callback = function() {
-    };
+    this.callback = null;
     this.isShowing = false;
     this.leftCalendar = {};
     this.rightCalendar = {};
@@ -81,7 +80,7 @@ class DateRangePicker {
       if (!Object.keys(this).concat(["startDate", "endDate"]).includes(name) || Object.keys(options).includes(name))
         continue;
       let ts = DateTime.fromISO(item.value);
-      const isDate = ["startDate", "endDate", "minDate", "maxDate", "initalMonth"].includes(name);
+      const isDate = ["startDate", "endDate", "minDate", "maxDate", "initialMonth"].includes(name);
       dataOptions[name] = ts.isValid && isDate ? ts : JSON.parse(item.value);
     }
     options = { ...dataOptions, ...options };
@@ -296,7 +295,7 @@ class DateRangePicker {
         secondStep: this.timePickerStepSize.seconds
       };
     }
-    for (let opt of ["startDate", "endDate", "minDate", "maxDate", "initalMonth"]) {
+    for (let opt of ["startDate", "endDate", "minDate", "maxDate", "initialMonth"]) {
       if (opt === "endDate" && this.singleDatePicker)
         continue;
       if (typeof options[opt] === "object") {
@@ -356,13 +355,13 @@ class DateRangePicker {
     if (!this.timePicker) {
       if (this.minDate) this.minDate = this.minDate.startOf("day");
       if (this.maxDate) this.maxDate = this.maxDate.endOf("day");
-      this.#startDate = this.#startDate.startOf("day");
-      this.#endDate = this.#endDate.endOf("day");
+      if (this.#startDate) this.#startDate = this.#startDate.startOf("day");
+      if (this.#endDate) this.#endDate = this.#endDate.endOf("day");
     }
-    if (!this.#startDate && this.initalMonth) {
+    if (!this.#startDate && this.initialMonth) {
       this.#endDate = null;
       if (this.timePicker)
-        console.error(`Option 'initalMonth' works only with 'timePicker: false'`);
+        console.error(`Option 'initialMonth' works only with 'timePicker: false'`);
     } else {
       const violations = this.validateInput(null, false);
       if (violations != null) {
@@ -540,14 +539,14 @@ class DateRangePicker {
    * @type {external:DateTime}
    */
   get startDate() {
-    return this.timePicker ? this.#startDate : this.#startDate.startOf("day");
+    return this.timePicker ? this.#startDate : this.#startDate?.startOf("day") ?? null;
   }
   /**
    * endDate
    * @type {external:DateTime}
    */
   get endDate() {
-    return this.singleDatePicker ? null : this.timePicker ? this.#endDate : this.#endDate.endOf("day");
+    return this.singleDatePicker ? null : (this.timePicker ? this.#endDate : this.#endDate?.endOf("day")) ?? null;
   }
   set startDate(val) {
     this.#startDate = val;
@@ -764,7 +763,7 @@ class DateRangePicker {
   */
   setStartDate(startDate, updateView = true) {
     if (!this.singleDatePicker)
-      return setRange(startDate, this.#endDate, updateView);
+      return this.setRange(startDate, this.#endDate, updateView);
     const oldDate = this.#startDate;
     let newDate = this.parseDate(startDate);
     if (newDate.equals(oldDate))
@@ -801,7 +800,7 @@ class DateRangePicker {
   * drp.setEndDate(DateTime.now().startOf('hour'));
   */
   setEndDate(endDate, updateView = true) {
-    return this.singleDatePicker ? null : setRange(this.#startDate, endDate, updateView);
+    return this.singleDatePicker ? null : this.setRange(this.#startDate, endDate, updateView);
   }
   /**
   * Sets the date range picker's currently selected start date to the provided date.<br>
@@ -879,6 +878,8 @@ class DateRangePicker {
    * @returns {string} - Formatted date string
    */
   formatDate(date, format = this.locale.format) {
+    if (date === null)
+      return null;
     if (typeof format === "object") {
       return date.toLocaleString(format);
     } else {
@@ -1151,10 +1152,10 @@ class DateRangePicker {
         }
       }
     } else {
-      if (!this.#startDate && this.initalMonth) {
-        this.leftCalendar.month = this.initalMonth;
+      if (!this.#startDate && this.initialMonth) {
+        this.leftCalendar.month = this.initialMonth;
         if (!this.singleMonthView)
-          this.rightCalendar.month = this.initalMonth.plus({ month: 1 });
+          this.rightCalendar.month = this.initialMonth.plus({ month: 1 });
       } else {
         if (!this.leftCalendar.month.hasSame(this.#startDate, "month") && !this.rightCalendar.month.hasSame(this.#startDate, "month")) {
           this.leftCalendar.month = this.#startDate.startOf("month");
@@ -1237,8 +1238,8 @@ class DateRangePicker {
     if (side === "right" && this.singleMonthView)
       return;
     var calendar = side === "left" ? this.leftCalendar : this.rightCalendar;
-    if (calendar.month == null && !this.#startDate && this.initalMonth)
-      calendar.month = this.initalMonth.startOf("month");
+    if (calendar.month == null && !this.#startDate && this.initialMonth)
+      calendar.month = this.initialMonth.startOf("month");
     const firstDay = calendar.month.startOf("month");
     const lastDay = calendar.month.endOf("month").startOf("day");
     var theDate = calendar.month.startOf("month").minus({ day: 1 });
@@ -1655,8 +1656,10 @@ class DateRangePicker {
       this.#startDate = this.oldStartDate;
       this.#endDate = this.oldEndDate;
     }
-    if (!this.#startDate.equals(this.oldStartDate) || !this.#endDate.equals(this.oldEndDate))
-      this.callback(this.startDate, this.endDate, this.chosenLabel);
+    if (typeof this.callback === "function") {
+      if (this.#startDate && !this.#startDate.equals(this.oldStartDate ?? DateTime) || this.#endDate && !this.singleDatePicker && !this.#endDate.equals(this.oldEndDate ?? DateTime))
+        this.callback(this.startDate, this.endDate, this.chosenLabel);
+    }
     this.updateElement();
     const event = this.triggerEvent(this.#events.onBeforeHide);
     if (event.defaultPrevented)
@@ -1776,7 +1779,7 @@ class DateRangePicker {
     const leftCalendar = this.leftCalendar;
     const rightCalendar = this.rightCalendar;
     const startDate = this.#startDate;
-    const initalMonth = this.initalMonth;
+    const initialMonth = this.initialMonth;
     if (!this.#endDate) {
       this.container.querySelectorAll(".drp-calendar tbody td").forEach((el) => {
         if (el.classList.contains("week")) return;
@@ -1785,7 +1788,7 @@ class DateRangePicker {
         const col2 = title2.substring(3, 4);
         const cal2 = el.closest(".drp-calendar");
         const dt = cal2.classList.contains("left") ? leftCalendar.calendar[row2][col2] : rightCalendar.calendar[row2][col2];
-        if (!startDate && initalMonth) {
+        if (!startDate && initialMonth) {
           el.classList.remove("in-range");
         } else {
           el.classList.toggle("in-range", dt > startDate && dt < date || dt.hasSame(date, "day"));
@@ -2176,7 +2179,7 @@ class DateRangePicker {
   * @emits external:change
   */
   updateElement() {
-    if (this.#startDate == null && this.initalMonth)
+    if (this.#startDate == null && this.initialMonth)
       return;
     if (this.isInputText) {
       let newValue = this.formatDate(this.#startDate);
