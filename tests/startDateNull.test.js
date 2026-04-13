@@ -13,7 +13,7 @@ test('daterangepicker no initial date', () => {
     Settings.defaultLocale = 'en-CH';
 
     daterangepicker('#p', {
-        timePicker: true,
+        timePicker: false,
         startDate: null,
         initialMonth: DateTime.fromISO('2026-03-01')
     });
