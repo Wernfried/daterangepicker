@@ -1780,6 +1780,7 @@ class DateRangePicker {
             selected = maxDate;
       }
 
+      let disabled = { hour: false, minute: false, second: false, ampm: false };
       html += `<th colspan="7">`;
       //
       // hours
@@ -1794,20 +1795,19 @@ class DateRangePicker {
 
       for (var i = start; i <= start + 23; i += this.timePickerOpts.hourStep) {
          let time = selected.set({ hour: i % 24 });
-         let disabled = false;
          if (minDate && time.set({ minute: 59 }) < minDate)
-            disabled = true;
+            disabled.hour = true;
          if (maxDate && time.set({ minute: 0 }) > maxDate)
-            disabled = true;
+            disabled.hour = true;
          if (minLimit && time.endOf('hour') < minLimit)
-            disabled = true;
-         if (!disabled && this.isInvalidTime(time, this.singleDatePicker ? null : side, 'hour'))
-            disabled = true;
+            disabled.hour = true;
+         if (!disabled.hour && this.isInvalidTime(time, this.singleDatePicker ? null : side, 'hour'))
+            disabled.hour = true;
 
          if (this.timePicker24Hour) {
-            if (!disabled && i == selected.hour) {
+            if (!disabled.hour && i == selected.hour) {
                html += `<option value="${i}" selected>${i}</option>`;
-            } else if (disabled) {
+            } else if (disabled.hour) {
                html += `<option value="${i}" disabled class="disabled">${i}</option>`;
             } else {
                html += `<option value="${i}">${i}</option>`;
@@ -1816,9 +1816,9 @@ class DateRangePicker {
             const i_12 = DateTime.fromFormat(`${i % 24}`, 'H').toFormat('h');
             const i_ampm = DateTime.fromFormat(`${i % 24}`, 'H').toFormat('a', { locale: 'en-US' });
             if (ampm == i_ampm) {
-               if (!disabled && i == selected.hour) {
+               if (!disabled.hour && i == selected.hour) {
                   html += `<option ampm="${i_ampm}" value="${i % 24}" selected>${i_12}</option>`;
-               } else if (disabled) {
+               } else if (disabled.hour) {
                   html += `<option  ampm="${i_ampm}" value="${i % 24}" disabled class="disabled">${i_12}</option>`;
                } else {
                   html += `<option ampm="${i_ampm}" value="${i % 24}">${i_12}</option>`;
@@ -1846,19 +1846,20 @@ class DateRangePicker {
             var padded = i < 10 ? '0' + i : i;
             let time = selected.set({ minute: i });
 
-            let disabled = false;
+            if (disabled.hour)
+               disabled.minute = true;
             if (minDate && time.set({ second: 59 }) < minDate)
-               disabled = true;
+               disabled.minute = true;
             if (maxDate && time.set({ second: 0 }) > maxDate)
-               disabled = true;
+               disabled.minute = true;
             if (minLimit && time.endOf('minute') < minLimit)
-               disabled = true;
-            if (!disabled && this.isInvalidTime(time, this.singleDatePicker ? null : side, 'minute'))
-               disabled = true;
+               disabled.minute = true;
+            if (!disabled.minute && this.isInvalidTime(time, this.singleDatePicker ? null : side, 'minute'))
+               disabled.minute = true;
 
-            if (selected.minute == i && !disabled) {
+            if (selected.minute == i && !disabled.minute) {
                html += `<option value="${i}" selected>${padded}</option>`;
-            } else if (disabled) {
+            } else if (disabled.minute) {
                html += `<option value="${i}" disabled class="disabled">${padded}</option>`;
             } else {
                html += `<option value="${i}">${padded}</option>`;
@@ -1883,19 +1884,20 @@ class DateRangePicker {
             var padded = i < 10 ? '0' + i : i;
             let time = selected.set({ second: i });
 
-            let disabled = false;
+            if (disabled.minute)
+               disabled.second = true;
             if (minDate && time < minDate)
-               disabled = true;
+               disabled.second = true;
             if (maxDate && time > maxDate)
-               disabled = true;
+               disabled.second = true;
             if (minLimit && time < minLimit)
-               disabled = true;
-            if (!disabled && this.isInvalidTime(time, this.singleDatePicker ? null : side, 'second'))
-               disabled = true;
+               disabled.second = true;
+            if (!disabled.second && this.isInvalidTime(time, this.singleDatePicker ? null : side, 'second'))
+               disabled.second = true;
 
-            if (selected.second == i && !disabled) {
+            if (selected.second == i && !disabled.second) {
                html += `<option value="${i}" selected>${padded}</option>`;
-            } else if (disabled) {
+            } else if (disabled.second) {
                html += `<option value="${i}" disabled class="disabled">${padded}</option>`;
             } else {
                html += `<option value="${i}">${padded}</option>`;
@@ -1917,15 +1919,16 @@ class DateRangePicker {
 
          var am_html = '';
          var pm_html = '';
-         let disabled = false;
+         if (disabled.hour)
+            disabled.ampm = true;
 
          if (minDate && selected.startOf('day') < minDate)
-            disabled = true;
+            disabled.ampm = true;
          if (maxDate && selected.endOf('day') > maxDate)
-            disabled = true;
+            disabled.ampm = true;
          if (minLimit && selected.startOf('day') < minLimit)
-            disabled = true;
-         if (disabled) {
+            disabled.ampm = true;
+         if (disabled.ampm) {
             am_html = ' disabled class="disabled "';
             pm_html = ' disabled class="disabled"';
          } else {
