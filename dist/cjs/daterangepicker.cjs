@@ -1128,8 +1128,12 @@ class DateRangePicker {
       this.triggerEvent(this.#events.onBeforeRenderTimePicker);
       this.renderTimePicker("start");
       this.renderTimePicker("end");
-      this.container.querySelectorAll(".calendar-time.end-time select").disabled = !this.#endDate;
-      this.container.querySelectorAll(".calendar-time.end-time select").classList.toggle("disabled", !this.#endDate);
+      this.container.querySelectorAll(".calendar-time.end-time select").forEach((el) => {
+        el.disabled = !this.#endDate;
+      });
+      this.container.querySelectorAll(".calendar-time.end-time select").forEach((el) => {
+        el.classList.toggle("disabled", !this.#endDate);
+      });
     }
     this.updateLabel();
     this.updateMonthsInView();
