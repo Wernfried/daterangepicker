@@ -62,7 +62,7 @@ class DateRangePicker {
       * Takes precedence over localized `showWeekNumbers`
 
       * @property {boolean} timePicker=false - Adds select boxes to choose times in addition to dates
-      * @property {boolean} timePicker24Hour=true|false - Use 24-hour instead of 12-hour times, removing the AM/PM selection.<br>
+      * @property {boolean} timePicker24Hour - Use 24-hour instead of 12-hour times, removing the AM/PM selection.<br>
       * Default is derived from current locale [Intl.DateTimeFormat.resolvedOptions.hour12](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/resolvedOptions#hour12).
       * @property {external:Duration|string|number} timePickerStepSize - Default: `Duration.fromObject({minutes:1})`<br>Set the time picker step size.<br>
       * Must be a `luxon.Duration` or the number of seconds or a string according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} duration.<br>
@@ -128,7 +128,7 @@ class DateRangePicker {
       * @property {boolean} alwaysShowCalendars=false - Normally, if you use the ranges option to specify pre-defined date ranges, 
       * calendars for choosing a custom date range are not shown until the user clicks "Custom Range".<br>
       * When this option is set to true, the calendars for choosing a custom date range are always shown instead.
-      * @property {boolean} showLabel= - Shows selected range next to Apply buttons.<br>
+      * @property {boolean} showLabel - Shows selected range next to Apply buttons.<br>
       * Defaults to `false` if anchor element is `<input type="text">`, otherwise `true`
       * @property {object} locale={} - Allows you to provide localized strings for buttons and labels, customize the date format, 
       * and change the first day of week for the calendars.
