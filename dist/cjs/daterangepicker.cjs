@@ -1089,9 +1089,9 @@ class DateRangePicker {
       if (endDate < minDate) {
         violation = { old: endDate, reason: "minSpan" };
         if (this.defaultSpan) {
-          endDate = endDate.plus({ seconds: Math.trunc(startDate.plus(this.defaultSpan).diff(endDate).as("seconds") / shiftStep) * shiftStep });
+          endDate = startDate.plus({ seconds: Math.trunc(this.defaultSpan.as("seconds") / shiftStep) * shiftStep });
         } else {
-          endDate = endDate.plus({ seconds: Math.trunc(minDate.diff(endDate).as("seconds") / shiftStep) * shiftStep });
+          endDate = startDate.plus({ seconds: Math.trunc(this.minSpan.as("seconds") / shiftStep) * shiftStep });
         }
         if (endDate < minDate)
           endDate = endDate.plus(this.timePicker ? this.timePickerStepSize : { days: 1 });
@@ -2042,8 +2042,14 @@ class DateRangePicker {
         this.#startDate = this.#startDate.set({ hour, minute, second });
       if (this.singleDatePicker) {
         this.#endDate = this.#startDate;
-      } else if (this.#endDate && this.#endDate.hasSame(this.#startDate, "day") && this.#endDate < this.#startDate) {
-        this.#endDate = this.#startDate;
+      } else if (this.#endDate && this.#endDate.hasSame(this.#startDate, "day")) {
+        if (this.defaultSpan && this.#endDate < this.#startDate.plus(this.minSpan)) {
+          this.#endDate = this.#startDate.plus(this.defaultSpan);
+        } else if (this.minSpan && this.#endDate < this.#startDate.plus(this.minSpan)) {
+          this.#endDate = this.#startDate.plus(this.minSpan);
+        } else if (this.#endDate < this.#startDate) {
+          this.#endDate = this.#startDate;
+        }
       }
     } else if (this.#endDate) {
       this.#endDate = this.#endDate.set({ hour, minute, second });
