@@ -20,7 +20,7 @@
     "postversion": "sed -bi -e 's/daterangepicker@[[:digit:]]\\.[[:digit:]]\\+\\.[[:digit:]]\\+/daterangepicker@%npm_package_version%/' README.md",
     "build": "rollup -c",
     "postbuild": "minify css/daterangepicker.css > css/daterangepicker.min.css && minify css/daterangepicker.bulma.css > css/daterangepicker.bulma.min.css",
-    "unix2dos": "unix2dos.exe dist/*/*js css/*.min.css README.md",
+    "unix2dos": "unix2dos.exe dist/*/*js css/*.min.css",
     "prepack": "sed -n -bi '/## Options/q;p' README.md && npm run build && npm run unix2dos",
     "prepare": "jsdoc2md --EOL win32 --example-lang js src/daterangepicker.js > API_Doc.md && sed -n '/## Options$/,$p' API_Doc.md | sed -n '/name=\"Ranges\"/q;p' >> README.md",
     "postpack": "git commit -a -m \"Updated README.md\"",
