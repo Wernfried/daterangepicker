@@ -2053,6 +2053,8 @@ class DateRangePicker {
       }
     } else if (this.#endDate) {
       this.#endDate = this.#endDate.set({ hour, minute, second });
+      if (this.#endDate < this.#startDate)
+        this.#endDate = this.#startDate.plus(this.minSpan ?? luxon.Duration.fromObject({}));
     }
     this.updateCalendars(false);
     this.setApplyBtnState();
