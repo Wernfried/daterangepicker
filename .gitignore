@@ -3,3 +3,4 @@ npm-debug.log
 *.sw[onp]
 .vscode
 package-lock.json
+debug.html

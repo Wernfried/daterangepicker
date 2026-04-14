@@ -2567,7 +2567,7 @@ class DateRangePicker {
       if (side === 'start') {
          if (this.#startDate)
             this.#startDate = this.#startDate.set({ hour: hour, minute: minute, second: second });
-         
+
          if (this.singleDatePicker) {
             this.#endDate = this.#startDate;
          } else if (this.#endDate && this.#endDate.hasSame(this.#startDate, 'day')) {
@@ -2581,6 +2581,8 @@ class DateRangePicker {
          }
       } else if (this.#endDate) {
          this.#endDate = this.#endDate.set({ hour: hour, minute: minute, second: second });
+         if (this.#endDate < this.#startDate)
+            this.#endDate = this.#startDate.plus(this.minSpan ?? Duration.fromObject({}))
       }
 
       //update the calendars so all clickable dates reflect the new time component
