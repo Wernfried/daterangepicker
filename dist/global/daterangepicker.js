@@ -9,6 +9,8 @@ var DateRangePicker = (function(exports, luxon2) {
       this.parentEl = "body";
       this.element = element instanceof HTMLElement ? element : document.querySelector(element);
       this.isInputText = this.element instanceof HTMLInputElement && this.element.type === "text";
+      this.button = null;
+      this.showOnClick = true;
       this.#startDate = luxon2.DateTime.now().startOf("day");
       this.#endDate = luxon2.DateTime.now().plus({ day: 1 }).startOf("day");
       this.minDate = null;
@@ -85,6 +87,16 @@ var DateRangePicker = (function(exports, luxon2) {
         dataOptions[name] = ts.isValid && isDate ? ts : JSON.parse(item.value);
       }
       options = { ...dataOptions, ...options };
+      if (["string", "object"].includes(typeof options.button)) {
+        let button = options.button;
+        if (typeof button === "string" && document.querySelectorAll(button).length === 1)
+          button = document.querySelector(button);
+        if (button instanceof HTMLButtonElement) {
+          this.button = button;
+        } else {
+          console.error(`Option 'button' cannot resolved to a HTMLButtonElement`);
+        }
+      }
       if (typeof options.singleDatePicker === "boolean")
         this.singleDatePicker = options.singleDatePicker;
       if (!this.singleDatePicker && typeof options.singleMonthView === "boolean") {
@@ -164,13 +176,13 @@ var DateRangePicker = (function(exports, luxon2) {
           if (["rtl", "ltr"].includes(options.locale.direction))
             this.locale.direction = options.locale.direction;
           else
-            console.error(`Option 'options.locale.direction' must be 'rtl' or 'ltr'`);
+            console.error(`Option 'locale.direction' must be 'rtl' or 'ltr'`);
         }
         if (["string", "object"].includes(typeof options.locale.format))
           this.locale.format = options.locale.format;
         if (Array.isArray(options.locale.daysOfWeek)) {
           if (options.locale.daysOfWeek.some((x) => typeof x !== "string"))
-            console.error(`Option 'options.locale.daysOfWeek' must be an array of strings`);
+            console.error(`Option 'locale.daysOfWeek' must be an array of strings`);
           else
             this.locale.daysOfWeek = options.locale.daysOfWeek.slice();
         }
@@ -202,7 +214,8 @@ var DateRangePicker = (function(exports, luxon2) {
         "alwaysShowCalendars",
         "autoApply",
         "autoUpdateInput",
-        "showLabel"
+        "showLabel",
+        "showOnClick"
       ]) {
         if (typeof options[key2] === "boolean")
           this[key2] = options[key2];
@@ -419,13 +432,13 @@ var DateRangePicker = (function(exports, luxon2) {
         if (["left", "right", "center"].includes(options.opens))
           this.opens = options.opens;
         else
-          console.error(`Option 'options.opens' must be 'left', 'right' or 'center'`);
+          console.error(`Option 'opens' must be 'left', 'right' or 'center'`);
       }
       if (typeof options.drops === "string") {
         if (["up", "down", "auto"].includes(options.drops))
           this.drops = options.drops;
         else
-          console.error(`Option 'options.drops' must be 'up', 'down' or 'auto'`);
+          console.error(`Option 'drops' must be 'up', 'down' or 'auto'`);
       }
       if (Array.isArray(options.buttonClasses)) {
         this.buttonClasses = options.buttonClasses.join(" ");
@@ -436,7 +449,7 @@ var DateRangePicker = (function(exports, luxon2) {
         if (["cancel", "apply"].includes(options.onOutsideClick))
           this.onOutsideClick = options.onOutsideClick;
         else
-          console.error(`Option 'options.onOutsideClick' must be 'cancel' or 'apply'`);
+          console.error(`Option 'onOutsideClick' must be 'cancel' or 'apply'`);
       }
       if (this.locale.firstDay != 1) {
         let iterator = this.locale.firstDay;
@@ -526,15 +539,19 @@ var DateRangePicker = (function(exports, luxon2) {
       this.addListener(".ranges", "mouseleave", "li", this.leaveRange.bind(this));
       this.addListener(".drp-buttons", "click", "button.applyBtn", this.clickApply.bind(this));
       this.addListener(".drp-buttons", "click", "button.cancelBtn", this.clickCancel.bind(this));
-      if (this.element.matches("input") || this.element.matches("button")) {
-        this.element.addEventListener("click", this.#showProxy);
-        this.element.addEventListener("focus", this.#showProxy);
-        this.element.addEventListener("keyup", this.#elementChangedProxy);
-        this.element.addEventListener("keydown", this.#keydownProxy);
-      } else {
-        this.element.addEventListener("click", this.#toggleProxy);
-        this.element.addEventListener("keydown", this.#toggleProxy);
+      if (this.showOnClick) {
+        if (this.element.matches("input") || this.element.matches("button")) {
+          this.element.addEventListener("click", this.#showProxy);
+          this.element.addEventListener("focus", this.#showProxy);
+          this.element.addEventListener("keyup", this.#elementChangedProxy);
+          this.element.addEventListener("keydown", this.#keydownProxy);
+        } else {
+          this.element.addEventListener("click", this.#toggleProxy);
+          this.element.addEventListener("keydown", this.#toggleProxy);
+        }
       }
+      if (this.button)
+        this.button.addEventListener("click", this.#showProxy);
       this.updateElement();
     }
     /**
@@ -1732,7 +1749,9 @@ var DateRangePicker = (function(exports, luxon2) {
     outsideClick(e) {
       const target = e.target;
       function closest2(el, selector) {
-        let parent = el.parentElement;
+        if (selector == null)
+          return null;
+        let parent = el;
         while (parent) {
           if (parent == selector)
             return parent;
@@ -1742,7 +1761,7 @@ var DateRangePicker = (function(exports, luxon2) {
       }
       if (
         // ie modal dialog fix
-        e.type === "focusin" || closest2(target, this.element) || closest2(target, this.container) || target.closest(".calendar-table")
+        e.type === "focusin" || closest2(target, this.element) || closest2(target, this.container) || closest2(target, this.button) || target.closest(".calendar-table")
       ) return;
       const event = this.triggerEvent(this.#events.onOutsideClick);
       if (event.defaultPrevented)
