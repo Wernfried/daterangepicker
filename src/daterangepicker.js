@@ -2,7 +2,8 @@ import { DateTime, Duration, Info, Settings } from 'luxon';
 
 /**
 * @constructs DateRangePicker
-* @param {string|external:HTMLElement} element - A DOM HTMLElement or querySelector string of element where DateRangePicker is attached. Often a `<input>` element.
+* @param {string|external:HTMLElement} element - A DOM HTMLElement or CSS querySelector string of element where DateRangePicker is attached.
+* Often a `<input type="text">` element. Element `<input>` and `<button>` shows the DateRangePicker on click, other elements toggle the DateRangePicker.
 * @param {Options} options - Object to configure the DateRangePicker
 * @param {function} cb - Callback function executed when new date values applied
 */
@@ -15,7 +16,7 @@ class DateRangePicker {
       * Options for DateRangePicker
       * @typedef Options 
       * @property {string|external:HTMLElement} parentEl=body - {@link https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector#selectors|Document querySelector} 
-      * or `HTMLElement` of the parent element that the date range picker will be added to
+      * or `HTMLElement` of the parent element that the DateRangePicker will be added to
 
       * @property {external:DateTime|external:Date|string|null} startDate - Default: `DateTime.now().startOf('day')`<br>The beginning date of the initially selected date range.<br>
       * Must be a `luxon.DateTime` or `Date` or `string` according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} or a string matching `locale.format`.<br>
@@ -23,23 +24,23 @@ class DateRangePicker {
       * Option `isInvalidDate` and `isInvalidTime` are not evaluated, you may set date/time which is not selectable in calendar.<br>
       * If the date does not fall into `minDate` and `maxDate` then date is shifted and a warning is written to console.<br>
       * Use `startDate: null` to show calendar without an initial selected date.
-      * @property {external:DateTime|external:Date|string} endDate - Defautl: `DateTime.now().endOf('day')`<br>The end date of the initially selected date range.<br>
+      * @property {external:DateTime|external:Date|string} endDate - Default: `DateTime.now().endOf('day')`<br>The end date of the initially selected date range.<br>
       * Must be a `luxon.DateTime` or `Date` or `string` according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} or a string matching `locale.format`.<br>
       * Date value is rounded to match option `timePickerStepSize`<br>
       * Option `isInvalidDate`, `isInvalidTime` and `minSpan`, `maxSpan` are not evaluated, you may set date/time which is not selectable in calendar.<br>
       * If the date does not fall into `minDate` and `maxDate` then date is shifted and a warning is written to console.<br>
 
-      * @property {external:DateTime|external:Date|string|null} minDate - The earliest date a user may select or `null` for no limit.<br>
+      * @property {external:DateTime|external:Date|string|null} minDate=null - The earliest date a user may select or `null` for no limit.<br>
       * Must be a `luxon.DateTime` or `Date` or `string` according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} or a string matching `locale.format`.
-      * @property {external:DateTime|external:Date|string|null} maxDate - The latest date a user may select or `null` for no limit.<br>
+      * @property {external:DateTime|external:Date|string|null} maxDate=null - The latest date a user may select or `null` for no limit.<br>
       * Must be a `luxon.DateTime` or `Date` or `string` according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} or a string matching `locale.format`.
-      * @property {external:Duration|string|number|null} minSpan - The minimum span between the selected start and end dates.<br>
+      * @property {external:Duration|string|number|null} minSpan=null - The minimum span between the selected start and end dates.<br>
       * Must be a `luxon.Duration` or number of seconds or a string according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} duration.<br>
       * Ignored when `singleDatePicker: true`
-      * @property {external:Duration|string|number|null} maxSpan - The maximum  span between the selected start and end dates.<br>
+      * @property {external:Duration|string|number|null} maxSpan=null - The maximum  span between the selected start and end dates.<br>
       * Must be a `luxon.Duration` or number of seconds or a string according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} duration.<br>
       * Ignored when `singleDatePicker: true`
-      * @property {external:Duration|string|number|null} defaultSpan - The span which is used when endDate is automatically updated due to wrong user input<br>
+      * @property {external:Duration|string|number|null} defaultSpan=null - The span which is used when endDate is automatically updated due to wrong user input<br>
       * Must be a `luxon.Duration` or number of seconds or a string according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} duration.<br>
       * Ignored when `singleDatePicker: true`. Not relevant if `minSpan: null`
       * @property {external:DateTime|external:Date|string|null} initialMonth - Default: `DateTime.now().startOf('month')`<br>
@@ -60,6 +61,10 @@ class DateRangePicker {
       * @property {boolean} showWeekNumbers=false - Show **localized** week numbers at the start of each week on the calendars
       * @property {boolean} showISOWeekNumbers=false - Show **ISO** week numbers at the start of each week on the calendars.<br>
       * Takes precedence over localized `showWeekNumbers`
+      * @property {string|external:HTMLButtonElement} button=null - A dedicated element to show the DateRangePicker on click.<br>
+      * Main reason of this option is to prevent hide/flicker of the picker on `outsideClick()`
+      * @property {boolean} showOnClick=true - Shows/toggle the DateRangePicker on click or focus at `element`.<br>
+      * You may want to set it to `false` only when option `button` is provided or when you use `show()` programmatically.
 
       * @property {boolean} timePicker=false - Adds select boxes to choose times in addition to dates
       * @property {boolean} timePicker24Hour - Use 24-hour instead of 12-hour times, removing the AM/PM selection.<br>
@@ -71,7 +76,7 @@ class DateRangePicker {
       * Duration must be greater than `minSpan` and smaller than `maxSpan`.<br>
       * For example `timePickerStepSize: 600` will disable time picker seconds and time picker minutes are set to step size of 10 Minutes.
 
-      * @property {boolean} autoUpdateInput=true - Indicates whether the date range picker should instantly update the value of the attached `<input>` 
+      * @property {boolean} autoUpdateInput=true - Indicates whether the DateRangePicker should instantly update the value of the attached `<input>` 
       * element when the selected dates change.<br>The `<input>` element will be always updated on `Apply` and reverted when user clicks on `Cancel`.
       * @property {string} onOutsideClick=apply - Defines what picker shall do when user clicks outside the calendar. 
       * `'apply'` or `'cancel'`. Event {@link #event_outsideClick|onOutsideClick} is always emitted.
@@ -185,6 +190,8 @@ class DateRangePicker {
       this.parentEl = 'body';
       this.element = element instanceof HTMLElement ? element : document.querySelector(element);
       this.isInputText = this.element instanceof HTMLInputElement && this.element.type === 'text';
+      this.button = null;
+      this.showOnClick = true;
       this.#startDate = DateTime.now().startOf('day');
       this.#endDate = DateTime.now().plus({ day: 1 }).startOf('day');
       this.minDate = null;
@@ -271,6 +278,17 @@ class DateRangePicker {
       }
       //javascript options take precedence over data-* attributes
       options = { ...dataOptions, ...options };
+
+      if (['string', 'object'].includes(typeof options.button)) {
+         let button = options.button;
+         if (typeof button === 'string' && document.querySelectorAll(button).length === 1)
+            button = document.querySelector(button);
+         if (button instanceof HTMLButtonElement) {
+            this.button = button;
+         } else {
+            console.error(`Option 'button' cannot resolved to a HTMLButtonElement`);
+         }
+      }
 
       if (typeof options.singleDatePicker === 'boolean')
          this.singleDatePicker = options.singleDatePicker;
@@ -362,7 +380,7 @@ class DateRangePicker {
             if (['rtl', 'ltr'].includes(options.locale.direction))
                this.locale.direction = options.locale.direction
             else
-               console.error(`Option 'options.locale.direction' must be 'rtl' or 'ltr'`);
+               console.error(`Option 'locale.direction' must be 'rtl' or 'ltr'`);
          }
 
          if (['string', 'object'].includes(typeof options.locale.format))
@@ -370,7 +388,7 @@ class DateRangePicker {
 
          if (Array.isArray(options.locale.daysOfWeek)) {
             if (options.locale.daysOfWeek.some(x => typeof x !== 'string'))
-               console.error(`Option 'options.locale.daysOfWeek' must be an array of strings`)
+               console.error(`Option 'locale.daysOfWeek' must be an array of strings`)
             else
                this.locale.daysOfWeek = options.locale.daysOfWeek.slice();
          }
@@ -403,7 +421,7 @@ class DateRangePicker {
       // #region Generic Options
       for (let key of ['timePicker24Hour', 'showWeekNumbers', 'showISOWeekNumbers',
          'showDropdowns', 'linkedCalendars', 'showCustomRangeLabel',
-         'alwaysShowCalendars', 'autoApply', 'autoUpdateInput', 'showLabel']) {
+         'alwaysShowCalendars', 'autoApply', 'autoUpdateInput', 'showLabel', 'showOnClick']) {
          if (typeof options[key] === 'boolean')
             this[key] = options[key];
       }
@@ -636,14 +654,14 @@ class DateRangePicker {
          if (['left', 'right', 'center'].includes(options.opens))
             this.opens = options.opens
          else
-            console.error(`Option 'options.opens' must be 'left', 'right' or 'center'`);
+            console.error(`Option 'opens' must be 'left', 'right' or 'center'`);
       }
 
       if (typeof options.drops === 'string') {
          if (['up', 'down', 'auto'].includes(options.drops))
             this.drops = options.drops
          else
-            console.error(`Option 'options.drops' must be 'up', 'down' or 'auto'`);
+            console.error(`Option 'drops' must be 'up', 'down' or 'auto'`);
       }
 
       if (Array.isArray(options.buttonClasses)) {
@@ -656,7 +674,7 @@ class DateRangePicker {
          if (['cancel', 'apply'].includes(options.onOutsideClick))
             this.onOutsideClick = options.onOutsideClick
          else
-            console.error(`Option 'options.onOutsideClick' must be 'cancel' or 'apply'`);
+            console.error(`Option 'onOutsideClick' must be 'cancel' or 'apply'`);
       }
 
       // update day names order to firstDay
@@ -751,8 +769,8 @@ class DateRangePicker {
       this.container.querySelector('.cancelBtn').innerHTML = this.locale.cancelLabel;
       // #endregion
 
-      //addListener(element, eventName, selector, delegate)
       // #region Event Listeners
+      //addListener(element, eventName, selector, delegate)
       this.addListener('.drp-calendar', 'click', '.prev', this.clickPrev.bind(this));
       this.addListener('.drp-calendar', 'click', '.next', this.clickNext.bind(this));
       this.addListener('.drp-calendar', 'mousedown', 'td.available', this.clickDate.bind(this));
@@ -767,15 +785,19 @@ class DateRangePicker {
       this.addListener('.drp-buttons', 'click', 'button.applyBtn', this.clickApply.bind(this));
       this.addListener('.drp-buttons', 'click', 'button.cancelBtn', this.clickCancel.bind(this));
 
-      if (this.element.matches('input') || this.element.matches('button')) {
-         this.element.addEventListener('click', this.#showProxy);
-         this.element.addEventListener('focus', this.#showProxy);
-         this.element.addEventListener('keyup', this.#elementChangedProxy);
-         this.element.addEventListener('keydown', this.#keydownProxy); //IE 11 compatibility
-      } else {
-         this.element.addEventListener('click', this.#toggleProxy)
-         this.element.addEventListener('keydown', this.#toggleProxy);
+      if (this.showOnClick) {
+         if (this.element.matches('input') || this.element.matches('button')) {
+            this.element.addEventListener('click', this.#showProxy);
+            this.element.addEventListener('focus', this.#showProxy);
+            this.element.addEventListener('keyup', this.#elementChangedProxy);
+            this.element.addEventListener('keydown', this.#keydownProxy); //IE 11 compatibility
+         } else {
+            this.element.addEventListener('click', this.#toggleProxy)
+            this.element.addEventListener('keydown', this.#toggleProxy);
+         }
       }
+      if (this.button)
+         this.button.addEventListener('click', this.#showProxy);
       // #endregion
 
       // if attached to a text input, set the initial value
@@ -2181,9 +2203,11 @@ class DateRangePicker {
       const target = e.target;
 
       // implements jQuery closest(). 
-      // Web-API supports only CSS selectors string
+      // Web-API supports only CSS selector string
       function closest(el, selector) {
-         let parent = el.parentElement;
+         if (selector == null)
+            return null;
+         let parent = el;
          while (parent) {
             if (parent == selector)
                return parent;
@@ -2199,6 +2223,7 @@ class DateRangePicker {
          e.type === "focusin" ||
          closest(target, this.element) ||
          closest(target, this.container) ||
+         closest(target, this.button) ||
          target.closest('.calendar-table')
       ) return;
 
