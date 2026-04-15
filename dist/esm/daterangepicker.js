@@ -538,16 +538,16 @@ class DateRangePicker {
     this.addListener(".ranges", "mouseleave", "li", this.leaveRange.bind(this));
     this.addListener(".drp-buttons", "click", "button.applyBtn", this.clickApply.bind(this));
     this.addListener(".drp-buttons", "click", "button.cancelBtn", this.clickCancel.bind(this));
-    if (this.showOnClick) {
-      if (this.element.matches("input") || this.element.matches("button")) {
+    if (this.element.matches("input") || this.element.matches("button")) {
+      if (this.showOnClick) {
         this.element.addEventListener("click", this.#showProxy);
         this.element.addEventListener("focus", this.#showProxy);
-        this.element.addEventListener("keyup", this.#elementChangedProxy);
-        this.element.addEventListener("keydown", this.#keydownProxy);
-      } else {
-        this.element.addEventListener("click", this.#toggleProxy);
-        this.element.addEventListener("keydown", this.#toggleProxy);
       }
+      this.element.addEventListener("keyup", this.#elementChangedProxy);
+      this.element.addEventListener("keydown", this.#keydownProxy);
+    } else if (this.showOnClick) {
+      this.element.addEventListener("click", this.#toggleProxy);
+      this.element.addEventListener("keydown", this.#toggleProxy);
     }
     if (this.button)
       this.button.addEventListener("click", this.#showProxy);
