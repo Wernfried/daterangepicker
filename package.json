@@ -17,7 +17,7 @@
   "source": "src/daterangepicker.js",
   "type": "module",
   "scripts": {
-    "postversion": "sed -i -e 's/daterangepicker@[[:digit:]]\\.[[:digit:]]\\+\\.[[:digit:]]\\+/daterangepicker@%npm_package_version%/' README.md",
+    "postversion": "sed -bi -e 's/daterangepicker@[[:digit:]]\\.[[:digit:]]\\+\\.[[:digit:]]\\+/daterangepicker@%npm_package_version%/' README.md",
     "build": "rollup -c",
     "postbuild": "minify css/daterangepicker.css > css/daterangepicker.min.css && minify css/daterangepicker.bulma.css > css/daterangepicker.bulma.min.css",
     "unix2dos": "unix2dos.exe -q dist/*/*js css/*.min.css",
