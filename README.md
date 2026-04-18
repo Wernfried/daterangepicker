@@ -254,6 +254,7 @@ Compared to [inital repository](https://github.com/dangrossman/daterangepicker),
 - Added option `onOutsideClick` where you can define whether picker shall apply or revert selected value
 - Added option `initalMonth` to show datepicker without an initial date
 - Added option `singleMonthView` to show single month calendar, useful for shorter ranges
+- Added option `showOnClick` and `button` to provide better control when DateRangePicker pops up
 - Better validation of input parameters, errors are logged to console
 - Highlight range in calendar when hovering over pre-defined ranges
 - Option `autoUpdateInput` defines whether the attached `<input>` element is updated when the user clicks on a date value.<br>
@@ -267,21 +268,19 @@ but other frameworks may be added in future releases
 - ... and maybe some new bugs 😉 
 
 ### Localization
-All date values are based on [luxon](https://moment.github.io/luxon/index.html#/intl) which provides great support for localization. Instead of providing date format, weekday and month names manually as strings, it is usually easier to set the default locale like this:
+All date values are based on [luxon](https://moment.github.io/luxon/index.html#/intl) which provides great support for localization. Instead of providing date format, weekdays, month names, etc. manually it is usually easier to set the default locale like this:
 ```js
 const Settings = luxon.Settings;
 Settings.defaultLocale = 'fr-CA'
-
 daterangepicker('#picker', {
-   timePicker: true,
-   singleDatePicker: false
+   timePicker: true
 };
 ```
 instead of 
 ```js
 daterangepicker('#picker', {
    timePicker: true,
-   singleDatePicker: false,
+   timePicker24Hour: true,
    locale: {
       format: 'yyyyy-M-d H h m',
       daysOfWeek: [ 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.', 'dim.' ],
