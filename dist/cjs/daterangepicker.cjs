@@ -87,7 +87,7 @@ class DateRangePicker {
       dataOptions[name] = ts.isValid && isDate ? ts : JSON.parse(item.value);
     }
     options = { ...dataOptions, ...options };
-    if (["string", "object"].includes(typeof options.button)) {
+    if (["string", "object"].includes(typeof options.button) && options.button != null) {
       let button = options.button;
       if (typeof button === "string" && document.querySelectorAll(button).length === 1)
         button = document.querySelector(button);
@@ -178,7 +178,7 @@ class DateRangePicker {
         else
           console.error(`Option 'locale.direction' must be 'rtl' or 'ltr'`);
       }
-      if (["string", "object"].includes(typeof options.locale.format))
+      if (["string", "object"].includes(typeof options.locale.format) && options.locale.format !== null)
         this.locale.format = options.locale.format;
       if (Array.isArray(options.locale.daysOfWeek)) {
         if (options.locale.daysOfWeek.some((x) => typeof x !== "string"))
@@ -458,7 +458,7 @@ class DateRangePicker {
         iterator--;
       }
     }
-    if (!this.singleDatePicker && typeof options.ranges === "object") {
+    if (!this.singleDatePicker && typeof options.ranges === "object" && options.ranges != null) {
       for (let range in options.ranges) {
         let start, end;
         if (["string", "object"].includes(typeof options.ranges[range][0])) {
