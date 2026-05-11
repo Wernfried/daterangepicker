@@ -522,7 +522,7 @@ class DateRangePicker {
          if (opt === 'endDate' && this.singleDatePicker)
             continue;
          if (typeof options[opt] === 'object') {
-            if (DateTime.isDateTime(options[opt]) && options[opt].isValid) {
+            if (DateTime.isDateTime(options[opt])) {
                this[opt] = options[opt];
             } else if (options[opt] instanceof Date) {
                this[opt] = DateTime.fromJSDate(options[opt]);
