@@ -522,12 +522,12 @@ class DateRangePicker {
          if (opt === 'endDate' && this.singleDatePicker)
             continue;
          if (typeof options[opt] === 'object') {
-            if (DateTime.isDateTime(options[opt])) {
+            if (options[opt] == null) {
+               this[opt] = null;
+            } else if (DateTime.isDateTime(options[opt])) {
                this[opt] = options[opt];
             } else if (options[opt] instanceof Date) {
                this[opt] = DateTime.fromJSDate(options[opt]);
-            } else if (options[opt] === null) {
-               this[opt] = null;
             } else {
                console.error(`Option '${opt}' must be a luxon.DateTime or Date or string`);
             }
