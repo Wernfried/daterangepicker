@@ -279,7 +279,7 @@ class DateRangePicker {
       //javascript options take precedence over data-* attributes
       options = { ...dataOptions, ...options };
 
-      if (['string', 'object'].includes(typeof options.button)) {
+      if (['string', 'object'].includes(typeof options.button) && options.button != null) {
          let button = options.button;
          if (typeof button === 'string' && document.querySelectorAll(button).length === 1)
             button = document.querySelector(button);
@@ -383,7 +383,7 @@ class DateRangePicker {
                console.error(`Option 'locale.direction' must be 'rtl' or 'ltr'`);
          }
 
-         if (['string', 'object'].includes(typeof options.locale.format))
+         if (['string', 'object'].includes(typeof options.locale.format) && options.locale.format !== null)
             this.locale.format = options.locale.format;
 
          if (Array.isArray(options.locale.daysOfWeek)) {
@@ -686,7 +686,7 @@ class DateRangePicker {
          }
       }
 
-      if (!this.singleDatePicker && typeof options.ranges === 'object') {
+      if (!this.singleDatePicker && typeof options.ranges === 'object' && options.ranges != null) {
          // Process custom ranges
          for (let range in options.ranges) {
             let start, end;
