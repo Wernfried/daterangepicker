@@ -18,7 +18,7 @@ for (let fmt of meta) {
          plugins: [minify({ minify: compact })]
       };
       if (fmt.globals)
-         out = { ...out, ...{ name: 'DateRangePicker', globals: { luxon: 'luxon' } } }
+         out = { ...out, name: 'DateRangePicker', globals: { luxon: 'luxon' } }
       output.push(out);
    }
 

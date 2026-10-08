@@ -859,7 +859,7 @@ class DateRangePicker {
       * 
       * // -> Calendar selects and shows "today - 3 days"
       */
-      onViolate: { type: 'violate', param: (violation, newDate) => { return { ...violation, ...{ cancelable: true } } } },
+      onViolate: { type: 'violate', param: (violation, newDate) => { return { ...violation, cancelable: true } } },
       /**
       * Emitted before the calendar time picker is rendered.
       * @event
