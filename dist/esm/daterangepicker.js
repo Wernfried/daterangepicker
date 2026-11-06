@@ -314,12 +314,12 @@ class DateRangePicker {
       if (opt === "endDate" && this.singleDatePicker)
         continue;
       if (typeof options[opt] === "object") {
-        if (DateTime.isDateTime(options[opt]) && options[opt].isValid) {
+        if (options[opt] == null) {
+          this[opt] = null;
+        } else if (DateTime.isDateTime(options[opt])) {
           this[opt] = options[opt];
         } else if (options[opt] instanceof Date) {
           this[opt] = DateTime.fromJSDate(options[opt]);
-        } else if (options[opt] === null) {
-          this[opt] = null;
         } else {
           console.error(`Option '${opt}' must be a luxon.DateTime or Date or string`);
         }
@@ -616,7 +616,7 @@ class DateRangePicker {
     * // -> Calendar selects and shows "today - 3 days"
     */
     onViolate: { type: "violate", param: (violation, newDate) => {
-      return { ...violation, ...{ cancelable: true } };
+      return { ...violation, cancelable: true };
     } },
     /**
     * Emitted before the calendar time picker is rendered.
@@ -1334,7 +1334,7 @@ class DateRangePicker {
       html += `<th class="week">${this.locale.weekLabel}</th>`;
     for (let [index, dayOfWeek] of this.locale.daysOfWeek.entries()) {
       html += "<th";
-      if (this.weekendDayClasses && this.weekendDayClasses.length && Info.getWeekendWeekdays().includes(index + 1))
+      if (this.weekendDayClasses && this.weekendDayClasses.length && Info.getWeekendWeekdays().includes(calendar[0][index].weekday))
         html += ` class="${this.weekendDayClasses}"`;
       html += `>${dayOfWeek}</th>`;
     }
