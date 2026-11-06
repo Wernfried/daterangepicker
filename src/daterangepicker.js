@@ -1669,7 +1669,7 @@ class DateRangePicker {
 
       for (let [index, dayOfWeek] of this.locale.daysOfWeek.entries()) {
          html += '<th';
-         if (this.weekendDayClasses && this.weekendDayClasses.length && Info.getWeekendWeekdays().includes(index + 1))
+         if (this.weekendDayClasses && this.weekendDayClasses.length && Info.getWeekendWeekdays().includes(calendar[0][index].weekday))
             //highlight weekend day
             html += ` class="${this.weekendDayClasses}"`;
          html += `>${dayOfWeek}</th>`;
