@@ -6,7 +6,7 @@ var DateRangePicker = (function(exports, luxon2) {
     constructor(element, options, cb) {
       if (typeof element === "string" && document.querySelectorAll(element).length > 1)
         throw new RangeError(`Option 'element' must match to one element only`);
-      this.parentEl = "body";
+      this.parentEl = document.querySelector("body");
       this.element = element instanceof HTMLElement ? element : document.querySelector(element);
       this.isInputText = this.element instanceof HTMLInputElement && this.element.type === "text";
       this.button = null;
@@ -161,7 +161,11 @@ var DateRangePicker = (function(exports, luxon2) {
         options.template = template.join("");
         this.container = createElementFromHTML(options.template);
       }
-      this.parentEl = document.querySelector(typeof options.parentEl === "string" ? options.parentEl : this.parentEl);
+      if (options.parentEl instanceof HTMLElement) {
+        this.parentEl = options.parentEl;
+      } else if (typeof options.parentEl === "string") {
+        this.parentEl = document.querySelector(options.parentEl) ?? this.parentEl;
+      }
       this.parentEl.appendChild(this.container);
       if (typeof options.timePicker === "boolean")
         this.timePicker = options.timePicker;
