@@ -2025,6 +2025,9 @@ class DateRangePicker {
 
       let parentRightEdge = window.innerWidth;
       if (!this.parentEl.matches('body')) {
+         //const parentRect = parentEl.getBoundingClientRect();
+         //const parentOffset = { top: parentRect.top, left: parentRect.left };
+
          parentOffset = {
             top: offset(this.parentEl).top - this.parentEl.scrollTop,
             left: offset(this.parentEl).left - this.parentEl.scrollLeft
