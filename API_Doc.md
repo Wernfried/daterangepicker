@@ -10,7 +10,7 @@
 ## Functions
 
 <dl>
-<dt><a href="#daterangepicker">daterangepicker(elements, options, callback)</a> ⇒ <code>HTMLElement</code> | <code>Array.&lt;HTMLElement&gt;</code></dt>
+<dt><a href="#daterangepicker">daterangepicker(element, options, callback)</a> ⇒ <code><a href="#DateRangePicker">DateRangePicker</a></code> | <code><a href="#DateRangePicker">Array.&lt;DateRangePicker&gt;</a></code></dt>
 <dd><p>Initiate a new DateRangePicker</p>
 </dd>
 <dt><a href="#getDateRangePicker">getDateRangePicker(target)</a> ⇒ <code><a href="#DateRangePicker">DateRangePicker</a></code></dt>
@@ -366,15 +366,15 @@ Helper function to dispatch events
 **Extends**: <code>Event</code>  
 <a name="daterangepicker"></a>
 
-## daterangepicker(elements, options, callback) ⇒ <code>HTMLElement</code> \| <code>Array.&lt;HTMLElement&gt;</code>
+## daterangepicker(element, options, callback) ⇒ [<code>DateRangePicker</code>](#DateRangePicker) \| [<code>Array.&lt;DateRangePicker&gt;</code>](#DateRangePicker)
 Initiate a new DateRangePicker
 
 **Kind**: global function  
-**Returns**: <code>HTMLElement</code> \| <code>Array.&lt;HTMLElement&gt;</code> - The input `element` instance or an array of HTMLElement instances if `elements` matches more than one element  
+**Returns**: [<code>DateRangePicker</code>](#DateRangePicker) \| [<code>Array.&lt;DateRangePicker&gt;</code>](#DateRangePicker) - The DateRangePicker instance or an array of DateRangePicker instances if `elements` matches more than one element  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| elements | <code>string</code> \| [<code>HTMLElement</code>](https://developer.mozilla.org/de/docs/Web/API/HTMLElement) | Element where DateRangePicker is attached |
+| element | <code>string</code> \| [<code>HTMLElement</code>](https://developer.mozilla.org/de/docs/Web/API/HTMLElement) \| [<code>HTMLCollection</code>](https://developer.mozilla.org/de/docs/Web/API/HTMLCollection) | Element where DateRangePicker is attached |
 | options | [<code>Options</code>](#Options) | Object to configure the DateRangePicker |
 | callback | [<code>callback</code>](#callback) | Callback function executed when date is changed.<br/> Callback function is executed if selected date values has changed, before picker is hidden and before the attached `<input>` element is updated.  As alternative listen to the ["apply"](#event_apply) event |
 
