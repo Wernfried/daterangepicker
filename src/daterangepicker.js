@@ -187,7 +187,7 @@ class DateRangePicker {
          throw new RangeError(`Option 'element' must match to one element only`);
 
       //default settings for options
-      this.parentEl = 'body';
+      this.parentEl = document.querySelector('body');
       this.element = element instanceof HTMLElement ? element : document.querySelector(element);
       this.isInputText = this.element instanceof HTMLInputElement && this.element.type === 'text';
       this.button = null;
@@ -358,7 +358,11 @@ class DateRangePicker {
          options.template = template.join('');
          this.container = createElementFromHTML(options.template);
       }
-      this.parentEl = document.querySelector(typeof options.parentEl === 'string' ? options.parentEl : this.parentEl);
+      if (options.parentEl instanceof HTMLElement) {
+         this.parentEl = options.parentEl;
+      } else if (typeof options.parentEl === 'string') {
+         this.parentEl = document.querySelector(options.parentEl) ?? this.parentEl;
+      }
       this.parentEl.appendChild(this.container);
 
       //
