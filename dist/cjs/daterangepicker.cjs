@@ -1605,7 +1605,7 @@ class DateRangePicker {
         top: offset(this.parentEl).top - this.parentEl.scrollTop,
         left: offset(this.parentEl).left - this.parentEl.scrollLeft
       };
-      parentRightEdge = this.parentEl[0].clientWidth + offset(this.parentEl).left;
+      parentRightEdge = this.parentEl.clientWidth + offset(this.parentEl).left;
     }
     switch (this.drops) {
       case "auto":
