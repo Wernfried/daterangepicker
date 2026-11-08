@@ -2971,33 +2971,42 @@ function outerHeight(el, withMargin = false) {
 /**
 * Initiate a new DateRangePicker
 * @function
-* @param {string|external:HTMLElement} elements - Element where DateRangePicker is attached
+* @param {string|external:HTMLElement|external:HTMLCollection} element - Element where DateRangePicker is attached
 * @param {Options} options - Object to configure the DateRangePicker
 * @param {callback} callback - Callback function executed when date is changed.<br/>
 * Callback function is executed if selected date values has changed, before picker is hidden and before the attached `<input>` element is updated. 
 * As alternative listen to the {@link #event_apply|"apply"} event
-* @returns {HTMLElement|HTMLElement[]} The input `element` instance or an array of HTMLElement instances if `elements` matches more than one element
+* @returns {DateRangePicker|DateRangePicker[]} The DateRangePicker instance or an array of DateRangePicker instances if `elements` matches more than one element
 */
-function daterangepicker(elements, options, callback) {
-   if (typeof elements === 'string')
-      return daterangepicker(document.querySelectorAll(elements), options, callback);
+function daterangepicker(element, options, callback) {
+   if (element instanceof HTMLElement) {
+      return new DateRangePicker(element, options || {}, callback);
+   } else if (elements instanceof NodeList || element instanceof HTMLCollection) {
+      const ret = [];
+      for (const el of Array.from(element)) {
+         if (el._daterangepicker && typeof el._daterangepicker.remove === 'function')
+            el._daterangepicker.remove();
+         ret.push(new DateRangePicker(el, options || {}, callback));
+      }
+      return ret;
+   } else if (typeof element === 'string') {
+      if (document.querySelectorAll(element).length > 1) {
+         const ret = [];
+         for (const el of Array.from(document.querySelectorAll(element))) {
+            if (el._daterangepicker && typeof el._daterangepicker.remove === 'function')
+               el._daterangepicker.remove();
+            ret.push(new DateRangePicker(el, options || {}, callback));
+         }
+         return ret;
+      } else if (document.querySelectorAll(element).length === 1) {
+         return new DateRangePicker(element, options || {}, callback);
+      } else {
+         return null;
+      }
+   } else {
+      return null;
+   }
 
-   if (elements instanceof HTMLElement)
-      elements = [elements];
-
-   if (elements instanceof NodeList || elements instanceof HTMLCollection)
-      elements = Array.from(elements);
-
-   if (elements == null)
-      return new DateRangePicker(null, options || {}, callback);
-
-   elements.forEach(el => {
-      if (el._daterangepicker && typeof el._daterangepicker.remove === 'function')
-         el._daterangepicker.remove();
-      el._daterangepicker = new DateRangePicker(el, options || {}, callback);
-   });
-
-   return elements.length === 1 ? elements[0] : elements;
 }
 
 
