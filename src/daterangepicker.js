@@ -3055,16 +3055,19 @@ export { daterangepicker, getDateRangePicker, DateRangePicker };
 
 
 /** @external HTMLElement
-@see {@link https://developer.mozilla.org/de/docs/Web/API/HTMLElement|HTMLElement} */
+@see {@link https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement|HTMLElement} */
 
 /** @external HTMLInputElement
-@see {@link https://developer.mozilla.org/de/docs/Web/API/HTMLInputElement|HTMLInputElement} */
+@see {@link https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement|HTMLInputElement} */
 
 /** @external NodeList 
 @see {@link https://developer.mozilla.org/en-US/docs/Web/API/NodeList|NodeList} */
 
 /** @external HTMLCollection 
-@see {@link https://developer.mozilla.org/de/docs/Web/API/HTMLCollection|HTMLCollection} */
+@see {@link https://developer.mozilla.org/en-US/docs/Web/API/HTMLCollection|HTMLCollection} */
+
+/** @external HTMLButtonElement 
+@see {@link https://developer.mozilla.org/en-US/docs/Web/API/HTMLButtonElement|HTMLButtonElement} */
 
 /** @external selectors
 @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector#selectors|selectors} */
