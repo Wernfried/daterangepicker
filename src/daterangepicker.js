@@ -2023,8 +2023,8 @@ class DateRangePicker {
       let parentRightEdge = window.innerWidth;
       if (!this.parentEl.matches('body')) {
          parentOffset = {
-            top: offset(this.parentEl).top - this.parentEl.scrollTop(),
-            left: offset(this.parentEl).left - this.parentEl.scrollLeft()
+            top: offset(this.parentEl).top - this.parentEl.scrollTop,
+            left: offset(this.parentEl).left - this.parentEl.scrollLeft
          };
          parentRightEdge = this.parentEl[0].clientWidth + offset(this.parentEl).left;
       }
