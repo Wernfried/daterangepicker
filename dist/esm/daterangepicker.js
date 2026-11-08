@@ -165,6 +165,8 @@ class DateRangePicker {
     } else if (typeof options.parentEl === "string") {
       this.parentEl = document.querySelector(options.parentEl) ?? this.parentEl;
     }
+    if (this.parentEl.matches("input"))
+      console.error('Parent element "parentEl" must not a self-closing "<input>"');
     this.parentEl.appendChild(this.container);
     if (typeof options.timePicker === "boolean")
       this.timePicker = options.timePicker;
@@ -1604,7 +1606,7 @@ class DateRangePicker {
         top: offset(this.parentEl).top - this.parentEl.scrollTop,
         left: offset(this.parentEl).left - this.parentEl.scrollLeft
       };
-      parentRightEdge = this.parentEl.clientWidth + offset(this.parentEl).left;
+      parentRightEdge = this.parentEl.clientWidth + parentOffset.left;
     }
     switch (this.drops) {
       case "auto":
