@@ -2976,7 +2976,7 @@ function outerHeight(el, withMargin = false) {
 * @param {callback} callback - Callback function executed when date is changed.<br/>
 * Callback function is executed if selected date values has changed, before picker is hidden and before the attached `<input>` element is updated. 
 * As alternative listen to the {@link #event_apply|"apply"} event
-* @returns {DateRangePicker|DateRangePicker[]} The DateRangePicker instance or an array of DateRangePicker instances if `elements` matches more than one element
+* @returns {DateRangePicker|DateRangePicker[]} The DateRangePicker instance or an array of DateRangePicker instances if `element` matches more than one element
 */
 function daterangepicker(element, options, callback) {
    if (element instanceof HTMLElement) {
