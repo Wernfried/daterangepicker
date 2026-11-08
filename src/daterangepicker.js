@@ -79,7 +79,8 @@ class DateRangePicker {
       * @property {boolean} autoUpdateInput=true - Indicates whether the DateRangePicker should instantly update the value of the attached `<input>` 
       * element when the selected dates change.<br>The `<input>` element will be always updated on `Apply` and reverted when user clicks on `Cancel`.
       * @property {string} onOutsideClick=apply - Defines what picker shall do when user clicks outside the calendar. 
-      * `'apply'` or `'cancel'`. Event {@link #event_outsideClick|onOutsideClick} is always emitted.
+      * `'apply'` or `'cancel'`. Event {@link #event_outsideClick|onOutsideClick} is always emitted.return;
+      * If you like to do nothing (i.e. neither `apply` nor `cancel`), call `event.preventDefault()` in the event listener.
       * @property {boolean} linkedCalendars=true - When enabled, the two calendars displayed will always be for two sequential months (i.e. January and February), 
       * and both will be advanced when clicking the left or right arrows above the calendars.<br>
       * When disabled, the two calendars can be individually advanced and display any month/year
@@ -363,6 +364,8 @@ class DateRangePicker {
       } else if (typeof options.parentEl === 'string') {
          this.parentEl = document.querySelector(options.parentEl) ?? this.parentEl;
       }
+      if (this.parentEl.matches('input'))
+         console.error('Parent element "parentEl" must not a self-closing "<input>"');
       this.parentEl.appendChild(this.container);
 
       //
@@ -2026,7 +2029,7 @@ class DateRangePicker {
             top: offset(this.parentEl).top - this.parentEl.scrollTop,
             left: offset(this.parentEl).left - this.parentEl.scrollLeft
          };
-         parentRightEdge = this.parentEl.clientWidth + offset(this.parentEl).left;
+         parentRightEdge = this.parentEl.clientWidth + parentOffset.left;
       }
 
       switch (this.drops) {
