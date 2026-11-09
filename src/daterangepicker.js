@@ -3013,9 +3013,8 @@ function daterangepicker(element, options, callback) {
       for (const el of Array.from(element)) {
          if (el._daterangepicker && typeof el._daterangepicker.remove === 'function')
             el._daterangepicker.remove();
-         const picker = new DateRangePicker(el, options || {}, callback);
-         el._daterangepicker = picker;
-         ret.push(picker);
+         el._daterangepicker = new DateRangePicker(el, options || {}, callback);
+         ret.push(el._daterangepicker);
       }
       return ret;
    } else if (typeof element === 'string') {
@@ -3024,9 +3023,8 @@ function daterangepicker(element, options, callback) {
          for (const el of Array.from(document.querySelectorAll(element))) {
             if (el._daterangepicker && typeof el._daterangepicker.remove === 'function')
                el._daterangepicker.remove();
-            const picker = new DateRangePicker(el, options || {}, callback);
-            el._daterangepicker = picker;
-            ret.push(picker);
+            el._daterangepicker = new DateRangePicker(el, options || {}, callback);
+            ret.push(el._daterangepicker);
          }
          return ret;
       } else if (document.querySelectorAll(element).length === 1) {
