@@ -2902,6 +2902,26 @@ class DateRangePicker {
       });
    }
 
+   /**
+    * Adds an event listener to the anchor element (e.g., `<input>`) the DateRangePicker is attached to.
+    * This allows external code to subscribe to native DOM events such as 'click', 'focus', 'keyup', etc.
+    * 
+    * @param {string} type - The event name (e.g., 'click', 'focus', 'keyup')
+    * @param {function} listener - The callback function invoked when the event fires
+    * @param {boolean|object} [options] - Optional event options:
+    *   - `boolean capture`: Whether to listen in the capture phase (default: `false`)
+    *   - `object signal`: An `AbortSignal` for later removal of the listener (default: `undefined`)
+    * 
+    * @example
+    * daterangepicker.addEventListener('click', (e) => {
+    *    console.log('Picker element was clicked', e);
+    * });
+    * 
+    */
+   addEventListener(type, listener, options) {
+      this.element.addEventListener(type, listener, options);
+   }
+
 
 }
 
@@ -2986,13 +3006,16 @@ function outerHeight(el, withMargin = false) {
 */
 function daterangepicker(element, options, callback) {
    if (element instanceof HTMLElement) {
-      return new DateRangePicker(element, options || {}, callback);
-   } else if (elements instanceof NodeList || element instanceof HTMLCollection) {
+      element._daterangepicker = new DateRangePicker(element, options || {}, callback);
+      return element._daterangepicker;
+   } else if (element instanceof NodeList || element instanceof HTMLCollection) {
       const ret = [];
       for (const el of Array.from(element)) {
          if (el._daterangepicker && typeof el._daterangepicker.remove === 'function')
             el._daterangepicker.remove();
-         ret.push(new DateRangePicker(el, options || {}, callback));
+         const picker = new DateRangePicker(el, options || {}, callback);
+         el._daterangepicker = picker;
+         ret.push(picker);
       }
       return ret;
    } else if (typeof element === 'string') {
@@ -3001,30 +3024,35 @@ function daterangepicker(element, options, callback) {
          for (const el of Array.from(document.querySelectorAll(element))) {
             if (el._daterangepicker && typeof el._daterangepicker.remove === 'function')
                el._daterangepicker.remove();
-            ret.push(new DateRangePicker(el, options || {}, callback));
+            const picker = new DateRangePicker(el, options || {}, callback);
+            el._daterangepicker = picker;
+            ret.push(picker);
          }
          return ret;
       } else if (document.querySelectorAll(element).length === 1) {
-         return new DateRangePicker(element, options || {}, callback);
+         const picker = new DateRangePicker(element, options || {}, callback);
+         document.querySelector(element)._daterangepicker = picker;
+         return picker;
       } else {
          return null;
       }
    } else {
       return null;
    }
-
 }
 
 
 /**
  * Returns the DateRangePicker. Equivalent to `element._daterangepicker`
- * @param {HTMLElement|string} target - The HTMLElement or querySelector string where the DateRangePicker is attached.
+ * @param {HTMLElement|string} element - The HTMLElement or querySelector string where the DateRangePicker is attached.
  * @returns {DateRangePicker} - The attached DateRangePicker
  */
-function getDateRangePicker(target) {
-   if (typeof target === 'string')
-      target = document.querySelector(target);
-   return target instanceof HTMLElement ? target._daterangepicker : undefined;
+function getDateRangePicker(element) {
+   if (typeof element === 'string') {
+      return document.querySelector(element)._daterangepicker;
+   } else {
+      return element instanceof HTMLElement ? element._daterangepicker : undefined;
+   }
 }
 
 // legacy support for jQuery 
