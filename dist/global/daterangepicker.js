@@ -40,6 +40,7 @@ var DateRangePicker = (function(exports, luxon2) {
       this.isInvalidTime = null;
       this.isCustomDate = null;
       this.onOutsideClick = "apply";
+      this.stopPropagation = true;
       this.opens = this.element?.classList.contains("pull-right") ? "left" : "right";
       this.drops = this.element?.classList.contains("dropup") ? "up" : "down";
       this.buttonClasses = "btn btn-sm";
@@ -221,7 +222,8 @@ var DateRangePicker = (function(exports, luxon2) {
         "autoApply",
         "autoUpdateInput",
         "showLabel",
-        "showOnClick"
+        "showOnClick",
+        "stopPropagation"
       ]) {
         if (typeof options[key2] === "boolean")
           this[key2] = options[key2];
@@ -2320,11 +2322,15 @@ var DateRangePicker = (function(exports, luxon2) {
      * @private
      */
     addListener(element, eventName, selector, delegate) {
+      const stopPropagation = this.stopPropagation;
       this.container.querySelectorAll(element).forEach((el) => {
         el.addEventListener(eventName, function(event) {
           const target = event.target.closest(selector);
-          if (target && el.contains(target))
+          if (target && el.contains(target)) {
+            if (stopPropagation)
+              event.stopPropagation();
             delegate.call(target, event);
+          }
         });
       });
     }
@@ -2399,9 +2405,8 @@ var DateRangePicker = (function(exports, luxon2) {
       for (const el of Array.from(element)) {
         if (el._daterangepicker && typeof el._daterangepicker.remove === "function")
           el._daterangepicker.remove();
-        const picker = new DateRangePicker2(el, options || {}, callback);
-        el._daterangepicker = picker;
-        ret.push(picker);
+        el._daterangepicker = new DateRangePicker2(el, options || {}, callback);
+        ret.push(el._daterangepicker);
       }
       return ret;
     } else if (typeof element === "string") {
@@ -2410,9 +2415,8 @@ var DateRangePicker = (function(exports, luxon2) {
         for (const el of Array.from(document.querySelectorAll(element))) {
           if (el._daterangepicker && typeof el._daterangepicker.remove === "function")
             el._daterangepicker.remove();
-          const picker = new DateRangePicker2(el, options || {}, callback);
-          el._daterangepicker = picker;
-          ret.push(picker);
+          el._daterangepicker = new DateRangePicker2(el, options || {}, callback);
+          ret.push(el._daterangepicker);
         }
         return ret;
       } else if (document.querySelectorAll(element).length === 1) {

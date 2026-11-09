@@ -19,8 +19,8 @@ Above samples are based on the [original repository](https://github.com/dangross
 #### Global import with `<script>` tags
 ```html
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.4.10/dist/global/daterangepicker.min.js"></script>
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.4.10/css/daterangepicker.min.css" rel="stylesheet" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.5.0/dist/global/daterangepicker.min.js"></script>
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.5.0/css/daterangepicker.min.css" rel="stylesheet" />
 
 <input type="text" id="picker" />
 
@@ -40,11 +40,11 @@ Above samples are based on the [original repository](https://github.com/dangross
 {
    "imports": {
       "luxon": "https://cdn.jsdelivr.net/npm/luxon@3.7.2/+esm",
-      "daterangepicker": "https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.4.10/+esm"
+      "daterangepicker": "https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.5.0/+esm"
    }
 }
 </script>
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.4.10/css/daterangepicker.min.css" rel="stylesheet" />
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.5.0/css/daterangepicker.min.css" rel="stylesheet" />
 
 <input type="text" id="picker" />
 
@@ -63,9 +63,9 @@ Above samples are based on the [original repository](https://github.com/dangross
 #### Style with Bulma
 ```html
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.4.10/dist/global/daterangepicker.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.5.0/dist/global/daterangepicker.min.js"></script>
 <link type="text/css" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css" rel="stylesheet" />
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.4.10/css/daterangepicker.bulma.min.css" rel="stylesheet" />
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.5.0/css/daterangepicker.bulma.min.css" rel="stylesheet" />
 
 <input type="text" id="picker" />
 
@@ -121,8 +121,8 @@ Initialisation with jQuery is supported in version 5.x
 ```html
 <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.4.10/dist/global/daterangepicker.min.js"></script>
-<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.4.10/css/daterangepicker.min.css" rel="stylesheet" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.5.0/dist/global/daterangepicker.min.js"></script>
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/@wernfried/daterangepicker@5.5.0/css/daterangepicker.min.css" rel="stylesheet" />
 
 <input type="text" id="picker" />
 
@@ -366,6 +366,7 @@ Options for DateRangePicker
 | showISOWeekNumbers | <code>boolean</code> | <code>false</code> | Show **ISO** week numbers at the start of each week on the calendars.<br> Takes precedence over localized `showWeekNumbers` |
 | button | <code>string</code> \| [<code>HTMLButtonElement</code>](https://developer.mozilla.org/en-US/docs/Web/API/HTMLButtonElement) | <code>null</code> | A dedicated element to show the DateRangePicker on click.<br> Main reason of this option is to prevent hide/flicker of the picker on `outsideClick()` |
 | showOnClick | <code>boolean</code> | <code>true</code> | Shows/toggle the DateRangePicker on click or focus at `element`.<br> You may want to set it to `false` only when option `button` is provided or when you use `show()` programmatically. |
+| stopPropagation | <code>boolean</code> | <code>true</code> | Set this option to `false` if you want to listen on DOM-Events outside this instance. |
 | timePicker | <code>boolean</code> | <code>false</code> | Adds select boxes to choose times in addition to dates |
 | timePicker24Hour | <code>boolean</code> |  | Use 24-hour instead of 12-hour times, removing the AM/PM selection.<br> Default is derived from current locale [Intl.DateTimeFormat.resolvedOptions.hour12](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/resolvedOptions#hour12). |
 | timePickerStepSize | [<code>Duration</code>](https://moment.github.io/luxon/api-docs/index.html#duration) \| <code>string</code> \| <code>number</code> |  | Default: `Duration.fromObject({minutes:1})`<br>Set the time picker step size.<br> Must be a `luxon.Duration` or the number of seconds or a string according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) duration.<br> Valid values are 1,2,3,4,5,6,10,12,15,20,30 for `Duration.fromObject({seconds: ...})` and `Duration.fromObject({minutes: ...})`  and 1,2,3,4,6,(8,12) for `Duration.fromObject({hours: ...})`.<br> Duration must be greater than `minSpan` and smaller than `maxSpan`.<br> For example `timePickerStepSize: 600` will disable time picker seconds and time picker minutes are set to step size of 10 Minutes. |
