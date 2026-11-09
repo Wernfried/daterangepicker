@@ -65,6 +65,7 @@ class DateRangePicker {
       * Main reason of this option is to prevent hide/flicker of the picker on `outsideClick()`
       * @property {boolean} showOnClick=true - Shows/toggle the DateRangePicker on click or focus at `element`.<br>
       * You may want to set it to `false` only when option `button` is provided or when you use `show()` programmatically.
+      * @property {boolean} stopPropagation=true - Set this option to `false` if you want to listen on DOM-Events outside this instance.
 
       * @property {boolean} timePicker=false - Adds select boxes to choose times in addition to dates
       * @property {boolean} timePicker24Hour - Use 24-hour instead of 12-hour times, removing the AM/PM selection.<br>
@@ -222,6 +223,7 @@ class DateRangePicker {
       this.isInvalidTime = null;
       this.isCustomDate = null;
       this.onOutsideClick = 'apply';
+      this.stopPropagation = true;
       this.opens = this.element?.classList.contains('pull-right') ? 'left' : 'right';
       this.drops = this.element?.classList.contains('dropup') ? 'up' : 'down';
       this.buttonClasses = 'btn btn-sm';
@@ -428,7 +430,7 @@ class DateRangePicker {
       // #region Generic Options
       for (let key of ['timePicker24Hour', 'showWeekNumbers', 'showISOWeekNumbers',
          'showDropdowns', 'linkedCalendars', 'showCustomRangeLabel',
-         'alwaysShowCalendars', 'autoApply', 'autoUpdateInput', 'showLabel', 'showOnClick']) {
+         'alwaysShowCalendars', 'autoApply', 'autoUpdateInput', 'showLabel', 'showOnClick', 'stopPropagation']) {
          if (typeof options[key] === 'boolean')
             this[key] = options[key];
       }
@@ -2893,11 +2895,15 @@ class DateRangePicker {
     * @private
     */
    addListener(element, eventName, selector, delegate) {
+      const stopPropagation = this.stopPropagation;
       this.container.querySelectorAll(element).forEach(el => {
          el.addEventListener(eventName, function (event) {
             const target = event.target.closest(selector);
-            if (target && el.contains(target))
+            if (target && el.contains(target)) {
+               if (stopPropagation)
+                  event.stopPropagation();
                delegate.call(target, event);
+            }
          });
       });
    }
