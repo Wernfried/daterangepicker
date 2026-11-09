@@ -13,7 +13,7 @@
 <dt><a href="#daterangepicker">daterangepicker(element, options, callback)</a> ⇒ <code><a href="#DateRangePicker">DateRangePicker</a></code> | <code><a href="#DateRangePicker">Array.&lt;DateRangePicker&gt;</a></code></dt>
 <dd><p>Initiate a new DateRangePicker</p>
 </dd>
-<dt><a href="#getDateRangePicker">getDateRangePicker(target)</a> ⇒ <code><a href="#DateRangePicker">DateRangePicker</a></code></dt>
+<dt><a href="#getDateRangePicker">getDateRangePicker(element)</a> ⇒ <code><a href="#DateRangePicker">DateRangePicker</a></code></dt>
 <dd><p>Returns the DateRangePicker. Equivalent to <code>element._daterangepicker</code></p>
 </dd>
 </dl>
@@ -118,6 +118,7 @@ Ranges are not validated against <code>minDate</code>, <code>maxDate</code>, <co
     * [.updateAltInput()](#DateRangePicker+updateAltInput)
     * [.remove()](#DateRangePicker+remove)
     * [.triggerEvent(ev, ...args)](#DateRangePicker+triggerEvent)
+    * [.addEventListener(type, listener, [options])](#DateRangePicker+addEventListener)
 
 <a name="new_DateRangePicker_new"></a>
 
@@ -359,6 +360,26 @@ Helper function to dispatch events
 | ev | <code>object</code> | Event template from this.#events |
 | ...args | <code>object</code> | Additional parameters if needed |
 
+<a name="DateRangePicker+addEventListener"></a>
+
+### dateRangePicker.addEventListener(type, listener, [options])
+Adds an event listener to the anchor element (e.g., `<input>`) the DateRangePicker is attached to.
+This allows external code to subscribe to native DOM events such as 'click', 'focus', 'keyup', etc.
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| type | <code>string</code> | The event name (e.g., 'click', 'focus', 'keyup') |
+| listener | <code>function</code> | The callback function invoked when the event fires |
+| [options] | <code>boolean</code> \| <code>object</code> | Optional event options:   - `boolean capture`: Whether to listen in the capture phase (default: `false`)   - `object signal`: An `AbortSignal` for later removal of the listener (default: `undefined`) |
+
+**Example**  
+```js
+daterangepicker.addEventListener('click', (e) => {
+   console.log('Picker element was clicked', e);
+});
+```
 <a name="DateRangePickerEvent"></a>
 
 ## DateRangePickerEvent ⇐ <code>Event</code>
@@ -380,7 +401,7 @@ Initiate a new DateRangePicker
 
 <a name="getDateRangePicker"></a>
 
-## getDateRangePicker(target) ⇒ [<code>DateRangePicker</code>](#DateRangePicker)
+## getDateRangePicker(element) ⇒ [<code>DateRangePicker</code>](#DateRangePicker)
 Returns the DateRangePicker. Equivalent to `element._daterangepicker`
 
 **Kind**: global function  
@@ -388,7 +409,7 @@ Returns the DateRangePicker. Equivalent to `element._daterangepicker`
 
 | Param | Type | Description |
 | --- | --- | --- |
-| target | <code>HTMLElement</code> \| <code>string</code> | The HTMLElement or querySelector string where the DateRangePicker is attached. |
+| element | <code>HTMLElement</code> \| <code>string</code> | The HTMLElement or querySelector string where the DateRangePicker is attached. |
 
 <a name="event_violate"></a>
 
