@@ -3034,10 +3034,13 @@ function daterangepicker(element, options, callback) {
          document.querySelector(element)._daterangepicker = picker;
          return picker;
       } else {
-         return null;
+         return undefined;
       }
+   } else if (element == null) {
+      // No idea if this works and whether it makes any sense
+      return new DateRangePicker(element, options || {}, callback);
    } else {
-      return null;
+      return undefined;
    }
 }
 
