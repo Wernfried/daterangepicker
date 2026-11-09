@@ -52,7 +52,7 @@ Above samples are based on the [original repository](https://github.com/dangross
    import { DateTime } from 'luxon';
    import { daterangepicker } from 'daterangepicker';
 
-   daterangepicker('#picker', {
+   const picker = daterangepicker('#picker', {
       startDate: DateTime.now().plus({day: 1})
    }, (start, end) => {
       console.log(`Selected range: ${start.toString()} to ${end.toString()}`)
@@ -99,16 +99,17 @@ Values in `options` of `daterangepicker(el, options)` take precedence over `data
 <script type="module">
    import {daterangepicker, getDateRangePicker} from 'daterangepicker'; // or global import with <script> tag
    
-   const input = daterangepicker('#picker', {}); // returns the mutated <input> HTMLElement
+   const input = document.getElementById('picker');
+   const picker = daterangepicker('#picker', {}); // returns DateRangePicker instance or array of DateRangePicker if selector matches more than one element
    // or daterangepicker(document.querySelector('#picker'), {})
 
-   const drp = getDateRangePicker('#picker');
+   // Get DateRangePicker instance after initialization
+   const drp = getDateRangePicker(input);
    // or DateRangePicker.getDateRangePicker('#picker'); if imported globally with <script> tag
 
-   console.log( drp.startDate.toString()) // prints the selected startDate
-   console.log( drp === input._daterangepicker) // prints 'true'
-   console.log( drp.element === input) // prints 'true'
-   console.log( document.querySelector('#picker') === input) // prints 'true'
+   console.log( picker.startDate.toString()) // prints the selected startDate
+   console.log( picker === input._daterangepicker) // prints 'true'
+   console.log( picker.element === input) // prints 'true'
 </script>
 ```
 
@@ -161,7 +162,7 @@ $('#picker').daterangepicker({
 });
 
 // version 5.x - without jQuery
-const input = daterangepicker('#picker', { // or DateRangePicker.daterangepicker('#picker', ...
+const picker = daterangepicker('#picker', { // or DateRangePicker.daterangepicker('#picker', ...
    startDate: DateTime.now(),
    // allow only dates from current year
    minDate: DateTime.now().startOf('year'),
@@ -169,14 +170,14 @@ const input = daterangepicker('#picker', { // or DateRangePicker.daterangepicker
    singleDatePicker: true
 });
 
-input.addEventListener('violate', (ev) => {
+picker.addEventListener('violate', (ev) => {
    ev.newDate.startDate = DateTime.now().minus({ days: 3 }).startOf('day');
    ev.preventDefault();
 });
-input.addEventListener('show', (ev) => {
+picker.addEventListener('show', (ev) => {
    console.log('Show the picker')
 });
-input.addEventListener('beforeHide', (ev) => {
+picker.addEventListener('beforeHide', (ev) => {
    console.log(ev.picker.startDate.toString());
    ev.preventDefault(); // -> do not hide the picker
 });
