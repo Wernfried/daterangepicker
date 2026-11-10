@@ -100,8 +100,7 @@ class DateRangePicker {
       * and may return a string or array of CSS class names to apply to that date's calendar cell.<br>
       * Signature: `isCustomDate(date)`
       * @property {string|Array|external:HTMLInputElement} altInput=null - A {@link https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector#selectors|Document querySelector}<br>
-      * string or `HTMLElement` 
-      * for an alternative output (typically hidden) `<input>` element. Uses `altFormat` to format the value.<br>
+      * string or `HTMLElement` for an alternative output (typically hidden) `<input>` element. Uses `altFormat` to format the value.<br>
       * Must be a single string/HTMLElement for `singleDatePicker: true` or an array of two strings or HTMLElement for `singleDatePicker: false`<br>
       * Example: `['#start', '#end']`
       * @property {function|string} altFormat - The output format used for `altInput`.<br>
@@ -638,15 +637,15 @@ class DateRangePicker {
       if (this.singleDatePicker) {
          if (typeof options.altInput === 'string') {
             const el = document.querySelector(options.altInput);
-            this.altInput = (el instanceof HTMLInputElement && el.type === 'text') ? el : null;
+            this.altInput = (el instanceof HTMLInputElement && ['text', 'hidden'].includes(el.type)) ? el : null;
          } else if (options.altInput instanceof HTMLElement) {
-            this.altInput = (options.altInput instanceof HTMLInputElement && options.altInput.type === 'text') ? options.altInput : null;
+            this.altInput = (options.altInput instanceof HTMLInputElement && ['text', 'hidden'].includes(options.altInput.type)) ? options.altInput : null;
          }
       } else if (!this.singleDatePicker && Array.isArray(options.altInput) && options.altInput.length === 2) {
          this.altInput = [];
          for (let item of options.altInput) {
             const el = typeof item === 'string' ? document.querySelector(item) : item;
-            if (el instanceof HTMLInputElement && el.type === 'text')
+            if (el instanceof HTMLInputElement && ['text', 'hidden'].includes(el.type))
                this.altInput.push(el);
          }
          if (this.altInput.length !== 2)
