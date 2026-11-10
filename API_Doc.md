@@ -119,6 +119,7 @@ Ranges are not validated against <code>minDate</code>, <code>maxDate</code>, <co
     * [.remove()](#DateRangePicker+remove)
     * [.triggerEvent(ev, ...args)](#DateRangePicker+triggerEvent)
     * [.addEventListener(type, listener, [options])](#DateRangePicker+addEventListener)
+    * [.removeEventListener(type, listener, [options])](#DateRangePicker+removeEventListener)
 
 <a name="new_DateRangePicker_new"></a>
 
@@ -363,23 +364,37 @@ Helper function to dispatch events
 <a name="DateRangePicker+addEventListener"></a>
 
 ### dateRangePicker.addEventListener(type, listener, [options])
-Adds an event listener to the anchor element (e.g., `<input>`) the DateRangePicker is attached to.
-This allows external code to subscribe to native DOM events such as 'click', 'focus', 'keyup', etc.
+Adding event listener to input element where dateragnepicker is attached to.
+Wrapper to give easy access for `addEventListener()` on DateRangePicker instance.
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| type | <code>string</code> | The event name (e.g., 'click', 'focus', 'keyup') |
+| type | <code>string</code> | The event name, either native DOM-Event or [DateRangePicker](API_Doc.md#event) specific event |
 | listener | <code>function</code> | The callback function invoked when the event fires |
 | [options] | <code>boolean</code> \| <code>object</code> | Optional event options:   - `boolean capture`: Whether to listen in the capture phase (default: `false`)   - `object signal`: An `AbortSignal` for later removal of the listener (default: `undefined`) |
 
 **Example**  
 ```js
-daterangepicker.addEventListener('click', (e) => {
-   console.log('Picker element was clicked', e);
+picker.addEventListener('hide', (e) => {
+   console.log('Picker element was hidden', e);
 });
 ```
+<a name="DateRangePicker+removeEventListener"></a>
+
+### dateRangePicker.removeEventListener(type, listener, [options])
+Counterpart to `addEventListener()`
+Note, `listener` most be a named function to enable remove.
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| type | <code>string</code> | The event name, either native |
+| listener | <code>function</code> | The callback function invoked when the event fires |
+| [options] | <code>boolean</code> \| <code>object</code> | Optional event options:   - `boolean capture`: Whether to listen in the capture phase (default: `false`)   - `object signal`: An `AbortSignal` for later removal of the listener (default: `undefined`) |
+
 <a name="DateRangePickerEvent"></a>
 
 ## DateRangePickerEvent ⇐ <code>Event</code>
