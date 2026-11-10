@@ -2909,18 +2909,18 @@ class DateRangePicker {
    }
 
    /**
-    * Adds an event listener to the anchor element (e.g., `<input>`) the DateRangePicker is attached to.
-    * This allows external code to subscribe to native DOM events such as 'click', 'focus', 'keyup', etc.
+    * Adding event listener to input element where dateragnepicker is attached to.
+    * Wrapper to give easy access for `addEventListener()` on DateRangePicker instance. 
     * 
-    * @param {string} type - The event name (e.g., 'click', 'focus', 'keyup')
+    * @param {string} type - The event name, either native DOM-Event or [DateRangePicker](API_Doc.md#event) specific event
     * @param {function} listener - The callback function invoked when the event fires
     * @param {boolean|object} [options] - Optional event options:
     *   - `boolean capture`: Whether to listen in the capture phase (default: `false`)
     *   - `object signal`: An `AbortSignal` for later removal of the listener (default: `undefined`)
     * 
     * @example
-    * daterangepicker.addEventListener('click', (e) => {
-    *    console.log('Picker element was clicked', e);
+    * picker.addEventListener('hide', (e) => {
+    *    console.log('Picker element was hidden', e);
     * });
     * 
     */
@@ -2928,6 +2928,19 @@ class DateRangePicker {
       this.element.addEventListener(type, listener, options);
    }
 
+   /**
+    * Counterpart to `addEventListener()`
+    * Note, `listener` most be a named function to enable remove.
+    * 
+    * @param {string} type - The event name, either native 
+    * @param {function} listener - The callback function invoked when the event fires
+    * @param {boolean|object} [options] - Optional event options:
+    *   - `boolean capture`: Whether to listen in the capture phase (default: `false`)
+    *   - `object signal`: An `AbortSignal` for later removal of the listener (default: `undefined`)
+    */
+   removeEventListener(type, listener, options) {
+      this.element.removeEventListener(type, listener, options);
+   }
 
 }
 
