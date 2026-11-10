@@ -79,9 +79,10 @@ class DateRangePicker {
 
       * @property {boolean} autoUpdateInput=true - Indicates whether the DateRangePicker should instantly update the value of the attached `<input>` 
       * element when the selected dates change.<br>The `<input>` element will be always updated on `Apply` and reverted when user clicks on `Cancel`.
-      * @property {string} onOutsideClick=apply - Defines what picker shall do when user clicks outside the calendar. 
-      * `'apply'` or `'cancel'`. Event {@link #event_outsideClick|onOutsideClick} is always emitted.return;
-      * If you like to do nothing (i.e. neither `apply` nor `cancel`), call `event.preventDefault()` in the event listener.
+      * @property {string} onOutsideClick=apply - Defines what picker shall do when user clicks outside the calendar.
+      * `cancel`,  `apply` or `hide`. Event {@link #event_outsideClick|onOutsideClick} is always emitted;<br>
+      * `cancel` reverts to previous date values. Note, `apply` is only useful with `autoApply: false`, otherwise date values will apply multiple times<br>
+      * If you like to do nothing, call `event.preventDefault()` in the event listener.
       * @property {boolean} linkedCalendars=true - When enabled, the two calendars displayed will always be for two sequential months (i.e. January and February), 
       * and both will be advanced when clicking the left or right arrows above the calendars.<br>
       * When disabled, the two calendars can be individually advanced and display any month/year
@@ -680,10 +681,10 @@ class DateRangePicker {
       }
 
       if (typeof options.onOutsideClick === 'string') {
-         if (['cancel', 'apply'].includes(options.onOutsideClick))
+         if (['cancel', 'apply', 'hide'].includes(options.onOutsideClick))
             this.onOutsideClick = options.onOutsideClick
          else
-            console.error(`Option 'onOutsideClick' must be 'cancel' or 'apply'`);
+            console.error(`Option 'onOutsideClick' must be 'cancel', 'apply' or 'hide'`);
       }
 
       // update day names order to firstDay
@@ -2141,21 +2142,11 @@ class DateRangePicker {
       if (!this.isShowing) return;
 
       //incomplete date selection, revert to last values
-      if (!this.#endDate) {
+      if (!this.#endDate && !this.singleDatePicker) {
          this.#startDate = this.oldStartDate;
          this.#endDate = this.oldEndDate;
       }
-
-      if (typeof this.callback === 'function') {
-         //if a new date range was selected, invoke the user callback function
-         if (
-            (this.#startDate && !this.#startDate.equals(this.oldStartDate ?? DateTime)) ||
-            (this.#endDate && !this.singleDatePicker && !this.#endDate.equals(this.oldEndDate ?? DateTime))
-         )
-            this.callback(this.startDate, this.endDate, this.chosenLabel);
-      }
-
-      //if picker is attached to a text input, update it
+      // if picker is attached to a text input, update it
       this.updateElement();
 
       const event = this.triggerEvent(this.#events.onBeforeHide);
@@ -2246,8 +2237,12 @@ class DateRangePicker {
       if (this.onOutsideClick === 'cancel') {
          this.#startDate = this.oldStartDate;
          this.#endDate = this.oldEndDate;
+         this.hide();
+      } else if (this.onOutsideClick === 'apply') {
+         this.clickApply(); // includes hide() 
+      } else {
+         this.hide();
       }
-      this.hide();
 
    }
 
@@ -2695,6 +2690,15 @@ class DateRangePicker {
 * @private
    */
    clickApply() {
+      // if picker is attached to a text input, update it
+      this.updateElement();
+
+      if (typeof this.callback === 'function') {
+         // invoke the user callback function
+         if (this.#startDate && (this.#endDate || !this.singleDatePicker))
+            this.callback(this.startDate, this.endDate, this.chosenLabel);
+      }
+
       this.hide();
       this.triggerEvent(this.#events.onApply);
    }
@@ -2814,11 +2818,11 @@ class DateRangePicker {
          }
          this.updateAltInput();
          if (newValue !== this.element.value) {
-            this.element.value = newValue
-            this.element.dispatchEvent(new Event('change', { bubbles: true }))
+            this.element.value = newValue;
+            this.element.dispatchEvent(new Event('change', { bubbles: true }));
          }
       } else {
-         this.updateAltInput()
+         this.updateAltInput();
       }
    }
 
