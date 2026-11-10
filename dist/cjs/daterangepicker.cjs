@@ -454,10 +454,10 @@ class DateRangePicker {
       this.buttonClasses = options.buttonClasses;
     }
     if (typeof options.onOutsideClick === "string") {
-      if (["cancel", "apply"].includes(options.onOutsideClick))
+      if (["cancel", "apply", "hide"].includes(options.onOutsideClick))
         this.onOutsideClick = options.onOutsideClick;
       else
-        console.error(`Option 'onOutsideClick' must be 'cancel' or 'apply'`);
+        console.error(`Option 'onOutsideClick' must be 'cancel', 'apply' or 'hide'`);
     }
     if (this.locale.firstDay != 1) {
       let iterator = this.locale.firstDay;
@@ -1698,13 +1698,9 @@ class DateRangePicker {
   */
   hide() {
     if (!this.isShowing) return;
-    if (!this.#endDate) {
+    if (!this.#endDate && !this.singleDatePicker) {
       this.#startDate = this.oldStartDate;
       this.#endDate = this.oldEndDate;
-    }
-    if (typeof this.callback === "function") {
-      if (this.#startDate && !this.#startDate.equals(this.oldStartDate ?? luxon.DateTime) || this.#endDate && !this.singleDatePicker && !this.#endDate.equals(this.oldEndDate ?? luxon.DateTime))
-        this.callback(this.startDate, this.endDate, this.chosenLabel);
     }
     this.updateElement();
     const event = this.triggerEvent(this.#events.onBeforeHide);
@@ -1777,8 +1773,12 @@ class DateRangePicker {
     if (this.onOutsideClick === "cancel") {
       this.#startDate = this.oldStartDate;
       this.#endDate = this.oldEndDate;
+      this.hide();
+    } else if (this.onOutsideClick === "apply") {
+      this.clickApply();
+    } else {
+      this.hide();
     }
-    this.hide();
   }
   /**
   * Move calendar to previous month
@@ -2141,6 +2141,11 @@ class DateRangePicker {
   * @private
      */
   clickApply() {
+    this.updateElement();
+    if (typeof this.callback === "function") {
+      if (this.#startDate && (this.#endDate || !this.singleDatePicker))
+        this.callback(this.startDate, this.endDate, this.chosenLabel);
+    }
     this.hide();
     this.triggerEvent(this.#events.onApply);
   }
