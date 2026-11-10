@@ -104,6 +104,7 @@ Ranges are not validated against <code>minDate</code>, <code>maxDate</code>, <co
     * [.setStartDate(startDate, updateView)](#DateRangePicker+setStartDate) ⇒ <code>InputViolation</code>
     * [.setEndDate(endDate, updateView)](#DateRangePicker+setEndDate) ⇒ <code>InputViolation</code>
     * [.setRange(startDate, endDate, updateView)](#DateRangePicker+setRange) ⇒ <code>InputViolation</code>
+    * [.clearDate(month)](#DateRangePicker+clearDate)
     * [.parseDate(value)](#DateRangePicker+parseDate) ⇒ [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime)
     * [.formatDate(date, format)](#DateRangePicker+formatDate) ⇒ <code>string</code>
     * [.validateInput(range, dipatch)](#DateRangePicker+validateInput) ⇒ <code>InputViolation</code> \| <code>null</code>
@@ -210,6 +211,18 @@ Invalid date values are handled by [violate](#DateRangePicker+violate) Event
 const drp = getDateRangePicker('#picker');
 drp.setRange(DateTime.now().startOf('hour'), DateTime.now().endOf('day'));
 ```
+<a name="DateRangePicker+clearDate"></a>
+
+### dateRangePicker.clearDate(month)
+Clear selected date values.
+Does not invoke callback function, disables "Apply" button
+
+**Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| month | <code>sting</code> \| [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| <code>Date</code> | The month to be shown, if null then current month is selected. |
+
 <a name="DateRangePicker+parseDate"></a>
 
 ### dateRangePicker.parseDate(value) ⇒ [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime)

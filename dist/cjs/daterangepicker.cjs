@@ -384,8 +384,6 @@ class DateRangePicker {
     }
     if (!this.#startDate && this.initialMonth) {
       this.#endDate = null;
-      if (this.timePicker)
-        console.error(`Option 'initialMonth' works only with 'timePicker: false'`);
     } else {
       const violations = this.validateInput(null, false);
       if (violations != null) {
@@ -873,6 +871,31 @@ class DateRangePicker {
     return violations;
   }
   /**
+   * Clear selected date values.
+   * Does not invoke callback function, disables "Apply" button
+   * @param {sting|external:DateTime|Date} month - The month to be shown, if null then current month is selected.
+   */
+  clearDate(month) {
+    const initialMonth = this.parseDate(month ?? this.#startDate.startOf("month"));
+    this.oldStartDate = this.#startDate;
+    this.oldEndDate = this.#endDate;
+    this.#startDate = null;
+    this.#endDate = null;
+    if (this.isInputText)
+      this.element.value = "";
+    if (!this.singleDatePicker)
+      this.chosenLabel = null;
+    if (this.altInput) {
+      if (this.singleDatePicker) {
+        this.altInput.value = "";
+      } else {
+        this.altInput[0].value = "";
+        this.altInput[1].value = "";
+      }
+    }
+    this.updateView(!initialMonth.hasSame(this.oldStartDate, "month"));
+  }
+  /**
    * Parse date value
    * @param {sting|external:DateTime|Date} value - The value to be parsed
    * @returns {external:DateTime} - DateTime object
@@ -884,7 +907,7 @@ class DateRangePicker {
       } else if (value instanceof Date) {
         return luxon.DateTime.fromJSDate(value);
       } else {
-        throw RangeError(`Value must be a luxon.DateTime or Date or string`);
+        throw RangeError(`Value must be a luxon.DateTime or Date or string. Or use clearDate() to clear date values`);
       }
     } else if (typeof value === "string") {
       const format = typeof this.locale.format === "string" ? this.locale.format : luxon.DateTime.parseFormatForOpts(this.locale.format);
@@ -1214,42 +1237,48 @@ class DateRangePicker {
   updateCalendars(monthChange) {
     if (this.timePicker) {
       var hour, minute, second;
-      if (this.#endDate) {
-        hour = parseInt(this.container.querySelector(".start-time .hourselect").value, 10);
-        if (isNaN(hour))
-          hour = parseInt(this.container.querySelector(".start-time .hourselect option:last-child").value, 10);
-        minute = 0;
-        if (this.timePickerOpts.showMinutes) {
-          minute = parseInt(this.container.querySelector(".start-time .minuteselect").value, 10);
-          if (isNaN(minute))
-            minute = parseInt(this.container.querySelector(".start-time .minuteselect option:last-child").value, 10);
-        }
-        second = 0;
-        if (this.timePickerOpts.showSeconds) {
-          second = parseInt(this.container.querySelector(".start-time .secondselect").value, 10);
-          if (isNaN(second))
-            second = parseInt(this.container.querySelector(".start-time .secondselect option:last-child").value, 10);
-        }
+      if (this.#startDate == null && this.#endDate == null) {
+        this.leftCalendar.month = this.leftCalendar.month.set({ hour: 0, minute: 0, second: 0 });
+        if (!this.singleMonthView)
+          this.rightCalendar.month = this.rightCalendar.month.set({ hour: 0, minute: 0, second: 0 });
       } else {
-        hour = parseInt(this.container.querySelector(".end-time .hourselect").value, 10);
-        if (isNaN(hour))
-          hour = parseInt(this.container.querySelector(".end-time .hourselect option:last-child").value, 10);
-        minute = 0;
-        if (this.timePickerOpts.showMinutes) {
-          minute = parseInt(this.container.querySelector(".end-time .minuteselect").value, 10);
-          if (isNaN(minute))
-            minute = parseInt(this.container.querySelector(".end-time .minuteselect option:last-child").value, 10);
+        if (this.#endDate) {
+          hour = parseInt(this.container.querySelector(".start-time .hourselect").value, 10);
+          if (isNaN(hour))
+            hour = parseInt(this.container.querySelector(".start-time .hourselect option:last-child").value, 10);
+          minute = 0;
+          if (this.timePickerOpts.showMinutes) {
+            minute = parseInt(this.container.querySelector(".start-time .minuteselect").value, 10);
+            if (isNaN(minute))
+              minute = parseInt(this.container.querySelector(".start-time .minuteselect option:last-child").value, 10);
+          }
+          second = 0;
+          if (this.timePickerOpts.showSeconds) {
+            second = parseInt(this.container.querySelector(".start-time .secondselect").value, 10);
+            if (isNaN(second))
+              second = parseInt(this.container.querySelector(".start-time .secondselect option:last-child").value, 10);
+          }
+        } else {
+          hour = parseInt(this.container.querySelector(".end-time .hourselect").value, 10);
+          if (isNaN(hour))
+            hour = parseInt(this.container.querySelector(".end-time .hourselect option:last-child").value, 10);
+          minute = 0;
+          if (this.timePickerOpts.showMinutes) {
+            minute = parseInt(this.container.querySelector(".end-time .minuteselect").value, 10);
+            if (isNaN(minute))
+              minute = parseInt(this.container.querySelector(".end-time .minuteselect option:last-child").value, 10);
+          }
+          second = 0;
+          if (this.timePickerOpts.showSeconds) {
+            second = parseInt(this.container.querySelector(".end-time .secondselect").value, 10);
+            if (isNaN(second))
+              second = parseInt(this.container.querySelector(".end-time .secondselect option:last-child").value, 10);
+          }
         }
-        second = 0;
-        if (this.timePickerOpts.showSeconds) {
-          second = parseInt(this.container.querySelector(".end-time .secondselect").value, 10);
-          if (isNaN(second))
-            second = parseInt(this.container.querySelector(".end-time .secondselect option:last-child").value, 10);
-        }
+        this.leftCalendar.month = this.leftCalendar.month.set({ hour, minute, second });
+        if (!this.singleMonthView)
+          this.rightCalendar.month = this.rightCalendar.month.set({ hour, minute, second });
       }
-      this.leftCalendar.month = this.leftCalendar.month.set({ hour, minute, second });
-      if (!this.singleMonthView)
-        this.rightCalendar.month = this.rightCalendar.month.set({ hour, minute, second });
     } else {
       this.leftCalendar.month = this.leftCalendar.month.set({ hour: 0, minute: 0, second: 0 });
       if (!this.singleMonthView)
@@ -1404,20 +1433,27 @@ class DateRangePicker {
   * @emits "beforeRenderTimePicker"
   */
   renderTimePicker(side) {
-    if (side === "end" && !this.#endDate) return;
+    if (side === "end" && !this.#endDate && this.#startDate) return;
     var selected, minLimit, minDate, maxDate = this.maxDate;
     let html = "";
     if (this.showWeekNumbers || this.showISOWeekNumbers)
       html += "<th></th>";
-    if (this.maxSpan && (!this.maxDate || this.#startDate.plus(this.maxSpan) < this.maxDate))
-      maxDate = this.#startDate.plus(this.maxSpan);
-    if (this.minSpan && side === "end")
-      minLimit = this.#startDate.plus(this.minSpan);
+    if (this.#startDate) {
+      if (this.maxSpan && (!this.maxDate || this.#startDate.plus(this.maxSpan) < this.maxDate))
+        maxDate = this.#startDate.plus(this.maxSpan);
+      if (this.minSpan && side === "end")
+        minLimit = this.#startDate.plus(this.minSpan);
+    } else {
+      if (this.maxSpan && (!this.maxDate || this.initialMonth.plus(this.maxSpan) < this.maxDate))
+        maxDate = this.initialMonth.plus(this.maxSpan);
+      if (this.minSpan && side === "end")
+        minLimit = this.initialMonth.plus(this.minSpan);
+    }
     if (side === "start") {
-      selected = this.#startDate;
+      selected = this.#startDate ?? this.initialMonth.startOf("day");
       minDate = this.minDate;
     } else if (side === "end") {
-      selected = this.#endDate;
+      selected = this.#endDate ?? this.initialMonth.startOf("day");
       minDate = this.#startDate;
       let timeSelector = this.container.querySelector(".drp-calendar .calendar-time.end-time");
       if (timeSelector.innerHTML != "") {
