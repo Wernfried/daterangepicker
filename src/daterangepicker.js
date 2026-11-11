@@ -3111,34 +3111,35 @@ function outerHeight(el, withMargin = false) {
 * @param {callback} callback - Callback function executed when date is changed.<br/>
 * Callback function is executed if selected date values has changed, before picker is hidden and before the attached `<input>` element is updated. 
 * As alternative listen to the {@link #event_apply|"apply"} event
+* @param {string} pickerAttribute=_daterangepicker - Name of attribute attached to `element`. Provide the possibility to attach more than one DateRangePicker to an element
 * @returns {DateRangePicker|DateRangePicker[]} The DateRangePicker instance or an array of DateRangePicker instances if `element` matches more than one element
 */
-function daterangepicker(element, options, callback) {
+function daterangepicker(element, options, callback, pickerAttribute = '_daterangepicker') {
    if (element instanceof HTMLElement) {
-      element._daterangepicker = new DateRangePicker(element, options || {}, callback);
-      return element._daterangepicker;
+      element[pickerAttribute] = new DateRangePicker(element, options || {}, callback);
+      return element[pickerAttribute];
    } else if (element instanceof NodeList || element instanceof HTMLCollection) {
       const ret = [];
       for (const el of Array.from(element)) {
-         if (el._daterangepicker && typeof el._daterangepicker.remove === 'function')
-            el._daterangepicker.remove();
-         el._daterangepicker = new DateRangePicker(el, options || {}, callback);
-         ret.push(el._daterangepicker);
+         if (el[pickerAttribute] && typeof el[pickerAttribute].remove === 'function')
+            el[pickerAttribute].remove();
+         el[pickerAttribute] = new DateRangePicker(el, options || {}, callback);
+         ret.push(el[pickerAttribute]);
       }
       return ret;
    } else if (typeof element === 'string') {
       if (document.querySelectorAll(element).length > 1) {
          const ret = [];
          for (const el of Array.from(document.querySelectorAll(element))) {
-            if (el._daterangepicker && typeof el._daterangepicker.remove === 'function')
-               el._daterangepicker.remove();
-            el._daterangepicker = new DateRangePicker(el, options || {}, callback);
-            ret.push(el._daterangepicker);
+            if (el[pickerAttribute] && typeof el[pickerAttribute].remove === 'function')
+               el[pickerAttribute].remove();
+            el[pickerAttribute] = new DateRangePicker(el, options || {}, callback);
+            ret.push(el[pickerAttribute]);
          }
          return ret;
       } else if (document.querySelectorAll(element).length === 1) {
          const picker = new DateRangePicker(element, options || {}, callback);
-         document.querySelector(element)._daterangepicker = picker;
+         document.querySelector(element)[pickerAttribute] = picker;
          return picker;
       } else {
          return undefined;
@@ -3153,15 +3154,16 @@ function daterangepicker(element, options, callback) {
 
 
 /**
- * Returns the DateRangePicker. Equivalent to `element._daterangepicker`
+ * Returns the DateRangePicker. Equivalent to `element[pickerAttribute]`
  * @param {HTMLElement|string} element - The HTMLElement or querySelector string where the DateRangePicker is attached.
+ * @param {string} pickerAttribute=_daterangepicker - Name of attribute attached to `element`
  * @returns {DateRangePicker} - The attached DateRangePicker
  */
-function getDateRangePicker(element) {
+function getDateRangePicker(element, pickerAttribute = '_daterangepicker') {
    if (typeof element === 'string') {
-      return document.querySelector(element)._daterangepicker;
+      return document.querySelector(element)[pickerAttribute];
    } else {
-      return element instanceof HTMLElement ? element._daterangepicker : undefined;
+      return element instanceof HTMLElement ? element[pickerAttribute] : undefined;
    }
 }
 
