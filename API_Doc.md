@@ -10,11 +10,11 @@
 ## Functions
 
 <dl>
-<dt><a href="#daterangepicker">daterangepicker(element, options, callback)</a> ⇒ <code><a href="#DateRangePicker">DateRangePicker</a></code> | <code><a href="#DateRangePicker">Array.&lt;DateRangePicker&gt;</a></code></dt>
+<dt><a href="#daterangepicker">daterangepicker(element, options, callback, pickerAttribute)</a> ⇒ <code><a href="#DateRangePicker">DateRangePicker</a></code> | <code><a href="#DateRangePicker">Array.&lt;DateRangePicker&gt;</a></code></dt>
 <dd><p>Initiate a new DateRangePicker</p>
 </dd>
-<dt><a href="#getDateRangePicker">getDateRangePicker(element)</a> ⇒ <code><a href="#DateRangePicker">DateRangePicker</a></code></dt>
-<dd><p>Returns the DateRangePicker. Equivalent to <code>element._daterangepicker</code></p>
+<dt><a href="#getDateRangePicker">getDateRangePicker(element, pickerAttribute)</a> ⇒ <code><a href="#DateRangePicker">DateRangePicker</a></code></dt>
+<dd><p>Returns the DateRangePicker. Equivalent to <code>element[pickerAttribute]</code></p>
 </dd>
 </dl>
 
@@ -417,29 +417,31 @@ Note, `listener` most be a named function to enable remove.
 **Extends**: <code>Event</code>  
 <a name="daterangepicker"></a>
 
-## daterangepicker(element, options, callback) ⇒ [<code>DateRangePicker</code>](#DateRangePicker) \| [<code>Array.&lt;DateRangePicker&gt;</code>](#DateRangePicker)
+## daterangepicker(element, options, callback, pickerAttribute) ⇒ [<code>DateRangePicker</code>](#DateRangePicker) \| [<code>Array.&lt;DateRangePicker&gt;</code>](#DateRangePicker)
 Initiate a new DateRangePicker
 
 **Kind**: global function  
 **Returns**: [<code>DateRangePicker</code>](#DateRangePicker) \| [<code>Array.&lt;DateRangePicker&gt;</code>](#DateRangePicker) - The DateRangePicker instance or an array of DateRangePicker instances if `element` matches more than one element  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| element | <code>string</code> \| [<code>HTMLElement</code>](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement) \| [<code>HTMLCollection</code>](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCollection) | Element where DateRangePicker is attached |
-| options | [<code>Options</code>](#Options) | Object to configure the DateRangePicker |
-| callback | [<code>callback</code>](#callback) | Callback function executed when date is changed.<br/> Callback function is executed if selected date values has changed, before picker is hidden and before the attached `<input>` element is updated.  As alternative listen to the ["apply"](#event_apply) event |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| element | <code>string</code> \| [<code>HTMLElement</code>](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement) \| [<code>HTMLCollection</code>](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCollection) |  | Element where DateRangePicker is attached |
+| options | [<code>Options</code>](#Options) |  | Object to configure the DateRangePicker |
+| callback | [<code>callback</code>](#callback) |  | Callback function executed when date is changed.<br/> Callback function is executed if selected date values has changed, before picker is hidden and before the attached `<input>` element is updated.  As alternative listen to the ["apply"](#event_apply) event |
+| pickerAttribute | <code>string</code> | <code>&quot;_daterangepicker&quot;</code> | Name of attribute attached to `element`. Provide the possibility to attach more than one DateRangePicker to an element |
 
 <a name="getDateRangePicker"></a>
 
-## getDateRangePicker(element) ⇒ [<code>DateRangePicker</code>](#DateRangePicker)
-Returns the DateRangePicker. Equivalent to `element._daterangepicker`
+## getDateRangePicker(element, pickerAttribute) ⇒ [<code>DateRangePicker</code>](#DateRangePicker)
+Returns the DateRangePicker. Equivalent to `element[pickerAttribute]`
 
 **Kind**: global function  
 **Returns**: [<code>DateRangePicker</code>](#DateRangePicker) - - The attached DateRangePicker  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| element | <code>HTMLElement</code> \| <code>string</code> | The HTMLElement or querySelector string where the DateRangePicker is attached. |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| element | <code>HTMLElement</code> \| <code>string</code> |  | The HTMLElement or querySelector string where the DateRangePicker is attached. |
+| pickerAttribute | <code>string</code> | <code>&quot;_daterangepicker&quot;</code> | Name of attribute attached to `element` |
 
 <a name="event_violate"></a>
 

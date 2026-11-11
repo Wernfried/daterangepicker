@@ -2496,32 +2496,32 @@ function outerHeight(el, withMargin = false) {
   const style = getComputedStyle(el);
   return el.offsetHeight + parseFloat(style.marginTop) + parseFloat(style.marginBottom);
 }
-function daterangepicker(element, options, callback) {
+function daterangepicker(element, options, callback, pickerAttribute = "_daterangepicker") {
   if (element instanceof HTMLElement) {
-    element._daterangepicker = new DateRangePicker(element, options || {}, callback);
-    return element._daterangepicker;
+    element[pickerAttribute] = new DateRangePicker(element, options || {}, callback);
+    return element[pickerAttribute];
   } else if (element instanceof NodeList || element instanceof HTMLCollection) {
     const ret = [];
     for (const el of Array.from(element)) {
-      if (el._daterangepicker && typeof el._daterangepicker.remove === "function")
-        el._daterangepicker.remove();
-      el._daterangepicker = new DateRangePicker(el, options || {}, callback);
-      ret.push(el._daterangepicker);
+      if (el[pickerAttribute] && typeof el[pickerAttribute].remove === "function")
+        el[pickerAttribute].remove();
+      el[pickerAttribute] = new DateRangePicker(el, options || {}, callback);
+      ret.push(el[pickerAttribute]);
     }
     return ret;
   } else if (typeof element === "string") {
     if (document.querySelectorAll(element).length > 1) {
       const ret = [];
       for (const el of Array.from(document.querySelectorAll(element))) {
-        if (el._daterangepicker && typeof el._daterangepicker.remove === "function")
-          el._daterangepicker.remove();
-        el._daterangepicker = new DateRangePicker(el, options || {}, callback);
-        ret.push(el._daterangepicker);
+        if (el[pickerAttribute] && typeof el[pickerAttribute].remove === "function")
+          el[pickerAttribute].remove();
+        el[pickerAttribute] = new DateRangePicker(el, options || {}, callback);
+        ret.push(el[pickerAttribute]);
       }
       return ret;
     } else if (document.querySelectorAll(element).length === 1) {
       const picker = new DateRangePicker(element, options || {}, callback);
-      document.querySelector(element)._daterangepicker = picker;
+      document.querySelector(element)[pickerAttribute] = picker;
       return picker;
     } else {
       return void 0;
@@ -2532,11 +2532,11 @@ function daterangepicker(element, options, callback) {
     return void 0;
   }
 }
-function getDateRangePicker(element) {
+function getDateRangePicker(element, pickerAttribute = "_daterangepicker") {
   if (typeof element === "string") {
-    return document.querySelector(element)._daterangepicker;
+    return document.querySelector(element)[pickerAttribute];
   } else {
-    return element instanceof HTMLElement ? element._daterangepicker : void 0;
+    return element instanceof HTMLElement ? element[pickerAttribute] : void 0;
   }
 }
 if (window.jQuery?.fn) {
