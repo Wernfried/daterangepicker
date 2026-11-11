@@ -5,8 +5,8 @@ test('list all implemented methods', () => {
 
    const toBe = [
       'constructor', 'setStartDate',
-      'setEndDate', 'setRange',
-      'parseDate', 
+      'setEndDate', 'setRange', 'clearDate',
+      'parseDate',
       'formatDate', 'updateLabel',
       'validateInput', 'updateView',
       'updateMonthsInView', 'updateCalendars',
@@ -24,7 +24,7 @@ test('list all implemented methods', () => {
       'elementChanged', 'keydown',
       'updateElement', 'updateAltInput',
       'remove', 'triggerEvent',
-      'addListener'
+      'addListener', 'addEventListener', 'removeEventListener'
    ];
 
    const methods = getMethods(drp);

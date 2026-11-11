@@ -6,14 +6,13 @@ test('show and hide events fire correctly', () => {
     let hidden = false;
 
     document.body.innerHTML = `<input id="p">`;
-    const input = daterangepicker('#p', {});
-    input.addEventListener('show', () => {
+    const picker = daterangepicker('#p', {})
+    .addEventListener('show', () => {
         shown = true;
-    });
-    input.addEventListener('hide', () => {
+    }).addEventListener('hide', () => {
         hidden = true;
     });
-    input.click();
+    picker.show();
 
     const applyBtn = document.querySelector('.applyBtn');
     applyBtn.click();

@@ -6,7 +6,7 @@ test('beforeRender events fire correctly', () => {
    let calendar = false;
 
    document.body.innerHTML = `<input id="p">`;
-   const input = daterangepicker('#p', 
+   const picker = daterangepicker('#p', 
       {
          timePicker: true,
          ranges: {
@@ -16,13 +16,13 @@ test('beforeRender events fire correctly', () => {
          }
       }
    );
-   input.addEventListener('beforeRenderTimePicker', () => {
+   picker.addEventListener('beforeRenderTimePicker', () => {
       timePicker = true;
    });
-   input.addEventListener('beforeRenderCalendar', () => {
+   picker.addEventListener('beforeRenderCalendar', () => {
       calendar = true;
    });
-   input.click();
+   picker.show();
 
    expect(timePicker).toBe(true);
    expect(calendar).toBe(true);

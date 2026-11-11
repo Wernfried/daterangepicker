@@ -5,9 +5,10 @@ test('beforeHide event prevents closing', () => {
     let called = false;
     document.body.innerHTML = `<input id="p">`;
 
-    Picker.daterangepicker('#p', {
+    const picker = Picker.daterangepicker('#p', {
         startDate: '2026-03-02'
-    }).addEventListener('beforeHide', (ev) => {
+    })
+    picker.addEventListener('beforeHide', (ev) => {
         called = true;
         ev.preventDefault();
     });

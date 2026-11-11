@@ -4,18 +4,17 @@ import { DateTime } from 'luxon';
 test('dateChange event fires correctly', () => {
     let called = false;
     document.body.innerHTML = `<input id="p">`;
-    daterangepicker('#p', {
+    const picker = daterangepicker('#p', {
         startDate: '2026-03-02',
         endDate: '2026-03-06',
         timePicker: false
-    }).addEventListener('dateChange', (ev) => {
+    });
+    picker.addEventListener('dateChange', (ev) => {
         called = true;
         expect(ev.side).toBe(left ? 'start' : 'end');
         let day = ev.picker[left ? 'startDate' : 'endDate'].day;
         expect(day).toBe(left ? 19 : 7);
     });
-
-    const drp = getDateRangePicker('#p');
     const input = document.querySelector('#p');
     input.click();
 

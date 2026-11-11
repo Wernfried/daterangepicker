@@ -12,17 +12,16 @@ test('daterangepicker no initial date', () => {
     document.body.innerHTML = `<input id="p" >`;
     Settings.defaultLocale = 'en-CH';
 
-    daterangepicker('#p', {
+    const picker = daterangepicker('#p', {
         timePicker: false,
         startDate: null,
         initialMonth: DateTime.fromISO('2026-03-01')
     });
-    const drp = getDateRangePicker('#p');
     const input = document.querySelector('#p');
     input.click();
     expect(document.querySelector('div.daterangepicker tbody .active')).toBe(null);
-    expect(drp.startDate).toBe(null);
-    expect(drp.endDate).toBe(null);
+    expect(picker.startDate).toBe(null);
+    expect(picker.endDate).toBe(null);
     const leftMonth = document.querySelector('div.daterangepicker .drp-calendar.left .calendar-table .month');
     const rightMonth = document.querySelector('div.daterangepicker .drp-calendar.right .calendar-table .month');
     expect(leftMonth.innerHTML).toBe('March 2026');
@@ -31,8 +30,8 @@ test('daterangepicker no initial date', () => {
     const cancelBtn = document.querySelector('.cancelBtn');
     const applyBtn = document.querySelector('.applyBtn');
     cancelBtn.click();
-    expect(drp.startDate).toBe(null);
-    expect(drp.endDate).toBe(null);
+    expect(picker.startDate).toBe(null);
+    expect(picker.endDate).toBe(null);
 
     input.click();
     const startDay = document.querySelector('.drp-calendar.left .calendar-table tbody td[data-title="r3c3"]'); // -> 2026-03-19
@@ -45,8 +44,8 @@ test('daterangepicker no initial date', () => {
 
     applyBtn.click();
 
-    expect(drp.startDate.toString()).toBe(DateTime.fromISO('2026-03-19').toString());
-    expect(drp.endDate.toString()).toBe(DateTime.fromISO('2026-04-07').endOf('day').toString());
+    expect(picker.startDate.toString()).toBe(DateTime.fromISO('2026-03-19').toString());
+    expect(picker.endDate.toString()).toBe(DateTime.fromISO('2026-04-07').endOf('day').toString());
 
 });
 

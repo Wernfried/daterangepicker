@@ -4,7 +4,7 @@ import { DateTime } from 'luxon';
 test('timeChange event fires correctly', () => {
     let called = false;
     document.body.innerHTML = `<input id="p">`;
-    daterangepicker('#p', {
+    const picker = daterangepicker('#p', {
         timePicker: true,
         startDate: DateTime.now().set({ hour: 0 }),
         endDate: DateTime.now().plus({ days: 1 }).set({ hour: 0 })
