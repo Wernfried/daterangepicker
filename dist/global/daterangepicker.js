@@ -413,27 +413,33 @@ var DateRangePicker = (function(exports, luxon2) {
           }
         }
       }
-      if (this.singleDatePicker) {
-        if (typeof options.altInput === "string") {
-          const el = document.querySelector(options.altInput);
-          this.altInput = el instanceof HTMLInputElement && ["text", "hidden"].includes(el.type) ? el : null;
-        } else if (options.altInput instanceof HTMLElement) {
-          this.altInput = options.altInput instanceof HTMLInputElement && ["text", "hidden"].includes(options.altInput.type) ? options.altInput : null;
-        }
-      } else if (!this.singleDatePicker && Array.isArray(options.altInput) && options.altInput.length === 2) {
-        this.altInput = [];
-        for (let item of options.altInput) {
-          const el = typeof item === "string" ? document.querySelector(item) : item;
-          if (el instanceof HTMLInputElement && ["text", "hidden"].includes(el.type))
-            this.altInput.push(el);
-        }
-        if (this.altInput.length !== 2)
-          this.altInput = null;
-      } else if (options.altInput != null) {
-        console.warn(`Option 'altInput' ${JSON.stringify(options.altInput)} is not valid`);
-      }
-      if (options.altInput && ["function", "string"].includes(typeof options.altFormat))
+      if (["function", "string", "object"].includes(typeof options.altFormat))
         this.altFormat = options.altFormat;
+      if (typeof options.altInput === "string") {
+        if (this.singleDatePicker) {
+          const el = document.querySelector(options.altInput);
+          if (el instanceof HTMLInputElement && ["text", "hidden"].includes(el.type))
+            this.altInput = el;
+        } else {
+          const el = Array.from(document.querySelectorAll(options.altInput));
+          if ([1, 2].includes(el.length) && el.every((x) => x instanceof HTMLInputElement && ["text", "hidden"].includes(x.type)))
+            this.altInput = el.length === 1 ? el[0] : el;
+        }
+      } else if (options.altInput instanceof HTMLElement && ["text", "hidden"].includes(options.altInput.type)) {
+        this.altInput = options.altInput;
+      } else if (Array.isArray(options.altInput) || options.altInput instanceof HTMLCollection || options.altInput instanceof NodeList) {
+        let el = Array.isArray(options.altInput) ? options.altInput : Array.from(options.altInput);
+        if (!this.singleDatePicker && el.length === 2) {
+          if (el.every((x) => typeof x === "string"))
+            el = el.map((x) => {
+              return document.querySelector(x);
+            });
+          if (el.every((x) => x instanceof HTMLInputElement && ["text", "hidden"].includes(x.type)))
+            this.altInput = el;
+        }
+      }
+      if (options.altInput != null && this.altInput == null)
+        console.error(`Option 'altInput' ${JSON.stringify(options.altInput)} is not valid`);
       if (typeof options.opens === "string") {
         if (["left", "right", "center"].includes(options.opens))
           this.opens = options.opens;
@@ -886,7 +892,7 @@ var DateRangePicker = (function(exports, luxon2) {
       if (!this.singleDatePicker)
         this.chosenLabel = null;
       if (this.altInput) {
-        if (this.singleDatePicker) {
+        if (this.singleDatePicker || !Array.isArray(this.altInput)) {
           this.altInput.value = "";
         } else {
           this.altInput[0].value = "";
@@ -2300,7 +2306,7 @@ var DateRangePicker = (function(exports, luxon2) {
     updateAltInput() {
       if (this.altInput == null)
         return;
-      if (this.altFormat == null) {
+      if (this.altFormat == null || typeof this.altFormat === "object") {
         let precision = "day";
         if (this.timePicker) {
           if (this.timePickerOpts.showSeconds) {
@@ -2311,18 +2317,37 @@ var DateRangePicker = (function(exports, luxon2) {
             precision = "hour";
           }
         }
-        const startDate = this.#startDate.toISO({ format: "basic", precision, includeOffset: false });
-        (this.singleDatePicker ? this.altInput : this.altInput[0]).value = startDate;
-        if (!this.singleDatePicker && this.#endDate) {
-          const endDate = this.#endDate.toISO({ format: "basic", precision, includeOffset: false });
-          this.altInput[1].value = endDate;
+        const isoOptions = this.altFormat ?? { format: "basic", precision, includeOffset: false };
+        const startDate = this.#startDate.toISO(isoOptions);
+        if (this.singleDatePicker) {
+          this.altInput.value = startDate;
+        } else if (this.#endDate) {
+          const endDate = this.#endDate.toISO(isoOptions);
+          if (Array.isArray(this.altInput)) {
+            this.altInput[0].value = startDate;
+            this.altInput[1].value = endDate;
+          } else {
+            const interval = luxon2.Interval.fromDateTimes(this.#startDate, this.#endDate);
+            this.altInput.value = interval.toISO(isoOptions);
+          }
         }
       } else {
-        const startDate = typeof this.altFormat === "function" ? this.altFormat(this.#startDate) : this.formatDate(this.#startDate, this.altFormat);
-        (this.singleDatePicker ? this.altInput : this.altInput[0]).value = startDate;
-        if (!this.singleDatePicker && this.#endDate) {
-          const endDate = typeof this.altFormat === "function" ? this.altFormat(this.#endDate) : this.formatDate(this.#endDate, this.altFormat);
-          this.altInput[1].value = endDate;
+        const startDate = typeof this.altFormat === "function" ? this.altFormat(this.#startDate) : this.toFormat(this.#startDate, this.altFormat);
+        if (this.singleDatePicker) {
+          this.altInput.value = startDate;
+        } else if (this.#endDate) {
+          const endDate = typeof this.altFormat === "function" ? this.altFormat(this.#endDate) : this.toFormat(this.#endDate, this.altFormat);
+          if (Array.isArray(this.altInput)) {
+            this.altInput[0].value = startDate;
+            this.altInput[1].value = endDate;
+          } else {
+            const interval = luxon2.Interval.fromDateTimes(this.#startDate, this.#endDate);
+            if (typeof this.altFormat === "function") {
+              this.altInput.value = this.altFormat(interval);
+            } else {
+              this.altInput.value = this.toFormat(interval, this.altFormat, { separator: "/" });
+            }
+          }
         }
       }
     }
@@ -2384,6 +2409,7 @@ var DateRangePicker = (function(exports, luxon2) {
      * @param {boolean|object} [options] - Optional event options:
      *   - `boolean capture`: Whether to listen in the capture phase (default: `false`)
      *   - `object signal`: An `AbortSignal` for later removal of the listener (default: `undefined`)
+     * @returns {DateRangePicker} - The DateRangePicker instance, usefull for chaining
      * 
      * @example
      * picker.addEventListener('hide', (e) => {
@@ -2393,6 +2419,7 @@ var DateRangePicker = (function(exports, luxon2) {
      */
     addEventListener(type, listener, options) {
       this.element.addEventListener(type, listener, options);
+      return this;
     }
     /**
      * Counterpart to `addEventListener()`
@@ -2403,9 +2430,11 @@ var DateRangePicker = (function(exports, luxon2) {
      * @param {boolean|object} [options] - Optional event options:
      *   - `boolean capture`: Whether to listen in the capture phase (default: `false`)
      *   - `object signal`: An `AbortSignal` for later removal of the listener (default: `undefined`)
-     */
+     * @returns {DateRangePicker} - The DateRangePicker instance, usefull for chaining
+    */
     removeEventListener(type, listener, options) {
       this.element.removeEventListener(type, listener, options);
+      return this;
     }
   }
   function createElementFromHTML(html) {

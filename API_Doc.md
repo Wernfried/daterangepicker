@@ -119,8 +119,8 @@ Ranges are not validated against <code>minDate</code>, <code>maxDate</code>, <co
     * [.updateAltInput()](#DateRangePicker+updateAltInput)
     * [.remove()](#DateRangePicker+remove)
     * [.triggerEvent(ev, ...args)](#DateRangePicker+triggerEvent)
-    * [.addEventListener(type, listener, [options])](#DateRangePicker+addEventListener)
-    * [.removeEventListener(type, listener, [options])](#DateRangePicker+removeEventListener)
+    * [.addEventListener(type, listener, [options])](#DateRangePicker+addEventListener) ⇒ [<code>DateRangePicker</code>](#DateRangePicker)
+    * [.removeEventListener(type, listener, [options])](#DateRangePicker+removeEventListener) ⇒ [<code>DateRangePicker</code>](#DateRangePicker)
 
 <a name="new_DateRangePicker_new"></a>
 
@@ -376,11 +376,12 @@ Helper function to dispatch events
 
 <a name="DateRangePicker+addEventListener"></a>
 
-### dateRangePicker.addEventListener(type, listener, [options])
+### dateRangePicker.addEventListener(type, listener, [options]) ⇒ [<code>DateRangePicker</code>](#DateRangePicker)
 Adding event listener to input element where dateragnepicker is attached to.
 Wrapper to give easy access for `addEventListener()` on DateRangePicker instance.
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Returns**: [<code>DateRangePicker</code>](#DateRangePicker) - - The DateRangePicker instance, usefull for chaining  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -396,11 +397,12 @@ picker.addEventListener('hide', (e) => {
 ```
 <a name="DateRangePicker+removeEventListener"></a>
 
-### dateRangePicker.removeEventListener(type, listener, [options])
+### dateRangePicker.removeEventListener(type, listener, [options]) ⇒ [<code>DateRangePicker</code>](#DateRangePicker)
 Counterpart to `addEventListener()`
 Note, `listener` most be a named function to enable remove.
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Returns**: [<code>DateRangePicker</code>](#DateRangePicker) - - The DateRangePicker instance, usefull for chaining  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -712,8 +714,8 @@ Options for DateRangePicker
 | isInvalidDate | <code>function</code> | <code>false</code> | A function that is passed each date in the two calendars before they are displayed,<br>  and may return `true` or `false` to indicate whether that date should be available for selection or not.<br> Signature: `isInvalidDate(date)`<br> |
 | isInvalidTime | <code>function</code> | <code>false</code> | A function that is passed each hour/minute/second/am-pm in the two calendars before they are displayed,<br>  and may return `true` or `false` to indicate whether that date should be available for selection or not.<br> Signature: `isInvalidTime(time, side, unit)`<br> `side` is `'start'` or `'end'` or `null` for `singleDatePicker: true`<br> `unit` is `'hour'`, `'minute'`, `'second'` or `'ampm'`<br> Hours are always given as 24-hour clock<br> Ensure that your function returns `false` for at least one item. Otherwise the calender is not rendered.<br> |
 | isCustomDate | <code>function</code> | <code>false</code> | A function that is passed each date in the two calendars before they are displayed,  and may return a string or array of CSS class names to apply to that date's calendar cell.<br> Signature: `isCustomDate(date)` |
-| altInput | <code>string</code> \| <code>Array</code> \| [<code>HTMLInputElement</code>](https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement) | <code>null</code> | A [Document querySelector](https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector#selectors)<br> string or `HTMLElement` for an alternative output (typically hidden) `<input>` element. Uses `altFormat` to format the value.<br> Must be a single string/HTMLElement for `singleDatePicker: true` or an array of two strings or HTMLElement for `singleDatePicker: false`<br> Example: `['#start', '#end']` |
-| altFormat | <code>function</code> \| <code>string</code> |  | The output format used for `altInput`.<br> Default: ISO-8601 basic format without time zone, precisison is derived from `timePicker` and `timePickerStepSize`<br> Example `yyyyMMdd'T'HHmm` for `timePicker=true` and display of Minutes<br>  If defined, either a string used with [Format tokens](https://moment.github.io/luxon/#/formatting?id=table-of-tokens) or a function.<br> Examples: `"yyyy:MM:dd'T'HH:mm"`,<br>`(date) => date.toUnixInteger()` |
+| altInput | <code>string</code> \| <code>Array</code> \| [<code>HTMLInputElement</code>](https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement) \| [<code>HTMLCollection</code>](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCollection) | <code>null</code> | A [Document querySelector](https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector#selectors)<br> string matching a single `<input>` element or an `HTMLInputElement` for the alternative output. Uses `altFormat` to format the value.<br> For `singleDatePicker: false` you may provide:<br> - A CSS querySelector string matching exactly two `<input>` elements (e.g., `'.start-date, .end-date'`)<br> - An array of two strings or `HTMLInputElement` elements<br> - An `HTMLCollection` of two `HTMLInputElement` elements<br> Uses `altFormat` to format the values.<br> Examples: `'#start, #end'`, `['#start', '#end']`, or `[startInput, endInput]` |
+| altFormat | <code>function</code> \| <code>string</code> \| <code>object</code> |  | The output format used for `altInput`.<br> Either a string of [Format tokens](https://moment.github.io/luxon/#/formatting?id=table-of-tokens) or  [DateTime.toISO()](https://moment.github.io/luxon/api-docs/index.html#datetimetoiso) opts object or a function.<br> Default: `{format: 'extended', precision: <derived from timePickerStepSize>, includeOffset: false}`<br> Examples: `"yyyy:MM:dd'T'HH:mm"`<br> `(date) => date.toUnixInteger()` for singleDatePicker: true or altInput[]<br> `(interval) => interval.toISO('yyyy:MM:dd', {separator: '..'})` for singleDatePicker: false and single altInput |
 | applyButtonClasses | <code>string</code> | <code>&quot;btn-primary&quot;</code> | CSS class names that will be added only to the apply button |
 | cancelButtonClasses | <code>string</code> | <code>&quot;btn-default&quot;</code> | CSS class names that will be added only to the cancel button |
 | buttonClasses | <code>string</code> |  | Default: `'btn btn-sm'`<br>CSS class names that will be added to both the apply and cancel buttons. |
