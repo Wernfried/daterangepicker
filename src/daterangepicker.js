@@ -1136,11 +1136,27 @@ class DateRangePicker {
     * @param {sting|external:DateTime|Date} month - The month to be shown, if null then current month is selected.
     */
    clearDate(month) {
-      const initialMonth = this.parseDate(month ?? this.#startDate.startOf('month'));
+      if (this.#startDate == null && this.#endDate == null)
+         return;
+      const monthChange = month !== undefined && !this.parseDate(month).hasSame(this.#startDate, 'month');
+      if (monthChange)
+         this.#startDate = this.parseDate(month); // set correct month to be shown
+
+      this.updateMonthsInView();
       this.oldStartDate = this.#startDate;
       this.oldEndDate = this.#endDate;
       this.#startDate = null;
       this.#endDate = null;
+      this.updateCalendars(monthChange);
+      this.setApplyBtnState();
+
+      if (this.timePicker) {
+         this.triggerEvent(this.#events.onBeforeRenderTimePicker);
+         this.renderTimePicker('start');
+         this.renderTimePicker('end');
+         this.container.querySelectorAll('.calendar-time.end-time select').forEach(el => { el.disabled = !this.#endDate });
+         this.container.querySelectorAll('.calendar-time.end-time select').forEach(el => { el.classList.toggle('disabled', !this.#endDate) });
+      }
 
       if (this.isInputText)
          this.element.value = '';
@@ -1155,7 +1171,6 @@ class DateRangePicker {
             this.altInput[1].value = '';
          }
       }
-      this.updateView(!initialMonth.hasSame(this.oldStartDate, 'month'));
    }
 
    /**
@@ -1485,7 +1500,6 @@ class DateRangePicker {
       this.updateMonthsInView();
       this.updateCalendars(monthChange);
       this.setApplyBtnState();
-
    }
 
    /**

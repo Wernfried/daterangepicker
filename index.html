@@ -18,10 +18,11 @@
   <script type="module">
     import { DateTime, Duration, Info, Settings, Interval } from 'luxon';
     import { daterangepicker, getDateRangePicker } from 'daterangepicker';
+    window.getDateRangePicker = getDateRangePicker;
 
     const picker = daterangepicker('#picker', {
       startDate: DateTime.now(),
-      timePicker: false,
+      timePicker: true,
       autoApply: true,
       //singleDatePicker: true,
       altInput: document.getElementById('range'),
@@ -40,7 +41,7 @@
   <div>
     <input type="text" id="picker" size="30" />
   </div>
-  <div style="padding-top: 300px">
+  <div style="padding-top: 350px">
     <input type="text" id="startDate" size="30" />
     <input type="text" id="endDate" size="30" />
     <input type="text" id="range" size="50" />
