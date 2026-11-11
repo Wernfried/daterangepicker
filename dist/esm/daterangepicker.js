@@ -1,4 +1,4 @@
-import { DateTime, Duration, Info, Settings, Interval } from "luxon";
+import { DateTime, Duration, Info, Interval, Settings } from "luxon";
 class DateRangePicker {
   #startDate = null;
   #endDate = null;
@@ -57,6 +57,7 @@ class DateRangePicker {
       format: DateTime.DATE_SHORT,
       // or DateTime.DATETIME_SHORT when timePicker: true
       separator: " - ",
+      formatInterval: false,
       applyLabel: "Apply",
       cancelLabel: "Cancel",
       weekLabel: "W",
@@ -186,6 +187,8 @@ class DateRangePicker {
       }
       if (["string", "object"].includes(typeof options.locale.format) && options.locale.format !== null)
         this.locale.format = options.locale.format;
+      if (typeof options.locale.formatInterval === "boolean")
+        this.locale.formatInterval = options.locale.formatInterval;
       if (Array.isArray(options.locale.daysOfWeek)) {
         if (options.locale.daysOfWeek.some((x) => typeof x !== "string"))
           console.error(`Option 'locale.daysOfWeek' must be an array of strings`);
@@ -354,18 +357,28 @@ class DateRangePicker {
             console.error(`Value "${this.element.value}" in <input> is not a valid string: ${start.invalidExplanation}`);
           }
         } else if (!this.singleDatePicker && typeof options.startDate === "undefined" && typeof options.endDate === "undefined") {
-          const split = this.element.value.split(this.locale.separator);
-          if (split.length === 2) {
-            const start = DateTime.fromFormat(split[0], format, { locale: DateTime.now().locale });
-            const end = DateTime.fromFormat(split[1], format, { locale: DateTime.now().locale });
-            if (start.isValid && end.isValid) {
-              this.#startDate = start;
-              this.#endDate = end;
+          if (this.locale.formatInterval) {
+            const interval = Interval.fromFormat(this.element.value, format, { locale: DateTime.now().locale });
+            if (interval.isValid) {
+              this.#startDate = interval.start;
+              this.#endDate = interval.end;
             } else {
-              console.error(`Value in <input> is not a valid string: ${start.invalidExplanation} - ${end.invalidExplanation}`);
+              console.error(`Value "${this.element.value}" in <input> is not a valid string`);
             }
           } else {
-            console.error(`Value "${this.element.value}" in <input> is not a valid string`);
+            const split = this.element.value.split(this.locale.separator);
+            if (split.length === 2) {
+              const start = DateTime.fromFormat(split[0], format, { locale: DateTime.now().locale });
+              const end = DateTime.fromFormat(split[1], format, { locale: DateTime.now().locale });
+              if (start.isValid && end.isValid) {
+                this.#startDate = start;
+                this.#endDate = end;
+              } else {
+                console.error(`Value in <input> is not a valid string: ${start.invalidExplanation} - ${end.invalidExplanation}`);
+              }
+            } else {
+              console.error(`Value "${this.element.value}" in <input> is not a valid string`);
+            }
           }
         }
       }
@@ -946,7 +959,7 @@ class DateRangePicker {
   /* #endregion */
   /**
    * Format a DateTime object
-   * @param {external:DateTime} date - The DateTime to format
+   * @param {external:DateTime|external:Interval} date - The DateTime to format
    * @param {object|string} format=this.locale.format - The format option
    * @returns {string} - Formatted date string
    */
@@ -954,13 +967,13 @@ class DateRangePicker {
     if (date === null)
       return null;
     if (typeof format === "object") {
-      return date.toLocaleString(format);
+      return Interval.isInterval(date) ? date.toLocaleString(format, { separator: this.locale.separator }) : date.toLocaleString(format);
     } else {
       if (Settings.defaultLocale === null) {
         const locale = DateTime.now().locale;
-        return date.toFormat(format, { locale });
+        return Interval.isInterval(date) ? date.toFormat(format, { locale, separator: this.locale.separator }) : date.toFormat(format, { locale });
       } else {
-        return date.toFormat(format);
+        return Interval.isInterval(date) ? date.toFormat(format, { separator: this.locale.separator }) : date.toFormat(format);
       }
     }
   }
@@ -970,13 +983,17 @@ class DateRangePicker {
    */
   updateLabel() {
     if (this.showLabel) {
-      let text = this.formatDate(this.#startDate);
-      if (!this.singleDatePicker) {
-        text += this.locale.separator;
-        if (this.#endDate)
-          text += this.formatDate(this.#endDate);
+      if (this.locale.formatInterval && this.#endDate) {
+        this.container.querySelector(".drp-selected").innerHTML = this.formatDate(Interval.fromDateTimes(this.#startDate, this.#endDate));
+      } else {
+        let text = this.formatDate(this.#startDate);
+        if (!this.singleDatePicker) {
+          text += this.locale.separator;
+          if (this.#endDate)
+            text += this.formatDate(this.#endDate);
+        }
+        this.container.querySelector(".drp-selected").innerHTML = text;
       }
-      this.container.querySelector(".drp-selected").innerHTML = text;
     }
     if (this.singleDatePicker || this.locale.durationFormat == null)
       return;
@@ -2301,11 +2318,16 @@ class DateRangePicker {
     if (this.#startDate == null && this.initialMonth)
       return;
     if (this.isInputText) {
-      let newValue = this.formatDate(this.#startDate);
-      if (!this.singleDatePicker) {
-        newValue += this.locale.separator;
-        if (this.#endDate)
-          newValue += this.formatDate(this.#endDate);
+      let newValue;
+      if (this.locale.formatInterval && this.#endDate) {
+        newValue = this.formatDate(Interval.fromDateTimes(this.#startDate, this.#endDate));
+      } else {
+        newValue = this.formatDate(this.#startDate);
+        if (!this.singleDatePicker) {
+          newValue += this.locale.separator;
+          if (this.#endDate)
+            newValue += this.formatDate(this.#endDate);
+        }
       }
       this.updateAltInput();
       if (newValue !== this.element.value) {

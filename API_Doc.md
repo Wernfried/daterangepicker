@@ -245,7 +245,7 @@ Format a DateTime object
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| date | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) |  | The DateTime to format |
+| date | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Interval</code>](https://moment.github.io/luxon/api-docs/index.html#interval) |  | The DateTime to format |
 | format | <code>object</code> \| <code>string</code> | <code>this.locale.format</code> | The format option |
 
 <a name="DateRangePicker+validateInput"></a>
@@ -734,6 +734,7 @@ Options for DateRangePicker
 | locale.direction | <code>string</code> | <code>&quot;ltr&quot;</code> | Direction of reading, `'ltr'` or `'rtl'` |
 | locale.format | <code>object</code> \| <code>string</code> |  | Default: `DateTime.DATE_SHORT` or `DateTime.DATETIME_SHORT` when `timePicker: true`<br>Date formats.  Either given as string, see [Format Tokens](https://moment.github.io/luxon/#/formatting?id=table-of-tokens) or an object according  to [Intl.DateTimeFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat)<br> I recommend to use the luxon [Presets](https://moment.github.io/luxon/#/formatting?id=presets). |
 | locale.separator | <code>string</code> |  | Defaut: `' - '`<br>Separator for start and end time |
+| locale.formatInterval | <code>boolean</code> | <code>false</code> | If `false` then range is formatted like `{startDate.toFormat(locale.format)}{locale.separator}{endDate.toFormat(locale.format)}`<br> If `true` then range is formatted like `Interval.fromDateTimes(startDate, endDate).toFormat(locale.format, {separator: locale.separator})` |
 | locale.weekLabel | <code>string</code> | <code>&quot;W&quot;</code> | Label for week numbers |
 | locale.daysOfWeek | <code>Array</code> |  | Default: `luxon.Info.weekdays('short')`<br>Array with weekday names, from Monday to Sunday |
 | locale.monthNames | <code>Array</code> |  | Default: `luxon.Info.months('long')`<br>Array with month names |
