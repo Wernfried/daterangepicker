@@ -2,10 +2,12 @@ import { DateTime, Duration, Info, Settings, Interval } from 'luxon';
 
 /**
 * @constructs DateRangePicker
-* @param {string|external:HTMLElement} element - A DOM HTMLElement or CSS querySelector string of element where DateRangePicker is attached.
-* Often a `<input type="text">` element. Element `<input>` and `<button>` shows the DateRangePicker on click, other elements toggle the DateRangePicker.
-* @param {Options} options - Object to configure the DateRangePicker
-* @param {function} cb - Callback function executed when new date values applied
+* @param {string|external:HTMLElement} element - A DOM `HTMLElement` or a CSS querySelector string of the element the DateRangePicker is attached to.<br>
+* Often an `<input type="text">` element. A click on an `<input>` or `<button>` element shows the picker, a click on any other element toggles it.<br>
+* A selector string must match exactly one element.
+* @param {Options} [options] - Object to configure the DateRangePicker
+* @param {callback} [cb] - Callback function executed when new date values are applied
+* @throws {RangeError} If `element` is a selector string which matches more than one element
 */
 class DateRangePicker {
    #startDate = null;
@@ -37,14 +39,14 @@ class DateRangePicker {
       * @property {external:Duration|string|number|null} minSpan=null - The minimum span between the selected start and end dates.<br>
       * Must be a `luxon.Duration` or number of seconds or a string according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} duration.<br>
       * Ignored when `singleDatePicker: true`
-      * @property {external:Duration|string|number|null} maxSpan=null - The maximum  span between the selected start and end dates.<br>
+      * @property {external:Duration|string|number|null} maxSpan=null - The maximum span between the selected start and end dates.<br>
       * Must be a `luxon.Duration` or number of seconds or a string according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} duration.<br>
       * Ignored when `singleDatePicker: true`
-      * @property {external:Duration|string|number|null} defaultSpan=null - The span which is used when endDate is automatically updated due to wrong user input<br>
+      * @property {external:Duration|string|number|null} defaultSpan=null - The span used to correct `endDate` when the selected range is shorter than `minSpan`<br>
       * Must be a `luxon.Duration` or number of seconds or a string according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} duration.<br>
       * Ignored when `singleDatePicker: true`. Not relevant if `minSpan: null`
       * @property {external:DateTime|external:Date|string|null} initialMonth - Default: `DateTime.now().startOf('month')`<br>
-      * The inital month to be shown. Only relevant for `startDate: null`. Be aware, the attached `<input>` element must also be empty.<br>
+      * The initial month to be shown. Only relevant for `startDate: null`. Be aware, the attached `<input>` element must also be empty.<br>
       * Must be a `luxon.DateTime` or `Date` or `string` according to {@link https://en.wikipedia.org/wiki/ISO_8601|ISO-8601} or a string matching `locale.format`.<br>
       * Works only with `timePicker: false`
 
@@ -57,7 +59,7 @@ class DateRangePicker {
       * Ignored for `singleDatePicker: true`. 
       * @property {boolean} showDropdowns=false - Show year and month select boxes above calendars to jump to a specific month and year
       * @property {number} minYear - Default: `DateTime.now().minus({year:100}).year`<br>The minimum year shown in the dropdowns when `showDropdowns: true`
-      * @property {number} maxYear - Default: `DateTime.now().plus({year:100}).year`<br>The maximum  year shown in the dropdowns when `showDropdowns: true`
+      * @property {number} maxYear - Default: `DateTime.now().plus({year:100}).year`<br>The maximum year shown in the dropdowns when `showDropdowns: true`
       * @property {boolean} showWeekNumbers=false - Show **localized** week numbers at the start of each week on the calendars
       * @property {boolean} showISOWeekNumbers=false - Show **ISO** week numbers at the start of each week on the calendars.<br>
       * Takes precedence over localized `showWeekNumbers`
@@ -65,7 +67,8 @@ class DateRangePicker {
       * Main reason of this option is to prevent hide/flicker of the picker on `outsideClick()`
       * @property {boolean} showOnClick=true - Shows/toggle the DateRangePicker on click or focus at `element`.<br>
       * You may want to set it to `false` only when option `button` is provided or when you use `show()` programmatically.
-      * @property {boolean} stopPropagation=true - Set this option to `false` if you want to listen on DOM-Events outside this instance.
+      * @property {boolean} stopPropagation=true - Events handled inside the picker (click, hover, change) are not propagated to parent elements.<br>
+      * Set to `false` if you need to listen to these DOM events outside this instance.
 
       * @property {boolean} timePicker=false - Adds select boxes to choose times in addition to dates
       * @property {boolean} timePicker24Hour - Use 24-hour instead of 12-hour times, removing the AM/PM selection.<br>
@@ -86,17 +89,17 @@ class DateRangePicker {
       * @property {boolean} linkedCalendars=true - When enabled, the two calendars displayed will always be for two sequential months (i.e. January and February), 
       * and both will be advanced when clicking the left or right arrows above the calendars.<br>
       * When disabled, the two calendars can be individually advanced and display any month/year
-      * @property {function} isInvalidDate=false - A function that is passed each date in the two calendars before they are displayed,<br> 
+      * @property {function} isInvalidDate - Default: `() => false`<br>A function that is passed each date in the two calendars before they are displayed,<br> 
       * and may return `true` or `false` to indicate whether that date should be available for selection or not.<br>
       * Signature: `isInvalidDate(date)`<br>
-      * @property {function} isInvalidTime=false - A function that is passed each hour/minute/second/am-pm in the two calendars before they are displayed,<br> 
+      * @property {function} isInvalidTime - Default: `() => false`<br>A function that is passed each hour/minute/second/am-pm in the two calendars before they are displayed,<br> 
       * and may return `true` or `false` to indicate whether that date should be available for selection or not.<br>
       * Signature: `isInvalidTime(time, side, unit)`<br>
       * `side` is `'start'` or `'end'` or `null` for `singleDatePicker: true`<br>
       * `unit` is `'hour'`, `'minute'`, `'second'` or `'ampm'`<br>
       * Hours are always given as 24-hour clock<br>
-      * Ensure that your function returns `false` for at least one item. Otherwise the calender is not rendered.<br>
-      * @property {function} isCustomDate=false - A function that is passed each date in the two calendars before they are displayed, 
+      * Ensure that your function returns `false` for at least one item. Otherwise the calendar is not rendered.<br>
+      * @property {function} isCustomDate - Default: `() => false`<br>A function that is passed each date in the two calendars before they are displayed, 
       * and may return a string or array of CSS class names to apply to that date's calendar cell.<br>
       * Signature: `isCustomDate(date)`
       * @property {string|Array|external:HTMLInputElement|external:HTMLCollection} altInput=null - 
@@ -123,7 +126,7 @@ class DateRangePicker {
       * Use `null` or empty string if you don't like to highlight weekend days.
       * @property {string} weekendDayClasses=weekend-day - CSS class names that will be used to highlight weekend day names.<br>
       * Weekend days are evaluated by [Info.getWeekendWeekdays](https://moment.github.io/luxon/api-docs/index.html#infogetweekendweekdays) and depend on current 
-      * locale settings.
+      * locale settings.<br>
       * Use `null` or empty string if you don't like to highlight weekend day names.
       * @property {string} todayClasses=today - CSS class names that will be used to highlight the current day.<br>
       * Use `null` or empty string if you don't like to highlight the current day.
@@ -150,8 +153,8 @@ class DateRangePicker {
       * @property {object|string} locale.format - Default: `DateTime.DATE_SHORT` or `DateTime.DATETIME_SHORT` when `timePicker: true`<br>Date formats. 
       * Either given as string, see [Format Tokens](https://moment.github.io/luxon/#/formatting?id=table-of-tokens) or an object according 
       * to [Intl.DateTimeFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat)<br>
-      * I recommend to use the luxon [Presets](https://moment.github.io/luxon/#/formatting?id=presets).
-      * @property {string} locale.separator - Defaut: `' - '`<br>Separator for start and end time
+      * It is recommended to use the luxon [Presets](https://moment.github.io/luxon/#/formatting?id=presets).
+      * @property {string} locale.separator - Default: `' - '`<br>Separator for start and end time
       * @property {boolean} locale.formatInterval=false - If `false` then range is formatted like `{startDate.toFormat(locale.format)}{locale.separator}{endDate.toFormat(locale.format)}`<br>
       * If `true` then range is formatted like `Interval.fromDateTimes(startDate, endDate).toFormat(locale.format, {separator: locale.separator})`
       * @property {string} locale.weekLabel=W - Label for week numbers
@@ -164,17 +167,15 @@ class DateRangePicker {
       * @property {object|string|function} locale.durationFormat={} - Format a custom label for selected duration, for example `'5 Days, 12 Hours'`.<br>
       * Define the format either as string, see [Duration.toFormat - Format Tokens](https://moment.github.io/luxon/api-docs/index.html#durationtoformat) or 
       * an object according to [Intl.NumberFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#options), 
-      * see [Duration.toHuamn](https://moment.github.io/luxon/api-docs/index.html#durationtohuman).<br>
+      * see [Duration.toHuman](https://moment.github.io/luxon/api-docs/index.html#durationtohuman).<br>
       * Or custom function as `(startDate, endDate) => {}`
       */
 
       /**
-      * A set of predefined ranges.<br>
+      * A set of predefined ranges. Each key is the label of a range, its value an array `[startDate, endDate]`.<br>
       * Ranges are not validated against `minDate`, `maxDate`, `minSpan`, `maxSpan` or `timePickerStepSize ` constraints.
       * @typedef Ranges
-      * @type {Object}
-      * @property {string} name - The name of the range
-      * @property {external:DateTime|external:Date|string} range - Array of 2 elements with `startDate` and `endDate`
+      * @type {Object<string, Array<external:DateTime|external:Date|string>>}
       * @example {
       *  'Today': [DateTime.now().startOf('day'), DateTime.now().endOf('day')],
       *  'Yesterday': [DateTime.now().startOf('day').minus({days: 1}), DateTime.now().minus({days: 1}).endOf('day')],
@@ -186,11 +187,9 @@ class DateRangePicker {
       */
 
       /**
-      * A single predefined range
+      * A single predefined range, an array of 2 elements `[startDate, endDate]`
       * @typedef Range
-      * @type {Object}
-      * @property {string} name - The name of the range
-      * @property {external:DateTime|external:Date|string} range - Array of 2 elements with startDate and endDate
+      * @type {Array<external:DateTime|external:Date|string>}
       * @example { Today: [DateTime.now().startOf('day'), DateTime.now().endOf('day')] }        
       */
 
@@ -839,13 +838,17 @@ class DateRangePicker {
 
    }
    /**
-    * startDate
-    * @type {external:DateTime}
+    * The beginning of the selected date range.<br>
+    * Without `timePicker` the time part is always the start of the day.<br>
+    * The setter assigns the value as is, without validation and without updating the UI, use {@link #DateRangePicker+setStartDate|setStartDate} instead.
+    * @type {external:DateTime|null}
     */
    get startDate() { return this.timePicker ? this.#startDate : this.#startDate?.startOf('day') ?? null; }
    /**
-    * endDate
-    * @type {external:DateTime}
+    * The end of the selected date range, always `null` for `singleDatePicker: true`.<br>
+    * Without `timePicker` the time part is always the end of the day.<br>
+    * The setter assigns the value as is, without validation and without updating the UI, use {@link #DateRangePicker+setEndDate|setEndDate} instead.
+    * @type {external:DateTime|null}
     */
    get endDate() { return this.singleDatePicker ? null : (this.timePicker ? this.#endDate : this.#endDate?.endOf('day')) ?? null; }
    set startDate(val) { this.#startDate = val }
@@ -858,21 +861,23 @@ class DateRangePicker {
       /**
       * Emitted when the date is changed through `<input>` element or via {@link #DateRangePicker+setStartDate|setStartDate} or 
       * {@link #DateRangePicker+setRange|setRange} and date is not valid due to 
-      * `minDate`, `maxDate`, `minSpan`, `maxSpan`, `invalidDate` and `invalidTime` constraints.<br>
+      * `minDate`, `maxDate`, `minSpan`, `maxSpan`, `isInvalidDate` and `isInvalidTime` constraints.<br>
       * Event is only triggered when date string is valid and date value is changing<br>
       * @event
       * @name "violate"
       * @property {DateRangePickerEvent} event - The Event object
       * @property {DateRangePicker} event.picker - The daterangepicker object
-      * @property {InputViolation} event.violation - The daterangepicker object
-      * @property {NewDate} event.newDate - Object of corrected date values
-      * @property {boolean} event.cancelable=true - By calling `event.preventDefault()` the `newDate` values will apply
+      * @property {InputViolation} event.violation - Object of violations and corrected values
+      * @property {NewDate} event.newDate - Replacement values calculated by the picker (nearest valid date or range).<br>
+      * They are only applied if the listener calls `event.preventDefault()`. To apply other values, set `event.newDate.startDate` / `event.newDate.endDate` before.
+      * @property {boolean} event.cancelable=true - Without `event.preventDefault()` the invalid input is rejected and the current dates remain unchanged.<br>
+      * By calling `event.preventDefault()` the values of `event.newDate` are applied instead
       * @example
       * daterangepicker('#picker', {
       *   startDate: DateTime.now(),
       *   // allow only dates from current year
       *   minDate: DateTime.now().startOf('year'),
-      *   manDate: DateTime.now().endOf('year'),
+      *   maxDate: DateTime.now().endOf('year'),
       *   singleDatePicker: true,
       *   locale: {
       *      format: DateTime.DATETIME_SHORT
@@ -882,14 +887,14 @@ class DateRangePicker {
       *   ev.preventDefault();
       * });
       *
-      * // Try to set date outside permitted range at <input> elemet
+      * // Try to set date outside permitted range at <input> element
       * const input = document.querySelector('#picker');
-      * input.value = DateTime.now().minus({ years: 10 })).toLocaleString(DateTime.DATETIME_SHORT)
+      * input.value = DateTime.now().minus({ years: 10 }).toLocaleString(DateTime.DATETIME_SHORT);
       * input.dispatchEvent(new Event('keyup'));
       
       * // Try to set date outside permitted range by code
       * const drp = getDateRangePicker('#picker');
-      * drp.setStartDate(DateTime.now().minus({ years: 10 });
+      * drp.setStartDate(DateTime.now().minus({ years: 10 }));
       * 
       * // -> Calendar selects and shows "today - 3 days"
       */
@@ -959,7 +964,7 @@ class DateRangePicker {
       * @property {DateRangePickerEvent} event - The Event object
       * @property {DateRangePicker} event.picker - The daterangepicker object
       * @property {boolean} event.cancelable=true - Call `event.preventDefault()` to prevent default behaviour.<br>
-      * Useful to define custome areas where click shall not hide the picker
+      * Useful to define custom areas where click shall not hide the picker
       */
       onOutsideClick: { type: 'outsideClick', param: { cancelable: true } },
       /**
@@ -1011,7 +1016,7 @@ class DateRangePicker {
       * @property {DateRangePickerEvent} event - The Event object
       * @property {DateRangePicker} event.picker - The daterangepicker object
       * @property {external:DateTime} event.left - The first day of month in left-hand calendar
-      * @property {external:DateTime} event.right - The first day of month in left-hand calendar or `null` for singleDatePicker
+      * @property {external:DateTime} event.right - The first day of month in right-hand calendar or `null` for `singleDatePicker` and `singleMonthView`
       */
       onMonthViewChange: {
          type: 'monthViewChange',
@@ -1024,7 +1029,8 @@ class DateRangePicker {
       },
    }
    /**
-    * Getter for all DateRangePickerEvents
+    * Template objects of all DateRangePicker specific events, used internally by `triggerEvent()`.
+    * @type {Object<string, object>}
     */
    get events() { return this.#events };
 
@@ -1042,12 +1048,12 @@ class DateRangePicker {
 
    /* #region Set startDate/endDate */
    /**
-   * Sets the date range picker's currently selected start date to the provided date.<br>
+   * Sets the currently selected start date of the date range picker.<br>
    * `startDate` must be a `luxon.DateTime` or `Date` or `string` according to {@link ISO-8601} or a string matching `locale.format`.<br>
    * Invalid date values are handled by {@link #DateRangePicker+violate|violate} Event
    * @param {external:DateTime|external:Date|string} startDate - startDate to be set. In case of ranges, the current `endDate` is used.
-   * @param {boolean} updateView=true - If `true`, then calendar UI is updated to new value. Otherwise only internal values are set.
-   * @returns {InputViolation} - Object of violations or `null` if no violation have been found
+   * @param {boolean} [updateView=true] - If `true`, then calendar UI is updated to new value. Otherwise only internal values are set.
+   * @returns {InputViolation|null} - Object of violations or `null` if no violation has been found
    * @example 
    * const drp = getDateRangePicker('#picker');
    * drp.setStartDate(DateTime.now().startOf('hour'));
@@ -1084,12 +1090,12 @@ class DateRangePicker {
    }
 
    /**
-   * Sets the date range picker's currently selected start date to the provided date.<br>
+   * Sets the currently selected end date of the date range picker.<br>
    * `endDate` must be a `luxon.DateTime` or `Date` or `string` according to {@link ISO-8601} or a string matching `locale.format`.<br>
    * Invalid date values are handled by {@link #DateRangePicker+violate|violate} Event
    * @param {external:DateTime|external:Date|string} endDate - endDate to be set. In case of ranges, the current `startDate` is used.
-   * @param {boolean} updateView=true - If `true`, then calendar UI is updated to new value. Otherwise only internal values are set.
-   * @returns {InputViolation} - Object of violations or `null` if no violation have been found
+   * @param {boolean} [updateView=true] - If `true`, then calendar UI is updated to new value. Otherwise only internal values are set.
+   * @returns {InputViolation|null} - Object of violations or `null` if no violation has been found
    * @example 
    * const drp = getDateRangePicker('#picker');
    * drp.setEndDate(DateTime.now().startOf('hour'));
@@ -1099,13 +1105,14 @@ class DateRangePicker {
    }
 
    /**
-   * Sets the date range picker's currently selected start date to the provided date.<br>
+   * Sets the currently selected start and end date of the date range picker.<br>
+   * Does nothing and returns `undefined` for `singleDatePicker: true`, if the values did not change or if `startDate` is later than `endDate`.<br>
    * `startDate` and `endDate` must be a `luxon.DateTime` or `Date` or `string` according to {@link ISO-8601} or a string matching `locale.format`.<br>
    * Invalid date values are handled by {@link #DateRangePicker+violate|violate} Event
    * @param {external:DateTime|external:Date|string} startDate - startDate to be set
    * @param {external:DateTime|external:Date|string} endDate - endDate to be set
-   * @param {boolean} updateView=true - If `true`, then calendar UI is updated to new value. Otherwise only internal values are set.
-   * @returns {InputViolation} - Object of violations or `null` if no violation have been found
+   * @param {boolean} [updateView=true] - If `true`, then calendar UI is updated to new value. Otherwise only internal values are set.
+   * @returns {InputViolation|null} - Object of violations or `null` if no violation has been found
    * @example 
    * const drp = getDateRangePicker('#picker');
    * drp.setRange(DateTime.now().startOf('hour'), DateTime.now().endOf('day'));
@@ -1147,15 +1154,17 @@ class DateRangePicker {
 
    /**
     * Clear selected date values.
-    * Does not invoke callback function, disables "Apply" button
-    * @param {sting|external:DateTime|Date} month - The month to be shown, if null then current month is selected.
+    * Also clears the attached `<input>` and `altInput` elements.<br>
+    * Does not invoke the callback function and disables the "Apply" button.
+    * @param {string|external:DateTime|external:Date} [month] - The month to be shown after clearing. If omitted or `null`, the view stays unchanged when the cleared selection was visible, otherwise it moves to the month of the previous `startDate`.
+    * @throws {RangeError} If `month` is given but is not a valid date value
     */
    clearDate(month) {
       if (this.#startDate == null && this.#endDate == null)
          return;
-      const monthChange = month !== undefined && !this.parseDate(month).hasSame(this.#startDate, 'month');
+      const monthChange = month != null && !this.parseDate(month).hasSame(this.#startDate, 'month');
       if (monthChange)
-         this.#startDate = this.parseDate(month); // set correct month to be shown
+         this.#startDate = this.parseDate(month);
 
       this.updateMonthsInView();
       this.oldStartDate = this.#startDate;
@@ -1189,9 +1198,10 @@ class DateRangePicker {
    }
 
    /**
-    * Parse date value
-    * @param {sting|external:DateTime|Date} value - The value to be parsed
-    * @returns {external:DateTime} - DateTime object
+    * Parses a `luxon.DateTime`, `Date` or string (ISO-8601 or matching `locale.format`) into a `luxon.DateTime`
+    * @param {string|external:DateTime|external:Date} value - The value to be parsed
+    * @returns {external:DateTime} - The parsed DateTime object
+    * @throws {RangeError} If `value` is a string which cannot be parsed, or an object which is not a valid `DateTime` or `Date`
     */
    parseDate(value) {
       if (typeof value === 'object') {
@@ -1217,10 +1227,10 @@ class DateRangePicker {
    /* #endregion */
 
    /**
-    * Format a DateTime object
-    * @param {external:DateTime|external:Interval} date - The DateTime to format
-    * @param {object|string} format=this.locale.format - The format option
-    * @returns {string} - Formatted date string
+    * Formats a DateTime or Interval object
+    * @param {external:DateTime|external:Interval} date - The DateTime or Interval to format
+    * @param {object|string} [format=this.locale.format] - Format tokens string or `Intl.DateTimeFormat` options object
+    * @returns {string|null} - Formatted date string or `null` if `date` is `null`
     */
    formatDate(date, format = this.locale.format) {
       if (date === null)
@@ -1239,7 +1249,7 @@ class DateRangePicker {
    }
 
    /**
-    * Set Duration Label to selected range (if used) and selected dates
+    * Updates the label of the selected dates and the duration label (see `locale.durationFormat`)
     * @private 
     */
    updateLabel() {
@@ -1282,27 +1292,34 @@ class DateRangePicker {
    }
 
    /**
-   * @typedef InputViolation
-   * @type {Object}
+   * A single violated constraint
    * @typedef {object} Violation
-   * @property {string} reason - The type/reason of violation
-   * @property {external:DateTime} old - Old value startDate/endDate
-   * @property {external:DateTime} new? - Corrected value of startDate/endDate if existing
+   * @property {string} reason - The violated constraint, for example `'minDate'`, `'maxDate'`, `'minSpan'`, `'maxSpan'`, `'isInvalidDate'`, `'isInvalidTime'` or `'timePickerStepSize'`
+   * @property {external:DateTime} old - Value of `startDate`/`endDate` before the correction
+   * @property {external:DateTime} [new] - Corrected value of `startDate`/`endDate`, if a correction is possible
+   * @property {string} [unit] - Time unit (`'hour'`, `'minute'`, `'second'` or `'ampm'`), only set for reason `'isInvalidTime'`
+   */
+   /**
+   * Corrected date values
    * @typedef {object} NewDate
-   * @property {external:DateTime} newDate.startDate- Object with corrected values
-   * @property {external:DateTime} newDate.endDate - Object with corrected values
-   * @property {Violation[]} startDate - The constraints which violates the input
-   * @property {Violation[]?} endDate - The constraints which violates the input or `null` for singleDatePicker
-   * @property {NewDate} newDate - Object with corrected values
+   * @property {external:DateTime} startDate - Corrected `startDate`
+   * @property {external:DateTime} [endDate] - Corrected `endDate`, not set for `singleDatePicker: true`
+   */
+   /**
+   * Result of the validation of `startDate` and `endDate`
+   * @typedef {object} InputViolation
+   * @property {Violation[]} startDate - The constraints which are violated by `startDate`
+   * @property {Violation[]} [endDate] - The constraints which are violated by `endDate`, not set for `singleDatePicker: true`
+   * @property {NewDate} [newDate] - Corrected values. Only set if event "violate" was dispatched and `event.preventDefault()` was called
    */
    /**
    * Validate `startDate` and `endDate` against `timePickerStepSize`, `minDate`, `maxDate`, 
-   * `minSpan`, `maxSpan`, `invalidDate` and `invalidTime`.
-   * @param {Array} range - `[startDate, endDate]`<br>Range to be checked, defaults to current `startDate` and `endDate`
-   * @param {boolean} dipatch=false - If `true` then event "violate" is dispated.<br>
-   * If eventHandler returns `true`, then `null` is returned, otherwiese the object of violations.
+   * `minSpan`, `maxSpan`, `isInvalidDate` and `isInvalidTime`.
+   * @param {Array<external:DateTime>|null} range - `[startDate, endDate]`<br>Range to be checked. If `null`, the current `startDate` and `endDate` are checked.
+   * @param {boolean} [dispatch=false] - If `true`, event "violate" is dispatched.<br>
+   * If an event listener calls `event.preventDefault()`, the returned object contains the property `newDate` with the (possibly modified) corrected values.
    * @emits "violate"
-   * @returns {InputViolation|null} - Object of violations and corrected values or `null` if no violation have been found
+   * @returns {InputViolation|null} - Object of violations and corrected values or `null` if no violation has been found
    * @example 
    * options => {
    *   minDate: DateTime.now().minus({months: 3}).startOf('day'),
@@ -1311,15 +1328,15 @@ class DateRangePicker {
    *   maxSpan: Duration.fromObject({days: 70}),
    *   timePickerStepSize: Duration.fromObject({hours: 1})
    * }
-   * const result = validateInput(DateTime.now(), DateTime.now().plus({day: 3}));
+   * const result = picker.validateInput([DateTime.now(), DateTime.now().plus({day: 3})]);
    * 
    * result => {
    *   startDate: [
    *     { old: "2026-03-13T10:35:52", reason: "timePickerStepSize", new: "2026-03-13T11:00:00" },
    *     { old: "2026-03-13T11:00:00", reason: "maxDate", new: "2026-03-10T00:00:00" }
    *   ],
-   *   endDate: {
-   *     { old: "2026-03-16T10:35:52", reason: "stepSize", new: "2026-03-16T11:00:00" },
+   *   endDate: [
+   *     { old: "2026-03-16T10:35:52", reason: "timePickerStepSize", new: "2026-03-16T11:00:00" },
    *     { old: "2026-03-16T11:00:00", reason: "maxDate", new: "2026-03-10T00:00:00" },
    *     { old: "2026-03-10T00:00:00", reason: "minSpan", new: "2026-03-17T00:00:00" }
    *   ],
@@ -1329,7 +1346,7 @@ class DateRangePicker {
    *   }
    * }
    */
-   validateInput(range, dipatch = false) {
+   validateInput(range, dispatch = false) {
       let startDate = range == null ? this.#startDate : range[0];
       let endDate = range == null ? this.#endDate : range[1];
       if (startDate == null)
@@ -1385,7 +1402,7 @@ class DateRangePicker {
          result.startDate.push({ old: startDate, reason: 'isInvalidDate' });
       if (this.timePicker) {
          for (let unit of units) {
-            if (this.isInvalidTime(startDate, unit, 'start'))
+            if (this.isInvalidTime(startDate, this.singleDatePicker ? null : 'start', unit))
                result.startDate.push({ old: startDate, reason: 'isInvalidTime', unit: unit });
          }
       }
@@ -1393,7 +1410,7 @@ class DateRangePicker {
       if (this.singleDatePicker) {
          if (result.startDate.length == 0)
             return null;
-         if (dipatch) {
+         if (dispatch) {
             let newValues = { startDate: startDate };
             const event = this.triggerEvent(this.#events.onViolate, { violation: result, newDate: newValues });
             if (event.defaultPrevented) {
@@ -1410,7 +1427,7 @@ class DateRangePicker {
          return null;
       result.endDate = [];
 
-      violation = { old: endDate, reason: this.timePicker ? 'stepSize' : 'timePicker' };
+      violation = { old: endDate, reason: this.timePicker ? 'timePickerStepSize' : 'timePicker' };
       if (this.timePicker) {
          // Round time to step size
          const secs = this.timePickerStepSize.as('seconds');
@@ -1478,14 +1495,14 @@ class DateRangePicker {
          result.endDate.push({ old: endDate, reason: 'isInvalidDate' });
       if (this.timePicker) {
          for (let unit of units) {
-            if (this.isInvalidTime(endDate, unit, 'end'))
+            if (this.isInvalidTime(endDate, 'end', unit))
                result.endDate.push({ old: endDate, reason: 'isInvalidTime', unit: unit });
          }
       }
 
       if (result.startDate.length == 0 && result.endDate.length == 0)
          return null;
-      if (dipatch) {
+      if (dispatch) {
          let newValues = { startDate: startDate, endDate: endDate };
          const event = this.triggerEvent(this.#events.onViolate, { violation: result, newDate: newValues });
          if (event.defaultPrevented) {
@@ -1503,8 +1520,8 @@ class DateRangePicker {
 
    /**
    * Updates the picker when calendar is initiated or any date has been selected. 
-   * Could be useful after running {@link #DateRangePicker+setStartDate|setStartDate} or {@link #DateRangePicker+setEndDate|setRange} 
-   * @param {boolean} monthChange - If `true` then monthView changed
+   * Could be useful after running {@link #DateRangePicker+setStartDate|setStartDate} or {@link #DateRangePicker+setRange|setRange} 
+   * @param {boolean} [monthChange] - If `true`, the displayed month(s) changed
    * @emits "beforeRenderTimePicker"
    */
    updateView(monthChange) {
@@ -1565,10 +1582,10 @@ class DateRangePicker {
    }
 
    /**
-   * Updates the selected day value from calendar with selected time values
+   * Re-renders the left and right calendar based on the current selection (including the selected time, if `timePicker: true`)
    * @emits "beforeRenderCalendar"
    * @emits "monthViewChange"
-   * @param {boolean} monthChange - If `true` then monthView changed
+   * @param {boolean} [monthChange] - If `true`, the displayed month(s) changed
    * @private
    */
    updateCalendars(monthChange) {
@@ -1646,6 +1663,7 @@ class DateRangePicker {
 
    /**
    * Renders the calendar month
+   * @param {string} side - `'left'` or `'right'` calendar
    * @private
    */
    renderCalendar(side) {
@@ -1851,6 +1869,7 @@ class DateRangePicker {
 
    /**
    * Renders the time pickers
+   * @param {string} side - `'start'` or `'end'` time picker
    * @private
    * @emits "beforeRenderTimePicker"
    */
@@ -2280,7 +2299,7 @@ class DateRangePicker {
    /* #region Handle mouse related events */
    /**
    * Closes the picker when user clicks outside
-   * @param {external:Event} e - The Event target
+   * @param {external:Event} e - The DOM event
    * @emits "outsideClick"
    * @private
    */
@@ -2330,7 +2349,7 @@ class DateRangePicker {
 
    /**
    * Move calendar to previous month
-   * @param {external:Event} e - The Event target
+   * @param {external:Event} e - The DOM event
    * @private
    */
    clickPrev(e) {
@@ -2347,7 +2366,7 @@ class DateRangePicker {
 
    /**
    * Move calendar to next month
-   * @param {external:Event} e - The Event target
+   * @param {external:Event} e - The DOM event
    * @private
    */
    clickNext(e) {
@@ -2364,7 +2383,7 @@ class DateRangePicker {
 
    /**
    * User hovers over date values
-   * @param {external:Event} e - The Event target
+   * @param {external:Event} e - The DOM event
    * @private
    */
    hoverDate(e) {
@@ -2407,7 +2426,7 @@ class DateRangePicker {
 
    /**
    * User hovers over ranges
-   * @param {external:Event} e - The Event target
+   * @param {external:Event} e - The DOM event
    * @private
    */
    hoverRange(e) {
@@ -2437,7 +2456,7 @@ class DateRangePicker {
    }
 
    /**
-   * User leave ranges, remove hightlight from dates
+   * User leave ranges, remove highlight from dates
    * @private
    */
    leaveRange() {
@@ -2455,8 +2474,8 @@ class DateRangePicker {
 
    /* #region Select values by Mouse  */
    /**
-   * Set date values after user selected a date
-   * @param {external:Event} e - The Event target
+   * User clicked a predefined range, sets the date values accordingly
+   * @param {external:Event} e - The DOM event
    * @private
    */
    clickRange(e) {
@@ -2487,7 +2506,7 @@ class DateRangePicker {
 
    /**
    * User clicked a date
-   * @param {external:Event} e - The Event target
+   * @param {external:Event} e - The DOM event
    * @emits "dateChange"
    * @private
    */
@@ -2599,7 +2618,7 @@ class DateRangePicker {
    }
 
    /**
-   * Hightlight selected predefined range in calendar
+   * Highlight selected predefined range in calendar
    * @private
    */
    calculateChosenLabel() {
@@ -2639,7 +2658,7 @@ class DateRangePicker {
 
    /**
    * User clicked a time
-   * @param {external:Event} e - The Event target
+   * @param {external:Event} e - The DOM event
    * @emits "timeChange"
    * @private
    */
@@ -2717,10 +2736,10 @@ class DateRangePicker {
    }
 
    /**
-  * Calender month moved
-  * @param {external:Event} e - The Event target
-  * @private
-  */
+  * Calendar month or year changed using the select boxes
+   * @param {external:Event} e - The DOM event
+   * @private
+   */
    monthOrYearChanged(e) {
       const isLeft = e.target.closest('.drp-calendar').classList.contains('left');
       const leftOrRight = isLeft ? 'left' : 'right';
@@ -2767,9 +2786,9 @@ class DateRangePicker {
    }
 
    /**
-* User clicked `Apply` button
-* @emits "apply"
-* @private
+* User clicked `Apply` button, executes the callback function if provided
+   * @emits "apply"
+   * @private
    */
    clickApply() {
       // if picker is attached to a text input, update it
@@ -2801,7 +2820,7 @@ class DateRangePicker {
 
    /**
    * Update the picker with value from `<input>` element.<br> 
-   * Input values must be given in format of `locale.format`. Invalid values are handles by `violate` Event
+   * Input values must be given in format of `locale.format`. Invalid values are handled by `violate` Event
    * @emits "inputChange"
    * @private
    */
@@ -2866,7 +2885,7 @@ class DateRangePicker {
 
    /**
    * Handles key press, IE 11 compatibility
-   * @param {external:Event} e - The Event target
+   * @param {external:Event} e - The DOM event
    * @private
    */
    keydown(e) {
@@ -2980,9 +2999,10 @@ class DateRangePicker {
    }
 
    /**
-    * Helper function to dispatch events
+    * Helper function to create a DateRangePickerEvent and dispatch it on the attached element
     * @param {object} ev - Event template from this.#events
-    * @param  {...object} args - Additional parameters if needed
+    * @param {...object} args - Optional object with additional properties which are assigned to the event
+    * @returns {DateRangePickerEvent} The dispatched event
     */
    triggerEvent(ev, ...args) {
       if (args.length === 0) {
@@ -2998,10 +3018,10 @@ class DateRangePicker {
 
    /**
     * Helper function to add eventListener similar to jQuery .on( events [, selector ] [, data ] )
-    * @param {string} element - Query selector of element where listener is added
+    * @param {string} element - Query selector of the element(s) within the picker container where the listener is added
     * @param {string} eventName - Name of the event
     * @param {string} selector - Query selector string to filter the descendants of the element
-    * @param {function} delegate - Handler data
+    * @param {function} delegate - Handler function, called with the DOM event when the event target matches `selector`
     * @private
     */
    addListener(element, eventName, selector, delegate) {
@@ -3019,7 +3039,7 @@ class DateRangePicker {
    }
 
    /**
-    * Adding event listener to input element where dateragnepicker is attached to.
+    * Adds an event listener to the element the DateRangePicker is attached to.
     * Wrapper to give easy access for `addEventListener()` on DateRangePicker instance. 
     * 
     * @param {string} type - The event name, either native DOM-Event or [DateRangePicker](API_Doc.md#event) specific event
@@ -3027,7 +3047,7 @@ class DateRangePicker {
     * @param {boolean|object} [options] - Optional event options:
     *   - `boolean capture`: Whether to listen in the capture phase (default: `false`)
     *   - `object signal`: An `AbortSignal` for later removal of the listener (default: `undefined`)
-    * @returns {DateRangePicker} - The DateRangePicker instance, usefull for chaining
+    * @returns {DateRangePicker} - The DateRangePicker instance, useful for chaining
     * 
     * @example
     * picker.addEventListener('hide', (e) => {
@@ -3042,14 +3062,14 @@ class DateRangePicker {
 
    /**
     * Counterpart to `addEventListener()`
-    * Note, `listener` most be a named function to enable remove.
+    * Note, `listener` must be the same function reference that was passed to `addEventListener()`, anonymous functions cannot be removed.
     * 
     * @param {string} type - The event name, either native 
     * @param {function} listener - The callback function invoked when the event fires
     * @param {boolean|object} [options] - Optional event options:
     *   - `boolean capture`: Whether to listen in the capture phase (default: `false`)
     *   - `object signal`: An `AbortSignal` for later removal of the listener (default: `undefined`)
-    * @returns {DateRangePicker} - The DateRangePicker instance, usefull for chaining
+    * @returns {DateRangePicker} - The DateRangePicker instance, useful for chaining
    */
    removeEventListener(type, listener, options) {
       this.element.removeEventListener(type, listener, options);
@@ -3070,6 +3090,8 @@ function createElementFromHTML(html) {
  * 
  * @class
  * @extends Event
+ * @classdesc Event dispatched by a DateRangePicker on its attached element. Additional properties depend on the event type, see the individual event definitions.
+ * @property {DateRangePicker} picker - The DateRangePicker instance which emitted the event
  */
 class DateRangePickerEvent extends Event {
    #picker;
@@ -3124,19 +3146,19 @@ function outerHeight(el, withMargin = false) {
 * @callback callback
 * @param {external:DateTime} startDate - Selected startDate
 * @param {external:DateTime} endDate - Selected endDate 
-* @param {string} range
+* @param {string|null} range - Label of the selected predefined range (or the custom range label), `null` if no range is selected
 */
 
 /**
 * Initiate a new DateRangePicker
 * @function
-* @param {string|external:HTMLElement|external:HTMLCollection} element - Element where DateRangePicker is attached
-* @param {Options} options - Object to configure the DateRangePicker
-* @param {callback} callback - Callback function executed when date is changed.<br/>
+* @param {string|external:HTMLElement|external:NodeList|external:HTMLCollection} element - Element(s) where the DateRangePicker is attached. A picker is created for each matching element
+* @param {Options} [options] - Object to configure the DateRangePicker
+* @param {callback} [callback] - Callback function executed when date is changed.<br/>
 * Callback function is executed if selected date values has changed, before picker is hidden and before the attached `<input>` element is updated. 
 * As alternative listen to the {@link #event_apply|"apply"} event
-* @param {string} pickerAttribute=_daterangepicker - Name of attribute attached to `element`. Provide the possibility to attach more than one DateRangePicker to an element
-* @returns {DateRangePicker|DateRangePicker[]} The DateRangePicker instance or an array of DateRangePicker instances if `element` matches more than one element
+* @param {string} [pickerAttribute=_daterangepicker] - Name of the property on `element` which holds the DateRangePicker. Allows to attach more than one DateRangePicker to an element
+* @returns {DateRangePicker|DateRangePicker[]|undefined} The DateRangePicker instance, an array of DateRangePicker instances if `element` matches more than one element, or `undefined` if `element` matches no element
 */
 function daterangepicker(element, options, callback, pickerAttribute = '_daterangepicker') {
    if (element instanceof HTMLElement) {
@@ -3179,9 +3201,9 @@ function daterangepicker(element, options, callback, pickerAttribute = '_dateran
 
 /**
  * Returns the DateRangePicker. Equivalent to `element[pickerAttribute]`
- * @param {HTMLElement|string} element - The HTMLElement or querySelector string where the DateRangePicker is attached.
- * @param {string} pickerAttribute=_daterangepicker - Name of attribute attached to `element`
- * @returns {DateRangePicker} - The attached DateRangePicker
+ * @param {external:HTMLElement|string} element - The HTMLElement or querySelector string where the DateRangePicker is attached.
+ * @param {string} [pickerAttribute=_daterangepicker] - Name of the property on `element` which holds the DateRangePicker
+ * @returns {DateRangePicker|undefined} - The attached DateRangePicker, `undefined` if none is attached
  */
 function getDateRangePicker(element, pickerAttribute = '_daterangepicker') {
    if (typeof element === 'string') {
