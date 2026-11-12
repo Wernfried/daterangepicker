@@ -4,16 +4,17 @@
 <dt><a href="#DateRangePicker">DateRangePicker</a></dt>
 <dd></dd>
 <dt><a href="#DateRangePickerEvent">DateRangePickerEvent</a> ⇐ <code>Event</code></dt>
-<dd></dd>
+<dd><p>Event dispatched by a DateRangePicker on its attached element. Additional properties depend on the event type, see the individual event definitions.</p>
+</dd>
 </dl>
 
 ## Functions
 
 <dl>
-<dt><a href="#daterangepicker">daterangepicker(element, options, callback, pickerAttribute)</a> ⇒ <code><a href="#DateRangePicker">DateRangePicker</a></code> | <code><a href="#DateRangePicker">Array.&lt;DateRangePicker&gt;</a></code></dt>
+<dt><a href="#daterangepicker">daterangepicker(element, [options], [callback], [pickerAttribute])</a> ⇒ <code><a href="#DateRangePicker">DateRangePicker</a></code> | <code><a href="#DateRangePicker">Array.&lt;DateRangePicker&gt;</a></code> | <code>undefined</code></dt>
 <dd><p>Initiate a new DateRangePicker</p>
 </dd>
-<dt><a href="#getDateRangePicker">getDateRangePicker(element, pickerAttribute)</a> ⇒ <code><a href="#DateRangePicker">DateRangePicker</a></code></dt>
+<dt><a href="#getDateRangePicker">getDateRangePicker(element, [pickerAttribute])</a> ⇒ <code><a href="#DateRangePicker">DateRangePicker</a></code> | <code>undefined</code></dt>
 <dd><p>Returns the DateRangePicker. Equivalent to <code>element[pickerAttribute]</code></p>
 </dd>
 </dl>
@@ -24,7 +25,7 @@
 <dt><a href="#event_violate">"violate"</a></dt>
 <dd><p>Emitted when the date is changed through <code>&lt;input&gt;</code> element or via <a href="#DateRangePicker+setStartDate">setStartDate</a> or 
 <a href="#DateRangePicker+setRange">setRange</a> and date is not valid due to 
-<code>minDate</code>, <code>maxDate</code>, <code>minSpan</code>, <code>maxSpan</code>, <code>invalidDate</code> and <code>invalidTime</code> constraints.<br>
+<code>minDate</code>, <code>maxDate</code>, <code>minSpan</code>, <code>maxSpan</code>, <code>isInvalidDate</code> and <code>isInvalidTime</code> constraints.<br>
 Event is only triggered when date string is valid and date value is changing<br></p>
 </dd>
 <dt><a href="#event_beforeRenderTimePicker">"beforeRenderTimePicker"</a></dt>
@@ -78,15 +79,22 @@ Only useful when <a href="#Ranges">Ranges</a> are used.</p>
 <dt><a href="#Options">Options</a></dt>
 <dd><p>Options for DateRangePicker</p>
 </dd>
-<dt><a href="#Ranges">Ranges</a> : <code>Object</code></dt>
-<dd><p>A set of predefined ranges.<br>
+<dt><a href="#Ranges">Ranges</a> : <code>Object.&lt;string, Array.&lt;(external:DateTime|external:Date|string)&gt;&gt;</code></dt>
+<dd><p>A set of predefined ranges. Each key is the label of a range, its value an array <code>[startDate, endDate]</code>.<br>
 Ranges are not validated against <code>minDate</code>, <code>maxDate</code>, <code>minSpan</code>, <code>maxSpan</code> or <code>timePickerStepSize </code> constraints.</p>
 </dd>
-<dt><a href="#Range">Range</a> : <code>Object</code></dt>
-<dd><p>A single predefined range</p>
+<dt><a href="#Range">Range</a> : <code>Array.&lt;(external:DateTime|external:Date|string)&gt;</code></dt>
+<dd><p>A single predefined range, an array of 2 elements <code>[startDate, endDate]</code></p>
 </dd>
-<dt><a href="#NewDate">NewDate</a> : <code>Object</code></dt>
-<dd></dd>
+<dt><a href="#Violation">Violation</a> : <code>object</code></dt>
+<dd><p>A single violated constraint</p>
+</dd>
+<dt><a href="#NewDate">NewDate</a> : <code>object</code></dt>
+<dd><p>Corrected date values</p>
+</dd>
+<dt><a href="#InputViolation">InputViolation</a> : <code>object</code></dt>
+<dd><p>Result of the validation of <code>startDate</code> and <code>endDate</code></p>
+</dd>
 <dt><a href="#callback">callback</a> : <code>function</code></dt>
 <dd></dd>
 </dl>
@@ -97,18 +105,18 @@ Ranges are not validated against <code>minDate</code>, <code>maxDate</code>, <co
 **Kind**: global class  
 
 * [DateRangePicker](#DateRangePicker)
-    * [new DateRangePicker(element, options, cb)](#new_DateRangePicker_new)
-    * [.startDate](#DateRangePicker+startDate) : [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime)
-    * [.endDate](#DateRangePicker+endDate) : [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime)
-    * [.events](#DateRangePicker+events)
-    * [.setStartDate(startDate, updateView)](#DateRangePicker+setStartDate) ⇒ <code>InputViolation</code>
-    * [.setEndDate(endDate, updateView)](#DateRangePicker+setEndDate) ⇒ <code>InputViolation</code>
-    * [.setRange(startDate, endDate, updateView)](#DateRangePicker+setRange) ⇒ <code>InputViolation</code>
-    * [.clearDate(month)](#DateRangePicker+clearDate)
+    * [new DateRangePicker(element, [options], [cb])](#new_DateRangePicker_new)
+    * [.startDate](#DateRangePicker+startDate) : [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| <code>null</code>
+    * [.endDate](#DateRangePicker+endDate) : [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| <code>null</code>
+    * [.events](#DateRangePicker+events) : <code>Object.&lt;string, object&gt;</code>
+    * [.setStartDate(startDate, [updateView])](#DateRangePicker+setStartDate) ⇒ [<code>InputViolation</code>](#InputViolation) \| <code>null</code>
+    * [.setEndDate(endDate, [updateView])](#DateRangePicker+setEndDate) ⇒ [<code>InputViolation</code>](#InputViolation) \| <code>null</code>
+    * [.setRange(startDate, endDate, [updateView])](#DateRangePicker+setRange) ⇒ [<code>InputViolation</code>](#InputViolation) \| <code>null</code>
+    * [.clearDate([month])](#DateRangePicker+clearDate)
     * [.parseDate(value)](#DateRangePicker+parseDate) ⇒ [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime)
-    * [.formatDate(date, format)](#DateRangePicker+formatDate) ⇒ <code>string</code>
-    * [.validateInput(range, dipatch)](#DateRangePicker+validateInput) ⇒ <code>InputViolation</code> \| <code>null</code>
-    * [.updateView(monthChange)](#DateRangePicker+updateView)
+    * [.formatDate(date, [format])](#DateRangePicker+formatDate) ⇒ <code>string</code> \| <code>null</code>
+    * [.validateInput(range, [dispatch])](#DateRangePicker+validateInput) ⇒ [<code>InputViolation</code>](#InputViolation) \| <code>null</code>
+    * [.updateView([monthChange])](#DateRangePicker+updateView)
     * [.move()](#DateRangePicker+move)
     * [.show()](#DateRangePicker+show)
     * [.hide()](#DateRangePicker+hide)
@@ -118,52 +126,60 @@ Ranges are not validated against <code>minDate</code>, <code>maxDate</code>, <co
     * [.updateElement()](#DateRangePicker+updateElement)
     * [.updateAltInput()](#DateRangePicker+updateAltInput)
     * [.remove()](#DateRangePicker+remove)
-    * [.triggerEvent(ev, ...args)](#DateRangePicker+triggerEvent)
+    * [.triggerEvent(ev, ...args)](#DateRangePicker+triggerEvent) ⇒ [<code>DateRangePickerEvent</code>](#DateRangePickerEvent)
     * [.addEventListener(type, listener, [options])](#DateRangePicker+addEventListener) ⇒ [<code>DateRangePicker</code>](#DateRangePicker)
     * [.removeEventListener(type, listener, [options])](#DateRangePicker+removeEventListener) ⇒ [<code>DateRangePicker</code>](#DateRangePicker)
 
 <a name="new_DateRangePicker_new"></a>
 
-### new DateRangePicker(element, options, cb)
+### new DateRangePicker(element, [options], [cb])
+**Throws**:
+
+- <code>RangeError</code> If `element` is a selector string which matches more than one element
+
 
 | Param | Type | Description |
 | --- | --- | --- |
-| element | <code>string</code> \| [<code>HTMLElement</code>](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement) | A DOM HTMLElement or CSS querySelector string of element where DateRangePicker is attached. Often a `<input type="text">` element. Element `<input>` and `<button>` shows the DateRangePicker on click, other elements toggle the DateRangePicker. |
-| options | [<code>Options</code>](#Options) | Object to configure the DateRangePicker |
-| cb | <code>function</code> | Callback function executed when new date values applied |
+| element | <code>string</code> \| [<code>HTMLElement</code>](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement) | A DOM `HTMLElement` or a CSS querySelector string of the element the DateRangePicker is attached to.<br> Often an `<input type="text">` element. A click on an `<input>` or `<button>` element shows the picker, a click on any other element toggles it.<br> A selector string must match exactly one element. |
+| [options] | [<code>Options</code>](#Options) | Object to configure the DateRangePicker |
+| [cb] | [<code>callback</code>](#callback) | Callback function executed when new date values are applied |
 
 <a name="DateRangePicker+startDate"></a>
 
-### dateRangePicker.startDate : [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime)
-startDate
+### dateRangePicker.startDate : [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| <code>null</code>
+The beginning of the selected date range.<br>
+Without `timePicker` the time part is always the start of the day.<br>
+The setter assigns the value as is, without validation and without updating the UI, use [setStartDate](#DateRangePicker+setStartDate) instead.
 
 **Kind**: instance property of [<code>DateRangePicker</code>](#DateRangePicker)  
 <a name="DateRangePicker+endDate"></a>
 
-### dateRangePicker.endDate : [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime)
-endDate
+### dateRangePicker.endDate : [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| <code>null</code>
+The end of the selected date range, always `null` for `singleDatePicker: true`.<br>
+Without `timePicker` the time part is always the end of the day.<br>
+The setter assigns the value as is, without validation and without updating the UI, use [setEndDate](#DateRangePicker+setEndDate) instead.
 
 **Kind**: instance property of [<code>DateRangePicker</code>](#DateRangePicker)  
 <a name="DateRangePicker+events"></a>
 
-### dateRangePicker.events
-Getter for all DateRangePickerEvents
+### dateRangePicker.events : <code>Object.&lt;string, object&gt;</code>
+Template objects of all DateRangePicker specific events, used internally by `triggerEvent()`.
 
 **Kind**: instance property of [<code>DateRangePicker</code>](#DateRangePicker)  
 <a name="DateRangePicker+setStartDate"></a>
 
-### dateRangePicker.setStartDate(startDate, updateView) ⇒ <code>InputViolation</code>
-Sets the date range picker's currently selected start date to the provided date.<br>
+### dateRangePicker.setStartDate(startDate, [updateView]) ⇒ [<code>InputViolation</code>](#InputViolation) \| <code>null</code>
+Sets the currently selected start date of the date range picker.<br>
 `startDate` must be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](ISO-8601) or a string matching `locale.format`.<br>
 Invalid date values are handled by [violate](#DateRangePicker+violate) Event
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
-**Returns**: <code>InputViolation</code> - - Object of violations or `null` if no violation have been found  
+**Returns**: [<code>InputViolation</code>](#InputViolation) \| <code>null</code> - - Object of violations or `null` if no violation has been found  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | startDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> |  | startDate to be set. In case of ranges, the current `endDate` is used. |
-| updateView | <code>boolean</code> | <code>true</code> | If `true`, then calendar UI is updated to new value. Otherwise only internal values are set. |
+| [updateView] | <code>boolean</code> | <code>true</code> | If `true`, then calendar UI is updated to new value. Otherwise only internal values are set. |
 
 **Example**  
 ```js
@@ -172,18 +188,18 @@ drp.setStartDate(DateTime.now().startOf('hour'));
 ```
 <a name="DateRangePicker+setEndDate"></a>
 
-### dateRangePicker.setEndDate(endDate, updateView) ⇒ <code>InputViolation</code>
-Sets the date range picker's currently selected start date to the provided date.<br>
+### dateRangePicker.setEndDate(endDate, [updateView]) ⇒ [<code>InputViolation</code>](#InputViolation) \| <code>null</code>
+Sets the currently selected end date of the date range picker.<br>
 `endDate` must be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](ISO-8601) or a string matching `locale.format`.<br>
 Invalid date values are handled by [violate](#DateRangePicker+violate) Event
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
-**Returns**: <code>InputViolation</code> - - Object of violations or `null` if no violation have been found  
+**Returns**: [<code>InputViolation</code>](#InputViolation) \| <code>null</code> - - Object of violations or `null` if no violation has been found  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | endDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> |  | endDate to be set. In case of ranges, the current `startDate` is used. |
-| updateView | <code>boolean</code> | <code>true</code> | If `true`, then calendar UI is updated to new value. Otherwise only internal values are set. |
+| [updateView] | <code>boolean</code> | <code>true</code> | If `true`, then calendar UI is updated to new value. Otherwise only internal values are set. |
 
 **Example**  
 ```js
@@ -192,19 +208,20 @@ drp.setEndDate(DateTime.now().startOf('hour'));
 ```
 <a name="DateRangePicker+setRange"></a>
 
-### dateRangePicker.setRange(startDate, endDate, updateView) ⇒ <code>InputViolation</code>
-Sets the date range picker's currently selected start date to the provided date.<br>
+### dateRangePicker.setRange(startDate, endDate, [updateView]) ⇒ [<code>InputViolation</code>](#InputViolation) \| <code>null</code>
+Sets the currently selected start and end date of the date range picker.<br>
+Does nothing and returns `undefined` for `singleDatePicker: true`, if the values did not change or if `startDate` is later than `endDate`.<br>
 `startDate` and `endDate` must be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](ISO-8601) or a string matching `locale.format`.<br>
 Invalid date values are handled by [violate](#DateRangePicker+violate) Event
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
-**Returns**: <code>InputViolation</code> - - Object of violations or `null` if no violation have been found  
+**Returns**: [<code>InputViolation</code>](#InputViolation) \| <code>null</code> - - Object of violations or `null` if no violation has been found  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | startDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> |  | startDate to be set |
 | endDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> |  | endDate to be set |
-| updateView | <code>boolean</code> | <code>true</code> | If `true`, then calendar UI is updated to new value. Otherwise only internal values are set. |
+| [updateView] | <code>boolean</code> | <code>true</code> | If `true`, then calendar UI is updated to new value. Otherwise only internal values are set. |
 
 **Example**  
 ```js
@@ -213,55 +230,64 @@ drp.setRange(DateTime.now().startOf('hour'), DateTime.now().endOf('day'));
 ```
 <a name="DateRangePicker+clearDate"></a>
 
-### dateRangePicker.clearDate(month)
+### dateRangePicker.clearDate([month])
 Clear selected date values.
-Does not invoke callback function, disables "Apply" button
+Also clears the attached `<input>` and `altInput` elements.<br>
+Does not invoke the callback function and disables the "Apply" button.
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Throws**:
+
+- <code>RangeError</code> If `month` is given but is not a valid date value
+
 
 | Param | Type | Description |
 | --- | --- | --- |
-| month | <code>sting</code> \| [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| <code>Date</code> | The month to be shown, if null then current month is selected. |
+| [month] | <code>string</code> \| [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) | The month to be shown after clearing. If omitted or `null`, the view stays unchanged when the cleared selection was visible, otherwise it moves to the month of the previous `startDate`. |
 
 <a name="DateRangePicker+parseDate"></a>
 
 ### dateRangePicker.parseDate(value) ⇒ [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime)
-Parse date value
+Parses a `luxon.DateTime`, `Date` or string (ISO-8601 or matching `locale.format`) into a `luxon.DateTime`
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
-**Returns**: [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) - - DateTime object  
+**Returns**: [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) - - The parsed DateTime object  
+**Throws**:
+
+- <code>RangeError</code> If `value` is a string which cannot be parsed, or an object which is not a valid `DateTime` or `Date`
+
 
 | Param | Type | Description |
 | --- | --- | --- |
-| value | <code>sting</code> \| [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| <code>Date</code> | The value to be parsed |
+| value | <code>string</code> \| [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) | The value to be parsed |
 
 <a name="DateRangePicker+formatDate"></a>
 
-### dateRangePicker.formatDate(date, format) ⇒ <code>string</code>
-Format a DateTime object
+### dateRangePicker.formatDate(date, [format]) ⇒ <code>string</code> \| <code>null</code>
+Formats a DateTime or Interval object
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
-**Returns**: <code>string</code> - - Formatted date string  
+**Returns**: <code>string</code> \| <code>null</code> - - Formatted date string or `null` if `date` is `null`  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| date | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Interval</code>](https://moment.github.io/luxon/api-docs/index.html#interval) |  | The DateTime to format |
-| format | <code>object</code> \| <code>string</code> | <code>this.locale.format</code> | The format option |
+| date | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Interval</code>](https://moment.github.io/luxon/api-docs/index.html#interval) |  | The DateTime or Interval to format |
+| [format] | <code>object</code> \| <code>string</code> | <code>this.locale.format</code> | Format tokens string or `Intl.DateTimeFormat` options object |
 
 <a name="DateRangePicker+validateInput"></a>
 
-### dateRangePicker.validateInput(range, dipatch) ⇒ <code>InputViolation</code> \| <code>null</code>
+### dateRangePicker.validateInput(range, [dispatch]) ⇒ [<code>InputViolation</code>](#InputViolation) \| <code>null</code>
 Validate `startDate` and `endDate` against `timePickerStepSize`, `minDate`, `maxDate`, 
-`minSpan`, `maxSpan`, `invalidDate` and `invalidTime`.
+`minSpan`, `maxSpan`, `isInvalidDate` and `isInvalidTime`.
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
-**Returns**: <code>InputViolation</code> \| <code>null</code> - - Object of violations and corrected values or `null` if no violation have been found  
+**Returns**: [<code>InputViolation</code>](#InputViolation) \| <code>null</code> - - Object of violations and corrected values or `null` if no violation has been found  
 **Emits**: <code>event:&quot;violate&quot;</code>  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| range | <code>Array</code> |  | `[startDate, endDate]`<br>Range to be checked, defaults to current `startDate` and `endDate` |
-| dipatch | <code>boolean</code> | <code>false</code> | If `true` then event "violate" is dispated.<br> If eventHandler returns `true`, then `null` is returned, otherwiese the object of violations. |
+| range | [<code>Array.&lt;DateTime&gt;</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| <code>null</code> |  | `[startDate, endDate]`<br>Range to be checked. If `null`, the current `startDate` and `endDate` are checked. |
+| [dispatch] | <code>boolean</code> | <code>false</code> | If `true`, event "violate" is dispatched.<br> If an event listener calls `event.preventDefault()`, the returned object contains the property `newDate` with the (possibly modified) corrected values. |
 
 **Example**  
 ```js
@@ -272,15 +298,15 @@ options => {
   maxSpan: Duration.fromObject({days: 70}),
   timePickerStepSize: Duration.fromObject({hours: 1})
 }
-const result = validateInput(DateTime.now(), DateTime.now().plus({day: 3}));
+const result = picker.validateInput([DateTime.now(), DateTime.now().plus({day: 3})]);
 
 result => {
   startDate: [
     { old: "2026-03-13T10:35:52", reason: "timePickerStepSize", new: "2026-03-13T11:00:00" },
     { old: "2026-03-13T11:00:00", reason: "maxDate", new: "2026-03-10T00:00:00" }
   ],
-  endDate: {
-    { old: "2026-03-16T10:35:52", reason: "stepSize", new: "2026-03-16T11:00:00" },
+  endDate: [
+    { old: "2026-03-16T10:35:52", reason: "timePickerStepSize", new: "2026-03-16T11:00:00" },
     { old: "2026-03-16T11:00:00", reason: "maxDate", new: "2026-03-10T00:00:00" },
     { old: "2026-03-10T00:00:00", reason: "minSpan", new: "2026-03-17T00:00:00" }
   ],
@@ -292,16 +318,16 @@ result => {
 ```
 <a name="DateRangePicker+updateView"></a>
 
-### dateRangePicker.updateView(monthChange)
+### dateRangePicker.updateView([monthChange])
 Updates the picker when calendar is initiated or any date has been selected. 
-Could be useful after running [setStartDate](#DateRangePicker+setStartDate) or [setRange](#DateRangePicker+setEndDate)
+Could be useful after running [setStartDate](#DateRangePicker+setStartDate) or [setRange](#DateRangePicker+setRange)
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
 **Emits**: <code>event:&quot;beforeRenderTimePicker&quot;</code>  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| monthChange | <code>boolean</code> | If `true` then monthView changed |
+| [monthChange] | <code>boolean</code> | If `true`, the displayed month(s) changed |
 
 <a name="DateRangePicker+move"></a>
 
@@ -364,24 +390,25 @@ Removes the picker from document
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
 <a name="DateRangePicker+triggerEvent"></a>
 
-### dateRangePicker.triggerEvent(ev, ...args)
-Helper function to dispatch events
+### dateRangePicker.triggerEvent(ev, ...args) ⇒ [<code>DateRangePickerEvent</code>](#DateRangePickerEvent)
+Helper function to create a DateRangePickerEvent and dispatch it on the attached element
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Returns**: [<code>DateRangePickerEvent</code>](#DateRangePickerEvent) - The dispatched event  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | ev | <code>object</code> | Event template from this.#events |
-| ...args | <code>object</code> | Additional parameters if needed |
+| ...args | <code>object</code> | Optional object with additional properties which are assigned to the event |
 
 <a name="DateRangePicker+addEventListener"></a>
 
 ### dateRangePicker.addEventListener(type, listener, [options]) ⇒ [<code>DateRangePicker</code>](#DateRangePicker)
-Adding event listener to input element where dateragnepicker is attached to.
+Adds an event listener to the element the DateRangePicker is attached to.
 Wrapper to give easy access for `addEventListener()` on DateRangePicker instance.
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
-**Returns**: [<code>DateRangePicker</code>](#DateRangePicker) - - The DateRangePicker instance, usefull for chaining  
+**Returns**: [<code>DateRangePicker</code>](#DateRangePicker) - - The DateRangePicker instance, useful for chaining  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -399,10 +426,10 @@ picker.addEventListener('hide', (e) => {
 
 ### dateRangePicker.removeEventListener(type, listener, [options]) ⇒ [<code>DateRangePicker</code>](#DateRangePicker)
 Counterpart to `addEventListener()`
-Note, `listener` most be a named function to enable remove.
+Note, `listener` must be the same function reference that was passed to `addEventListener()`, anonymous functions cannot be removed.
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
-**Returns**: [<code>DateRangePicker</code>](#DateRangePicker) - - The DateRangePicker instance, usefull for chaining  
+**Returns**: [<code>DateRangePicker</code>](#DateRangePicker) - - The DateRangePicker instance, useful for chaining  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -413,42 +440,50 @@ Note, `listener` most be a named function to enable remove.
 <a name="DateRangePickerEvent"></a>
 
 ## DateRangePickerEvent ⇐ <code>Event</code>
+Event dispatched by a DateRangePicker on its attached element. Additional properties depend on the event type, see the individual event definitions.
+
 **Kind**: global class  
 **Extends**: <code>Event</code>  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| picker | [<code>DateRangePicker</code>](#DateRangePicker) | The DateRangePicker instance which emitted the event |
+
 <a name="daterangepicker"></a>
 
-## daterangepicker(element, options, callback, pickerAttribute) ⇒ [<code>DateRangePicker</code>](#DateRangePicker) \| [<code>Array.&lt;DateRangePicker&gt;</code>](#DateRangePicker)
+## daterangepicker(element, [options], [callback], [pickerAttribute]) ⇒ [<code>DateRangePicker</code>](#DateRangePicker) \| [<code>Array.&lt;DateRangePicker&gt;</code>](#DateRangePicker) \| <code>undefined</code>
 Initiate a new DateRangePicker
 
 **Kind**: global function  
-**Returns**: [<code>DateRangePicker</code>](#DateRangePicker) \| [<code>Array.&lt;DateRangePicker&gt;</code>](#DateRangePicker) - The DateRangePicker instance or an array of DateRangePicker instances if `element` matches more than one element  
+**Returns**: [<code>DateRangePicker</code>](#DateRangePicker) \| [<code>Array.&lt;DateRangePicker&gt;</code>](#DateRangePicker) \| <code>undefined</code> - The DateRangePicker instance, an array of DateRangePicker instances if `element` matches more than one element, or `undefined` if `element` matches no element  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| element | <code>string</code> \| [<code>HTMLElement</code>](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement) \| [<code>HTMLCollection</code>](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCollection) |  | Element where DateRangePicker is attached |
-| options | [<code>Options</code>](#Options) |  | Object to configure the DateRangePicker |
-| callback | [<code>callback</code>](#callback) |  | Callback function executed when date is changed.<br/> Callback function is executed if selected date values has changed, before picker is hidden and before the attached `<input>` element is updated.  As alternative listen to the ["apply"](#event_apply) event |
-| pickerAttribute | <code>string</code> | <code>&quot;_daterangepicker&quot;</code> | Name of attribute attached to `element`. Provide the possibility to attach more than one DateRangePicker to an element |
+| element | <code>string</code> \| [<code>HTMLElement</code>](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement) \| [<code>NodeList</code>](https://developer.mozilla.org/en-US/docs/Web/API/NodeList) \| [<code>HTMLCollection</code>](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCollection) |  | Element(s) where the DateRangePicker is attached. A picker is created for each matching element |
+| [options] | [<code>Options</code>](#Options) |  | Object to configure the DateRangePicker |
+| [callback] | [<code>callback</code>](#callback) |  | Callback function executed when date is changed.<br/> Callback function is executed if selected date values has changed, before picker is hidden and before the attached `<input>` element is updated.  As alternative listen to the ["apply"](#event_apply) event |
+| [pickerAttribute] | <code>string</code> | <code>&quot;_daterangepicker&quot;</code> | Name of the property on `element` which holds the DateRangePicker. Allows to attach more than one DateRangePicker to an element |
 
 <a name="getDateRangePicker"></a>
 
-## getDateRangePicker(element, pickerAttribute) ⇒ [<code>DateRangePicker</code>](#DateRangePicker)
+## getDateRangePicker(element, [pickerAttribute]) ⇒ [<code>DateRangePicker</code>](#DateRangePicker) \| <code>undefined</code>
 Returns the DateRangePicker. Equivalent to `element[pickerAttribute]`
 
 **Kind**: global function  
-**Returns**: [<code>DateRangePicker</code>](#DateRangePicker) - - The attached DateRangePicker  
+**Returns**: [<code>DateRangePicker</code>](#DateRangePicker) \| <code>undefined</code> - - The attached DateRangePicker, `undefined` if none is attached  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| element | <code>HTMLElement</code> \| <code>string</code> |  | The HTMLElement or querySelector string where the DateRangePicker is attached. |
-| pickerAttribute | <code>string</code> | <code>&quot;_daterangepicker&quot;</code> | Name of attribute attached to `element` |
+| element | [<code>HTMLElement</code>](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement) \| <code>string</code> |  | The HTMLElement or querySelector string where the DateRangePicker is attached. |
+| [pickerAttribute] | <code>string</code> | <code>&quot;_daterangepicker&quot;</code> | Name of the property on `element` which holds the DateRangePicker |
 
 <a name="event_violate"></a>
 
 ## "violate"
 Emitted when the date is changed through `<input>` element or via [setStartDate](#DateRangePicker+setStartDate) or 
 [setRange](#DateRangePicker+setRange) and date is not valid due to 
-`minDate`, `maxDate`, `minSpan`, `maxSpan`, `invalidDate` and `invalidTime` constraints.<br>
+`minDate`, `maxDate`, `minSpan`, `maxSpan`, `isInvalidDate` and `isInvalidTime` constraints.<br>
 Event is only triggered when date string is valid and date value is changing<br>
 
 **Kind**: event emitted  
@@ -458,9 +493,9 @@ Event is only triggered when date string is valid and date value is changing<br>
 | --- | --- | --- | --- |
 | event | [<code>DateRangePickerEvent</code>](#DateRangePickerEvent) |  | The Event object |
 | event.picker | [<code>DateRangePicker</code>](#DateRangePicker) |  | The daterangepicker object |
-| event.violation | <code>InputViolation</code> |  | The daterangepicker object |
-| event.newDate | [<code>NewDate</code>](#NewDate) |  | Object of corrected date values |
-| event.cancelable | <code>boolean</code> | <code>true</code> | By calling `event.preventDefault()` the `newDate` values will apply |
+| event.violation | [<code>InputViolation</code>](#InputViolation) |  | Object of violations and corrected values |
+| event.newDate | [<code>NewDate</code>](#NewDate) |  | Replacement values calculated by the picker (nearest valid date or range).<br> They are only applied if the listener calls `event.preventDefault()`. To apply other values, set `event.newDate.startDate` / `event.newDate.endDate` before. |
+| event.cancelable | <code>boolean</code> | <code>true</code> | Without `event.preventDefault()` the invalid input is rejected and the current dates remain unchanged.<br> By calling `event.preventDefault()` the values of `event.newDate` are applied instead |
 
 **Example**  
 ```js
@@ -468,7 +503,7 @@ daterangepicker('#picker', {
   startDate: DateTime.now(),
   // allow only dates from current year
   minDate: DateTime.now().startOf('year'),
-  manDate: DateTime.now().endOf('year'),
+  maxDate: DateTime.now().endOf('year'),
   singleDatePicker: true,
   locale: {
      format: DateTime.DATETIME_SHORT
@@ -478,13 +513,13 @@ daterangepicker('#picker', {
   ev.preventDefault();
 });
 
-// Try to set date outside permitted range at <input> elemet
+// Try to set date outside permitted range at <input> element
 const input = document.querySelector('#picker');
-input.value = DateTime.now().minus({ years: 10 })).toLocaleString(DateTime.DATETIME_SHORT)
+input.value = DateTime.now().minus({ years: 10 }).toLocaleString(DateTime.DATETIME_SHORT);
 input.dispatchEvent(new Event('keyup'));
 // Try to set date outside permitted range by code
 const drp = getDateRangePicker('#picker');
-drp.setStartDate(DateTime.now().minus({ years: 10 });
+drp.setStartDate(DateTime.now().minus({ years: 10 }));
 
 // -> Calendar selects and shows "today - 3 days"
 ```
@@ -593,7 +628,7 @@ Emitted when user clicks outside the picker. Use option `onOutsideClick` to defi
 | --- | --- | --- | --- |
 | event | [<code>DateRangePickerEvent</code>](#DateRangePickerEvent) |  | The Event object |
 | event.picker | [<code>DateRangePicker</code>](#DateRangePicker) |  | The daterangepicker object |
-| event.cancelable | <code>boolean</code> | <code>true</code> | Call `event.preventDefault()` to prevent default behaviour.<br> Useful to define custome areas where click shall not hide the picker |
+| event.cancelable | <code>boolean</code> | <code>true</code> | Call `event.preventDefault()` to prevent default behaviour.<br> Useful to define custom areas where click shall not hide the picker |
 
 <a name="event_dateChange"></a>
 
@@ -675,7 +710,7 @@ Emitted after month view changed, for example by click on 'prev' or 'next'
 | event | [<code>DateRangePickerEvent</code>](#DateRangePickerEvent) | The Event object |
 | event.picker | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
 | event.left | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | The first day of month in left-hand calendar |
-| event.right | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | The first day of month in left-hand calendar or `null` for singleDatePicker |
+| event.right | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | The first day of month in right-hand calendar or `null` for `singleDatePicker` and `singleMonthView` |
 
 <a name="Options"></a>
 
@@ -693,36 +728,36 @@ Options for DateRangePicker
 | minDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> \| <code>null</code> | <code></code> | The earliest date a user may select or `null` for no limit.<br> Must be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) or a string matching `locale.format`. |
 | maxDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> \| <code>null</code> | <code></code> | The latest date a user may select or `null` for no limit.<br> Must be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) or a string matching `locale.format`. |
 | minSpan | [<code>Duration</code>](https://moment.github.io/luxon/api-docs/index.html#duration) \| <code>string</code> \| <code>number</code> \| <code>null</code> | <code></code> | The minimum span between the selected start and end dates.<br> Must be a `luxon.Duration` or number of seconds or a string according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) duration.<br> Ignored when `singleDatePicker: true` |
-| maxSpan | [<code>Duration</code>](https://moment.github.io/luxon/api-docs/index.html#duration) \| <code>string</code> \| <code>number</code> \| <code>null</code> | <code></code> | The maximum  span between the selected start and end dates.<br> Must be a `luxon.Duration` or number of seconds or a string according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) duration.<br> Ignored when `singleDatePicker: true` |
-| defaultSpan | [<code>Duration</code>](https://moment.github.io/luxon/api-docs/index.html#duration) \| <code>string</code> \| <code>number</code> \| <code>null</code> | <code></code> | The span which is used when endDate is automatically updated due to wrong user input<br> Must be a `luxon.Duration` or number of seconds or a string according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) duration.<br> Ignored when `singleDatePicker: true`. Not relevant if `minSpan: null` |
-| initialMonth | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> \| <code>null</code> |  | Default: `DateTime.now().startOf('month')`<br> The inital month to be shown. Only relevant for `startDate: null`. Be aware, the attached `<input>` element must also be empty.<br> Must be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) or a string matching `locale.format`.<br> Works only with `timePicker: false` |
+| maxSpan | [<code>Duration</code>](https://moment.github.io/luxon/api-docs/index.html#duration) \| <code>string</code> \| <code>number</code> \| <code>null</code> | <code></code> | The maximum span between the selected start and end dates.<br> Must be a `luxon.Duration` or number of seconds or a string according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) duration.<br> Ignored when `singleDatePicker: true` |
+| defaultSpan | [<code>Duration</code>](https://moment.github.io/luxon/api-docs/index.html#duration) \| <code>string</code> \| <code>number</code> \| <code>null</code> | <code></code> | The span used to correct `endDate` when the selected range is shorter than `minSpan`<br> Must be a `luxon.Duration` or number of seconds or a string according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) duration.<br> Ignored when `singleDatePicker: true`. Not relevant if `minSpan: null` |
+| initialMonth | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> \| <code>null</code> |  | Default: `DateTime.now().startOf('month')`<br> The initial month to be shown. Only relevant for `startDate: null`. Be aware, the attached `<input>` element must also be empty.<br> Must be a `luxon.DateTime` or `Date` or `string` according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) or a string matching `locale.format`.<br> Works only with `timePicker: false` |
 | autoApply | <code>boolean</code> | <code>false</code> | Hide the `Apply` and `Cancel` buttons, and automatically apply a new date range as soon as two dates are clicked.<br> Only useful when `timePicker: false` |
 | singleDatePicker | <code>boolean</code> | <code>false</code> | Show only a single calendar to choose one date, instead of a range picker with two calendars.<br> If `true`, then `endDate` is always `null`. |
 | singleMonthView | <code>boolean</code> | <code>false</code> | Show only a single month calendar, useful when selected ranges are usually short<br> or for smaller viewports like mobile devices.<br> Ignored for `singleDatePicker: true`. |
 | showDropdowns | <code>boolean</code> | <code>false</code> | Show year and month select boxes above calendars to jump to a specific month and year |
 | minYear | <code>number</code> |  | Default: `DateTime.now().minus({year:100}).year`<br>The minimum year shown in the dropdowns when `showDropdowns: true` |
-| maxYear | <code>number</code> |  | Default: `DateTime.now().plus({year:100}).year`<br>The maximum  year shown in the dropdowns when `showDropdowns: true` |
+| maxYear | <code>number</code> |  | Default: `DateTime.now().plus({year:100}).year`<br>The maximum year shown in the dropdowns when `showDropdowns: true` |
 | showWeekNumbers | <code>boolean</code> | <code>false</code> | Show **localized** week numbers at the start of each week on the calendars |
 | showISOWeekNumbers | <code>boolean</code> | <code>false</code> | Show **ISO** week numbers at the start of each week on the calendars.<br> Takes precedence over localized `showWeekNumbers` |
 | button | <code>string</code> \| [<code>HTMLButtonElement</code>](https://developer.mozilla.org/en-US/docs/Web/API/HTMLButtonElement) | <code>null</code> | A dedicated element to show the DateRangePicker on click.<br> Main reason of this option is to prevent hide/flicker of the picker on `outsideClick()` |
 | showOnClick | <code>boolean</code> | <code>true</code> | Shows/toggle the DateRangePicker on click or focus at `element`.<br> You may want to set it to `false` only when option `button` is provided or when you use `show()` programmatically. |
-| stopPropagation | <code>boolean</code> | <code>true</code> | Set this option to `false` if you want to listen on DOM-Events outside this instance. |
+| stopPropagation | <code>boolean</code> | <code>true</code> | Events handled inside the picker (click, hover, change) are not propagated to parent elements.<br> Set to `false` if you need to listen to these DOM events outside this instance. |
 | timePicker | <code>boolean</code> | <code>false</code> | Adds select boxes to choose times in addition to dates |
 | timePicker24Hour | <code>boolean</code> |  | Use 24-hour instead of 12-hour times, removing the AM/PM selection.<br> Default is derived from current locale [Intl.DateTimeFormat.resolvedOptions.hour12](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/resolvedOptions#hour12). |
 | timePickerStepSize | [<code>Duration</code>](https://moment.github.io/luxon/api-docs/index.html#duration) \| <code>string</code> \| <code>number</code> |  | Default: `Duration.fromObject({minutes:1})`<br>Set the time picker step size.<br> Must be a `luxon.Duration` or the number of seconds or a string according to [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) duration.<br> Valid values are 1,2,3,4,5,6,10,12,15,20,30 for `Duration.fromObject({seconds: ...})` and `Duration.fromObject({minutes: ...})`  and 1,2,3,4,6,(8,12) for `Duration.fromObject({hours: ...})`.<br> Duration must be greater than `minSpan` and smaller than `maxSpan`.<br> For example `timePickerStepSize: 600` will disable time picker seconds and time picker minutes are set to step size of 10 Minutes. |
 | autoUpdateInput | <code>boolean</code> | <code>true</code> | Indicates whether the DateRangePicker should instantly update the value of the attached `<input>`  element when the selected dates change.<br>The `<input>` element will be always updated on `Apply` and reverted when user clicks on `Cancel`. |
 | onOutsideClick | <code>string</code> | <code>&quot;apply&quot;</code> | Defines what picker shall do when user clicks outside the calendar. `cancel`,  `apply` or `hide`. Event [onOutsideClick](#event_outsideClick) is always emitted;<br> `cancel` reverts to previous date values. Note, `apply` is only useful with `autoApply: false`, otherwise date values will apply multiple times<br> If you like to do nothing, call `event.preventDefault()` in the event listener. |
 | linkedCalendars | <code>boolean</code> | <code>true</code> | When enabled, the two calendars displayed will always be for two sequential months (i.e. January and February),  and both will be advanced when clicking the left or right arrows above the calendars.<br> When disabled, the two calendars can be individually advanced and display any month/year |
-| isInvalidDate | <code>function</code> | <code>false</code> | A function that is passed each date in the two calendars before they are displayed,<br>  and may return `true` or `false` to indicate whether that date should be available for selection or not.<br> Signature: `isInvalidDate(date)`<br> |
-| isInvalidTime | <code>function</code> | <code>false</code> | A function that is passed each hour/minute/second/am-pm in the two calendars before they are displayed,<br>  and may return `true` or `false` to indicate whether that date should be available for selection or not.<br> Signature: `isInvalidTime(time, side, unit)`<br> `side` is `'start'` or `'end'` or `null` for `singleDatePicker: true`<br> `unit` is `'hour'`, `'minute'`, `'second'` or `'ampm'`<br> Hours are always given as 24-hour clock<br> Ensure that your function returns `false` for at least one item. Otherwise the calender is not rendered.<br> |
-| isCustomDate | <code>function</code> | <code>false</code> | A function that is passed each date in the two calendars before they are displayed,  and may return a string or array of CSS class names to apply to that date's calendar cell.<br> Signature: `isCustomDate(date)` |
+| isInvalidDate | <code>function</code> |  | Default: `() => false`<br>A function that is passed each date in the two calendars before they are displayed,<br>  and may return `true` or `false` to indicate whether that date should be available for selection or not.<br> Signature: `isInvalidDate(date)`<br> |
+| isInvalidTime | <code>function</code> |  | Default: `() => false`<br>A function that is passed each hour/minute/second/am-pm in the two calendars before they are displayed,<br>  and may return `true` or `false` to indicate whether that date should be available for selection or not.<br> Signature: `isInvalidTime(time, side, unit)`<br> `side` is `'start'` or `'end'` or `null` for `singleDatePicker: true`<br> `unit` is `'hour'`, `'minute'`, `'second'` or `'ampm'`<br> Hours are always given as 24-hour clock<br> Ensure that your function returns `false` for at least one item. Otherwise the calendar is not rendered.<br> |
+| isCustomDate | <code>function</code> |  | Default: `() => false`<br>A function that is passed each date in the two calendars before they are displayed,  and may return a string or array of CSS class names to apply to that date's calendar cell.<br> Signature: `isCustomDate(date)` |
 | altInput | <code>string</code> \| <code>Array</code> \| [<code>HTMLInputElement</code>](https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement) \| [<code>HTMLCollection</code>](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCollection) | <code>null</code> | A [Document querySelector](https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector#selectors)<br> string matching a single `<input>` element or an `HTMLInputElement` for the alternative output. Uses `altFormat` to format the value.<br> For `singleDatePicker: false` you may provide:<br> - A CSS querySelector string matching exactly two `<input>` elements (e.g., `'.start-date, .end-date'`)<br> - An array of two strings or `HTMLInputElement` elements<br> - An `HTMLCollection` of two `HTMLInputElement` elements<br> Uses `altFormat` to format the values.<br> Examples: `'#start, #end'`, `['#start', '#end']`, or `[startInput, endInput]` |
 | altFormat | <code>function</code> \| <code>string</code> \| <code>object</code> |  | The output format used for `altInput`.<br> Either a string of [Format tokens](https://moment.github.io/luxon/#/formatting?id=table-of-tokens) or  [DateTime.toISO()](https://moment.github.io/luxon/api-docs/index.html#datetimetoiso) opts object or a function.<br> Default: `{format: 'extended', precision: <derived from timePickerStepSize>, includeOffset: false}`<br> Examples: `"yyyy:MM:dd'T'HH:mm"`<br> `(date) => date.toUnixInteger()` for singleDatePicker: true or altInput[]<br> `(interval) => interval.toISO('yyyy:MM:dd', {separator: '..'})` for singleDatePicker: false and single altInput |
 | applyButtonClasses | <code>string</code> | <code>&quot;btn-primary&quot;</code> | CSS class names that will be added only to the apply button |
 | cancelButtonClasses | <code>string</code> | <code>&quot;btn-default&quot;</code> | CSS class names that will be added only to the cancel button |
 | buttonClasses | <code>string</code> |  | Default: `'btn btn-sm'`<br>CSS class names that will be added to both the apply and cancel buttons. |
 | weekendClasses | <code>string</code> | <code>&quot;weekend&quot;</code> | CSS class names that will be used to highlight weekend days.<br> Use `null` or empty string if you don't like to highlight weekend days. |
-| weekendDayClasses | <code>string</code> | <code>&quot;weekend-day&quot;</code> | CSS class names that will be used to highlight weekend day names.<br> Weekend days are evaluated by [Info.getWeekendWeekdays](https://moment.github.io/luxon/api-docs/index.html#infogetweekendweekdays) and depend on current  locale settings. Use `null` or empty string if you don't like to highlight weekend day names. |
+| weekendDayClasses | <code>string</code> | <code>&quot;weekend-day&quot;</code> | CSS class names that will be used to highlight weekend day names.<br> Weekend days are evaluated by [Info.getWeekendWeekdays](https://moment.github.io/luxon/api-docs/index.html#infogetweekendweekdays) and depend on current  locale settings.<br> Use `null` or empty string if you don't like to highlight weekend day names. |
 | todayClasses | <code>string</code> | <code>&quot;today&quot;</code> | CSS class names that will be used to highlight the current day.<br> Use `null` or empty string if you don't like to highlight the current day. |
 | opens | <code>string</code> | <code>&quot;right&quot;</code> | Whether the picker appears aligned to the left, to the right, or centered under the HTML element it's attached to.<br> `'left' \| 'right' \| 'center'` |
 | drops | <code>string</code> | <code>&quot;down&quot;</code> | Whether the picker appears below or above the HTML element it's attached to.<br> `'down' \| 'up' \| 'auto'` |
@@ -732,8 +767,8 @@ Options for DateRangePicker
 | showLabel | <code>boolean</code> |  | Shows selected range next to Apply buttons.<br> Defaults to `false` if anchor element is `<input type="text">`, otherwise `true` |
 | locale | <code>object</code> | <code>{}</code> | Allows you to provide localized strings for buttons and labels, customize the date format,  and change the first day of week for the calendars. |
 | locale.direction | <code>string</code> | <code>&quot;ltr&quot;</code> | Direction of reading, `'ltr'` or `'rtl'` |
-| locale.format | <code>object</code> \| <code>string</code> |  | Default: `DateTime.DATE_SHORT` or `DateTime.DATETIME_SHORT` when `timePicker: true`<br>Date formats.  Either given as string, see [Format Tokens](https://moment.github.io/luxon/#/formatting?id=table-of-tokens) or an object according  to [Intl.DateTimeFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat)<br> I recommend to use the luxon [Presets](https://moment.github.io/luxon/#/formatting?id=presets). |
-| locale.separator | <code>string</code> |  | Defaut: `' - '`<br>Separator for start and end time |
+| locale.format | <code>object</code> \| <code>string</code> |  | Default: `DateTime.DATE_SHORT` or `DateTime.DATETIME_SHORT` when `timePicker: true`<br>Date formats.  Either given as string, see [Format Tokens](https://moment.github.io/luxon/#/formatting?id=table-of-tokens) or an object according  to [Intl.DateTimeFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat)<br> It is recommended to use the luxon [Presets](https://moment.github.io/luxon/#/formatting?id=presets). |
+| locale.separator | <code>string</code> |  | Default: `' - '`<br>Separator for start and end time |
 | locale.formatInterval | <code>boolean</code> | <code>false</code> | If `false` then range is formatted like `{startDate.toFormat(locale.format)}{locale.separator}{endDate.toFormat(locale.format)}`<br> If `true` then range is formatted like `Interval.fromDateTimes(startDate, endDate).toFormat(locale.format, {separator: locale.separator})` |
 | locale.weekLabel | <code>string</code> | <code>&quot;W&quot;</code> | Label for week numbers |
 | locale.daysOfWeek | <code>Array</code> |  | Default: `luxon.Info.weekdays('short')`<br>Array with weekday names, from Monday to Sunday |
@@ -742,22 +777,15 @@ Options for DateRangePicker
 | locale.applyLabel | <code>string</code> | <code>&quot;Apply&quot;</code> | Label of `Apply` Button |
 | locale.cancelLabel | <code>string</code> | <code>&quot;Cancel&quot;</code> | Label of `Cancel` Button |
 | locale.customRangeLabel | <code>string</code> | <code>&quot;Custom&quot;</code> | Range - Title for custom ranges |
-| locale.durationFormat | <code>object</code> \| <code>string</code> \| <code>function</code> | <code>{}</code> | Format a custom label for selected duration, for example `'5 Days, 12 Hours'`.<br> Define the format either as string, see [Duration.toFormat - Format Tokens](https://moment.github.io/luxon/api-docs/index.html#durationtoformat) or  an object according to [Intl.NumberFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#options),  see [Duration.toHuamn](https://moment.github.io/luxon/api-docs/index.html#durationtohuman).<br> Or custom function as `(startDate, endDate) => {}` |
+| locale.durationFormat | <code>object</code> \| <code>string</code> \| <code>function</code> | <code>{}</code> | Format a custom label for selected duration, for example `'5 Days, 12 Hours'`.<br> Define the format either as string, see [Duration.toFormat - Format Tokens](https://moment.github.io/luxon/api-docs/index.html#durationtoformat) or  an object according to [Intl.NumberFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#options),  see [Duration.toHuman](https://moment.github.io/luxon/api-docs/index.html#durationtohuman).<br> Or custom function as `(startDate, endDate) => {}` |
 
 <a name="Ranges"></a>
 
-## Ranges : <code>Object</code>
-A set of predefined ranges.<br>
+## Ranges : <code>Object.&lt;string, Array.&lt;(external:DateTime\|external:Date\|string)&gt;&gt;</code>
+A set of predefined ranges. Each key is the label of a range, its value an array `[startDate, endDate]`.<br>
 Ranges are not validated against `minDate`, `maxDate`, `minSpan`, `maxSpan` or `timePickerStepSize ` constraints.
 
 **Kind**: global typedef  
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| name | <code>string</code> | The name of the range |
-| range | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> | Array of 2 elements with `startDate` and `endDate` |
-
 **Example**  
 ```js
 {
@@ -771,37 +799,55 @@ Ranges are not validated against `minDate`, `maxDate`, `minSpan`, `maxSpan` or `
 ```
 <a name="Range"></a>
 
-## Range : <code>Object</code>
-A single predefined range
+## Range : <code>Array.&lt;(external:DateTime\|external:Date\|string)&gt;</code>
+A single predefined range, an array of 2 elements `[startDate, endDate]`
 
 **Kind**: global typedef  
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| name | <code>string</code> | The name of the range |
-| range | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Date</code>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) \| <code>string</code> | Array of 2 elements with startDate and endDate |
-
 **Example**  
 ```js
 { Today: [DateTime.now().startOf('day'), DateTime.now().endOf('day')] }        
 ```
-<a name="NewDate"></a>
+<a name="Violation"></a>
 
-## NewDate : <code>Object</code>
+## Violation : <code>object</code>
+A single violated constraint
+
 **Kind**: global typedef  
 **Properties**
 
 | Name | Type | Description |
 | --- | --- | --- |
-| reason | <code>string</code> | The type/reason of violation |
-| old | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | Old value startDate/endDate |
-| new? | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | Corrected value of startDate/endDate if existing |
-| newDate.startDate- | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | Object with corrected values |
-| newDate.endDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | Object with corrected values |
-| startDate | <code>Array.&lt;Violation&gt;</code> | The constraints which violates the input |
-| endDate | <code>Array.&lt;Violation&gt;</code> | The constraints which violates the input or `null` for singleDatePicker |
-| newDate | [<code>NewDate</code>](#NewDate) | Object with corrected values |
+| reason | <code>string</code> | The violated constraint, for example `'minDate'`, `'maxDate'`, `'minSpan'`, `'maxSpan'`, `'isInvalidDate'`, `'isInvalidTime'` or `'timePickerStepSize'` |
+| old | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | Value of `startDate`/`endDate` before the correction |
+| [new] | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | Corrected value of `startDate`/`endDate`, if a correction is possible |
+| [unit] | <code>string</code> | Time unit (`'hour'`, `'minute'`, `'second'` or `'ampm'`), only set for reason `'isInvalidTime'` |
+
+<a name="NewDate"></a>
+
+## NewDate : <code>object</code>
+Corrected date values
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| startDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | Corrected `startDate` |
+| [endDate] | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | Corrected `endDate`, not set for `singleDatePicker: true` |
+
+<a name="InputViolation"></a>
+
+## InputViolation : <code>object</code>
+Result of the validation of `startDate` and `endDate`
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| startDate | [<code>Array.&lt;Violation&gt;</code>](#Violation) | The constraints which are violated by `startDate` |
+| [endDate] | [<code>Array.&lt;Violation&gt;</code>](#Violation) | The constraints which are violated by `endDate`, not set for `singleDatePicker: true` |
+| [newDate] | [<code>NewDate</code>](#NewDate) | Corrected values. Only set if event "violate" was dispatched and `event.preventDefault()` was called |
 
 <a name="callback"></a>
 
@@ -812,5 +858,5 @@ A single predefined range
 | --- | --- | --- |
 | startDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | Selected startDate |
 | endDate | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) | Selected endDate |
-| range | <code>string</code> |  |
+| range | <code>string</code> \| <code>null</code> | Label of the selected predefined range (or the custom range label), `null` if no range is selected |
 
