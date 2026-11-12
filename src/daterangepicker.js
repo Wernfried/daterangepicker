@@ -577,15 +577,7 @@ class DateRangePicker {
                   console.error(`Value "${this.element.value}" in <input> is not a valid string: ${start.invalidExplanation}`)
                }
             } else if (!this.singleDatePicker && typeof options.startDate === 'undefined' && typeof options.endDate === 'undefined') {
-               if (this.locale.formatInterval) {
-                  const interval = Interval.fromFormat(this.element.value, format, { locale: DateTime.now().locale });
-                  if (interval.isValid) {
-                     this.#startDate = interval.start;
-                     this.#endDate = interval.end;
-                  } else {
-                     console.error(`Value "${this.element.value}" in <input> is not a valid string`)
-                  }
-               } else {
+               if (!this.locale.formatInterval) {
                   const split = this.element.value.split(this.locale.separator);
                   if (split.length === 2) {
                      const start = DateTime.fromFormat(split[0], format, { locale: DateTime.now().locale });
@@ -599,6 +591,9 @@ class DateRangePicker {
                   } else {
                      console.error(`Value "${this.element.value}" in <input> is not a valid string`)
                   }
+               } else {
+                   // Method Interval.fromFormat() does not exist in luxon
+                  console.error(`Value "${this.element.value}" in <input> is not a valid string`)
                }
             }
          }
