@@ -2820,9 +2820,19 @@ class DateRangePicker {
 
    /**
    * Update the picker with value from `<input>` element.<br> 
-   * Input values must be given in format of `locale.format`. Invalid values are handled by `violate` Event
+   * Input values must be given in format of `locale.format`. Invalid values are handled by `violate` Event<br>
+   * Does not work for `locale.formatInterval: true` due to missing `Interval.fromFormat()` method in luxon. As workaround use the example below.
    * @emits "inputChange"
    * @private
+   * @example
+   * element.addEventListener('focus', (ev) => {
+   *    if (element.value != '')
+   *       element.value = [
+   *          ev.picker.startDate.toLocaleString(ev.picker.locale.format),
+   *          ev.picker.locale.separator,
+   *          ev.picker.endDate.toLocaleString(ev.picker.locale.format)
+   *       ].join('');
+   * });
    */
    elementChanged() {
       if (!this.isInputText) return;
