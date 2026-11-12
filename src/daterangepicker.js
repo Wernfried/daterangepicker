@@ -2820,12 +2820,13 @@ class DateRangePicker {
    * @emits "inputChange"
    * @private
    * @example
-   * element.addEventListener('focus', (ev) => {
-   *    if (element.value != '')
+   * element.addEventListener('focus', () => {
+   *    if (element.value != '') {
+   *       const picker = getDateRangePicker(element);
    *       element.value = [
-   *          ev.picker.startDate.toLocaleString(ev.picker.locale.format),
-   *          ev.picker.locale.separator,
-   *          ev.picker.endDate.toLocaleString(ev.picker.locale.format)
+   *          picker.startDate.toLocaleString(picker.locale.format),
+   *          picker.locale.separator,
+   *          picker.endDate.toLocaleString(picker.locale.format)
    *       ].join('');
    * });
    */
