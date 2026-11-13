@@ -545,12 +545,12 @@ class DateRangePicker {
          if (typeof options[opt] === 'object') {
             if (options[opt] == null) {
                this[opt] = null;
-            } else if (DateTime.isDateTime(options[opt])) {
+            } else if (DateTime.isDateTime(options[opt]) && options[opt].isValid) {
                this[opt] = options[opt];
             } else if (options[opt] instanceof Date) {
                this[opt] = DateTime.fromJSDate(options[opt]);
             } else {
-               console.error(`Option '${opt}' must be a luxon.DateTime or Date or string`);
+               throw new RangeError(`Option '${opt}' must be a luxon.DateTime or Date or an ISO-8601 string`);
             }
          } else if (typeof options[opt] === 'string') {
             const format = typeof this.locale.format === 'string' ? this.locale.format : DateTime.parseFormatForOpts(this.locale.format);
@@ -560,7 +560,7 @@ class DateRangePicker {
                this[opt] = DateTime.fromFormat(options[opt], format, { locale: DateTime.now().locale });
             } else {
                const invalid = DateTime.fromFormat(options[opt], format, { locale: DateTime.now().locale }).invalidExplanation;
-               console.error(`Option '${opt}' is not a valid string: ${invalid}`);
+               throw new RangeError(`Option '${opt}' is not a valid string: ${invalid}`);
             }
          }
       }
