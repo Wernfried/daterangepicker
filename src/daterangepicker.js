@@ -726,7 +726,7 @@ class DateRangePicker {
                } else if (typeof options.ranges[range][0] === 'string' && DateTime.fromISO(options.ranges[range][0]).isValid) {
                   start = DateTime.fromISO(options.ranges[range][0]);
                } else {
-                  console.error(`Option ranges['${range}'] is not am array of valid ISO-8601 string or luxon.DateTime or Date`);
+                  throw new RangeError(`Option ranges['${range}'] is not am array of valid ISO-8601 string or luxon.DateTime or Date`);
                }
             }
             if (['string', 'object'].includes(typeof options.ranges[range][1])) {
@@ -737,7 +737,7 @@ class DateRangePicker {
                } else if (typeof options.ranges[range][1] === 'string' && DateTime.fromISO(options.ranges[range][1]).isValid) {
                   end = DateTime.fromISO(options.ranges[range][1]);
                } else {
-                  console.error(`Option ranges['${range}'] is not a valid ISO-8601 string or luxon.DateTime or Date`);
+                  throw new RangeError(`Option ranges['${range}'] is not a valid ISO-8601 string or luxon.DateTime or Date`);
                }
             }
             if (start == null || end == null)
