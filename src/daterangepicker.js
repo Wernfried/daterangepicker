@@ -3,7 +3,7 @@ import { DateTime, Duration, Info, Settings, Interval } from 'luxon';
 /**
 * @constructs DateRangePicker
 * @param {string|external:HTMLElement} element - A DOM `HTMLElement` or a CSS querySelector string of the element the DateRangePicker is attached to.<br>
-* Often an `<input type="text">` element. A click on an `<input>` or `<button>` element shows the picker, a click on any other element toggles it.<br>
+* Often an `<input type="text">` element. A click on an `<input>` or `<button>` element shows the picker, any other element toggles it. (unless `showOnClick==false`)<br>
 * A selector string must match exactly one element.
 * @param {Options} [options] - Object to configure the DateRangePicker
 * @param {callback} [cb] - Callback function executed when new date values are applied
@@ -592,7 +592,7 @@ class DateRangePicker {
                      console.error(`Value "${this.element.value}" in <input> is not a valid string`)
                   }
                } else {
-                   // Method Interval.fromFormat() does not exist in luxon
+                  // Method Interval.fromFormat() does not exist in luxon
                   console.error(`Value "${this.element.value}" in <input> is not a valid string`)
                }
             }
@@ -2474,6 +2474,8 @@ class DateRangePicker {
    * @private
    */
    clickRange(e) {
+      if (this.isInputText && this.element.disabled)
+         return;
       let label = e.target.getAttribute('data-range-key');
       this.chosenLabel = label;
       if (label == this.locale.customRangeLabel) {
@@ -2507,6 +2509,8 @@ class DateRangePicker {
    */
    clickDate(e) {
       if (!e.target.classList.contains('available')) return;
+      if (this.isInputText && this.element.disabled)
+         return;
 
       let title = e.target.dataset.title;
       let row = title.substring(1, 2);
@@ -2658,6 +2662,8 @@ class DateRangePicker {
    * @private
    */
    timeChanged(e) {
+      if (this.isInputText && this.element.disabled)
+         return;
       const time = e.target.closest('.calendar-time');
       const side = time.classList.contains('start-time') ? 'start' : 'end';
 
@@ -2786,6 +2792,8 @@ class DateRangePicker {
    * @private
    */
    clickApply() {
+      if (this.isInputText && this.element.disabled)
+         return;
       // if picker is attached to a text input, update it
       this.updateElement();
 
