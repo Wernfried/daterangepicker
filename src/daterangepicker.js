@@ -156,7 +156,7 @@ class DateRangePicker {
       * It is recommended to use the luxon [Presets](https://moment.github.io/luxon/#/formatting?id=presets).
       * @property {string} locale.separator - Default: `' - '`<br>Separator for start and end time
       * @property {boolean} locale.formatInterval=false - If `false` then range is formatted like `{startDate.toFormat(locale.format)}{locale.separator}{endDate.toFormat(locale.format)}`<br>
-      * If `true` then range is formatted like `Interval.fromDateTimes(startDate, endDate).toFormat(locale.format, {separator: locale.separator})`
+      * If `true` then range is formatted like `Interval.fromDateTimes(startDate, endDate).toFormat(locale.format)` (`locale.separator` is not used)<br>
       * @property {string} locale.weekLabel=W - Label for week numbers
       * @property {Array} locale.daysOfWeek - Default: `luxon.Info.weekdays('short')`<br>Array with weekday names, from Monday to Sunday
       * @property {Array} locale.monthNames - Default: `luxon.Info.months('long')`<br>Array with month names
@@ -1231,14 +1231,14 @@ class DateRangePicker {
       if (date === null)
          return null;
       if (typeof format === 'object') {
-         return Interval.isInterval(date) ? date.toLocaleString(format, { separator: this.locale.separator }) : date.toLocaleString(format);
+         return Interval.isInterval(date) ? date.toLocaleString(format) : date.toLocaleString(format);
       } else {
          if (Settings.defaultLocale === null) {
             // Limitation/bug, see https://github.com/moment/luxon/issues/1366
             const locale = DateTime.now().locale;
-            return Interval.isInterval(date) ? date.toFormat(format, { locale: locale, separator: this.locale.separator }) : date.toFormat(format, { locale: locale });
+            return Interval.isInterval(date) ? date.toFormat(format, { locale: locale }) : date.toFormat(format, { locale: locale });
          } else {
-            return Interval.isInterval(date) ? date.toFormat(format, { separator: this.locale.separator }) : date.toFormat(format);
+            return Interval.isInterval(date) ? date.toFormat(format) : date.toFormat(format);
          }
       }
    }
