@@ -328,12 +328,12 @@ var DateRangePicker = (function(exports, luxon2) {
         if (typeof options[opt] === "object") {
           if (options[opt] == null) {
             this[opt] = null;
-          } else if (luxon2.DateTime.isDateTime(options[opt])) {
+          } else if (luxon2.DateTime.isDateTime(options[opt]) && options[opt].isValid) {
             this[opt] = options[opt];
           } else if (options[opt] instanceof Date) {
             this[opt] = luxon2.DateTime.fromJSDate(options[opt]);
           } else {
-            console.error(`Option '${opt}' must be a luxon.DateTime or Date or string`);
+            throw new RangeError(`Option '${opt}' must be a luxon.DateTime or Date or an ISO-8601 string`);
           }
         } else if (typeof options[opt] === "string") {
           const format = typeof this.locale.format === "string" ? this.locale.format : luxon2.DateTime.parseFormatForOpts(this.locale.format);
@@ -343,7 +343,7 @@ var DateRangePicker = (function(exports, luxon2) {
             this[opt] = luxon2.DateTime.fromFormat(options[opt], format, { locale: luxon2.DateTime.now().locale });
           } else {
             const invalid = luxon2.DateTime.fromFormat(options[opt], format, { locale: luxon2.DateTime.now().locale }).invalidExplanation;
-            console.error(`Option '${opt}' is not a valid string: ${invalid}`);
+            throw new RangeError(`Option '${opt}' is not a valid string: ${invalid}`);
           }
         }
       }
@@ -358,15 +358,7 @@ var DateRangePicker = (function(exports, luxon2) {
               console.error(`Value "${this.element.value}" in <input> is not a valid string: ${start.invalidExplanation}`);
             }
           } else if (!this.singleDatePicker && typeof options.startDate === "undefined" && typeof options.endDate === "undefined") {
-            if (this.locale.formatInterval) {
-              const interval = luxon2.Interval.fromFormat(this.element.value, format, { locale: luxon2.DateTime.now().locale });
-              if (interval.isValid) {
-                this.#startDate = interval.start;
-                this.#endDate = interval.end;
-              } else {
-                console.error(`Value "${this.element.value}" in <input> is not a valid string`);
-              }
-            } else {
+            if (!this.locale.formatInterval) {
               const split = this.element.value.split(this.locale.separator);
               if (split.length === 2) {
                 const start = luxon2.DateTime.fromFormat(split[0], format, { locale: luxon2.DateTime.now().locale });
@@ -380,6 +372,8 @@ var DateRangePicker = (function(exports, luxon2) {
               } else {
                 console.error(`Value "${this.element.value}" in <input> is not a valid string`);
               }
+            } else {
+              console.error(`Value "${this.element.value}" in <input> is not a valid string`);
             }
           }
         }
@@ -494,7 +488,7 @@ var DateRangePicker = (function(exports, luxon2) {
             } else if (typeof options.ranges[range][0] === "string" && luxon2.DateTime.fromISO(options.ranges[range][0]).isValid) {
               start = luxon2.DateTime.fromISO(options.ranges[range][0]);
             } else {
-              console.error(`Option ranges['${range}'] is not am array of valid ISO-8601 string or luxon.DateTime or Date`);
+              throw new RangeError(`Option ranges['${range}'] is not am array of valid ISO-8601 string or luxon.DateTime or Date`);
             }
           }
           if (["string", "object"].includes(typeof options.ranges[range][1])) {
@@ -505,7 +499,7 @@ var DateRangePicker = (function(exports, luxon2) {
             } else if (typeof options.ranges[range][1] === "string" && luxon2.DateTime.fromISO(options.ranges[range][1]).isValid) {
               end = luxon2.DateTime.fromISO(options.ranges[range][1]);
             } else {
-              console.error(`Option ranges['${range}'] is not a valid ISO-8601 string or luxon.DateTime or Date`);
+              throw new RangeError(`Option ranges['${range}'] is not a valid ISO-8601 string or luxon.DateTime or Date`);
             }
           }
           if (start == null || end == null)
@@ -979,13 +973,13 @@ var DateRangePicker = (function(exports, luxon2) {
       if (date === null)
         return null;
       if (typeof format === "object") {
-        return luxon2.Interval.isInterval(date) ? date.toLocaleString(format, { separator: this.locale.separator }) : date.toLocaleString(format);
+        return luxon2.Interval.isInterval(date) ? date.toLocaleString(format) : date.toLocaleString(format);
       } else {
         if (luxon2.Settings.defaultLocale === null) {
           const locale = luxon2.DateTime.now().locale;
-          return luxon2.Interval.isInterval(date) ? date.toFormat(format, { locale, separator: this.locale.separator }) : date.toFormat(format, { locale });
+          return luxon2.Interval.isInterval(date) ? date.toFormat(format, { locale }) : date.toFormat(format, { locale });
         } else {
-          return luxon2.Interval.isInterval(date) ? date.toFormat(format, { separator: this.locale.separator }) : date.toFormat(format);
+          return luxon2.Interval.isInterval(date) ? date.toFormat(format) : date.toFormat(format);
         }
       }
     }
@@ -1986,6 +1980,8 @@ var DateRangePicker = (function(exports, luxon2) {
     * @private
     */
     clickRange(e) {
+      if (this.isInputText && this.element.disabled)
+        return;
       let label = e.target.getAttribute("data-range-key");
       this.chosenLabel = label;
       if (label == this.locale.customRangeLabel) {
@@ -2015,6 +2011,8 @@ var DateRangePicker = (function(exports, luxon2) {
     */
     clickDate(e) {
       if (!e.target.classList.contains("available")) return;
+      if (this.isInputText && this.element.disabled)
+        return;
       let title = e.target.dataset.title;
       let row = title.substring(1, 2);
       let col = title.substring(3, 4);
@@ -2131,6 +2129,8 @@ var DateRangePicker = (function(exports, luxon2) {
     * @private
     */
     timeChanged(e) {
+      if (this.isInputText && this.element.disabled)
+        return;
       const time = e.target.closest(".calendar-time");
       const side = time.classList.contains("start-time") ? "start" : "end";
       var hour = parseInt(time.querySelector(".hourselect").value, 10);
@@ -2237,6 +2237,8 @@ var DateRangePicker = (function(exports, luxon2) {
        * @private
        */
     clickApply() {
+      if (this.isInputText && this.element.disabled)
+        return;
       this.updateElement();
       if (typeof this.callback === "function") {
         if (this.#startDate && (this.#endDate || !this.singleDatePicker))
@@ -2259,9 +2261,20 @@ var DateRangePicker = (function(exports, luxon2) {
     /* #endregion */
     /**
     * Update the picker with value from `<input>` element.<br> 
-    * Input values must be given in format of `locale.format`. Invalid values are handled by `violate` Event
+    * Input values must be given in format of `locale.format`. Invalid values are handled by `violate` Event<br>
+    * Does not work for `locale.formatInterval: true` due to missing `Interval.fromFormat()` method in luxon. As workaround use the example below.
     * @emits "inputChange"
     * @private
+    * @example
+    * element.addEventListener('focus', () => {
+    *    if (element.value != '') {
+    *       const picker = getDateRangePicker(element);
+    *       element.value = [
+    *          picker.startDate.toLocaleString(picker.locale.format),
+    *          picker.locale.separator,
+    *          picker.endDate.toLocaleString(picker.locale.format)
+    *       ].join('');
+    * });
     */
     elementChanged() {
       if (!this.isInputText) return;

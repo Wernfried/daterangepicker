@@ -140,7 +140,7 @@ Ranges are not validated against <code>minDate</code>, <code>maxDate</code>, <co
 
 | Param | Type | Description |
 | --- | --- | --- |
-| element | <code>string</code> \| [<code>HTMLElement</code>](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement) | A DOM `HTMLElement` or a CSS querySelector string of the element the DateRangePicker is attached to.<br> Often an `<input type="text">` element. A click on an `<input>` or `<button>` element shows the picker, a click on any other element toggles it.<br> A selector string must match exactly one element. |
+| element | <code>string</code> \| [<code>HTMLElement</code>](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement) | A DOM `HTMLElement` or a CSS querySelector string of the element the DateRangePicker is attached to.<br> Often an `<input type="text">` element. A click on an `<input>` or `<button>` element shows the picker, any other element toggles it. (unless `showOnClick==false`)<br> A selector string must match exactly one element. |
 | [options] | [<code>Options</code>](#Options) | Object to configure the DateRangePicker |
 | [cb] | [<code>callback</code>](#callback) | Callback function executed when new date values are applied |
 
@@ -769,7 +769,7 @@ Options for DateRangePicker
 | locale.direction | <code>string</code> | <code>&quot;ltr&quot;</code> | Direction of reading, `'ltr'` or `'rtl'` |
 | locale.format | <code>object</code> \| <code>string</code> |  | Default: `DateTime.DATE_SHORT` or `DateTime.DATETIME_SHORT` when `timePicker: true`<br>Date formats.  Either given as string, see [Format Tokens](https://moment.github.io/luxon/#/formatting?id=table-of-tokens) or an object according  to [Intl.DateTimeFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat)<br> It is recommended to use the luxon [Presets](https://moment.github.io/luxon/#/formatting?id=presets). |
 | locale.separator | <code>string</code> |  | Default: `' - '`<br>Separator for start and end time |
-| locale.formatInterval | <code>boolean</code> | <code>false</code> | If `false` then range is formatted like `{startDate.toFormat(locale.format)}{locale.separator}{endDate.toFormat(locale.format)}`<br> If `true` then range is formatted like `Interval.fromDateTimes(startDate, endDate).toFormat(locale.format, {separator: locale.separator})` |
+| locale.formatInterval | <code>boolean</code> | <code>false</code> | If `false` then range is formatted like `{startDate.toFormat(locale.format)}{locale.separator}{endDate.toFormat(locale.format)}`<br> If `true` then range is formatted like `Interval.fromDateTimes(startDate, endDate).toFormat(locale.format)` (`locale.separator` is not used)<br> |
 | locale.weekLabel | <code>string</code> | <code>&quot;W&quot;</code> | Label for week numbers |
 | locale.daysOfWeek | <code>Array</code> |  | Default: `luxon.Info.weekdays('short')`<br>Array with weekday names, from Monday to Sunday |
 | locale.monthNames | <code>Array</code> |  | Default: `luxon.Info.months('long')`<br>Array with month names |
