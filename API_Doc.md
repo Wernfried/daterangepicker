@@ -65,6 +65,9 @@ Only useful when <a href="#Ranges">Ranges</a> are used.</p>
 <dt><a href="#event_cancel">"cancel"</a></dt>
 <dd><p>Emitted when the <code>Cancel</code> button is clicked</p>
 </dd>
+<dt><a href="#event_beforeChange">"beforeChange"</a></dt>
+<dd><p>Emitted before <code>&lt;input&gt;</code> element is updated.</p>
+</dd>
 <dt><a href="#event_inputChange">"inputChange"</a></dt>
 <dd><p>Emitted when the date is changed through <code>&lt;input&gt;</code> element. Event is only triggered when date string is valid and date value has changed</p>
 </dd>
@@ -675,6 +678,19 @@ Emitted when the `Apply` button is clicked, or when a predefined [Ranges](#Range
 
 ## "cancel"
 Emitted when the `Cancel` button is clicked
+
+**Kind**: event emitted  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| event | [<code>DateRangePickerEvent</code>](#DateRangePickerEvent) | The Event object |
+| event.picker | [<code>DateRangePicker</code>](#DateRangePicker) | The daterangepicker object |
+
+<a name="event_beforeChange"></a>
+
+## "beforeChange"
+Emitted before `<input>` element is updated.
 
 **Kind**: event emitted  
 **Properties**

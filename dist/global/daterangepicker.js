@@ -751,6 +751,14 @@ var DateRangePicker = (function(exports, luxon2) {
       */
       onCancel: { type: "cancel" },
       /**
+      * Emitted before `<input>` element is updated.
+      * @event
+      * @name "beforeChange"
+      * @property {DateRangePickerEvent} event - The Event object
+      * @property {DateRangePicker} event.picker - The daterangepicker object
+      */
+      onBeforeChange: { type: "beforeChange" },
+      /**
       * Emitted when the date is changed through `<input>` element. Event is only triggered when date string is valid and date value has changed
       * @event
       * @name "inputChange"
@@ -2233,9 +2241,9 @@ var DateRangePicker = (function(exports, luxon2) {
     }
     /**
     * User clicked `Apply` button, executes the callback function if provided
-       * @emits "apply"
-       * @private
-       */
+    * @emits "apply"
+    * @private
+    */
     clickApply() {
       if (this.isInputText && this.element.disabled)
         return;
@@ -2351,6 +2359,7 @@ var DateRangePicker = (function(exports, luxon2) {
     updateElement() {
       if (this.#startDate == null && this.initialMonth)
         return;
+      this.triggerEvent(this.#events.onBeforeChange);
       if (this.isInputText) {
         let newValue;
         if (this.locale.formatInterval && this.#endDate) {
