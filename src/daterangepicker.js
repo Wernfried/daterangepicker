@@ -3050,6 +3050,8 @@ class DateRangePicker {
 
    /**
     * Checks whether the given locale is a string that is syntactically valid and supported by the runtime
+    * @name DateRangePicker#isValidLocale
+    * @private
     * @param {string} locale - Locale to check (e.g. 'en-US')
     * @returns {boolean} True if the locale is valid and supported
     */
