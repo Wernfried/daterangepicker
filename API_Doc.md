@@ -112,12 +112,13 @@ Ranges are not validated against <code>minDate</code>, <code>maxDate</code>, <co
     * [.startDate](#DateRangePicker+startDate) : [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| <code>null</code>
     * [.endDate](#DateRangePicker+endDate) : [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| <code>null</code>
     * [.events](#DateRangePicker+events) : <code>Object.&lt;string, object&gt;</code>
+    * [.setLocale](#DateRangePicker+setLocale) : <code>Object</code>
     * [.setStartDate(startDate, [updateView])](#DateRangePicker+setStartDate) ⇒ [<code>InputViolation</code>](#InputViolation) \| <code>null</code>
     * [.setEndDate(endDate, [updateView])](#DateRangePicker+setEndDate) ⇒ [<code>InputViolation</code>](#InputViolation) \| <code>null</code>
     * [.setRange(startDate, endDate, [updateView])](#DateRangePicker+setRange) ⇒ [<code>InputViolation</code>](#InputViolation) \| <code>null</code>
     * [.clearDate([month])](#DateRangePicker+clearDate)
     * [.parseDate(value)](#DateRangePicker+parseDate) ⇒ [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime)
-    * [.formatDate(date, [format])](#DateRangePicker+formatDate) ⇒ <code>string</code> \| <code>null</code>
+    * [.formatDate(date)](#DateRangePicker+formatDate) ⇒ <code>string</code> \| <code>null</code>
     * [.validateInput(range, [dispatch])](#DateRangePicker+validateInput) ⇒ [<code>InputViolation</code>](#InputViolation) \| <code>null</code>
     * [.updateView([monthChange])](#DateRangePicker+updateView)
     * [.move()](#DateRangePicker+move)
@@ -169,6 +170,21 @@ The setter assigns the value as is, without validation and without updating the 
 Template objects of all DateRangePicker specific events, used internally by `triggerEvent()`.
 
 **Kind**: instance property of [<code>DateRangePicker</code>](#DateRangePicker)  
+<a name="DateRangePicker+setLocale"></a>
+
+### dateRangePicker.setLocale : <code>Object</code>
+Sets the locale of the currently selected start or end date (Luxon DateTime).
+Does nothing if the respective date is not set (null).
+Provides additional options to fine-tune the output format
+
+**Kind**: instance property of [<code>DateRangePicker</code>](#DateRangePicker)  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| startDate | <code>function</code> | Applies the locale (e.g. 'en-US') to the start date |
+| endDate | <code>function</code> | Applies the locale (e.g. 'en-US') to the end date |
+
 <a name="DateRangePicker+setStartDate"></a>
 
 ### dateRangePicker.setStartDate(startDate, [updateView]) ⇒ [<code>InputViolation</code>](#InputViolation) \| <code>null</code>
@@ -266,16 +282,15 @@ Parses a `luxon.DateTime`, `Date` or string (ISO-8601 or matching `locale.format
 
 <a name="DateRangePicker+formatDate"></a>
 
-### dateRangePicker.formatDate(date, [format]) ⇒ <code>string</code> \| <code>null</code>
+### dateRangePicker.formatDate(date) ⇒ <code>string</code> \| <code>null</code>
 Formats a DateTime or Interval object
 
 **Kind**: instance method of [<code>DateRangePicker</code>](#DateRangePicker)  
 **Returns**: <code>string</code> \| <code>null</code> - - Formatted date string or `null` if `date` is `null`  
 
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| date | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Interval</code>](https://moment.github.io/luxon/api-docs/index.html#interval) |  | The DateTime or Interval to format |
-| [format] | <code>object</code> \| <code>string</code> | <code>this.locale.format</code> | Format tokens string or `Intl.DateTimeFormat` options object |
+| Param | Type | Description |
+| --- | --- | --- |
+| date | [<code>DateTime</code>](https://moment.github.io/luxon/api-docs/index.html#datetime) \| [<code>Interval</code>](https://moment.github.io/luxon/api-docs/index.html#interval) | The DateTime or Interval to format |
 
 <a name="DateRangePicker+validateInput"></a>
 

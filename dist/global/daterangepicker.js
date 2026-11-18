@@ -53,6 +53,7 @@ var DateRangePicker = (function(exports, luxon2) {
       this.altFormat = null;
       this.externalStyle = null;
       this.ranges = {};
+      this.options = options;
       this.locale = {
         direction: "ltr",
         format: luxon2.DateTime.DATE_SHORT,
@@ -974,20 +975,23 @@ var DateRangePicker = (function(exports, luxon2) {
     /**
      * Formats a DateTime or Interval object
      * @param {external:DateTime|external:Interval} date - The DateTime or Interval to format
-     * @param {object|string} [format=this.locale.format] - Format tokens string or `Intl.DateTimeFormat` options object
      * @returns {string|null} - Formatted date string or `null` if `date` is `null`
      */
-    formatDate(date, format = this.locale.format) {
+    formatDate(date) {
       if (date === null)
         return null;
-      if (typeof format === "object") {
-        return luxon2.Interval.isInterval(date) ? date.toLocaleString(format) : date.toLocaleString(format);
+      if (typeof this.locale.format === "object") {
+        return date.toLocaleString(this.locale.format);
       } else {
-        if (luxon2.Settings.defaultLocale === null) {
-          const locale = luxon2.DateTime.now().locale;
-          return luxon2.Interval.isInterval(date) ? date.toFormat(format, { locale }) : date.toFormat(format, { locale });
+        if (luxon2.Interval.isInterval(date)) {
+          return date.toFormat(this.locale.format, { separator: this.locale.separator });
         } else {
-          return luxon2.Interval.isInterval(date) ? date.toFormat(format) : date.toFormat(format);
+          if (luxon2.Settings.defaultLocale === null) {
+            const locale = luxon2.DateTime.now().locale;
+            return date.toFormat(this.locale.format, { locale });
+          } else {
+            return date.toFormat(this.locale.format);
+          }
         }
       }
     }
@@ -2443,6 +2447,40 @@ var DateRangePicker = (function(exports, luxon2) {
       this.element.removeEventListener("click", this.#toggleProxy);
       this.element.removeEventListener("keydown", this.#toggleProxy);
       this.container.remove();
+    }
+    /**
+    * Sets the locale of the currently selected start or end date (Luxon DateTime).
+    * Does nothing if the respective date is not set (null).
+    * Provides additional options to fine-tune the output format
+    * @type {{startDate: function(string): void, endDate: function(string): void}}
+    * @property {function(string): void} startDate - Applies the locale (e.g. 'en-US') to the start date
+    * @property {function(string): void} endDate - Applies the locale (e.g. 'en-US') to the end date
+    */
+    setLocale = {
+      startDate: (locale) => {
+        if (this.#isValidLocale(locale) && this.#startDate != null)
+          this.#startDate = this.#startDate.setLocale(locale);
+      },
+      endDate: (locale) => {
+        if (this.#isValidLocale(locale) && this.#endDate != null)
+          this.#endDate = this.#endDate.setLocale(locale);
+      }
+    };
+    /**
+     * Checks whether the given locale is a string that is syntactically valid and supported by the runtime
+     * @name DateRangePicker#isValidLocale
+     * @private
+     * @param {string} locale - Locale to check (e.g. 'en-US')
+     * @returns {boolean} True if the locale is valid and supported
+     */
+    #isValidLocale(locale) {
+      if (typeof locale !== "string")
+        return false;
+      try {
+        return Intl.DateTimeFormat.supportedLocalesOf(locale).length > 0;
+      } catch {
+        return false;
+      }
     }
     /**
      * Helper function to create a DateRangePickerEvent and dispatch it on the attached element
